@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jetts-gym-v2';
+const CACHE_NAME = 'jetts-gym-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

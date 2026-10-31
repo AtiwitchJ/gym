@@ -989,6 +989,27 @@
     .toast.show {
       transform: translateX(-50%) translateY(0);
     }
+
+    .auto-save-pill {
+      font-size: 0.72rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: 99px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .auto-save-pill.saving {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+    }
   </style>
 </head>
 <body>
@@ -1003,6 +1024,7 @@
         <span class="brand-title">Fitness Workout Log</span>
       </div>
       <div class="header-actions">
+        <span class="auto-save-pill" id="autoSaveIndicator">✓ เซฟอัตโนมัติ</span>
         <button class="btn-reset" onclick="resetDayData()">ล้างติ๊กวันนี้</button>
       </div>
     </div>
@@ -1581,20 +1603,37 @@
 
     let userTodos = JSON.parse(localStorage.getItem('jetts_gym_todos')) || defaultTodos;
 
+    let autoSaveTimer = null;
+    function triggerAutoSaveFeedback() {
+      const el = document.getElementById('autoSaveIndicator');
+      if (!el) return;
+      el.innerText = '💾 เซฟแล้ว...';
+      el.classList.add('saving');
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        el.innerText = '✓ เซฟอัตโนมัติ';
+        el.classList.remove('saving');
+      }, 500);
+    }
+
     function saveState() {
       localStorage.setItem('jetts_workout_state', JSON.stringify(userState));
+      triggerAutoSaveFeedback();
     }
 
     function saveLastWeights() {
       localStorage.setItem('jetts_last_weights', JSON.stringify(lastWeights));
+      triggerAutoSaveFeedback();
     }
 
     function saveWorkoutHistory() {
       localStorage.setItem('jetts_workout_history', JSON.stringify(workoutHistory));
+      triggerAutoSaveFeedback();
     }
 
     function saveTodos() {
       localStorage.setItem('jetts_gym_todos', JSON.stringify(userTodos));
+      triggerAutoSaveFeedback();
     }
 
     function showToast(msg) {
@@ -1608,6 +1647,7 @@
 
     function switchDay(dayKey) {
       currentDay = dayKey;
+      localStorage.setItem('jetts_active_tab', dayKey);
       
       // Update Tab Styles
       const tabs = document.querySelectorAll('.day-tab');
@@ -1706,7 +1746,7 @@
               </td>
               <td style="width: 22%;">
                 <div class="input-wrap">
-                  <input type="number" step="0.5" id="inp_${ex.id}_${sIdx}" class="input-field" placeholder="${prevWt} กก." value="${weight}"
+                  <input type="number" step="0.5" inputmode="decimal" pattern="[0-9]*" id="inp_${ex.id}_${sIdx}" class="input-field" placeholder="${prevWt} กก." value="${weight}"
                     oninput="updateWeight('${currentDay}', '${ex.id}', ${sIdx}, this.value)">
                   ${prevHintHtml}
                 </div>
@@ -1801,7 +1841,7 @@
                 </td>
                 <td style="width: 22%;">
                   <div class="input-wrap">
-                    <input type="number" step="0.5" id="inp_${bEx.id}_${sIdx}" class="input-field" placeholder="${prevWt} กก." value="${weight}"
+                    <input type="number" step="0.5" inputmode="decimal" pattern="[0-9]*" id="inp_${bEx.id}_${sIdx}" class="input-field" placeholder="${prevWt} กก." value="${weight}"
                       oninput="updateWeight('${currentDay}', '${bEx.id}', ${sIdx}, this.value)">
                     ${prevHintHtml}
                   </div>
@@ -1897,8 +1937,11 @@
       saveState();
       renderContent();
 
-      // Trigger rest timer if checked
+      // Trigger rest timer and subtle haptic feedback if checked
       if (!current) {
+        if (navigator.vibrate) {
+          try { navigator.vibrate(35); } catch(e) {}
+        }
         startTimer();
       }
     }
@@ -2303,10 +2346,11 @@
       }
     }
 
-    // --- Timer Logic ---
+    // --- Timer Logic (Background / Lock-Screen Safe via Timestamps) ---
     let timerDuration = 90;
     let timerRemaining = 90;
     let timerInterval = null;
+    let timerEndTime = null;
     let isRunning = false;
 
     function formatTime(sec) {
@@ -2317,6 +2361,7 @@
 
     function updateTimerDisplay() {
       const display = document.getElementById('timerDisplay');
+      if (!display) return;
       display.innerText = formatTime(timerRemaining);
       if (isRunning) {
         display.classList.add('running');
@@ -2328,9 +2373,11 @@
     function setTimerDuration(seconds) {
       timerDuration = seconds;
       timerRemaining = seconds;
+      timerEndTime = null;
       clearInterval(timerInterval);
       isRunning = false;
-      document.getElementById('timerStartBtn').innerText = '▶';
+      const btn = document.getElementById('timerStartBtn');
+      if (btn) btn.innerText = '▶';
       updateTimerDisplay();
 
       document.querySelectorAll('.btn-preset').forEach(btn => {
@@ -2350,52 +2397,85 @@
       }
     }
 
+    function checkTimerTick() {
+      if (!isRunning || !timerEndTime) return;
+      const now = Date.now();
+      timerRemaining = Math.max(0, Math.ceil((timerEndTime - now) / 1000));
+      updateTimerDisplay();
+
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        timerEndTime = null;
+        const btn = document.getElementById('timerStartBtn');
+        if (btn) btn.innerText = '▶';
+        updateTimerDisplay();
+        playBeep();
+        if (navigator.vibrate) {
+          try { navigator.vibrate([200, 100, 200]); } catch(e) {}
+        }
+      }
+    }
+
     function startTimer() {
       if (isRunning) return;
       if (timerRemaining <= 0) {
         timerRemaining = timerDuration;
       }
       isRunning = true;
-      document.getElementById('timerStartBtn').innerText = '⏸';
+      timerEndTime = Date.now() + (timerRemaining * 1000);
+      const btn = document.getElementById('timerStartBtn');
+      if (btn) btn.innerText = '⏸';
       updateTimerDisplay();
 
       clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        timerRemaining--;
-        updateTimerDisplay();
-
-        if (timerRemaining <= 0) {
-          clearInterval(timerInterval);
-          isRunning = false;
-          document.getElementById('timerStartBtn').innerText = '▶';
-          updateTimerDisplay();
-          playBeep();
-          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        }
-      }, 1000);
+      timerInterval = setInterval(checkTimerTick, 500);
     }
 
     function pauseTimer() {
+      if (!isRunning) return;
+      if (timerEndTime) {
+        const now = Date.now();
+        timerRemaining = Math.max(0, Math.ceil((timerEndTime - now) / 1000));
+      }
       isRunning = false;
+      timerEndTime = null;
       clearInterval(timerInterval);
-      document.getElementById('timerStartBtn').innerText = '▶';
+      const btn = document.getElementById('timerStartBtn');
+      if (btn) btn.innerText = '▶';
       updateTimerDisplay();
     }
 
     function resetTimer() {
       pauseTimer();
       timerRemaining = timerDuration;
+      timerEndTime = null;
       updateTimerDisplay();
     }
 
-    // Auto set day based on current weekday
-    const today = new Date().getDay();
-    // 0: Sun, 1: Mon, 2: Tue, 3: Wed, 4: Thu, 5: Fri, 6: Sat
-    if (today === 1) switchDay('mon');
-    else if (today === 2) switchDay('tue');
-    else if (today === 3) switchDay('wed');
-    else if (today === 4) switchDay('thu');
-    else switchDay('rest');
+    // Handle screen sleep/wake and tab switching so timer never drifts
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && isRunning) {
+        checkTimerTick();
+      }
+    });
+    window.addEventListener('focus', () => {
+      if (isRunning) checkTimerTick();
+    });
+
+    // Auto set day based on stored preference or current weekday
+    const savedActiveTab = localStorage.getItem('jetts_active_tab');
+    if (savedActiveTab && (workoutData[savedActiveTab] || savedActiveTab === 'history' || savedActiveTab === 'todo' || savedActiveTab === 'rest')) {
+      switchDay(savedActiveTab);
+    } else {
+      const today = new Date().getDay();
+      // 0: Sun, 1: Mon, 2: Tue, 3: Wed, 4: Thu, 5: Fri, 6: Sat
+      if (today === 1) switchDay('mon');
+      else if (today === 2) switchDay('tue');
+      else if (today === 3) switchDay('wed');
+      else if (today === 4) switchDay('thu');
+      else switchDay('rest');
+    }
 
     // Register Service Worker for Offline PWA Support
     if ('serviceWorker' in navigator) {
