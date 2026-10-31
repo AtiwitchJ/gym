@@ -11,11 +11,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Jetts Log">
-  <meta name="description" content="ตารางออกกำลังกายและตัวบันทึกการฝึก Jetts Fitness 4 วัน สำหรับทุกอุปกรณ์">
+  <meta name="description" content="ตารางออกกำลังกายและตัวบันทึกการฝึก Jetts Fitness 4 วัน พร้อมระบบจำน้ำหนักและ Export Excel">
 
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="manifest" href="./manifest.json">
+
+  <!-- SheetJS Library for Offline Excel (.xlsx) Generation -->
+  <script src="./xlsx.full.min.js"></script>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -178,6 +181,12 @@
       border-color: var(--jetts-red);
       color: #fff;
       box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+    }
+
+    .day-tab.history-tab.active {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #10b981;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
     }
 
     .day-tab.todo-tab.active {
@@ -356,6 +365,20 @@
       border: 1px solid rgba(245, 158, 11, 0.4);
     }
 
+    /* Last Record Badge */
+    .last-record-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.74rem;
+      color: #93c5fd;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-top: 4px;
+    }
+
     .ex-title {
       font-size: 1.05rem;
       font-weight: 600;
@@ -466,6 +489,12 @@
       border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .input-field {
       width: 100%;
       background: #14161f;
@@ -481,6 +510,18 @@
     .input-field:focus {
       outline: none;
       border-color: var(--jetts-red);
+    }
+
+    .prev-hint {
+      font-size: 0.68rem;
+      color: #60a5fa;
+      margin-top: 3px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .prev-hint:hover {
+      text-decoration: underline;
     }
 
     .check-btn {
@@ -503,6 +544,32 @@
       background: var(--accent-green);
       border-color: var(--accent-green);
       color: #fff;
+    }
+
+    /* Save Workout Button */
+    .btn-save-workout {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Kanit', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 24px 0 16px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-save-workout:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
     }
 
     /* Rest Timer Bar */
@@ -624,6 +691,89 @@
       margin-left: 18px;
       margin-bottom: 8px;
       color: #c9ccd6;
+    }
+
+    /* --- History View Styling --- */
+    .history-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px 16px;
+      margin-top: 10px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .history-header h2 {
+      font-size: 1.2rem;
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-export-excel {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Kanit', sans-serif;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-export-excel:hover {
+      opacity: 0.95;
+    }
+
+    .history-card {
+      background: #191b24;
+      border: 1px solid #282c3c;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #282c3c;
+    }
+
+    .history-date {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .history-title {
+      font-size: 0.85rem;
+      color: #a5b4fc;
+    }
+
+    .history-items-list {
+      font-size: 0.8rem;
+      color: #c9ccd6;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     /* --- TODO View Styling --- */
@@ -772,21 +922,6 @@
       color: #ff6b72;
     }
 
-    /* PWA Install Guide Banner */
-    .pwa-hint {
-      margin-top: 20px;
-      background: #11131a;
-      border: 1px dashed #30354a;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .pwa-hint strong {
-      color: #fbbf24;
-    }
-
     .btn-reset {
       background: transparent;
       border: 1px solid #3e4359;
@@ -801,9 +936,34 @@
       color: #ff6b72;
       border-color: #ff6b72;
     }
+
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #10b981;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toastMsg">บันทึกสำเร็จ!</div>
 
   <header>
     <div class="brand-bar">
@@ -825,7 +985,7 @@
       <span>⭐ <strong>(ท่าหลัก):</strong> ท่าสร้างกล้ามเนื้อมวลรวม</span>
       <span>🔹 <strong>(ท่าเสริม):</strong> เก็บรายละเอียด</span>
       <span>⚡ <strong>(ซ้อมเสริม):</strong> 2 เซ็ตกระตุ้นฟอร์ม RPE 7-8</span>
-      <span>📝 <strong>(To-Do):</strong> เช็คลิสต์ประจำวัน</span>
+      <span>📊 <strong>(จำน้ำหนัก & Excel):</strong> บันทึกสถิติ</span>
     </div>
 
     <!-- Day Navigation -->
@@ -850,6 +1010,10 @@
         <span class="tab-day">ศุกร์-อาทิตย์</span>
         <span class="tab-sub">พักฟื้น</span>
       </div>
+      <div class="day-tab history-tab" onclick="switchDay('history')">
+        <span class="tab-day">📊 ประวัติ</span>
+        <span class="tab-sub">สถิติ & Excel</span>
+      </div>
       <div class="day-tab todo-tab" onclick="switchDay('todo')">
         <span class="tab-day">📝 To-Do</span>
         <span class="tab-sub">สิ่งที่ต้องทำ</span>
@@ -870,7 +1034,7 @@
 
   <!-- Content Container -->
   <main class="container" id="mainContainer">
-    <!-- Exercise cards or Todo will be injected here via JavaScript -->
+    <!-- Exercise cards, History or Todo will be injected here via JavaScript -->
   </main>
 
   <!-- Floating Rest Timer -->
@@ -992,7 +1156,7 @@
             part: "ไหล่ (Shoulders)",
             altName: "ดันไหล่รวมมิติรอบด้าน",
             tip: "✅ แนะนำ: วันไหล่คือวันพฤหัสบดี (มีเวลาพักยาว)",
-            videoUrl: "http://www.youtube.com/watch?v=aMB82ZgfdJ8",
+            videoUrl: "http://www.youtube.com/watch?aMB82ZgfdJ8",
             sets: [
               { type: "warm", reps: "15 ครั้ง (วอร์มข้อต่อ)" },
               { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
@@ -1370,6 +1534,8 @@
 
     let currentDay = 'mon';
     let userState = JSON.parse(localStorage.getItem('jetts_workout_state') || '{}');
+    let lastWeights = JSON.parse(localStorage.getItem('jetts_last_weights') || '{}');
+    let workoutHistory = JSON.parse(localStorage.getItem('jetts_workout_history') || '[]');
 
     // Default TODOs
     const defaultTodos = [
@@ -1388,8 +1554,25 @@
       localStorage.setItem('jetts_workout_state', JSON.stringify(userState));
     }
 
+    function saveLastWeights() {
+      localStorage.setItem('jetts_last_weights', JSON.stringify(lastWeights));
+    }
+
+    function saveWorkoutHistory() {
+      localStorage.setItem('jetts_workout_history', JSON.stringify(workoutHistory));
+    }
+
     function saveTodos() {
       localStorage.setItem('jetts_gym_todos', JSON.stringify(userTodos));
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
     }
 
     function switchDay(dayKey) {
@@ -1397,7 +1580,7 @@
       
       // Update Tab Styles
       const tabs = document.querySelectorAll('.day-tab');
-      const dayOrder = ['mon', 'tue', 'wed', 'thu', 'rest', 'todo'];
+      const dayOrder = ['mon', 'tue', 'wed', 'thu', 'rest', 'history', 'todo'];
       tabs.forEach((tab, index) => {
         if (dayOrder[index] === dayKey) {
           tab.classList.add('active');
@@ -1412,6 +1595,13 @@
     function renderContent() {
       const container = document.getElementById('mainContainer');
       const progressWrap = document.getElementById('progressWrap');
+
+      // History View
+      if (currentDay === 'history') {
+        progressWrap.style.display = 'none';
+        renderHistoryView(container);
+        return;
+      }
 
       // TODO View
       if (currentDay === 'todo') {
@@ -1457,12 +1647,25 @@
       // 1. Regular 5 exercises
       dayData.exercises.forEach((ex, exIdx) => {
         const exState = (userState[currentDay] && userState[currentDay][ex.id]) || {};
+        const exLast = lastWeights[ex.id] || {};
         let allDone = true;
+
+        // Last weight badge text
+        let lastBadgeText = '';
+        if (exLast.wt_0 || exLast.wt_1) {
+          lastBadgeText = `<div class="last-record-badge">⏱️ ล่าสุด: วอร์ม ${exLast.wt_0 ? exLast.wt_0 + ' กก.' : '-'} | เล่นจริง ${exLast.wt_1 ? exLast.wt_1 + ' กก.' : '-'}</div>`;
+        }
 
         let setsRows = ex.sets.map((set, sIdx) => {
           const isDone = !!exState[`set_${sIdx}`];
           if (!isDone) allDone = false;
-          const weight = exState[`wt_${sIdx}`] || '';
+          const weight = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : '';
+          const prevWt = exLast[`wt_${sIdx}`];
+
+          let prevHintHtml = '';
+          if (prevWt) {
+            prevHintHtml = `<span class="prev-hint" onclick="applyPrevWeight('${currentDay}', '${ex.id}', ${sIdx}, '${prevWt}')" title="กดเพื่อใส่ค่าน้ำหนักนี้">ก่อนหน้า: ${prevWt}กก.</span>`;
+          }
 
           return `
             <tr class="set-row ${isDone ? 'done' : ''}">
@@ -1471,12 +1674,15 @@
                   ${set.type === 'warm' ? 'วอร์ม' : 'จริง ' + sIdx}
                 </span>
               </td>
-              <td style="width: 40%; color: #c0c4d4; font-size: 0.8rem;">
+              <td style="width: 38%; color: #c0c4d4; font-size: 0.8rem;">
                 ${set.reps}
               </td>
-              <td style="width: 20%;">
-                <input type="number" step="0.5" class="input-field" placeholder="กก." value="${weight}"
-                  oninput="updateWeight('${currentDay}', '${ex.id}', ${sIdx}, this.value)">
+              <td style="width: 22%;">
+                <div class="input-wrap">
+                  <input type="number" step="0.5" id="inp_${ex.id}_${sIdx}" class="input-field" placeholder="${prevWt || 'กก.'}" value="${weight}"
+                    oninput="updateWeight('${currentDay}', '${ex.id}', ${sIdx}, this.value)">
+                  ${prevHintHtml}
+                </div>
               </td>
               <td style="width: 15%; text-align: center;">
                 <div class="check-btn ${isDone ? 'checked' : ''}" 
@@ -1501,6 +1707,7 @@
                 </div>
                 <div class="ex-title">${ex.name}</div>
                 <div class="ex-subtitle">${ex.altName}</div>
+                ${lastBadgeText}
               </div>
               <a href="${ex.videoUrl}" target="_blank" rel="noopener noreferrer" class="video-btn">
                 ▶ คลิป
@@ -1540,12 +1747,19 @@
 
         dayData.bonusExercises.forEach((bEx, bIdx) => {
           const exState = (userState[currentDay] && userState[currentDay][bEx.id]) || {};
+          const exLast = lastWeights[bEx.id] || {};
           let allDone = true;
 
           let setsRows = bEx.sets.map((set, sIdx) => {
             const isDone = !!exState[`set_${sIdx}`];
             if (!isDone) allDone = false;
-            const weight = exState[`wt_${sIdx}`] || '';
+            const weight = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : '';
+            const prevWt = exLast[`wt_${sIdx}`];
+
+            let prevHintHtml = '';
+            if (prevWt) {
+              prevHintHtml = `<span class="prev-hint" onclick="applyPrevWeight('${currentDay}', '${bEx.id}', ${sIdx}, '${prevWt}')">ก่อนหน้า: ${prevWt}กก.</span>`;
+            }
 
             return `
               <tr class="set-row ${isDone ? 'done' : ''}">
@@ -1554,12 +1768,15 @@
                     ${set.type === 'warm' ? 'วอร์ม' : 'เล่นเสริม'}
                   </span>
                 </td>
-                <td style="width: 40%; color: #c0c4d4; font-size: 0.8rem;">
+                <td style="width: 38%; color: #c0c4d4; font-size: 0.8rem;">
                   ${set.reps}
                 </td>
-                <td style="width: 20%;">
-                  <input type="number" step="0.5" class="input-field" placeholder="กก." value="${weight}"
-                    oninput="updateWeight('${currentDay}', '${bEx.id}', ${sIdx}, this.value)">
+                <td style="width: 22%;">
+                  <div class="input-wrap">
+                    <input type="number" step="0.5" id="inp_${bEx.id}_${sIdx}" class="input-field" placeholder="${prevWt || 'กก.'}" value="${weight}"
+                      oninput="updateWeight('${currentDay}', '${bEx.id}', ${sIdx}, this.value)">
+                    ${prevHintHtml}
+                  </div>
                 </td>
                 <td style="width: 15%; text-align: center;">
                   <div class="check-btn ${isDone ? 'checked' : ''}" 
@@ -1609,8 +1826,329 @@
         });
       }
 
+      // Finish & Save Session Button
+      html += `
+        <button class="btn-save-workout" onclick="finishAndSaveWorkout()">
+          💾 บันทึกประวัติและจำน้ำหนักวันนี้ (Save Session)
+        </button>
+      `;
+
       container.innerHTML = html;
       updateProgress();
+    }
+
+    function applyPrevWeight(day, exId, setIdx, wt) {
+      updateWeight(day, exId, setIdx, wt);
+      const input = document.getElementById(`inp_${exId}_${setIdx}`);
+      if (input) input.value = wt;
+      showToast(`ใส่ค่าน้ำหนัก ${wt} กก. แล้ว`);
+    }
+
+    function updateWeight(day, exId, setIdx, value) {
+      if (!userState[day]) userState[day] = {};
+      if (!userState[day][exId]) userState[day][exId] = {};
+      userState[day][exId][`wt_${setIdx}`] = value;
+      saveState();
+
+      // Automatically remember as latest weight
+      if (value !== '') {
+        if (!lastWeights[exId]) lastWeights[exId] = {};
+        lastWeights[exId][`wt_${setIdx}`] = value;
+        lastWeights[exId].updatedAt = new Date().toISOString().split('T')[0];
+        saveLastWeights();
+      }
+    }
+
+    function toggleSetDone(day, exId, setIdx) {
+      if (!userState[day]) userState[day] = {};
+      if (!userState[day][exId]) userState[day][exId] = {};
+
+      const current = !!userState[day][exId][`set_${setIdx}`];
+      userState[day][exId][`set_${setIdx}`] = !current;
+      saveState();
+      renderContent();
+
+      // Trigger rest timer if checked
+      if (!current) {
+        startTimer();
+      }
+    }
+
+    function finishAndSaveWorkout() {
+      const dayData = workoutData[currentDay];
+      if (!dayData) return;
+
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      const dayState = userState[currentDay] || {};
+      let totalExercisesSaved = 0;
+      let totalSetsDone = 0;
+
+      const sessionExercises = [];
+
+      // Process standard exercises
+      dayData.exercises.forEach(ex => {
+        const exState = dayState[ex.id] || {};
+        const setsData = ex.sets.map((set, sIdx) => {
+          const isDone = !!exState[`set_${sIdx}`];
+          const wt = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : (lastWeights[ex.id] && lastWeights[ex.id][`wt_${sIdx}`]) || '';
+          if (isDone) totalSetsDone++;
+
+          // Update lastWeights
+          if (wt) {
+            if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
+            lastWeights[ex.id][`wt_${sIdx}`] = wt;
+          }
+
+          return {
+            setIndex: sIdx + 1,
+            type: set.type === 'warm' ? 'วอร์ม' : 'เล่นจริง',
+            target: set.reps,
+            weight: wt,
+            done: isDone
+          };
+        });
+
+        sessionExercises.push({
+          id: ex.id,
+          name: ex.name,
+          category: ex.isMain ? 'ท่าหลัก' : 'ท่าเสริม',
+          sets: setsData
+        });
+        totalExercisesSaved++;
+      });
+
+      // Process bonus exercises
+      if (dayData.bonusExercises) {
+        dayData.bonusExercises.forEach(bEx => {
+          const bState = dayState[bEx.id] || {};
+          const setsData = bEx.sets.map((set, sIdx) => {
+            const isDone = !!bState[`set_${sIdx}`];
+            const wt = bState[`wt_${sIdx}`] !== undefined ? bState[`wt_${sIdx}`] : (lastWeights[bEx.id] && lastWeights[bEx.id][`wt_${sIdx}`]) || '';
+            if (isDone) totalSetsDone++;
+
+            if (wt) {
+              if (!lastWeights[bEx.id]) lastWeights[bEx.id] = {};
+              lastWeights[bEx.id][`wt_${sIdx}`] = wt;
+            }
+
+            return {
+              setIndex: sIdx + 1,
+              type: set.type === 'warm' ? 'วอร์ม' : 'ซ้อมเสริม',
+              target: set.reps,
+              weight: wt,
+              done: isDone
+            };
+          });
+
+          sessionExercises.push({
+            id: bEx.id,
+            name: bEx.name,
+            category: 'ซ้อมเสริม 2 เซ็ต',
+            sets: setsData
+          });
+        });
+      }
+
+      saveLastWeights();
+
+      // Create session object
+      const session = {
+        id: `${dateStr}_${currentDay}_${Date.now()}`,
+        date: dateStr,
+        time: timeStr,
+        dayKey: currentDay,
+        dayTitle: dayData.title,
+        totalSetsDone: totalSetsDone,
+        exercises: sessionExercises
+      };
+
+      workoutHistory.unshift(session); // prepend to history
+      saveWorkoutHistory();
+
+      showToast(`บันทึกประวัติสำเร็จ! (สำเร็จ ${totalSetsDone} เซ็ต)`);
+      renderContent();
+    }
+
+    // --- History View ---
+    function renderHistoryView(container) {
+      let sessionsHtml = '';
+
+      if (workoutHistory.length === 0) {
+        sessionsHtml = `
+          <div style="text-align: center; padding: 40px 16px; color: var(--text-muted);">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">📊</div>
+            <p>ยังไม่มีประวัติการฝึกที่บันทึกไว้</p>
+            <p style="font-size: 0.8rem; margin-top: 6px;">เมื่อเล่นเสร็จในแต่ละวัน ให้กดปุ่ม <strong>"💾 บันทึกประวัติและจำน้ำหนักวันนี้"</strong> ระบบจะเก็บสถิติและจำน้ำหนักไว้ให้ทันทีครับ</p>
+          </div>
+        `;
+      } else {
+        sessionsHtml = workoutHistory.map((s, idx) => {
+          let rowsHtml = s.exercises.map(ex => {
+            let setsSummary = ex.sets.map(st => `${st.type}: ${st.weight ? st.weight + 'kg' : '-'} ${st.done ? '✓' : ''}`).join(' | ');
+            return `
+              <div style="margin-bottom: 6px;">
+                <strong style="color: #fff;">${ex.name}</strong> 
+                <span style="font-size: 0.72rem; color: #a5abbc;">(${ex.category})</span><br>
+                <span style="color: #93c5fd; font-size: 0.76rem;">${setsSummary}</span>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div class="history-card">
+              <div class="history-meta">
+                <div>
+                  <div class="history-date">📅 ${s.date} <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">(${s.time} น.)</span></div>
+                  <div class="history-title">${s.dayTitle}</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">${s.totalSetsDone} เซ็ต</span>
+                  <button class="btn-del-todo" onclick="deleteHistorySession('${s.id}')" title="ลบประวัตินี้">✕</button>
+                </div>
+              </div>
+              <div class="history-items-list">
+                ${rowsHtml}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      container.innerHTML = `
+        <div class="history-wrap">
+          <div class="history-header">
+            <div>
+              <h2>📊 บันทึกประวัติการฝึกย้อนหลัง</h2>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                บันทึกไว้ทั้งหมด: ${workoutHistory.length} เซสชัน
+              </div>
+            </div>
+            <button class="btn-export-excel" onclick="exportToExcel()">
+              📥 Export Excel (.xlsx)
+            </button>
+          </div>
+
+          <div style="margin-top: 14px;">
+            ${sessionsHtml}
+          </div>
+
+          ${workoutHistory.length > 0 ? `
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+              <button class="btn-reset" onclick="clearAllHistory()">ล้างประวัติทั้งหมด</button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function deleteHistorySession(id) {
+      if (confirm('คุณต้องการลบรายการบันทึกนี้ใช่หรือไม่?')) {
+        workoutHistory = workoutHistory.filter(s => s.id !== id);
+        saveWorkoutHistory();
+        renderContent();
+        showToast('ลบรายการเรียบร้อย');
+      }
+    }
+
+    function clearAllHistory() {
+      if (confirm('คุณต้องการลบประวัติการฝึกทั้งหมดใช่หรือไม่?')) {
+        workoutHistory = [];
+        saveWorkoutHistory();
+        renderContent();
+        showToast('ล้างประวัติทั้งหมดแล้ว');
+      }
+    }
+
+    // --- Export to Excel (.xlsx) using SheetJS ---
+    function exportToExcel() {
+      if (typeof XLSX === 'undefined') {
+        alert('เกิดข้อผิดพลาด: ไม่พบไลบรารี XLSX กรุณารีเฟรชหน้าเว็บ');
+        return;
+      }
+
+      const rows = [];
+
+      // If we have saved history sessions
+      if (workoutHistory.length > 0) {
+        workoutHistory.forEach(s => {
+          s.exercises.forEach(ex => {
+            ex.sets.forEach(st => {
+              rows.push({
+                "วันที่ (Date)": s.date,
+                "เวลา (Time)": s.time,
+                "วันในโปรแกรม (Program Day)": s.dayTitle,
+                "ชื่อท่าฝึก (Exercise)": ex.name,
+                "ประเภทท่า (Category)": ex.category,
+                "เซ็ตที่ (Set #)": st.setIndex,
+                "ประเภทเซ็ต (Set Type)": st.type,
+                "เป้าหมายจำนวนครั้ง (Target Reps)": st.target,
+                "น้ำหนักที่ใช้ กก. (Weight kg)": st.weight !== '' ? Number(st.weight) : '',
+                "สถานะการเล่น (Status)": st.done ? "สำเร็จ ✓" : "ไม่ได้เล่น"
+              });
+            });
+          });
+        });
+      } else {
+        // If no history saved yet, export current day's plan and state
+        const dayData = workoutData[currentDay];
+        const dayState = userState[currentDay] || {};
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        dayData.exercises.forEach(ex => {
+          const exState = dayState[ex.id] || {};
+          ex.sets.forEach((st, sIdx) => {
+            const isDone = !!exState[`set_${sIdx}`];
+            const wt = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : '';
+            rows.push({
+              "วันที่ (Date)": todayStr,
+              "เวลา (Time)": "-",
+              "วันในโปรแกรม (Program Day)": dayData.title,
+              "ชื่อท่าฝึก (Exercise)": ex.name,
+              "ประเภทท่า (Category)": ex.isMain ? "ท่าหลัก" : "ท่าเสริม",
+              "เซ็ตที่ (Set #)": sIdx + 1,
+              "ประเภทเซ็ต (Set Type)": st.type === 'warm' ? 'วอร์ม' : 'เล่นจริง',
+              "เป้าหมายจำนวนครั้ง (Target Reps)": st.reps,
+              "น้ำหนักที่ใช้ กก. (Weight kg)": wt !== '' ? Number(wt) : '',
+              "สถานะการเล่น (Status)": isDone ? "สำเร็จ ✓" : "ยังไม่ได้ติ๊ก"
+            });
+          });
+        });
+      }
+
+      if (rows.length === 0) {
+        alert('ยังไม่มีข้อมูลสำหรับ Export');
+        return;
+      }
+
+      // Create Worksheet and Workbook
+      const ws = XLSX.utils.json_to_sheet(rows);
+
+      // Auto column width
+      const colWidths = [
+        { wch: 12 }, // Date
+        { wch: 8 },  // Time
+        { wch: 35 }, // Program
+        { wch: 35 }, // Exercise
+        { wch: 16 }, // Category
+        { wch: 8 },  // Set #
+        { wch: 14 }, // Set Type
+        { wch: 22 }, // Target Reps
+        { wch: 18 }, // Weight
+        { wch: 14 }  // Status
+      ];
+      ws['!cols'] = colWidths;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Workout_History");
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const fileName = `Jetts_Workout_History_${todayStr}.xlsx`;
+
+      XLSX.writeFile(wb, fileName);
+      showToast(`Export ไฟล์ ${fileName} สำเร็จ!`);
     }
 
     // --- TODO Checklist View ---
@@ -1646,15 +2184,6 @@
 
           <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
             <button class="btn-reset" onclick="resetDefaultTodos()">รีเซ็ตกลับเป็นค่าเริ่มต้น</button>
-          </div>
-
-          <div class="pwa-hint">
-            <strong>📲 วิธีติดตั้งใช้งานเหมือนแอปจริง (ทุกอุปกรณ์):</strong>
-            <div style="margin-top: 6px;">
-              • <strong>iPhone (Safari):</strong> กดปุ่มแชร์ ➔ เลือก <em>"เพิ่มไปยังหน้าจอโฮม (Add to Home Screen)"</em><br>
-              • <strong>Android (Chrome):</strong> กดเมนู 3 จุด ➔ เลือก <em>"ติดตั้งแอป (Install App)"</em><br>
-              • <strong>คอมพิวเตอร์ (PC/Mac):</strong> กดไอคอนติดตั้งที่แถบ URL ด้านบน
-            </div>
           </div>
         </div>
       `;
@@ -1693,30 +2222,8 @@
       }
     }
 
-    function toggleSetDone(day, exId, setIdx) {
-      if (!userState[day]) userState[day] = {};
-      if (!userState[day][exId]) userState[day][exId] = {};
-
-      const current = !!userState[day][exId][`set_${setIdx}`];
-      userState[day][exId][`set_${setIdx}`] = !current;
-      saveState();
-      renderContent();
-
-      // Trigger rest timer if checked
-      if (!current) {
-        startTimer();
-      }
-    }
-
-    function updateWeight(day, exId, setIdx, value) {
-      if (!userState[day]) userState[day] = {};
-      if (!userState[day][exId]) userState[day][exId] = {};
-      userState[day][exId][`wt_${setIdx}`] = value;
-      saveState();
-    }
-
     function resetDayData() {
-      if (confirm('คุณต้องการรีเซ็ตการติ๊กของวันนี้ใช่หรือไม่?')) {
+      if (confirm('คุณต้องการรีเซ็ตการติ๊กของวันนี้ใช่หรือไม่? (น้ำหนักสถิติล่าสุดจะยังคงจำไว้)')) {
         if (userState[currentDay]) {
           delete userState[currentDay];
           saveState();
@@ -1726,7 +2233,7 @@
     }
 
     function updateProgress() {
-      if (currentDay === 'rest' || currentDay === 'todo') return;
+      if (currentDay === 'rest' || currentDay === 'todo' || currentDay === 'history') return;
       const dayData = workoutData[currentDay];
       if (!dayData) return;
 

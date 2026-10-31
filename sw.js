@@ -1,8 +1,9 @@
-const CACHE_NAME = 'jetts-gym-v1';
+const CACHE_NAME = 'jetts-gym-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './xlsx.full.min.js',
   './icon-192.png',
   './icon-512.png',
   './apple-touch-icon.png'
@@ -27,11 +28,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Navigation or asset requests
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Return cache but update in background
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
@@ -40,7 +39,6 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
       return fetch(event.request).catch(() => {
-        // Offline fallback
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
