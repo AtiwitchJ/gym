@@ -1,11 +1,183 @@
 <template>
-  <div class="min-h-screen bg-titanium-950 text-titanium-200 flex items-center justify-center">
-    <div class="text-center p-8 bg-surface rounded-xl border border-surface-border">
-      <h1 class="text-2xl font-bold font-display text-white mb-2">JETTS FITNESS</h1>
-      <p class="text-titanium-400">Precision Athletic Gym Tracker</p>
-    </div>
+  <div class="min-h-screen bg-titanium-950 text-titanium-200 pb-36">
+    <!-- Floating Toast Notification -->
+    <transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="-translate-y-12 opacity-0"
+      enter-to-class="translate-y-0 opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="translate-y-0 opacity-100"
+      leave-to-class="-translate-y-12 opacity-0"
+    >
+      <div
+        v-if="toastMessage"
+        class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white font-medium text-xs px-4 py-2.5 rounded-xl shadow-xl shadow-black/50 border border-emerald-400 pointer-events-none flex items-center gap-2"
+      >
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+        </svg>
+        <span>{{ toastMessage }}</span>
+      </div>
+    </transition>
+
+    <!-- Header & Navigation -->
+    <HeaderBar />
+    <DayTabs />
+
+    <!-- Main Container -->
+    <main class="max-w-3xl mx-auto px-4 py-4">
+      <!-- 1. Workout Day View -->
+      <div v-if="isWorkoutDay && currentDayData">
+        <!-- Routine Banner -->
+        <div class="bg-surface rounded-xl border border-surface-border p-4 mb-4">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-[10px] font-mono font-bold tracking-widest text-crimson uppercase">
+              DAILY PROTOCOL
+            </span>
+            <span class="text-titanium-500">•</span>
+            <span class="text-[11px] font-mono text-titanium-400">
+              ท่าละ 4 เซ็ต (1 วอร์ม + 3 เล่นจริง)
+            </span>
+          </div>
+          <h2 class="text-lg font-bold font-display text-white tracking-tight">
+            {{ currentDayData.title }}
+          </h2>
+          <p class="text-xs text-titanium-400 mt-0.5">
+            {{ currentDayData.subtitle }}
+          </p>
+
+          <!-- Progress Bar -->
+          <div class="mt-3.5 pt-3 border-t border-surface-border/60">
+            <div class="flex items-center justify-between text-xs font-mono mb-1.5">
+              <span class="text-titanium-400">
+                ความคืบหน้าท่าประจำวัน:
+                <strong class="text-white tabular-nums">{{ completedSetsCount }}</strong> / {{ totalSetsCount }} เซ็ต
+              </span>
+              <span class="text-crimson font-bold tabular-nums">{{ progressPercent }}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-titanium-900 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-crimson transition-all duration-300 rounded-full"
+                :style="{ width: `${progressPercent}%` }"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise Cards List -->
+        <div class="space-y-3">
+          <ExerciseCard
+            v-for="(ex, idx) in currentDayData.exercises"
+            :key="ex.id"
+            :exercise="ex"
+            :index="idx"
+          />
+        </div>
+
+        <!-- Bonus Touch-Up Exercises -->
+        <div v-if="currentDayData.bonusExercises && currentDayData.bonusExercises.length > 0" class="mt-6 mb-4">
+          <div class="flex items-center gap-2.5 mb-3 px-1">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <div>
+              <h3 class="text-sm font-bold font-display text-amber-400 tracking-tight">
+                ซ้อมเสริมท่าหลักส่วนที่เหลือท้ายคาบ (Bonus Touch-Up)
+              </h3>
+              <p class="text-[11px] text-titanium-400">
+                เลือกซ้อมเพิ่ม 2 เซ็ตต่อส่วน (1 วอร์ม 15 ครั้ง + 1 เล่นจริง 6–8 ครั้ง) RPE 7–8 ห้ามหมดแรงคาเครื่อง
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <BonusCard
+              v-for="(bEx, bIdx) in currentDayData.bonusExercises"
+              :key="bEx.id"
+              :bonus="bEx"
+              :index="bIdx"
+            />
+          </div>
+        </div>
+
+        <!-- Finish & Commit Session Button -->
+        <div class="mt-8 mb-6">
+          <button
+            @click="finishAndSaveWorkout"
+            class="w-full bg-crimson hover:bg-crimson-hover text-white font-display font-bold text-sm tracking-wide py-3.5 px-4 rounded-xl shadow-lg shadow-crimson-dark transition-all flex items-center justify-center gap-2.5"
+          >
+            <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span>บันทึกประวัติและจำน้ำหนักวันนี้ (Save Session)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Rest Day View -->
+      <RestDayView v-else-if="currentDay === 'rest'" />
+
+      <!-- 3. History View -->
+      <HistoryView v-else-if="currentDay === 'history'" />
+
+      <!-- 4. Todo View -->
+      <TodoView v-else-if="currentDay === 'todo'" />
+    </main>
+
+    <!-- Floating Rest Timer Dock -->
+    <RestTimer />
   </div>
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue';
+import { useWorkoutStore } from './composables/useWorkoutStore';
+import HeaderBar from './components/HeaderBar.vue';
+import DayTabs from './components/DayTabs.vue';
+import ExerciseCard from './components/ExerciseCard.vue';
+import BonusCard from './components/BonusCard.vue';
+import RestTimer from './components/RestTimer.vue';
+import HistoryView from './components/HistoryView.vue';
+import TodoView from './components/TodoView.vue';
+import RestDayView from './components/RestDayView.vue';
+
+const {
+  currentDay,
+  workoutData,
+  userState,
+  toastMessage,
+  finishAndSaveWorkout,
+  fetchServerState
+} = useWorkoutStore();
+
+onMounted(() => {
+  fetchServerState();
+});
+
+const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu'].includes(currentDay.value));
+const currentDayData = computed(() => workoutData[currentDay.value]);
+
+// Progress calculation
+const totalSetsCount = computed(() => {
+  if (!currentDayData.value) return 0;
+  return currentDayData.value.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+});
+
+const completedSetsCount = computed(() => {
+  if (!currentDayData.value) return 0;
+  const dayState = userState[currentDay.value] || {};
+  let done = 0;
+  currentDayData.value.exercises.forEach(ex => {
+    const exState = dayState[ex.id] || {};
+    ex.sets.forEach((_, sIdx) => {
+      if (exState[`set_${sIdx}`]) done++;
+    });
+  });
+  return done;
+});
+
+const progressPercent = computed(() => {
+  if (totalSetsCount.value === 0) return 0;
+  return Math.round((completedSetsCount.value / totalSetsCount.value) * 100);
+});
 </script>
