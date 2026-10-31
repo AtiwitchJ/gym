@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Jetts Fitness - Workout Tracker & Guide</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#0f1015">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jetts Log">
+  <meta name="description" content="ตารางออกกำลังกายและตัวบันทึกการฝึก Jetts Fitness 4 วัน พร้อมระบบจำน้ำหนักและ Export Excel">
+
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- SheetJS Library for Offline Excel (.xlsx) Generation -->
+  <script src="./xlsx.full.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --jetts-red: #E50914;
+      --jetts-red-hover: #b80710;
+      --jetts-dark-red: #4a080b;
+      --bg-dark: #0f1015;
+      --card-bg: #171922;
+      --card-border: #262938;
+      --text-main: #f1f2f6;
+      --text-muted: #8e94a5;
+      --accent-green: #10b981;
+      --accent-orange: #f59e0b;
+      --accent-blue: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Kanit', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+    }
+
+    header {
+      background: linear-gradient(180deg, #1f1214 0%, var(--bg-dark) 100%);
+      padding: max(20px, env(safe-area-inset-top, 0px)) 16px 14px;
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+
+    .brand-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      background: var(--jetts-red);
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .program-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge-rule {
+      background: rgba(229, 9, 20, 0.15);
+      color: #ff6b72;
+      border: 1px solid rgba(229, 9, 20, 0.3);
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 0.74rem;
+      font-weight: 500;
+    }
+
+    .concept-bar {
+      background: #13151f;
+      border: 1px solid #232738;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.76rem;
+      color: #b2b7c6;
+      margin-bottom: 10px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .concept-bar strong {
+      color: #ff7880;
+    }
+
+    /* Day Nav */
+    .day-nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .day-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .day-tab {
+      flex: 0 0 auto;
+      background: #1b1d28;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .day-tab .tab-day {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .day-tab .tab-sub {
+      font-size: 0.75rem;
+    }
+
+    .day-tab.active {
+      background: var(--jetts-red);
+      border-color: var(--jetts-red);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+    }
+
+    .day-tab.history-tab.active {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-color: #10b981;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+
+    .day-tab.todo-tab.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #f59e0b;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Progress bar */
+    .progress-section {
+      padding: 12px 16px 8px;
+      max-width: 650px;
+      margin: 0 auto;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-bg {
+      background: #202330;
+      height: 8px;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--jetts-red), #ff5e67);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 99px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+      padding: 8px 16px;
+    }
+
+    /* Section Titles */
+    .section-headline {
+      margin: 20px 0 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .section-headline .main-txt {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ff6b72;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-headline .sub-txt {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .bonus-divider {
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(23, 25, 34, 0) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin: 28px 0 16px;
+    }
+
+    .bonus-divider .b-title {
+      color: #fbbf24;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bonus-divider .b-sub {
+      color: #d1d5db;
+      font-size: 0.78rem;
+      margin-top: 3px;
+    }
+
+    /* Exercise Card */
+    .exercise-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transition: border-color 0.2s ease;
+    }
+
+    .exercise-card.is-main-card {
+      border-left: 4px solid var(--jetts-red);
+    }
+
+    .exercise-card.is-bonus-card {
+      border-left: 4px solid var(--accent-orange);
+      background: #191b24;
+    }
+
+    .exercise-card.completed {
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .ex-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .ex-num {
+      background: #252837;
+      color: #f1f2f6;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .ex-num.main-num {
+      background: var(--jetts-red);
+      color: #fff;
+    }
+
+    .ex-num.bonus-num {
+      background: var(--accent-orange);
+      color: #111;
+      font-weight: 800;
+    }
+
+    .ex-title-wrap {
+      flex: 1;
+    }
+
+    .badge-exercise-role {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 6px;
+      margin-bottom: 3px;
+    }
+
+    .badge-exercise-role.main-role {
+      background: rgba(229, 9, 20, 0.22);
+      color: #ff7880;
+      border: 1px solid rgba(229, 9, 20, 0.45);
+    }
+
+    .badge-exercise-role.sub-role {
+      background: rgba(142, 148, 165, 0.14);
+      color: #9ea5ba;
+      border: 1px solid rgba(142, 148, 165, 0.25);
+    }
+
+    .badge-exercise-role.bonus-role {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    /* Last Record Badge */
+    .last-record-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: #93c5fd;
+      background: rgba(59, 130, 246, 0.16);
+      border: 1px solid rgba(59, 130, 246, 0.38);
+      padding: 3px 10px;
+      border-radius: 8px;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    .last-record-badge strong {
+      color: #60a5fa;
+      font-weight: 700;
+    }
+
+    .prev-hint {
+      font-size: 0.72rem;
+      color: #93c5fd;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px dashed rgba(59, 130, 246, 0.35);
+      border-radius: 6px;
+      padding: 2px 6px;
+      margin-top: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      display: inline-block;
+    }
+
+    .prev-hint:hover {
+      background: rgba(59, 130, 246, 0.25);
+      color: #fff;
+      border-color: #60a5fa;
+    }
+
+    .prev-hint strong {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .ex-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .ex-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .video-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(229, 9, 20, 0.12);
+      border: 1px solid rgba(229, 9, 20, 0.3);
+      color: #ff6b72;
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .video-btn:hover {
+      background: var(--jetts-red);
+      color: #fff;
+    }
+
+    .muscle-tags {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 14px;
+      background: #12141c;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+
+    .muscle-main {
+      color: #a5b4fc;
+    }
+
+    .muscle-sub {
+      color: var(--text-muted);
+      font-size: 0.76rem;
+    }
+
+    /* Sets Table */
+    .sets-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 6px;
+      font-size: 0.85rem;
+    }
+
+    .sets-table th {
+      text-align: left;
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 0.75rem;
+      padding: 0 6px 4px;
+    }
+
+    .set-row {
+      background: #1e212d;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .set-row.done {
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .set-row td {
+      padding: 8px 6px;
+    }
+
+    .set-badge {
+      display: inline-block;
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+    }
+
+    .badge-warm {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-work {
+      background: rgba(229, 9, 20, 0.18);
+      color: #ff7880;
+      border: 1px solid rgba(229, 9, 20, 0.3);
+    }
+
+    .badge-touchup {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .input-field {
+      width: 100%;
+      background: #14161f;
+      border: 1px solid #2e3244;
+      color: #fff;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: center;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--jetts-red);
+    }
+
+    .prev-hint {
+      font-size: 0.68rem;
+      color: #60a5fa;
+      margin-top: 3px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .prev-hint:hover {
+      text-decoration: underline;
+    }
+
+    .check-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #14161f;
+      border: 1px solid #33384c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: transparent;
+      margin: 0 auto;
+      transition: all 0.15s ease;
+      font-size: 1.1rem;
+    }
+
+    .check-btn.checked {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: #fff;
+    }
+
+    /* Save Workout Button */
+    .btn-save-workout {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Kanit', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 24px 0 16px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-save-workout:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* Rest Timer Bar */
+    .rest-timer-bar {
+      position: fixed;
+      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      left: 16px;
+      right: 16px;
+      max-width: 618px;
+      margin: 0 auto;
+      background: rgba(23, 25, 34, 0.95);
+      border: 1px solid var(--jetts-red);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(229, 9, 20, 0.25);
+      border-radius: 20px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 200;
+    }
+
+    .timer-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .timer-display {
+      font-family: 'Outfit', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .timer-display.running {
+      color: #ff5252;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.85; }
+      to { opacity: 1; text-shadow: 0 0 10px rgba(229, 9, 20, 0.6); }
+    }
+
+    .timer-presets {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-preset {
+      background: #252837;
+      border: 1px solid #363b50;
+      color: #e2e4ec;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+
+    .btn-preset:hover, .btn-preset.active {
+      background: var(--jetts-red);
+      border-color: var(--jetts-red);
+      color: #fff;
+    }
+
+    .timer-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-timer-ctrl {
+      background: #2d3142;
+      border: none;
+      color: #fff;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .btn-timer-ctrl.play {
+      background: var(--jetts-red);
+    }
+
+    /* Rest Day Card */
+    .rest-day-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .rest-emoji {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .rest-tips {
+      text-align: left;
+      margin-top: 18px;
+      background: #11131a;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+    }
+
+    .rest-tips li {
+      margin-left: 18px;
+      margin-bottom: 8px;
+      color: #c9ccd6;
+    }
+
+    /* --- History View Styling --- */
+    .history-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px 16px;
+      margin-top: 10px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .history-header h2 {
+      font-size: 1.2rem;
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-export-excel {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Kanit', sans-serif;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-export-excel:hover {
+      opacity: 0.95;
+    }
+
+    .history-card {
+      background: #191b24;
+      border: 1px solid #282c3c;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #282c3c;
+    }
+
+    .history-date {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .history-title {
+      font-size: 0.85rem;
+      color: #a5b4fc;
+    }
+
+    .history-items-list {
+      font-size: 0.8rem;
+      color: #c9ccd6;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* --- TODO View Styling --- */
+    .todo-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px 16px;
+      margin-top: 10px;
+    }
+
+    .todo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .todo-header h2 {
+      font-size: 1.15rem;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .todo-counter {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: #12141c;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .todo-input-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .todo-input {
+      flex: 1;
+      background: #12141c;
+      border: 1px solid #2c3044;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    .todo-input:focus {
+      outline: none;
+      border-color: #fbbf24;
+    }
+
+    .btn-add-todo {
+      background: #fbbf24;
+      color: #111;
+      border: none;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Kanit', sans-serif;
+      transition: background 0.2s;
+    }
+
+    .btn-add-todo:hover {
+      background: #f59e0b;
+    }
+
+    .todo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1c1e2a;
+      border: 1px solid #282c3c;
+      border-radius: 12px;
+      padding: 10px 14px;
+      transition: all 0.2s;
+    }
+
+    .todo-item.checked {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+
+    .todo-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .todo-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid #3c4259;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: transparent;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .todo-item.checked .todo-check {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: #fff;
+    }
+
+    .todo-text {
+      font-size: 0.9rem;
+      color: #e2e4ec;
+      transition: all 0.2s;
+    }
+
+    .todo-item.checked .todo-text {
+      text-decoration: line-through;
+      color: #71778c;
+    }
+
+    .btn-del-todo {
+      background: transparent;
+      border: none;
+      color: #555b73;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: color 0.15s;
+    }
+
+    .btn-del-todo:hover {
+      color: #ff6b72;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid #3e4359;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .btn-reset:hover {
+      color: #ff6b72;
+      border-color: #ff6b72;
+    }
+
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #10b981;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      z-index: 999;
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .auto-save-pill {
+      font-size: 0.72rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 8px;
+      border-radius: 99px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .auto-save-pill.saving {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toastMsg">บันทึกสำเร็จ!</div>
+
+  <header>
+    <div class="brand-bar">
+      <div class="brand-logo">
+        <span class="brand-badge">JETTS</span>
+        <span class="brand-title">Fitness Workout Log</span>
+      </div>
+      <div class="header-actions">
+        <span class="auto-save-pill" id="autoSaveIndicator">✓ เซฟอัตโนมัติ</span>
+        <button class="btn-reset" onclick="resetDayData()">ล้างติ๊กวันนี้</button>
+      </div>
+    </div>
+
+    <div class="program-desc">
+      <span class="badge-rule">ท่าประจำวัน 4 เซ็ต (1 วอร์ม + 3 เล่นจริง)</span>
+      <span>• ซ้อมเสริมท้ายคาบ 2 เซ็ต (1 วอร์ม + 1 เล่นจริง)</span>
+    </div>
+
+    <div class="concept-bar">
+      <span>⭐ <strong>(ท่าหลัก):</strong> ท่าสร้างกล้ามเนื้อมวลรวม</span>
+      <span>🔹 <strong>(ท่าเสริม):</strong> เก็บรายละเอียด</span>
+      <span>⚡ <strong>(ซ้อมเสริม):</strong> 2 เซ็ตกระตุ้นฟอร์ม RPE 7-8</span>
+      <span>📊 <strong>(จำน้ำหนัก & Excel):</strong> บันทึกสถิติ</span>
+    </div>
+
+    <!-- Day Navigation -->
+    <div class="day-nav" id="dayNav">
+      <div class="day-tab active" onclick="switchDay('mon')">
+        <span class="tab-day">จันทร์</span>
+        <span class="tab-sub">ขา + ก้น</span>
+      </div>
+      <div class="day-tab" onclick="switchDay('tue')">
+        <span class="tab-day">อังคาร</span>
+        <span class="tab-sub">อก + หลังแขน</span>
+      </div>
+      <div class="day-tab" onclick="switchDay('wed')">
+        <span class="tab-day">พุธ</span>
+        <span class="tab-sub">หลัง + หน้าแขน</span>
+      </div>
+      <div class="day-tab" onclick="switchDay('thu')">
+        <span class="tab-day">พฤหัส</span>
+        <span class="tab-sub">ไหล่ + ท้อง</span>
+      </div>
+      <div class="day-tab" onclick="switchDay('rest')">
+        <span class="tab-day">ศุกร์-อาทิตย์</span>
+        <span class="tab-sub">พักฟื้น</span>
+      </div>
+      <div class="day-tab history-tab" onclick="switchDay('history')">
+        <span class="tab-day">📊 ประวัติ</span>
+        <span class="tab-sub">สถิติ & Excel</span>
+      </div>
+      <div class="day-tab todo-tab" onclick="switchDay('todo')">
+        <span class="tab-day">📝 To-Do</span>
+        <span class="tab-sub">สิ่งที่ต้องทำ</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-section" id="progressWrap">
+    <div class="progress-meta">
+      <span id="progressText">ความคืบหน้าท่าประจำวัน: 0 / 20 เซ็ต</span>
+      <span id="progressPercent">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+  </div>
+
+  <!-- Content Container -->
+  <main class="container" id="mainContainer">
+    <!-- Exercise cards, History or Todo will be injected here via JavaScript -->
+  </main>
+
+  <!-- Floating Rest Timer -->
+  <div class="rest-timer-bar">
+    <div class="timer-info">
+      <div>
+        <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">REST TIMER</div>
+        <div class="timer-display" id="timerDisplay">01:30</div>
+      </div>
+      <div class="timer-presets">
+        <button class="btn-preset" onclick="setTimerDuration(60)">60s</button>
+        <button class="btn-preset active" onclick="setTimerDuration(90)">90s</button>
+        <button class="btn-preset" onclick="setTimerDuration(120)">120s</button>
+      </div>
+    </div>
+    <div class="timer-actions">
+      <button class="btn-timer-ctrl play" id="timerStartBtn" onclick="toggleTimer()">▶</button>
+      <button class="btn-timer-ctrl" onclick="resetTimer()">↺</button>
+    </div>
+  </div>
+
+  <script>
+    const workoutData = {
+      mon: {
+        title: "วันจันทร์: ขา + ก้น ครบทุกมิติ (Legs & Glutes)",
+        exercises: [
+          {
+            id: "m1",
+            name: "Seated Leg Press Machine (ท่าหลัก)",
+            isMain: true,
+            altName: "เครื่องถีบขา หรือ Squat",
+            mainMuscle: "ต้นขาด้านหน้า (Quads), ก้น (Glutes)",
+            subMuscle: "ต้นขาด้านหลัง, น่อง (วางเท้าสูงโดนก้นมากขึ้น)",
+            videoUrl: "http://www.youtube.com/watch?v=kTM85YKV7ls",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง (40-50%)" },
+              { type: "work", reps: "6–8 ครั้ง (ท้าทาย)" },
+              { type: "work", reps: "6–8 ครั้ง (ท้าทาย)" },
+              { type: "work", reps: "6–8 ครั้ง (ท้าทาย)" }
+            ]
+          },
+          {
+            id: "m2",
+            name: "Smith Machine Hip Thrust (ท่าหลัก)",
+            isMain: true,
+            altName: "หรือ Bulgarian Split Squat",
+            mainMuscle: "ก้นมัดใหญ่ (Gluteus Maximus เน้น ๆ)",
+            subMuscle: "แกนกลางลำตัว และ ขาด้านหลังช่วยพยุง",
+            videoUrl: "http://www.youtube.com/watch?v=s1gUMRjpgqM",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง (40-50%)" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "m3",
+            name: "Leg Extension Machine",
+            isMain: false,
+            altName: "เครื่องเตะขาหน้า",
+            mainMuscle: "ต้นขาด้านหน้า 4 มัดล้วน (Quadriceps)",
+            subMuscle: "กล้ามเนื้อพยุงรอบหัวเข่า",
+            videoUrl: "http://www.youtube.com/watch?v=dpn7z7nYRcQ",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "m4",
+            name: "Seated / Prone Leg Curl Machine",
+            isMain: false,
+            altName: "เครื่องพับขาหลัง หรือเลือกเล่น RDL แทน",
+            mainMuscle: "ต้นขาด้านหลังล้วน (Hamstrings)",
+            subMuscle: "น่องส่วนบน",
+            videoUrl: "http://www.youtube.com/watch?v=WzS7KK4eI0g",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "m5",
+            name: "Hip Abduction Machine & Calf Raise",
+            isMain: false,
+            altName: "เครื่องกางขา / เขย่งน่องบน Leg Press",
+            mainMuscle: "ก้นด้านข้าง/สะโพก (Gluteus Medius) & น่อง (Calves)",
+            subMuscle: "Soleus & Gastrocnemius",
+            videoUrl: "http://www.youtube.com/watch?v=dfzTjPMGVYw",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" },
+              { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" },
+              { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" }
+            ]
+          }
+        ],
+        bonusExercises: [
+          {
+            id: "b_m_back",
+            name: "Lat Pulldown Machine (ท่าหลักหลัง)",
+            part: "หลัง (Back)",
+            altName: "ดึงปีกกว้างทรง V-Shape",
+            tip: "✅ แนะนำ: วันหลังคือวันพุธ (พัก 48 ชม. ฟื้นตัวทันแน่นอน)",
+            videoUrl: "http://www.youtube.com/watch?v=BwV6jzYKiNY",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง (วอร์มปีก)" },
+              { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8 เหลือแรง 2 ครั้ง)" }
+            ]
+          },
+          {
+            id: "b_m_shoulder",
+            name: "Shoulder Press Machine (ท่าหลักไหล่)",
+            part: "ไหล่ (Shoulders)",
+            altName: "ดันไหล่รวมมิติรอบด้าน",
+            tip: "✅ แนะนำ: วันไหล่คือวันพฤหัสบดี (มีเวลาพักยาว)",
+            videoUrl: "http://www.youtube.com/watch?aMB82ZgfdJ8",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง (วอร์มข้อต่อ)" },
+              { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
+            ]
+          },
+          {
+            id: "b_m_chest",
+            name: "Chest Press Machine (ท่าหลักอก)",
+            part: "อก (Chest)",
+            altName: "เครื่องผลักอกกลาง",
+            tip: "⚠️ ระวัง: พรุ่งนี้ (อังคาร) เป็นวันอกเต็มระบบ! เล่นเบา ๆ แค่โฟกัสฟอร์ม",
+            videoUrl: "http://www.youtube.com/watch?v=F9k2K2aDi38",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักปานกลาง)" }
+            ]
+          }
+        ]
+      },
+      tue: {
+        title: "วันอังคาร: อกรวมทุกมุม + หลังแขน (Chest & Triceps)",
+        exercises: [
+          {
+            id: "t1",
+            name: "Chest Press Machine (ท่าหลัก)",
+            isMain: true,
+            altName: "เครื่องผลักอก หรือ Flat Bench Press",
+            mainMuscle: "อกส่วนกลาง (Mid Chest)",
+            subMuscle: "ไหล่หน้า (Front Delts), หลังแขน (Triceps)",
+            videoUrl: "http://www.youtube.com/watch?v=F9k2K2aDi38",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "t2",
+            name: "Incline Dumbbell / Smith Press (ท่าหลัก)",
+            isMain: true,
+            altName: "ดันอกเบาะเอียง 30–45 องศา",
+            mainMuscle: "อกส่วนบน (Upper Chest / แนวไหปลาร้า)",
+            subMuscle: "ไหล่หน้า, หลังแขน",
+            videoUrl: "http://www.youtube.com/watch?v=0bnc96eUvG0",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "t3",
+            name: "Pec Fly Machine",
+            isMain: false,
+            altName: "เครื่องหนีบอก Matrix หรือ Cable Fly",
+            mainMuscle: "อกด้านใน/ร่องอก และขยายฐานอก (Inner & Mid Chest)",
+            subMuscle: "ไหล่ด้านหน้า",
+            videoUrl: "http://www.youtube.com/watch?v=rTATwLKP548",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "t4",
+            name: "Assisted Dip Machine",
+            isMain: false,
+            altName: "เครื่องดิปมีแท่นรับเข่า หรือ วิดพื้น",
+            mainMuscle: "อกส่วนล่าง (Lower Chest)",
+            subMuscle: "หลังแขน (Triceps), ไหล่ด้านหน้า",
+            videoUrl: "http://www.youtube.com/watch?v=6oaLJs4dAwA",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "t5",
+            name: "Cable Triceps Pushdown",
+            isMain: false,
+            altName: "กดเชือกหรือบาร์ที่เสาเคเบิล",
+            mainMuscle: "แขนด้านหลังทั้ง 3 หัว (Triceps เน้น ๆ)",
+            subMuscle: "ท่อนแขนส่วนปลาย (Forearms)",
+            videoUrl: "http://www.youtube.com/watch?v=oz0gmMXpMAc",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          }
+        ],
+        bonusExercises: [
+          {
+            id: "b_t_leg",
+            name: "Seated Leg Press Machine (ท่าหลักขา)",
+            part: "ขา/ก้น (Legs)",
+            altName: "ถีบขากระตุ้นต้นขาหน้าและก้น",
+            tip: "✅ แนะนำ: ปั๊มเลือดคลายความตึงจากวันจันทร์ได้ดีมาก",
+            videoUrl: "http://www.youtube.com/watch?v=kTM85YKV7ls",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
+            ]
+          },
+          {
+            id: "b_t_shoulder",
+            name: "Shoulder Press Machine (ท่าหลักไหล่)",
+            part: "ไหล่ (Shoulders)",
+            altName: "ดันไหล่เหนือศีรษะ",
+            tip: "✅ แนะนำ: แตะเบา ๆ เพราะไหล่หน้าเพิ่งช่วยดันอกมาหมาด ๆ",
+            videoUrl: "http://www.youtube.com/watch?v=aMB82ZgfdJ8",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "b_t_back",
+            name: "Lat Pulldown หรือ Seated Row (ท่าหลักหลัง)",
+            part: "หลัง (Back)",
+            altName: "เครื่องดึงปีกหรือดึงหลัง",
+            tip: "⚠️ ระวัง: พรุ่งนี้ (พุธ) เป็นวันหลังเต็มระบบ! เล่นเบา ๆ แค่ยืดเส้น",
+            videoUrl: "http://www.youtube.com/watch?v=BwV6jzYKiNY",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักเบา)" }
+            ]
+          }
+        ]
+      },
+      wed: {
+        title: "วันพุธ: หลัง + หน้าแขน (Back & Biceps)",
+        exercises: [
+          {
+            id: "w1",
+            name: "Seated Row Machine (ท่าหลัก)",
+            isMain: true,
+            altName: "เครื่องดึงหลังพิงเบาะ หรือ Barbell Row",
+            mainMuscle: "หลังส่วนกลางเพิ่มความหนา (Mid Back / Rhomboids)",
+            subMuscle: "ปีก (Lats), ไหล่หลัง, หน้าแขน (Biceps)",
+            videoUrl: "http://www.youtube.com/watch?v=0U8VMBXPQco",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "w2",
+            name: "Lat Pulldown Machine (ท่าหลัก)",
+            isMain: true,
+            altName: "ดึงบาร์ลงข้างหน้า หรือ Assisted Chin-up",
+            mainMuscle: "หลังส่วนกว้าง/ปีก (Latissimus Dorsi - V-Shape)",
+            subMuscle: "หน้าแขน (Biceps), สะบักและหลังบน",
+            videoUrl: "http://www.youtube.com/watch?v=BwV6jzYKiNY",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "w3",
+            name: "Seated Cable Row",
+            isMain: false,
+            altName: "เคเบิลดึงหลังท่านั่งจับแคบ (V-Bar)",
+            mainMuscle: "หลังส่วนกลางและปีกส่วนล่าง (Mid Back & Lower Lats)",
+            subMuscle: "หน้าแขน, หลังล่างช่วยพยุงตัว",
+            videoUrl: "http://www.youtube.com/watch?v=5Y32un_XBts",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "w4",
+            name: "Dumbbell / Cable Biceps Curl",
+            isMain: false,
+            altName: "พับแขนหงายมือ โฟกัสลูกหนู",
+            mainMuscle: "แขนด้านหน้ามัดหลัก (Biceps Brachii)",
+            subMuscle: "ท่อนแขน (Forearms)",
+            videoUrl: "http://www.youtube.com/watch?v=TFUznuXdPVo",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "w5",
+            name: "Hammer Curl",
+            isMain: false,
+            altName: "พับแขนจับดัมเบลแนวตั้ง หรือเชือกเคเบิล",
+            mainMuscle: "กล้ามเนื้อแขนมัดลึกดันแขนหนา (Brachialis) + ท่อนแขน",
+            subMuscle: "หน้าแขน (Biceps)",
+            videoUrl: "http://www.youtube.com/watch?v=YQAo_78-ruc",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          }
+        ],
+        bonusExercises: [
+          {
+            id: "b_w_chest",
+            name: "Chest Press Machine (ท่าหลักอก)",
+            part: "อก (Chest)",
+            altName: "เครื่องผลักอก",
+            tip: "✅ แนะนำ: ปั๊มเลือดเข้าอก (Feeder Set) ที่เพิ่งเล่นเมื่อวาน ช่วยฟื้นตัวเร็ว",
+            videoUrl: "http://www.youtube.com/watch?v=F9k2K2aDi38",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
+            ]
+          },
+          {
+            id: "b_w_leg",
+            name: "Seated Leg Press Machine (ท่าหลักขา)",
+            part: "ขา/ก้น (Legs)",
+            altName: "ถีบขาเพิ่มมวลรวม",
+            tip: "✅ แนะนำ: กระตุ้นขามวลรวมได้ดี",
+            videoUrl: "http://www.youtube.com/watch?v=kTM85YKV7ls",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "b_w_shoulder",
+            name: "Shoulder Press Machine (ท่าหลักไหล่)",
+            part: "ไหล่ (Shoulders)",
+            altName: "ดันไหล่",
+            tip: "⚠️ ระวัง: พรุ่งนี้ (พฤหัส) เป็นวันไหล่เต็มระบบ! เล่นเบา ๆ แค่วอร์มข้อต่อ",
+            videoUrl: "http://www.youtube.com/watch?v=aMB82ZgfdJ8",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักเบา)" }
+            ]
+          }
+        ]
+      },
+      thu: {
+        title: "วันพฤหัสบดี: ไหล่ครบทุกมุม + หน้าท้อง (Shoulders & Abs)",
+        exercises: [
+          {
+            id: "th1",
+            name: "Shoulder Press Machine (ท่าหลัก)",
+            isMain: true,
+            altName: "เครื่องดันไหล่ หรือ ดัมเบล",
+            mainMuscle: "หัวไหล่ด้านหน้าและด้านข้าง (Front & Side Delts)",
+            subMuscle: "แขนด้านหลัง (Triceps), บ่าส่วนบน",
+            videoUrl: "http://www.youtube.com/watch?v=aMB82ZgfdJ8",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "th2",
+            name: "Dumbbell / Cable Lateral Raise",
+            isMain: false,
+            altName: "กางแขนยกด้านข้าง (สร้างมิติไหล่กว้าง 3D)",
+            mainMuscle: "หัวไหล่ด้านข้าง (Side Delts)",
+            subMuscle: "บ่า (Traps หากยกสูงเกินระดับไหล่)",
+            videoUrl: "http://www.youtube.com/watch?v=puqaiVqacvQ",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง (หรือ 10–12)" },
+              { type: "work", reps: "6–8 ครั้ง (หรือ 10–12)" },
+              { type: "work", reps: "6–8 ครั้ง (หรือ 10–12)" }
+            ]
+          },
+          {
+            id: "th3",
+            name: "Rear Delt Machine / Face Pull",
+            isMain: false,
+            altName: "หันหน้าเข้าเครื่อง Pec Fly กวาดแขนไปหลัง / เชือกดึงหน้าผาก",
+            mainMuscle: "หัวไหล่ด้านหลัง (Rear Delts) & สะบัก",
+            subMuscle: "หลังส่วนบน (ช่วยแก้ปัญหาไหล่ห่อ)",
+            videoUrl: "http://www.youtube.com/watch?v=woIoS0MbNYg",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "th4",
+            name: "Dumbbell / Cable Shrug",
+            isMain: false,
+            altName: "ยักไหล่ถือดัมเบล หรือ บาร์เบล",
+            mainMuscle: "กล้ามเนื้อบ่า/สะพานคอ (Upper Trapezius)",
+            subMuscle: "กำลังมือและท่อนแขน (Grip & Forearms)",
+            videoUrl: "http://www.youtube.com/watch?v=wTSt22ay31w",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" },
+              { type: "work", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "th5",
+            name: "Abdominal Machine / Plank",
+            isMain: false,
+            altName: "เครื่องเล่นท้อง หรือ ทำ Plank",
+            mainMuscle: "หน้าท้องส่วนหน้า (Six Pack) & แกนกลางลำตัว (Core)",
+            subMuscle: "หน้าท้องด้านข้าง (Obliques)",
+            videoUrl: "http://www.youtube.com/watch?v=H1RkFIBeolk",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง (หรือ 30s)" },
+              { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" },
+              { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" },
+              { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" }
+            ]
+          }
+        ],
+        bonusExercises: [
+          {
+            id: "b_th_chest",
+            name: "Chest Press Machine (ท่าหลักอก)",
+            part: "อก (Chest)",
+            altName: "เครื่องผลักอกกลาง",
+            tip: "✅ แนะนำ: พรุ่งนี้วันพัก 3 วันติด เล่นน้ำหนักท้าทายได้เต็มที่",
+            videoUrl: "http://www.youtube.com/watch?v=F9k2K2aDi38",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง (ท้าทาย)" }
+            ]
+          },
+          {
+            id: "b_th_back",
+            name: "Lat Pulldown Machine (ท่าหลักหลัง)",
+            part: "หลัง (Back)",
+            altName: "ดึงปีก V-Shape",
+            tip: "✅ แนะนำ: กระตุ้นปีกก่อนเข้าช่วงวันพักผ่อน",
+            videoUrl: "http://www.youtube.com/watch?v=BwV6jzYKiNY",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง" }
+            ]
+          },
+          {
+            id: "b_th_leg",
+            name: "Seated Leg Press Machine (ท่าหลักขา)",
+            part: "ขา/ก้น (Legs)",
+            altName: "ถีบขา",
+            tip: "✅ แนะนำ: ปั๊มเลือดเข้ากล้ามเนื้อขาและก้นมวลรวม",
+            videoUrl: "http://www.youtube.com/watch?v=kTM85YKV7ls",
+            sets: [
+              { type: "warm", reps: "15 ครั้ง" },
+              { type: "touchup", reps: "6–8 ครั้ง" }
+            ]
+          }
+        ]
+      }
+    };
+
+    let currentDay = 'mon';
+    let userState = JSON.parse(localStorage.getItem('jetts_workout_state') || '{}');
+    let lastWeights = JSON.parse(localStorage.getItem('jetts_last_weights') || '{}');
+    let workoutHistory = JSON.parse(localStorage.getItem('jetts_workout_history') || '[]');
+
+    // Default TODOs
+    const defaultTodos = [
+      { id: 1, text: "วอร์มร่างกาย ยืดเส้น และหมุนข้อต่อ 5–10 นาที ก่อนเริ่ม", done: false },
+      { id: 2, text: "จิบน้ำสะอาดระหว่างฝึกรวมอย่างน้อย 1 ลิตร", done: false },
+      { id: 3, text: "บันทึกน้ำหนัก (kg) ของแต่ละเซ็ตลงในแอป", done: false },
+      { id: 4, text: "โฟกัสฟอร์มการเล่นและจังหวะบีบกล้ามเนื้อ (Mind-Muscle Connection)", done: false },
+      { id: 5, text: "ซ้อมเสริมท่าหลัก 2 เซ็ตท้ายคาบ (RPE 7-8 ห้ามหมดแรงคาเครื่อง)", done: false },
+      { id: 6, text: "ยืดเหยียดกล้ามเนื้อ (Cool Down) 5 นาทีหลังฝึก", done: false },
+      { id: 7, text: "เติมโปรตีน 25–30g และอาหารฟื้นฟูร่างกายหลังเล่น", done: false }
+    ];
+
+    let userTodos = JSON.parse(localStorage.getItem('jetts_gym_todos')) || defaultTodos;
+
+    let autoSaveTimer = null;
+    function triggerAutoSaveFeedback() {
+      const el = document.getElementById('autoSaveIndicator');
+      if (!el) return;
+      el.innerText = '💾 เซฟแล้ว...';
+      el.classList.add('saving');
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => {
+        el.innerText = '✓ เซฟอัตโนมัติ';
+        el.classList.remove('saving');
+      }, 500);
+    }
+
+    function saveState() {
+      localStorage.setItem('jetts_workout_state', JSON.stringify(userState));
+      triggerAutoSaveFeedback();
+    }
+
+    function saveLastWeights() {
+      localStorage.setItem('jetts_last_weights', JSON.stringify(lastWeights));
+      triggerAutoSaveFeedback();
+    }
+
+    function saveWorkoutHistory() {
+      localStorage.setItem('jetts_workout_history', JSON.stringify(workoutHistory));
+      triggerAutoSaveFeedback();
+    }
+
+    function saveTodos() {
+      localStorage.setItem('jetts_gym_todos', JSON.stringify(userTodos));
+      triggerAutoSaveFeedback();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function switchDay(dayKey) {
+      currentDay = dayKey;
+      localStorage.setItem('jetts_active_tab', dayKey);
+      
+      // Update Tab Styles
+      const tabs = document.querySelectorAll('.day-tab');
+      const dayOrder = ['mon', 'tue', 'wed', 'thu', 'rest', 'history', 'todo'];
+      tabs.forEach((tab, index) => {
+        if (dayOrder[index] === dayKey) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      renderContent();
+    }
+
+    function renderContent() {
+      const container = document.getElementById('mainContainer');
+      const progressWrap = document.getElementById('progressWrap');
+
+      // History View
+      if (currentDay === 'history') {
+        progressWrap.style.display = 'none';
+        renderHistoryView(container);
+        return;
+      }
+
+      // TODO View
+      if (currentDay === 'todo') {
+        progressWrap.style.display = 'none';
+        renderTodoView(container);
+        return;
+      }
+
+      // Rest Day View
+      if (currentDay === 'rest') {
+        progressWrap.style.display = 'none';
+        container.innerHTML = `
+          <div class="rest-day-card">
+            <div class="rest-emoji">🛌🧘‍♂️</div>
+            <h2 style="color: #fff; font-size: 1.3rem; margin-bottom: 8px;">ศุกร์ – อาทิตย์: พักผ่อน (Rest Days)</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              ช่วงเวลาที่กล้ามเนื้อสร้างตัวและซ่อมแซมเส้นใยอย่างแท้จริง
+            </p>
+            <div class="rest-tips">
+              <strong style="color: #ff6b72; display: block; margin-bottom: 8px;">🔑 เคล็ดลับช่วงฟื้นฟู:</strong>
+              <ul>
+                <li><strong>นอนหลับ 7–8 ชม.:</strong> เพื่อให้ฮอร์โมนการเจริญเติบโต (Growth Hormone) หลั่งเต็มที่</li>
+                <li><strong>โปรตีนถึง:</strong> ทาน 1.6 - 2.2g ต่อน้ำหนักตัว (กก.) แบ่งมื้อสม่ำเสมอ</li>
+                <li><strong>ดื่มน้ำ 2.5 - 3 ลิตร:</strong> ขนส่งสารอาหารและลดอาการตึงเมื่อยล้า</li>
+                <li><strong>Active Recovery:</strong> เดินเบา ๆ, โฟมโรลเลอร์ (Foam Roller) หรือยืดเส้น</li>
+              </ul>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // Regular Workout Day
+      progressWrap.style.display = 'block';
+      const dayData = workoutData[currentDay];
+      let html = `
+        <div class="section-headline">
+          <div class="main-txt">📌 ท่าฝึกประจำวัน: ${dayData.title}</div>
+          <div class="sub-txt">เล่นครบ 5 ท่า ท่าละ 4 เซ็ต (1 วอร์ม + 3 เล่นจริง)</div>
+        </div>
+      `;
+
+      // 1. Regular 5 exercises
+      dayData.exercises.forEach((ex, exIdx) => {
+        const exState = (userState[currentDay] && userState[currentDay][ex.id]) || {};
+        const exLast = lastWeights[ex.id] || {};
+        let allDone = true;
+
+        // Previous weights (default to 0 if not recorded yet)
+        const prevWarm = (exLast && exLast.wt_0 !== undefined && exLast.wt_0 !== '') ? exLast.wt_0 : 0;
+        const prevWork = (exLast && exLast.wt_1 !== undefined && exLast.wt_1 !== '') ? exLast.wt_1 : 0;
+        const lastBadgeText = `<div class="last-record-badge">⏱️ ครั้งก่อน: วอร์ม <strong>${prevWarm} กก.</strong> | เล่นจริง <strong>${prevWork} กก.</strong></div>`;
+
+        let setsRows = ex.sets.map((set, sIdx) => {
+          const isDone = !!exState[`set_${sIdx}`];
+          if (!isDone) allDone = false;
+          const weight = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : '';
+          const prevWt = (exLast && exLast[`wt_${sIdx}`] !== undefined && exLast[`wt_${sIdx}`] !== '') ? exLast[`wt_${sIdx}`] : 0;
+
+          const prevHintHtml = `<span class="prev-hint" onclick="applyPrevWeight('${currentDay}', '${ex.id}', ${sIdx}, '${prevWt}')" title="กดเพื่อใส่น้ำหนักครั้งก่อน (${prevWt} กก.)">ครั้งก่อน: <strong>${prevWt} กก.</strong></span>`;
+
+          return `
+            <tr class="set-row ${isDone ? 'done' : ''}">
+              <td style="width: 25%;">
+                <span class="set-badge ${set.type === 'warm' ? 'badge-warm' : 'badge-work'}">
+                  ${set.type === 'warm' ? 'วอร์ม' : 'จริง ' + sIdx}
+                </span>
+              </td>
+              <td style="width: 38%; color: #c0c4d4; font-size: 0.8rem;">
+                ${set.reps}
+              </td>
+              <td style="width: 22%;">
+                <div class="input-wrap">
+                  <input type="number" step="0.5" inputmode="decimal" pattern="[0-9]*" id="inp_${ex.id}_${sIdx}" class="input-field" placeholder="${prevWt} กก." value="${weight}"
+                    oninput="updateWeight('${currentDay}', '${ex.id}', ${sIdx}, this.value)">
+                  ${prevHintHtml}
+                </div>
+              </td>
+              <td style="width: 15%; text-align: center;">
+                <div class="check-btn ${isDone ? 'checked' : ''}" 
+                  onclick="toggleSetDone('${currentDay}', '${ex.id}', ${sIdx})">
+                  ✓
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        html += `
+          <div class="exercise-card ${ex.isMain ? 'is-main-card' : ''} ${allDone ? 'completed' : ''}" id="card_${ex.id}">
+            <div class="ex-header">
+              <div class="ex-num ${ex.isMain ? 'main-num' : ''}">${exIdx + 1}</div>
+              <div class="ex-title-wrap">
+                <div>
+                  ${ex.isMain 
+                    ? '<span class="badge-exercise-role main-role">⭐ ท่าหลัก (Compound Lift)</span>' 
+                    : '<span class="badge-exercise-role sub-role">🔹 ท่าเสริม (Accessory)</span>'
+                  }
+                </div>
+                <div class="ex-title">${ex.name}</div>
+                <div class="ex-subtitle">${ex.altName}</div>
+                ${lastBadgeText}
+              </div>
+              <a href="${ex.videoUrl}" target="_blank" rel="noopener noreferrer" class="video-btn">
+                ▶ คลิป
+              </a>
+            </div>
+
+            <div class="muscle-tags">
+              <div class="muscle-main">🎯 <strong>หลัก:</strong> ${ex.mainMuscle}</div>
+              <div class="muscle-sub">⚡ <strong>รอง:</strong> ${ex.subMuscle}</div>
+            </div>
+
+            <table class="sets-table">
+              <thead>
+                <tr>
+                  <th>ประเภท</th>
+                  <th>เป้าหมาย</th>
+                  <th style="text-align: center;">น้ำหนักวันนี้</th>
+                  <th style="text-align: center;">สำเร็จ</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${setsRows}
+              </tbody>
+            </table>
+          </div>
+        `;
+      });
+
+      // 2. Bonus Touch-up Exercises
+      if (dayData.bonusExercises && dayData.bonusExercises.length > 0) {
+        html += `
+          <div class="bonus-divider">
+            <div class="b-title">⚡ ซ้อมเสริมท่าหลักส่วนที่เหลือท้ายคาบ (Bonus Touch-Up)</div>
+            <div class="b-sub">เลือกซ้อมเพิ่ม 2 เซ็ตต่อส่วน (1 วอร์ม 15 ครั้ง + 1 เล่นจริง 6–8 ครั้ง) เน้นส่งสัญญาณปลุกกล้ามเนื้อ RPE 7–8 ห้ามหมดแรงคาเครื่อง</div>
+          </div>
+        `;
+
+        dayData.bonusExercises.forEach((bEx, bIdx) => {
+          const exState = (userState[currentDay] && userState[currentDay][bEx.id]) || {};
+          const exLast = lastWeights[bEx.id] || {};
+          let allDone = true;
+
+          const prevWarm = (exLast && exLast.wt_0 !== undefined && exLast.wt_0 !== '') ? exLast.wt_0 : 0;
+          const prevTouch = (exLast && exLast.wt_1 !== undefined && exLast.wt_1 !== '') ? exLast.wt_1 : 0;
+          const lastBadgeText = `<div class="last-record-badge">⏱️ ครั้งก่อน: วอร์ม <strong>${prevWarm} กก.</strong> | เล่นเสริม <strong>${prevTouch} กก.</strong></div>`;
+
+          let setsRows = bEx.sets.map((set, sIdx) => {
+            const isDone = !!exState[`set_${sIdx}`];
+            if (!isDone) allDone = false;
+            const weight = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : '';
+            const prevWt = (exLast && exLast[`wt_${sIdx}`] !== undefined && exLast[`wt_${sIdx}`] !== '') ? exLast[`wt_${sIdx}`] : 0;
+
+            const prevHintHtml = `<span class="prev-hint" onclick="applyPrevWeight('${currentDay}', '${bEx.id}', ${sIdx}, '${prevWt}')" title="กดเพื่อใส่น้ำหนักครั้งก่อน (${prevWt} กก.)">ครั้งก่อน: <strong>${prevWt} กก.</strong></span>`;
+
+            return `
+              <tr class="set-row ${isDone ? 'done' : ''}">
+                <td style="width: 25%;">
+                  <span class="set-badge ${set.type === 'warm' ? 'badge-warm' : 'badge-touchup'}">
+                    ${set.type === 'warm' ? 'วอร์ม' : 'เล่นเสริม'}
+                  </span>
+                </td>
+                <td style="width: 38%; color: #c0c4d4; font-size: 0.8rem;">
+                  ${set.reps}
+                </td>
+                <td style="width: 22%;">
+                  <div class="input-wrap">
+                    <input type="number" step="0.5" inputmode="decimal" pattern="[0-9]*" id="inp_${bEx.id}_${sIdx}" class="input-field" placeholder="${prevWt} กก." value="${weight}"
+                      oninput="updateWeight('${currentDay}', '${bEx.id}', ${sIdx}, this.value)">
+                    ${prevHintHtml}
+                  </div>
+                </td>
+                <td style="width: 15%; text-align: center;">
+                  <div class="check-btn ${isDone ? 'checked' : ''}" 
+                    onclick="toggleSetDone('${currentDay}', '${bEx.id}', ${sIdx})">
+                    ✓
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+
+          html += `
+            <div class="exercise-card is-bonus-card ${allDone ? 'completed' : ''}" id="card_${bEx.id}">
+              <div class="ex-header">
+                <div class="ex-num bonus-num">+${bIdx + 1}</div>
+                <div class="ex-title-wrap">
+                  <div>
+                    <span class="badge-exercise-role bonus-role">⚡ ซ้อมเสริมส่วน: ${bEx.part}</span>
+                  </div>
+                  <div class="ex-title">${bEx.name}</div>
+                  <div class="ex-subtitle">${bEx.altName}</div>
+                  ${lastBadgeText}
+                </div>
+                <a href="${bEx.videoUrl}" target="_blank" rel="noopener noreferrer" class="video-btn">
+                  ▶ คลิป
+                </a>
+              </div>
+
+              <div class="muscle-tags" style="background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.3);">
+                <div style="color: #fbbf24; font-size: 0.8rem;">💡 ${bEx.tip}</div>
+              </div>
+
+              <table class="sets-table">
+                <thead>
+                  <tr>
+                    <th>ประเภท</th>
+                    <th>เป้าหมาย</th>
+                    <th style="text-align: center;">น้ำหนักวันนี้</th>
+                    <th style="text-align: center;">สำเร็จ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${setsRows}
+                </tbody>
+              </table>
+            </div>
+          `;
+        });
+      }
+
+      // Finish & Save Session Button
+      html += `
+        <button class="btn-save-workout" onclick="finishAndSaveWorkout()">
+          💾 บันทึกประวัติและจำน้ำหนักวันนี้ (Save Session)
+        </button>
+      `;
+
+      container.innerHTML = html;
+      updateProgress();
+    }
+
+    function applyPrevWeight(day, exId, setIdx, wt) {
+      updateWeight(day, exId, setIdx, wt);
+      const input = document.getElementById(`inp_${exId}_${setIdx}`);
+      if (input) input.value = wt;
+      showToast(`ใส่ค่าน้ำหนัก ${wt} กก. แล้ว`);
+    }
+
+    function updateWeight(day, exId, setIdx, value) {
+      if (!userState[day]) userState[day] = {};
+      if (!userState[day][exId]) userState[day][exId] = {};
+      userState[day][exId][`wt_${setIdx}`] = value;
+      saveState();
+
+      // Automatically remember as latest weight
+      if (value !== '') {
+        if (!lastWeights[exId]) lastWeights[exId] = {};
+        lastWeights[exId][`wt_${setIdx}`] = value;
+        lastWeights[exId].updatedAt = new Date().toISOString().split('T')[0];
+        saveLastWeights();
+      }
+    }
+
+    function toggleSetDone(day, exId, setIdx) {
+      if (!userState[day]) userState[day] = {};
+      if (!userState[day][exId]) userState[day][exId] = {};
+
+      const current = !!userState[day][exId][`set_${setIdx}`];
+      userState[day][exId][`set_${setIdx}`] = !current;
+      saveState();
+      renderContent();
+
+      // Trigger rest timer and subtle haptic feedback if checked
+      if (!current) {
+        if (navigator.vibrate) {
+          try { navigator.vibrate(35); } catch(e) {}
+        }
+        startTimer();
+      }
+    }
+
+    function finishAndSaveWorkout() {
+      const dayData = workoutData[currentDay];
+      if (!dayData) return;
+
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      const dayState = userState[currentDay] || {};
+      let totalExercisesSaved = 0;
+      let totalSetsDone = 0;
+
+      const sessionExercises = [];
+
+      // Process standard exercises
+      dayData.exercises.forEach(ex => {
+        const exState = dayState[ex.id] || {};
+        const setsData = ex.sets.map((set, sIdx) => {
+          const isDone = !!exState[`set_${sIdx}`];
+          const wt = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : (lastWeights[ex.id] && lastWeights[ex.id][`wt_${sIdx}`]) || '';
+          if (isDone) totalSetsDone++;
+
+          // Update lastWeights
+          if (wt) {
+            if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
+            lastWeights[ex.id][`wt_${sIdx}`] = wt;
+          }
+
+          return {
+            setIndex: sIdx + 1,
+            type: set.type === 'warm' ? 'วอร์ม' : 'เล่นจริง',
+            target: set.reps,
+            weight: wt,
+            done: isDone
+          };
+        });
+
+        sessionExercises.push({
+          id: ex.id,
+          name: ex.name,
+          category: ex.isMain ? 'ท่าหลัก' : 'ท่าเสริม',
+          sets: setsData
+        });
+        totalExercisesSaved++;
+      });
+
+      // Process bonus exercises
+      if (dayData.bonusExercises) {
+        dayData.bonusExercises.forEach(bEx => {
+          const bState = dayState[bEx.id] || {};
+          const setsData = bEx.sets.map((set, sIdx) => {
+            const isDone = !!bState[`set_${sIdx}`];
+            const wt = bState[`wt_${sIdx}`] !== undefined ? bState[`wt_${sIdx}`] : (lastWeights[bEx.id] && lastWeights[bEx.id][`wt_${sIdx}`]) || '';
+            if (isDone) totalSetsDone++;
+
+            if (wt) {
+              if (!lastWeights[bEx.id]) lastWeights[bEx.id] = {};
+              lastWeights[bEx.id][`wt_${sIdx}`] = wt;
+            }
+
+            return {
+              setIndex: sIdx + 1,
+              type: set.type === 'warm' ? 'วอร์ม' : 'ซ้อมเสริม',
+              target: set.reps,
+              weight: wt,
+              done: isDone
+            };
+          });
+
+          sessionExercises.push({
+            id: bEx.id,
+            name: bEx.name,
+            category: 'ซ้อมเสริม 2 เซ็ต',
+            sets: setsData
+          });
+        });
+      }
+
+      saveLastWeights();
+
+      // Create session object
+      const session = {
+        id: `${dateStr}_${currentDay}_${Date.now()}`,
+        date: dateStr,
+        time: timeStr,
+        dayKey: currentDay,
+        dayTitle: dayData.title,
+        totalSetsDone: totalSetsDone,
+        exercises: sessionExercises
+      };
+
+      workoutHistory.unshift(session); // prepend to history
+      saveWorkoutHistory();
+
+      showToast(`บันทึกประวัติสำเร็จ! (สำเร็จ ${totalSetsDone} เซ็ต)`);
+      renderContent();
+    }
+
+    // --- History View ---
+    function renderHistoryView(container) {
+      let sessionsHtml = '';
+
+      if (workoutHistory.length === 0) {
+        sessionsHtml = `
+          <div style="text-align: center; padding: 40px 16px; color: var(--text-muted);">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;">📊</div>
+            <p>ยังไม่มีประวัติการฝึกที่บันทึกไว้</p>
+            <p style="font-size: 0.8rem; margin-top: 6px;">เมื่อเล่นเสร็จในแต่ละวัน ให้กดปุ่ม <strong>"💾 บันทึกประวัติและจำน้ำหนักวันนี้"</strong> ระบบจะเก็บสถิติและจำน้ำหนักไว้ให้ทันทีครับ</p>
+          </div>
+        `;
+      } else {
+        sessionsHtml = workoutHistory.map((s, idx) => {
+          let rowsHtml = s.exercises.map(ex => {
+            let setsSummary = ex.sets.map(st => `${st.type}: ${st.weight ? st.weight + 'kg' : '-'} ${st.done ? '✓' : ''}`).join(' | ');
+            return `
+              <div style="margin-bottom: 6px;">
+                <strong style="color: #fff;">${ex.name}</strong> 
+                <span style="font-size: 0.72rem; color: #a5abbc;">(${ex.category})</span><br>
+                <span style="color: #93c5fd; font-size: 0.76rem;">${setsSummary}</span>
+              </div>
+            `;
+          }).join('');
+
+          return `
+            <div class="history-card">
+              <div class="history-meta">
+                <div>
+                  <div class="history-date">📅 ${s.date} <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">(${s.time} น.)</span></div>
+                  <div class="history-title">${s.dayTitle}</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px;">${s.totalSetsDone} เซ็ต</span>
+                  <button class="btn-del-todo" onclick="deleteHistorySession('${s.id}')" title="ลบประวัตินี้">✕</button>
+                </div>
+              </div>
+              <div class="history-items-list">
+                ${rowsHtml}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      container.innerHTML = `
+        <div class="history-wrap">
+          <div class="history-header">
+            <div>
+              <h2>📊 บันทึกประวัติการฝึกย้อนหลัง</h2>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                บันทึกไว้ทั้งหมด: ${workoutHistory.length} เซสชัน
+              </div>
+            </div>
+            <button class="btn-export-excel" onclick="exportToExcel()">
+              📥 Export Excel (.xlsx)
+            </button>
+          </div>
+
+          <div style="margin-top: 14px;">
+            ${sessionsHtml}
+          </div>
+
+          ${workoutHistory.length > 0 ? `
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+              <button class="btn-reset" onclick="clearAllHistory()">ล้างประวัติทั้งหมด</button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function deleteHistorySession(id) {
+      if (confirm('คุณต้องการลบรายการบันทึกนี้ใช่หรือไม่?')) {
+        workoutHistory = workoutHistory.filter(s => s.id !== id);
+        saveWorkoutHistory();
+        renderContent();
+        showToast('ลบรายการเรียบร้อย');
+      }
+    }
+
+    function clearAllHistory() {
+      if (confirm('คุณต้องการลบประวัติการฝึกทั้งหมดใช่หรือไม่?')) {
+        workoutHistory = [];
+        saveWorkoutHistory();
+        renderContent();
+        showToast('ล้างประวัติทั้งหมดแล้ว');
+      }
+    }
+
+    // --- Export to Excel (.xlsx) using SheetJS ---
+    function exportToExcel() {
+      if (typeof XLSX === 'undefined') {
+        alert('เกิดข้อผิดพลาด: ไม่พบไลบรารี XLSX กรุณารีเฟรชหน้าเว็บ');
+        return;
+      }
+
+      const rows = [];
+
+      // If we have saved history sessions
+      if (workoutHistory.length > 0) {
+        workoutHistory.forEach(s => {
+          s.exercises.forEach(ex => {
+            ex.sets.forEach(st => {
+              rows.push({
+                "วันที่ (Date)": s.date,
+                "เวลา (Time)": s.time,
+                "วันในโปรแกรม (Program Day)": s.dayTitle,
+                "ชื่อท่าฝึก (Exercise)": ex.name,
+                "ประเภทท่า (Category)": ex.category,
+                "เซ็ตที่ (Set #)": st.setIndex,
+                "ประเภทเซ็ต (Set Type)": st.type,
+                "เป้าหมายจำนวนครั้ง (Target Reps)": st.target,
+                "น้ำหนักที่ใช้ กก. (Weight kg)": st.weight !== '' ? Number(st.weight) : '',
+                "สถานะการเล่น (Status)": st.done ? "สำเร็จ ✓" : "ไม่ได้เล่น"
+              });
+            });
+          });
+        });
+      } else {
+        // If no history saved yet, export current day's plan and state
+        const dayData = workoutData[currentDay];
+        const dayState = userState[currentDay] || {};
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        dayData.exercises.forEach(ex => {
+          const exState = dayState[ex.id] || {};
+          ex.sets.forEach((st, sIdx) => {
+            const isDone = !!exState[`set_${sIdx}`];
+            const wt = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : '';
+            rows.push({
+              "วันที่ (Date)": todayStr,
+              "เวลา (Time)": "-",
+              "วันในโปรแกรม (Program Day)": dayData.title,
+              "ชื่อท่าฝึก (Exercise)": ex.name,
+              "ประเภทท่า (Category)": ex.isMain ? "ท่าหลัก" : "ท่าเสริม",
+              "เซ็ตที่ (Set #)": sIdx + 1,
+              "ประเภทเซ็ต (Set Type)": st.type === 'warm' ? 'วอร์ม' : 'เล่นจริง',
+              "เป้าหมายจำนวนครั้ง (Target Reps)": st.reps,
+              "น้ำหนักที่ใช้ กก. (Weight kg)": wt !== '' ? Number(wt) : '',
+              "สถานะการเล่น (Status)": isDone ? "สำเร็จ ✓" : "ยังไม่ได้ติ๊ก"
+            });
+          });
+        });
+      }
+
+      if (rows.length === 0) {
+        alert('ยังไม่มีข้อมูลสำหรับ Export');
+        return;
+      }
+
+      // Create Worksheet and Workbook
+      const ws = XLSX.utils.json_to_sheet(rows);
+
+      // Auto column width
+      const colWidths = [
+        { wch: 12 }, // Date
+        { wch: 8 },  // Time
+        { wch: 35 }, // Program
+        { wch: 35 }, // Exercise
+        { wch: 16 }, // Category
+        { wch: 8 },  // Set #
+        { wch: 14 }, // Set Type
+        { wch: 22 }, // Target Reps
+        { wch: 18 }, // Weight
+        { wch: 14 }  // Status
+      ];
+      ws['!cols'] = colWidths;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Workout_History");
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const fileName = `Jetts_Workout_History_${todayStr}.xlsx`;
+
+      XLSX.writeFile(wb, fileName);
+      showToast(`Export ไฟล์ ${fileName} สำเร็จ!`);
+    }
+
+    // --- TODO Checklist View ---
+    function renderTodoView(container) {
+      const completedCount = userTodos.filter(t => t.done).length;
+      const totalCount = userTodos.length;
+
+      let itemsHtml = userTodos.map((todo) => `
+        <div class="todo-item ${todo.done ? 'checked' : ''}">
+          <div class="todo-left" onclick="toggleTodoItem(${todo.id})">
+            <div class="todo-check">✓</div>
+            <div class="todo-text">${todo.text}</div>
+          </div>
+          <button class="btn-del-todo" onclick="deleteTodoItem(${todo.id})" title="ลบรายการ">✕</button>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="todo-wrap">
+          <div class="todo-header">
+            <h2>📝 เช็คลิสต์สิ่งที่ต้องทำ</h2>
+            <div class="todo-counter">สำเร็จ: ${completedCount} / ${totalCount}</div>
+          </div>
+
+          <form class="todo-input-form" onsubmit="addTodoItem(event)">
+            <input type="text" id="newTodoInput" class="todo-input" placeholder="+ พิมพ์เพิ่มสิ่งที่ต้องทำของคุณที่นี่..." required>
+            <button type="submit" class="btn-add-todo">เพิ่ม</button>
+          </form>
+
+          <div class="todo-list">
+            ${itemsHtml}
+          </div>
+
+          <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+            <button class="btn-reset" onclick="resetDefaultTodos()">รีเซ็ตกลับเป็นค่าเริ่มต้น</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleTodoItem(id) {
+      userTodos = userTodos.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      saveTodos();
+      renderContent();
+    }
+
+    function addTodoItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('newTodoInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const newId = Date.now();
+      userTodos.push({ id: newId, text: text, done: false });
+      saveTodos();
+      input.value = '';
+      renderContent();
+    }
+
+    function deleteTodoItem(id) {
+      userTodos = userTodos.filter(t => t.id !== id);
+      saveTodos();
+      renderContent();
+    }
+
+    function resetDefaultTodos() {
+      if (confirm('คุณต้องการรีเซ็ตรายการเช็คลิสต์กลับเป็นค่าเริ่มต้นใช่หรือไม่?')) {
+        userTodos = JSON.parse(JSON.stringify(defaultTodos));
+        saveTodos();
+        renderContent();
+      }
+    }
+
+    function resetDayData() {
+      if (confirm('คุณต้องการรีเซ็ตการติ๊กของวันนี้ใช่หรือไม่? (น้ำหนักสถิติล่าสุดจะยังคงจำไว้)')) {
+        if (userState[currentDay]) {
+          delete userState[currentDay];
+          saveState();
+          renderContent();
+        }
+      }
+    }
+
+    function updateProgress() {
+      if (currentDay === 'rest' || currentDay === 'todo' || currentDay === 'history') return;
+      const dayData = workoutData[currentDay];
+      if (!dayData) return;
+
+      let totalSets = 0;
+      let completedSets = 0;
+
+      dayData.exercises.forEach(ex => {
+        ex.sets.forEach((set, sIdx) => {
+          totalSets++;
+          if (userState[currentDay] && userState[currentDay][ex.id] && userState[currentDay][ex.id][`set_${sIdx}`]) {
+            completedSets++;
+          }
+        });
+      });
+
+      const pct = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
+      document.getElementById('progressText').innerText = `ความคืบหน้าท่าประจำวัน: ${completedSets} / ${totalSets} เซ็ต`;
+      document.getElementById('progressPercent').innerText = `${pct}%`;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+    }
+
+    // --- Audio Feedback via Web Audio API ---
+    function playBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.6);
+      } catch (e) {
+        console.log("Audio not supported or blocked");
+      }
+    }
+
+    // --- Timer Logic (Background / Lock-Screen Safe via Timestamps) ---
+    let timerDuration = 90;
+    let timerRemaining = 90;
+    let timerInterval = null;
+    let timerEndTime = null;
+    let isRunning = false;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function updateTimerDisplay() {
+      const display = document.getElementById('timerDisplay');
+      if (!display) return;
+      display.innerText = formatTime(timerRemaining);
+      if (isRunning) {
+        display.classList.add('running');
+      } else {
+        display.classList.remove('running');
+      }
+    }
+
+    function setTimerDuration(seconds) {
+      timerDuration = seconds;
+      timerRemaining = seconds;
+      timerEndTime = null;
+      clearInterval(timerInterval);
+      isRunning = false;
+      const btn = document.getElementById('timerStartBtn');
+      if (btn) btn.innerText = '▶';
+      updateTimerDisplay();
+
+      document.querySelectorAll('.btn-preset').forEach(btn => {
+        if (btn.innerText.includes(seconds + 's')) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    function toggleTimer() {
+      if (isRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    function checkTimerTick() {
+      if (!isRunning || !timerEndTime) return;
+      const now = Date.now();
+      timerRemaining = Math.max(0, Math.ceil((timerEndTime - now) / 1000));
+      updateTimerDisplay();
+
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        timerEndTime = null;
+        const btn = document.getElementById('timerStartBtn');
+        if (btn) btn.innerText = '▶';
+        updateTimerDisplay();
+        playBeep();
+        if (navigator.vibrate) {
+          try { navigator.vibrate([200, 100, 200]); } catch(e) {}
+        }
+      }
+    }
+
+    function startTimer() {
+      if (isRunning) return;
+      if (timerRemaining <= 0) {
+        timerRemaining = timerDuration;
+      }
+      isRunning = true;
+      timerEndTime = Date.now() + (timerRemaining * 1000);
+      const btn = document.getElementById('timerStartBtn');
+      if (btn) btn.innerText = '⏸';
+      updateTimerDisplay();
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(checkTimerTick, 500);
+    }
+
+    function pauseTimer() {
+      if (!isRunning) return;
+      if (timerEndTime) {
+        const now = Date.now();
+        timerRemaining = Math.max(0, Math.ceil((timerEndTime - now) / 1000));
+      }
+      isRunning = false;
+      timerEndTime = null;
+      clearInterval(timerInterval);
+      const btn = document.getElementById('timerStartBtn');
+      if (btn) btn.innerText = '▶';
+      updateTimerDisplay();
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      timerRemaining = timerDuration;
+      timerEndTime = null;
+      updateTimerDisplay();
+    }
+
+    // Handle screen sleep/wake and tab switching so timer never drifts
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && isRunning) {
+        checkTimerTick();
+      }
+    });
+    window.addEventListener('focus', () => {
+      if (isRunning) checkTimerTick();
+    });
+
+    // Auto set day based on stored preference or current weekday
+    const savedActiveTab = localStorage.getItem('jetts_active_tab');
+    if (savedActiveTab && (workoutData[savedActiveTab] || savedActiveTab === 'history' || savedActiveTab === 'todo' || savedActiveTab === 'rest')) {
+      switchDay(savedActiveTab);
+    } else {
+      const today = new Date().getDay();
+      // 0: Sun, 1: Mon, 2: Tue, 3: Wed, 4: Thu, 5: Fri, 6: Sat
+      if (today === 1) switchDay('mon');
+      else if (today === 2) switchDay('tue');
+      else if (today === 3) switchDay('wed');
+      else if (today === 4) switchDay('thu');
+      else switchDay('rest');
+    }
+
+    // Register Service Worker for Offline PWA Support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('PWA ServiceWorker registered successfully:', reg.scope);
+        }).catch((err) => {
+          console.log('PWA ServiceWorker registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

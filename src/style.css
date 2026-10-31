@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    background-color: #0E1015;
+    color: #E2E8F0;
+    font-family: 'Kanit', 'Outfit', sans-serif;
+  }
+
+  /* Force Tabular Numbers for all weights, sets, and stopwatch */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #0E1015;
+}
+::-webkit-scrollbar-thumb {
+  background: #232736;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E11D48;
+}

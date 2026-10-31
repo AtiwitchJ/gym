@@ -1,0 +1,40 @@
+{
+  "name": "gym",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "โปรแกรมออกกำลังกาย 4 วัน สำหรับเล่นที่ **Jetts Fitness** เน้นการสร้างกล้ามเนื้อ (Hypertrophy) และความแข็งแรง ด้วยรูปแบบเซ็ต: - **ท่าประจำวัน 5 ท่า:** 4 เซ็ตต่อท่า = 1 วอร์ม (15 ครั้ง) + 3 เล่นจริง (6–8 ครั้ง เน้นน้ำหนักท้าทาย) - **⚡ ซ้อมเสริมท่าหลักส่วนที่เหลือท้ายคาบ (Bonus Touch-Up):** 2 เซ็ตต่อส่วน = 1 วอร์ม (15 ครั้ง) + 1 เล่นจริง (6–8 ครั้ง RPE 7–8 ห้ามหมดแรง)",
+  "main": "sw.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server/server.js",
+    "test": "node server/test-api.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AtiwitchJ/gym.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AtiwitchJ/gym/issues"
+  },
+  "homepage": "https://github.com/AtiwitchJ/gym#readme",
+  "dependencies": {
+    "lucide-vue-next": "^1.0.0",
+    "vue": "^3.5.44",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.10",
+    "autoprefixer": "^10.6.2",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^3.4.19",
+    "vite": "^8.3.5"
+  }
+}
