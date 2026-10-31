@@ -4,7 +4,7 @@ import { defaultTodos } from '../data/defaultTodos';
 
 // Active Day restoration
 function getInitialDay() {
-  const saved = localStorage.getItem('jetts_active_tab');
+  const saved = localStorage.getItem('atiwitch_active_tab') || localStorage.getItem('jetts_active_tab');
   if (saved && (workoutData[saved] || saved === 'rest' || saved === 'history' || saved === 'todo')) {
     return saved;
   }
@@ -29,20 +29,20 @@ function showToast(msg) {
   }, 2500);
 }
 
-// Reactive store models
-const userState = reactive(JSON.parse(localStorage.getItem('jetts_workout_state') || '{}'));
-const lastWeights = reactive(JSON.parse(localStorage.getItem('jetts_last_weights') || '{}'));
-const workoutHistory = ref(JSON.parse(localStorage.getItem('jetts_workout_history') || '[]'));
-const userTodos = ref(JSON.parse(localStorage.getItem('jetts_gym_todos') || JSON.stringify(defaultTodos)));
+// Reactive store models (supports both new and previous storage keys seamlessly)
+const userState = reactive(JSON.parse(localStorage.getItem('atiwitch_workout_state') || localStorage.getItem('jetts_workout_state') || '{}'));
+const lastWeights = reactive(JSON.parse(localStorage.getItem('atiwitch_last_weights') || localStorage.getItem('jetts_last_weights') || '{}'));
+const workoutHistory = ref(JSON.parse(localStorage.getItem('atiwitch_workout_history') || localStorage.getItem('jetts_workout_history') || '[]'));
+const userTodos = ref(JSON.parse(localStorage.getItem('atiwitch_gym_todos') || localStorage.getItem('jetts_gym_todos') || JSON.stringify(defaultTodos)));
 
 // Auto-save triggers
 let syncDebounceTimer = null;
 
 function persistLocal() {
-  localStorage.setItem('jetts_workout_state', JSON.stringify(userState));
-  localStorage.setItem('jetts_last_weights', JSON.stringify(lastWeights));
-  localStorage.setItem('jetts_workout_history', JSON.stringify(workoutHistory.value));
-  localStorage.setItem('jetts_gym_todos', JSON.stringify(userTodos.value));
+  localStorage.setItem('atiwitch_workout_state', JSON.stringify(userState));
+  localStorage.setItem('atiwitch_last_weights', JSON.stringify(lastWeights));
+  localStorage.setItem('atiwitch_workout_history', JSON.stringify(workoutHistory.value));
+  localStorage.setItem('atiwitch_gym_todos', JSON.stringify(userTodos.value));
 }
 
 function triggerSave(dayKey = currentDay.value) {
@@ -113,7 +113,7 @@ async function fetchServerState() {
 // Actions
 function switchDay(dayKey) {
   currentDay.value = dayKey;
-  localStorage.setItem('jetts_active_tab', dayKey);
+  localStorage.setItem('atiwitch_active_tab', dayKey);
 }
 
 function updateWeight(day, exId, setIdx, val) {

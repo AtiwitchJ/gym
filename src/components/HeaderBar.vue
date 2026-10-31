@@ -1,17 +1,17 @@
 <template>
-  <header class="sticky top-0 z-40 bg-titanium-950/90 backdrop-blur-md border-b border-surface-border px-4 py-3">
+  <header class="sticky top-0 z-40 bg-paper/95 backdrop-blur-md border-b-2 border-plate px-4 py-3">
     <div class="max-w-3xl mx-auto flex items-center justify-between">
-      <!-- Brand Logo -->
+      <!-- Brand Seal Chop -->
       <div class="flex items-center gap-2.5">
-        <span class="bg-crimson text-white font-display font-extrabold text-sm px-2.5 py-1 rounded tracking-wider shadow-sm">
-          JETTS
+        <span class="seal-chop">
+          ATIWITCH
         </span>
         <div class="flex flex-col">
-          <span class="text-sm font-bold font-display tracking-tight text-white leading-none">
-            WORKOUT TRACKER
+          <span class="text-sm font-bold font-heading tracking-tight text-ink leading-none">
+            WORKOUT LOG
           </span>
-          <span class="text-[10px] font-mono tracking-widest text-titanium-400 uppercase mt-0.5">
-            4-Day Hypertrophy
+          <span class="text-[10px] font-mono tracking-wider text-ink-muted uppercase mt-0.5">
+            Personal Strength Protocol
           </span>
         </div>
       </div>
@@ -20,20 +20,20 @@
       <div class="flex items-center gap-2">
         <!-- Auto-save Pill -->
         <span
-          class="text-[11px] font-mono px-2.5 py-1 rounded-full border transition-all duration-200 flex items-center gap-1.5"
+          class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border-2 transition-all flex items-center gap-1.5 select-none"
           :class="saveStatus === 'saving'
-            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 animate-pulse'
-            : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'"
+            ? 'bg-flame-bg border-flame text-flame shadow-[2px_2px_0px_#ea580c] animate-pulse'
+            : 'bg-emerald-bg border-emerald text-emerald shadow-[2px_2px_0px_#059669]'"
         >
-          <span class="w-1.5 h-1.5 rounded-full" :class="saveStatus === 'saving' ? 'bg-amber-400' : 'bg-emerald-400'"></span>
+          <span class="w-1.5 h-1.5 rounded-full" :class="saveStatus === 'saving' ? 'bg-flame' : 'bg-emerald'"></span>
           {{ saveStatus === 'saving' ? 'SYNCING...' : 'SAVED' }}
         </span>
 
-        <!-- Reset Button (visible only in workout day tabs) -->
+        <!-- Reset Button -->
         <button
           v-if="isWorkoutDay"
           @click="confirmReset"
-          class="text-[11px] font-mono font-medium px-2.5 py-1 rounded border border-surface-border bg-surface hover:bg-surface-muted text-titanium-400 hover:text-white transition-colors"
+          class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border-2 border-plate bg-surface hover:bg-paper-subtle text-ink shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
           title="ล้างข้อมูลติ๊กของวันนี้"
         >
           RESET

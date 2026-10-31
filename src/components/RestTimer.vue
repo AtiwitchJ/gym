@@ -1,15 +1,15 @@
 <template>
-  <div class="fixed bottom-0 left-0 right-0 z-50 bg-titanium-950/95 backdrop-blur-lg border-t border-surface-border px-4 py-2.5 pb-[max(12px,env(safe-area-inset-bottom))] shadow-2xl">
+  <div class="fixed bottom-0 left-0 right-0 z-50 bg-paper/95 backdrop-blur-lg border-t-2 border-plate px-4 py-2.5 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(30,34,32,0.08)]">
     <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
       <!-- Digital Stopwatch Readout -->
       <div class="flex items-center gap-3">
         <div class="flex flex-col">
-          <span class="text-[9px] font-mono tracking-widest text-titanium-400 uppercase leading-none">
+          <span class="text-[9px] font-mono font-bold tracking-widest text-ink-muted uppercase leading-none">
             REST INTERVAL
           </span>
           <span
-            class="font-mono tabular-nums text-2xl font-extrabold tracking-wider leading-tight"
-            :class="isRunning ? 'text-crimson animate-pulse' : 'text-white'"
+            class="font-mono tabular-nums text-2xl font-bold tracking-wider leading-tight"
+            :class="isRunning ? 'text-flame animate-pulse' : 'text-ink'"
           >
             {{ formatTime(timerRemaining) }}
           </span>
@@ -21,10 +21,10 @@
             v-for="preset in [60, 90, 120, 180]"
             :key="preset"
             @click="setTimerDuration(preset)"
-            class="text-[11px] font-mono px-2 py-1 rounded border transition-colors select-none"
+            class="text-[11px] font-mono font-bold px-2.5 py-1 rounded-full border-2 border-plate transition-all select-none"
             :class="timerDuration === preset
-              ? 'bg-crimson text-white border-crimson font-bold'
-              : 'bg-surface hover:bg-surface-muted text-titanium-400 border-surface-border'"
+              ? 'bg-flame text-white shadow-[2px_2px_0px_#1e2220] translate-x-[-1px] translate-y-[-1px]'
+              : 'bg-surface hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
           >
             {{ preset }}s
           </button>
@@ -36,10 +36,10 @@
         <!-- Play / Pause Button -->
         <button
           @click="toggleTimer"
-          class="w-11 h-11 rounded-lg flex items-center justify-center font-bold text-white transition-all shadow-md select-none"
+          class="w-11 h-11 rounded-xl flex items-center justify-center font-bold text-white transition-all select-none border-2 border-plate"
           :class="isRunning
-            ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-950'
-            : 'bg-crimson hover:bg-crimson-hover shadow-crimson-dark'"
+            ? 'bg-gold hover:bg-gold-glow text-ink shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
+            : 'bg-flame hover:bg-flame-glow shadow-[3px_3px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
           :title="isRunning ? 'พักเวลา' : 'เริ่มจับเวลา'"
         >
           <svg v-if="isRunning" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@
         <!-- Reset Button -->
         <button
           @click="resetTimer"
-          class="w-11 h-11 rounded-lg bg-surface hover:bg-surface-muted border border-surface-border flex items-center justify-center text-titanium-300 hover:text-white transition-colors"
+          class="w-11 h-11 rounded-xl bg-surface hover:bg-paper-subtle border-2 border-plate flex items-center justify-center text-ink shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
           title="รีเซ็ตเวลา"
         >
           <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">

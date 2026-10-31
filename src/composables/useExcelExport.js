@@ -52,7 +52,7 @@ export function useExcelExport() {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Workout History');
 
     const dateStr = new Date().toISOString().split('T')[0];
-    XLSX.writeFile(workbook, `Jetts_Workout_Log_${dateStr}.xlsx`);
+    XLSX.writeFile(workbook, `Atiwitch_Workout_Log_${dateStr}.xlsx`);
   }
 
   function downloadSqliteDatabase() {

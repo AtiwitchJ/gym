@@ -1,6 +1,6 @@
 #!/bin/bash
 # -------------------------------------------------------------
-# Script to run Jetts Fitness Tracker locally or over Tailscale
+# Script to run Atiwitch Workout Tracker locally or over Tailscale
 # -------------------------------------------------------------
 
 PORT=8080

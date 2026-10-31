@@ -1,21 +1,21 @@
 <template>
-  <nav class="bg-titanium-900 border-b border-surface-border px-4 py-2 overflow-x-auto scrollbar-none">
+  <nav class="bg-paper border-b-2 border-plate px-4 py-2.5 overflow-x-auto scrollbar-none">
     <div class="max-w-3xl mx-auto flex gap-2 min-w-max">
       <button
         v-for="tab in tabs"
         :key="tab.id"
         @click="switchDay(tab.id)"
-        class="flex flex-col items-center justify-center px-3.5 py-2 rounded-lg text-xs transition-all relative"
+        class="flex flex-col items-center justify-center px-3.5 py-1.5 rounded-xl text-xs transition-all relative font-heading border-2 border-plate"
         :class="currentDay === tab.id
           ? tab.id === 'history'
-            ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950 font-medium'
+            ? 'bg-emerald text-white shadow-[3px_3px_0px_#1e2220] translate-x-[-1px] translate-y-[-1px]'
             : tab.id === 'todo'
-              ? 'bg-amber-600 text-white shadow-lg shadow-amber-950 font-medium'
-              : 'bg-crimson text-white shadow-lg shadow-crimson-dark font-medium'
-          : 'bg-surface hover:bg-surface-muted text-titanium-400 hover:text-titanium-200 border border-surface-border'"
+              ? 'bg-gold text-ink font-bold shadow-[3px_3px_0px_#1e2220] translate-x-[-1px] translate-y-[-1px]'
+              : 'bg-plate text-white shadow-[3px_3px_0px_#ea580c] translate-x-[-1px] translate-y-[-1px]'
+          : 'bg-surface text-ink shadow-[2px_2px_0px_#1e2220] hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
       >
         <span class="font-bold text-xs tracking-tight">{{ tab.name }}</span>
-        <span class="text-[10px] opacity-80 mt-0.5 tracking-normal">{{ tab.sub }}</span>
+        <span class="text-[10px] opacity-80 mt-0.5 tracking-normal font-body">{{ tab.sub }}</span>
       </button>
     </div>
   </nav>

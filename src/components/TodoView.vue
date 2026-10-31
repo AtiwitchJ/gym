@@ -1,15 +1,15 @@
 <template>
   <div class="py-2">
     <!-- Header Card -->
-    <div class="bg-surface rounded-xl border border-surface-border p-5 mb-5 shadow-sm">
-      <span class="text-[10px] font-mono tracking-widest text-amber-400 uppercase">
+    <div class="archive-card p-5 mb-5">
+      <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase">
         DAILY DISCIPLINE
       </span>
-      <h2 class="text-xl font-bold font-display text-white tracking-tight">
-        สิ่งที่ต้องทำในการฝึก (Gym Checklist)
+      <h2 class="text-xl font-bold font-heading text-ink tracking-tight">
+        สิ่งที่ต้องทำในการฝึก (Workout Checklist)
       </h2>
-      <p class="text-xs text-titanium-400 mt-1">
-        ทำครบทุกข้อเพื่อรักษาฟอร์มการเล่นและฟื้นฟูกล้ามเนื้อให้เต็มประสิทธิภาพ
+      <p class="text-xs text-ink-muted mt-1 font-body">
+        วินัยประจำวันสำหรับการสร้างกล้ามเนื้อและการฟื้นฟูร่างกายอย่างมีประสิทธิภาพ
       </p>
 
       <!-- Add New Item Form -->
@@ -17,12 +17,12 @@
         <input
           v-model="newTodoText"
           type="text"
-          placeholder="+ พิมพ์เพิ่มข้อปฏิบัติของคุณที่นี่..."
-          class="flex-1 bg-titanium-950 border border-surface-border focus:border-amber-400 rounded-lg px-3.5 py-2.5 text-xs text-white outline-none transition-colors"
+          placeholder="+ เพิ่มข้อปฏิบัติของคุณที่นี่..."
+          class="flex-1 bg-surface-low border-2 border-plate focus:border-flame focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-ink outline-none transition-colors shadow-inner"
         />
         <button
           type="submit"
-          class="bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs px-4 py-2.5 rounded-lg border border-amber-500 transition-colors whitespace-nowrap"
+          class="bg-flame hover:bg-flame-glow text-white font-bold text-xs px-4 py-2.5 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
         >
           เพิ่มรายการ
         </button>
@@ -30,23 +30,23 @@
     </div>
 
     <!-- Todo List -->
-    <div class="bg-surface rounded-xl border border-surface-border divide-y divide-surface-border overflow-hidden">
+    <div class="archive-card divide-y-2 divide-plate/10 overflow-hidden bg-white">
       <div
         v-for="todo in userTodos"
         :key="todo.id"
         class="p-4 flex items-center justify-between gap-3 transition-colors"
-        :class="todo.done ? 'bg-surface-card/40' : 'hover:bg-surface-card/20'"
+        :class="todo.done ? 'bg-surface-low/50' : 'hover:bg-surface-low/30'"
       >
         <label class="flex items-center gap-3 cursor-pointer flex-1 select-none">
           <input
             type="checkbox"
             :checked="todo.done"
             @change="toggleTodo(todo.id)"
-            class="w-5 h-5 rounded border-surface-border text-amber-500 focus:ring-0 focus:ring-offset-0 bg-titanium-950 cursor-pointer accent-amber-500"
+            class="w-5 h-5 rounded-md border-2 border-plate text-flame focus:ring-0 focus:ring-offset-0 bg-surface-low cursor-pointer accent-flame"
           />
           <span
-            class="text-xs transition-colors"
-            :class="todo.done ? 'text-titanium-500 line-through' : 'text-titanium-200 font-medium'"
+            class="text-xs transition-colors font-body"
+            :class="todo.done ? 'text-ink-muted line-through opacity-70' : 'text-ink font-semibold'"
           >
             {{ todo.text }}
           </span>
@@ -55,7 +55,7 @@
         <!-- Delete button -->
         <button
           @click="deleteTodo(todo.id)"
-          class="text-titanium-500 hover:text-crimson p-1.5 rounded transition-colors"
+          class="text-ink-muted hover:text-flame p-1.5 rounded transition-colors"
           title="ลบรายการนี้"
         >
           <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">

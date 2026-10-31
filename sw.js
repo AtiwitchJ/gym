@@ -1,9 +1,8 @@
-const CACHE_NAME = 'jetts-gym-v3';
+const CACHE_NAME = 'atiwitch-log-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './xlsx.full.min.js',
   './icon-192.png',
   './icon-512.png',
   './apple-touch-icon.png'
@@ -28,6 +27,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (event.request.url.includes('/api/')) {
+    return; // Do not cache API routes
+  }
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {

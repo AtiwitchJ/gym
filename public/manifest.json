@@ -1,13 +1,13 @@
 {
-  "name": "Jetts Fitness Workout Tracker",
-  "short_name": "Jetts Log",
-  "description": "ตารางออกกำลังกายและบันทึกการฝึก Jetts Fitness 4 วัน สำหรับทุกอุปกรณ์",
+  "name": "Atiwitch Workout Log",
+  "short_name": "Workout Log",
+  "description": "Personal workout tracker & strength protocol by Atiwitch Jitamornpak",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0f1015",
-  "theme_color": "#E50914",
+  "background_color": "#fdfbf7",
+  "theme_color": "#fdfbf7",
   "icons": [
     {
       "src": "./icon-192.png",

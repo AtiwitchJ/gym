@@ -147,7 +147,7 @@ if (fs.existsSync(DIST_DIR)) {
 
 if (require.main === module) {
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Jetts Gym Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Atiwitch Workout Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

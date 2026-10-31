@@ -8,9 +8,9 @@
   }
 
   html, body {
-    background-color: #0E1015;
-    color: #E2E8F0;
-    font-family: 'Kanit', 'Outfit', sans-serif;
+    background-color: #fdfbf7;
+    color: #1e2220;
+    font-family: 'Noto Sans Thai', 'Prompt', 'Space Grotesk', sans-serif;
   }
 
   /* Force Tabular Numbers for all weights, sets, and stopwatch */
@@ -19,18 +19,45 @@
   }
 }
 
-/* Custom scrollbar */
+/* Seal Chop Stamp Token */
+.seal-chop {
+  border: 2px solid #ea580c;
+  color: #ea580c;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0px #ea580c;
+  background: #fff7ed;
+  border-radius: 9999px;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+}
+
+/* Archive Plate Card */
+.archive-card {
+  background: #ffffff;
+  border: 2px solid #1e2220;
+  border-radius: 14px;
+  box-shadow: 3px 3px 0px #1e2220;
+  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Custom Paper Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0E1015;
+  background: #fdfbf7;
 }
 ::-webkit-scrollbar-thumb {
-  background: #232736;
+  background: #dfd5c4;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #E11D48;
+  background: #1e2220;
 }
