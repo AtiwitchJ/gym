@@ -8,8 +8,8 @@ TAILSCALE_BIN="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
 
 case "$1" in
   docker)
-    echo "🐳 Starting with Docker Compose..."
-    docker compose up -d
+    echo "🐳 Building & starting with Docker Compose (Node.js + SQLite)..."
+    docker compose up -d --build
     echo "✅ Running at http://localhost:$PORT"
     ;;
   stop)
@@ -17,20 +17,36 @@ case "$1" in
     docker compose down
     ;;
   tailscale)
+    echo "🔒 Starting Server & configuring Tailscale VPN..."
+    docker compose up -d --build
     if [ -x "$TAILSCALE_BIN" ]; then
-      echo "🔒 Setting up Tailscale Serve with HTTPS (Recommended for PWA)..."
-      # First run a local python or docker server, then tailscale serve
-      python3 -m http.server $PORT --directory . > /dev/null 2>&1 &
-      SERVER_PID=$!
-      echo "Started local server (PID: $SERVER_PID)"
       $TAILSCALE_BIN serve --bg $PORT
-      echo "✅ Tailscale Serve is active! Check your Tailscale HTTPS URL with: $TAILSCALE_BIN serve status"
+      echo "✅ Tailscale Serve is active! Status:"
+      $TAILSCALE_BIN serve status
     else
-      echo "❌ Tailscale CLI not found at $TAILSCALE_BIN"
+      echo "✅ Docker container running on port $PORT."
+      echo "Connect directly via your Tailscale IP on port $PORT (e.g., http://<your-tailscale-ip>:$PORT)"
     fi
     ;;
+  native)
+    echo "🚀 Building frontend and running native server..."
+    npm run build
+    node server/server.js
+    ;;
+  dev)
+    echo "🛠️ Starting Dev mode (Vite on :5173 + API on :8080)..."
+    node server/server.js &
+    API_PID=$!
+    npm run dev
+    kill $API_PID
+    ;;
   *)
-    echo "🚀 Starting simple HTTP server on port $PORT..."
-    python3 -m http.server $PORT
+    echo "Usage: ./serve.sh [docker | stop | tailscale | native | dev]"
+    echo ""
+    echo "  docker    - Build & run in Docker container (recommended)"
+    echo "  tailscale - Run via Docker and activate Tailscale HTTPS serve"
+    echo "  native    - Run Node.js + SQLite natively on Mac"
+    echo "  dev       - Run Vite hot-reload dev server"
+    echo "  stop      - Stop running container"
     ;;
 esac
