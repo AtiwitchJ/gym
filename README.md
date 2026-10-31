@@ -6,10 +6,30 @@
 
 ---
 
-## 🌐 ใช้งานผ่านเว็บไซต์บนมือถือ (GitHub Pages)
+## 🔒 สถานะ Repository: Private
 
-สามารถเปิดใช้งาน Tracker ขณะอยู่ที่ยิมได้ทันทีผ่านลิงก์นี้บนมือถือ:
-👉 **[https://atiwitchj.github.io/gym/](https://atiwitchj.github.io/gym/)**
+Repository นี้ได้รับการตั้งค่าเป็น **Private** เรียบร้อยแล้วเพื่อความเป็นส่วนตัว
+
+---
+
+## 🌐 วิธีเปิดใช้งาน Web App บนมือถือ (เมื่อ Repo เป็น Private)
+
+เนื่องจาก GitHub Pages แบบฟรีไม่รองรับ Private Repository คุณสามารถเปิดใช้งานได้ 2 วิธีง่าย ๆ:
+
+### 1. นำขึ้น Vercel / Cloudflare Pages ฟรี (แนะนำที่สุด - ได้ลิงก์เข้าจากมือถือตลอดชีพ)
+1. เข้าไปที่ **[Vercel](https://vercel.com)** หรือ **[Cloudflare Pages](https://pages.cloudflare.com)**
+2. กด **Add New Project** ➔ เลือกเชื่อมต่อกับ GitHub Account `AtiwitchJ`
+3. เลือก Repository **`gym`** (ที่เป็น Private) แล้วกด **Deploy** ได้ทันทีใน 10 วินาที
+4. จะได้ URL ฟรี (เช่น `https://gym-xxx.vercel.app`) สามารถเปิดบนมือถือและ Add to Home Screen ได้เหมือนเดิมทุกประการ!
+
+### 2. เปิดใช้งานบนเครื่องคอมพิวเตอร์ / เครือข่าย Local
+```bash
+open index.html
+```
+หรือรัน Local Server:
+```bash
+python3 -m http.server 8080
+```
 
 ---
 
