@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   gym-tracker:
-    build: .
-    container_name: jetts-gym-tracker
+    image: nginx:alpine
+    container_name: gym-tracker
     restart: unless-stopped
     ports:
       - "8080:80"
-    environment:
-      - TZ=Asia/Bangkok
+    volumes:
+      - .:/usr/share/nginx/html:ro

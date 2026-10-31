@@ -6,52 +6,52 @@
 
 ---
 
-## 🔒 สถานะ Repository: Private
+## 🔒 สถานะ Repository: Private (Self-Hosted via Tailscale VPN)
 
-Repository นี้ได้รับการตั้งค่าเป็น **Private** เรียบร้อยแล้วเพื่อความเป็นส่วนตัว
+Repository นี้เป็น **Private** และออกแบบมาเพื่อ **Self-Host ใช้งานส่วนตัวผ่าน Tailscale VPN** ปลอดภัย 100% ไม่ต้องพึ่งพา Cloud ภายนอก
 
 ---
 
-## 🏠 วิธี Self-Host เอง และเข้าใช้งานผ่าน VPN (WireGuard / Tailscale / OpenVPN)
+## 🌐 วิธีเปิดใช้งาน Web App ผ่าน Tailscale VPN บนมือถือ
 
-ระบบนี้รองรับการรันแบบ Self-Host ได้อย่างสมบูรณ์แบบ ทั้งบน **Home Server, NAS, Raspberry Pi หรือเครื่อง Mac/Linux** โดยเปิดพอร์ตให้เข้าถึงได้เฉพาะในวง VPN เพื่อความปลอดภัยและเป็นส่วนตัว 100%
+เมื่อเปิด VPN Tailscale บนมือถือและเครื่องโฮสต์ (Mac / Home Server) คุณสามารถเข้าใช้งานได้ด้วยวิธีต่อไปนี้:
 
-### วิธีที่ 1: รันด้วย Docker / Docker Compose (แนะนำ)
-มีไฟล์ `Dockerfile` และ `docker-compose.yml` (ใช้ Nginx Alpine น้ำหนักเบา ~20MB) พร้อมใช้งานทันที:
+### วิธีที่ 1: ใช้ `tailscale serve` (แนะนำที่สุด - ได้ HTTPS รองรับ PWA & Offline)
+Tailscale มีระบบออกใบรับรอง HTTPS อัตโนมัติ ทำให้ iOS/Android ยอมรับการติดตั้ง PWA (Add to Home Screen) และ Service Worker ได้อย่างสมบูรณ์แบบ:
 
 ```bash
-# สั่งรันขึ้นมาใน Background บนพอร์ต 8080
-docker compose up -d --build
+# 1. สั่งรัน Tailscale Serve ชี้มาที่พอร์ต 8080 ในแบบ background
+/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg 8080
 ```
-*(หากต้องการเปลี่ยนพอร์ต สามารถแก้ไขใน `docker-compose.yml` ได้ เช่น `"3000:80"`)*
-
----
-
-### วิธีที่ 2: รันด้วย Script สำเร็จรูป หรือ Python (ไม่ต้องติดตั้งอะไรเพิ่ม)
+ตรวจสอบโดเมน HTTPS ส่วนตัวของคุณได้ด้วย:
 ```bash
-./start.sh
-# หรือระบุพอร์ตที่ต้องการ
-PORT=8080 ./start.sh
+/Applications/Tailscale.app/Contents/MacOS/Tailscale serve status
 ```
+จะได้ URL ประจำเครื่อง เช่น:  
+👉 `https://<ชื่อเครื่อง>.<tailnet-name>.ts.net`  
+*(เปิดลิงก์นี้บนมือถือที่ต่อ Tailscale VPN อยู่เพื่อใช้งานและ Add to Home Screen ได้ทันที)*
 
 ---
 
-### 📲 การเชื่อมต่อจากมือถือขณะอยู่ที่ Jetts Fitness ผ่าน VPN
+### วิธีที่ 2: รันผ่าน Docker Compose (Nginx)
+หากต้องการให้เว็บเซิร์ฟเวอร์รันอยู่เบื้องหลังตลอดเวลา:
 
-1. **เปิด VPN บนมือถือ** (เช่น แอป WireGuard, Tailscale หรือ OpenVPN)
-2. **เปิดเบราว์เซอร์บนมือถือ** แล้วพิมพ์ URL:
-   ```text
-   http://<VPN-IP-ของเครื่อง-Host>:8080
-   ```
-   *ตัวอย่าง:*
-   - ถ้าใช้ **Tailscale:** `http://100.x.y.z:8080` หรือชื่อเครื่อง `http://mac-mini:8080`
-   - ถ้าใช้ **WireGuard:** `http://10.0.0.x:8080`
-3. **กด "Add to Home Screen"** บนมือถือเพื่อใช้งานเหมือนแอปจริงเต็มจอได้ทันที
+```bash
+docker compose up -d
+```
+เข้าใช้งานผ่านเบราว์เซอร์มือถือด้วย Tailscale IP ของเครื่อง:
+👉 `http://<Tailscale-IP-ของเครื่อง>:8080`
 
-> [!TIP]
-> **เคล็ดลับสำหรับผู้ใช้ Tailscale:**  
-> หากต้องการเปิดแบบ HTTPS อัตโนมัติ (เพื่อเปิดฟีเจอร์ PWA เต็มรูปแบบบน Android):  
-> สามารถรันคำสั่ง `tailscale serve --bg 8080` บนเครื่อง Host ได้ทันที จะได้โดเมน HTTPS ส่วนตัวในวง VPN ฟรี!
+*(หากต้องการหยุด container ให้พิมพ์ `docker compose down`)*
+
+---
+
+### วิธีที่ 3: สคริปต์รันเร็ว `serve.sh`
+```bash
+./serve.sh docker     # รันด้วย Docker Compose
+./serve.sh tailscale  # รัน Python + Tailscale Serve
+./serve.sh            # รัน Python HTTP Server ธรรมดา
+```
 
 ---
 
