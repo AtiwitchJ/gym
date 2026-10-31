@@ -2,8 +2,22 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Jetts Fitness - Workout Tracker & Guide</title>
+
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#0f1015">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Jetts Log">
+  <meta name="description" content="ตารางออกกำลังกายและตัวบันทึกการฝึก Jetts Fitness 4 วัน สำหรับทุกอุปกรณ์">
+
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
@@ -34,12 +48,12 @@
       background-color: var(--bg-dark);
       color: var(--text-main);
       line-height: 1.5;
-      padding-bottom: 120px;
+      padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px));
     }
 
     header {
       background: linear-gradient(180deg, #1f1214 0%, var(--bg-dark) 100%);
-      padding: 20px 16px 14px;
+      padding: max(20px, env(safe-area-inset-top, 0px)) 16px 14px;
       border-bottom: 1px solid var(--card-border);
       position: sticky;
       top: 0;
@@ -75,6 +89,12 @@
       font-size: 1.15rem;
       font-weight: 600;
       letter-spacing: -0.3px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
     .program-desc {
@@ -158,6 +178,12 @@
       border-color: var(--jetts-red);
       color: #fff;
       box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+    }
+
+    .day-tab.todo-tab.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-color: #f59e0b;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
     }
 
     /* Progress bar */
@@ -482,7 +508,7 @@
     /* Rest Timer Bar */
     .rest-timer-bar {
       position: fixed;
-      bottom: 16px;
+      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
       left: 16px;
       right: 16px;
       max-width: 618px;
@@ -577,7 +603,7 @@
       border-radius: 16px;
       padding: 24px;
       text-align: center;
-      margin-top: 20px;
+      margin-top: 10px;
     }
 
     .rest-emoji {
@@ -598,6 +624,167 @@
       margin-left: 18px;
       margin-bottom: 8px;
       color: #c9ccd6;
+    }
+
+    /* --- TODO View Styling --- */
+    .todo-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px 16px;
+      margin-top: 10px;
+    }
+
+    .todo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .todo-header h2 {
+      font-size: 1.15rem;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .todo-counter {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: #12141c;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .todo-input-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .todo-input {
+      flex: 1;
+      background: #12141c;
+      border: 1px solid #2c3044;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    .todo-input:focus {
+      outline: none;
+      border-color: #fbbf24;
+    }
+
+    .btn-add-todo {
+      background: #fbbf24;
+      color: #111;
+      border: none;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Kanit', sans-serif;
+      transition: background 0.2s;
+    }
+
+    .btn-add-todo:hover {
+      background: #f59e0b;
+    }
+
+    .todo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1c1e2a;
+      border: 1px solid #282c3c;
+      border-radius: 12px;
+      padding: 10px 14px;
+      transition: all 0.2s;
+    }
+
+    .todo-item.checked {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+
+    .todo-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .todo-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid #3c4259;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: transparent;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .todo-item.checked .todo-check {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: #fff;
+    }
+
+    .todo-text {
+      font-size: 0.9rem;
+      color: #e2e4ec;
+      transition: all 0.2s;
+    }
+
+    .todo-item.checked .todo-text {
+      text-decoration: line-through;
+      color: #71778c;
+    }
+
+    .btn-del-todo {
+      background: transparent;
+      border: none;
+      color: #555b73;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: color 0.15s;
+    }
+
+    .btn-del-todo:hover {
+      color: #ff6b72;
+    }
+
+    /* PWA Install Guide Banner */
+    .pwa-hint {
+      margin-top: 20px;
+      background: #11131a;
+      border: 1px dashed #30354a;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .pwa-hint strong {
+      color: #fbbf24;
     }
 
     .btn-reset {
@@ -624,7 +811,9 @@
         <span class="brand-badge">JETTS</span>
         <span class="brand-title">Fitness Workout Log</span>
       </div>
-      <button class="btn-reset" onclick="resetDayData()">ล้างติ๊กวันนี้</button>
+      <div class="header-actions">
+        <button class="btn-reset" onclick="resetDayData()">ล้างติ๊กวันนี้</button>
+      </div>
     </div>
 
     <div class="program-desc">
@@ -633,9 +822,10 @@
     </div>
 
     <div class="concept-bar">
-      <span>⭐ <strong>(ท่าหลัก):</strong> ท่าสร้างกล้ามเนื้อมวลรวม ห้ามข้าม</span>
-      <span>🔹 <strong>(ท่าเสริม):</strong> เก็บรายละเอียดเฉพาะจุด</span>
+      <span>⭐ <strong>(ท่าหลัก):</strong> ท่าสร้างกล้ามเนื้อมวลรวม</span>
+      <span>🔹 <strong>(ท่าเสริม):</strong> เก็บรายละเอียด</span>
       <span>⚡ <strong>(ซ้อมเสริม):</strong> 2 เซ็ตกระตุ้นฟอร์ม RPE 7-8</span>
+      <span>📝 <strong>(To-Do):</strong> เช็คลิสต์ประจำวัน</span>
     </div>
 
     <!-- Day Navigation -->
@@ -660,6 +850,10 @@
         <span class="tab-day">ศุกร์-อาทิตย์</span>
         <span class="tab-sub">พักฟื้น</span>
       </div>
+      <div class="day-tab todo-tab" onclick="switchDay('todo')">
+        <span class="tab-day">📝 To-Do</span>
+        <span class="tab-sub">สิ่งที่ต้องทำ</span>
+      </div>
     </div>
   </header>
 
@@ -676,7 +870,7 @@
 
   <!-- Content Container -->
   <main class="container" id="mainContainer">
-    <!-- Exercise cards will be injected here via JavaScript -->
+    <!-- Exercise cards or Todo will be injected here via JavaScript -->
   </main>
 
   <!-- Floating Rest Timer -->
@@ -1177,8 +1371,25 @@
     let currentDay = 'mon';
     let userState = JSON.parse(localStorage.getItem('jetts_workout_state') || '{}');
 
+    // Default TODOs
+    const defaultTodos = [
+      { id: 1, text: "วอร์มร่างกาย ยืดเส้น และหมุนข้อต่อ 5–10 นาที ก่อนเริ่ม", done: false },
+      { id: 2, text: "จิบน้ำสะอาดระหว่างฝึกรวมอย่างน้อย 1 ลิตร", done: false },
+      { id: 3, text: "บันทึกน้ำหนัก (kg) ของแต่ละเซ็ตลงในแอป", done: false },
+      { id: 4, text: "โฟกัสฟอร์มการเล่นและจังหวะบีบกล้ามเนื้อ (Mind-Muscle Connection)", done: false },
+      { id: 5, text: "ซ้อมเสริมท่าหลัก 2 เซ็ตท้ายคาบ (RPE 7-8 ห้ามหมดแรงคาเครื่อง)", done: false },
+      { id: 6, text: "ยืดเหยียดกล้ามเนื้อ (Cool Down) 5 นาทีหลังฝึก", done: false },
+      { id: 7, text: "เติมโปรตีน 25–30g และอาหารฟื้นฟูร่างกายหลังเล่น", done: false }
+    ];
+
+    let userTodos = JSON.parse(localStorage.getItem('jetts_gym_todos')) || defaultTodos;
+
     function saveState() {
       localStorage.setItem('jetts_workout_state', JSON.stringify(userState));
+    }
+
+    function saveTodos() {
+      localStorage.setItem('jetts_gym_todos', JSON.stringify(userTodos));
     }
 
     function switchDay(dayKey) {
@@ -1186,7 +1397,7 @@
       
       // Update Tab Styles
       const tabs = document.querySelectorAll('.day-tab');
-      const dayOrder = ['mon', 'tue', 'wed', 'thu', 'rest'];
+      const dayOrder = ['mon', 'tue', 'wed', 'thu', 'rest', 'todo'];
       tabs.forEach((tab, index) => {
         if (dayOrder[index] === dayKey) {
           tab.classList.add('active');
@@ -1202,6 +1413,14 @@
       const container = document.getElementById('mainContainer');
       const progressWrap = document.getElementById('progressWrap');
 
+      // TODO View
+      if (currentDay === 'todo') {
+        progressWrap.style.display = 'none';
+        renderTodoView(container);
+        return;
+      }
+
+      // Rest Day View
       if (currentDay === 'rest') {
         progressWrap.style.display = 'none';
         container.innerHTML = `
@@ -1225,6 +1444,7 @@
         return;
       }
 
+      // Regular Workout Day
       progressWrap.style.display = 'block';
       const dayData = workoutData[currentDay];
       let html = `
@@ -1393,6 +1613,86 @@
       updateProgress();
     }
 
+    // --- TODO Checklist View ---
+    function renderTodoView(container) {
+      const completedCount = userTodos.filter(t => t.done).length;
+      const totalCount = userTodos.length;
+
+      let itemsHtml = userTodos.map((todo) => `
+        <div class="todo-item ${todo.done ? 'checked' : ''}">
+          <div class="todo-left" onclick="toggleTodoItem(${todo.id})">
+            <div class="todo-check">✓</div>
+            <div class="todo-text">${todo.text}</div>
+          </div>
+          <button class="btn-del-todo" onclick="deleteTodoItem(${todo.id})" title="ลบรายการ">✕</button>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="todo-wrap">
+          <div class="todo-header">
+            <h2>📝 เช็คลิสต์สิ่งที่ต้องทำ</h2>
+            <div class="todo-counter">สำเร็จ: ${completedCount} / ${totalCount}</div>
+          </div>
+
+          <form class="todo-input-form" onsubmit="addTodoItem(event)">
+            <input type="text" id="newTodoInput" class="todo-input" placeholder="+ พิมพ์เพิ่มสิ่งที่ต้องทำของคุณที่นี่..." required>
+            <button type="submit" class="btn-add-todo">เพิ่ม</button>
+          </form>
+
+          <div class="todo-list">
+            ${itemsHtml}
+          </div>
+
+          <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+            <button class="btn-reset" onclick="resetDefaultTodos()">รีเซ็ตกลับเป็นค่าเริ่มต้น</button>
+          </div>
+
+          <div class="pwa-hint">
+            <strong>📲 วิธีติดตั้งใช้งานเหมือนแอปจริง (ทุกอุปกรณ์):</strong>
+            <div style="margin-top: 6px;">
+              • <strong>iPhone (Safari):</strong> กดปุ่มแชร์ ➔ เลือก <em>"เพิ่มไปยังหน้าจอโฮม (Add to Home Screen)"</em><br>
+              • <strong>Android (Chrome):</strong> กดเมนู 3 จุด ➔ เลือก <em>"ติดตั้งแอป (Install App)"</em><br>
+              • <strong>คอมพิวเตอร์ (PC/Mac):</strong> กดไอคอนติดตั้งที่แถบ URL ด้านบน
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleTodoItem(id) {
+      userTodos = userTodos.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      saveTodos();
+      renderContent();
+    }
+
+    function addTodoItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('newTodoInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const newId = Date.now();
+      userTodos.push({ id: newId, text: text, done: false });
+      saveTodos();
+      input.value = '';
+      renderContent();
+    }
+
+    function deleteTodoItem(id) {
+      userTodos = userTodos.filter(t => t.id !== id);
+      saveTodos();
+      renderContent();
+    }
+
+    function resetDefaultTodos() {
+      if (confirm('คุณต้องการรีเซ็ตรายการเช็คลิสต์กลับเป็นค่าเริ่มต้นใช่หรือไม่?')) {
+        userTodos = JSON.parse(JSON.stringify(defaultTodos));
+        saveTodos();
+        renderContent();
+      }
+    }
+
     function toggleSetDone(day, exId, setIdx) {
       if (!userState[day]) userState[day] = {};
       if (!userState[day][exId]) userState[day][exId] = {};
@@ -1426,7 +1726,7 @@
     }
 
     function updateProgress() {
-      if (currentDay === 'rest') return;
+      if (currentDay === 'rest' || currentDay === 'todo') return;
       const dayData = workoutData[currentDay];
       if (!dayData) return;
 
@@ -1560,6 +1860,17 @@
     else if (today === 3) switchDay('wed');
     else if (today === 4) switchDay('thu');
     else switchDay('rest');
+
+    // Register Service Worker for Offline PWA Support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('PWA ServiceWorker registered successfully:', reg.scope);
+        }).catch((err) => {
+          console.log('PWA ServiceWorker registration failed:', err);
+        });
+      });
+    }
   </script>
 </body>
 </html>
