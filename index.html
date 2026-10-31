@@ -369,14 +369,45 @@
     .last-record-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      font-size: 0.74rem;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: #93c5fd;
+      background: rgba(59, 130, 246, 0.16);
+      border: 1px solid rgba(59, 130, 246, 0.38);
+      padding: 3px 10px;
+      border-radius: 8px;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    .last-record-badge strong {
+      color: #60a5fa;
+      font-weight: 700;
+    }
+
+    .prev-hint {
+      font-size: 0.72rem;
       color: #93c5fd;
       background: rgba(59, 130, 246, 0.12);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      padding: 2px 8px;
+      border: 1px dashed rgba(59, 130, 246, 0.35);
       border-radius: 6px;
+      padding: 2px 6px;
       margin-top: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      display: inline-block;
+    }
+
+    .prev-hint:hover {
+      background: rgba(59, 130, 246, 0.25);
+      color: #fff;
+      border-color: #60a5fa;
+    }
+
+    .prev-hint strong {
+      color: #fff;
+      font-weight: 700;
     }
 
     .ex-title {
@@ -1650,22 +1681,18 @@
         const exLast = lastWeights[ex.id] || {};
         let allDone = true;
 
-        // Last weight badge text
-        let lastBadgeText = '';
-        if (exLast.wt_0 || exLast.wt_1) {
-          lastBadgeText = `<div class="last-record-badge">⏱️ ล่าสุด: วอร์ม ${exLast.wt_0 ? exLast.wt_0 + ' กก.' : '-'} | เล่นจริง ${exLast.wt_1 ? exLast.wt_1 + ' กก.' : '-'}</div>`;
-        }
+        // Previous weights (default to 0 if not recorded yet)
+        const prevWarm = (exLast && exLast.wt_0 !== undefined && exLast.wt_0 !== '') ? exLast.wt_0 : 0;
+        const prevWork = (exLast && exLast.wt_1 !== undefined && exLast.wt_1 !== '') ? exLast.wt_1 : 0;
+        const lastBadgeText = `<div class="last-record-badge">⏱️ ครั้งก่อน: วอร์ม <strong>${prevWarm} กก.</strong> | เล่นจริง <strong>${prevWork} กก.</strong></div>`;
 
         let setsRows = ex.sets.map((set, sIdx) => {
           const isDone = !!exState[`set_${sIdx}`];
           if (!isDone) allDone = false;
           const weight = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : '';
-          const prevWt = exLast[`wt_${sIdx}`];
+          const prevWt = (exLast && exLast[`wt_${sIdx}`] !== undefined && exLast[`wt_${sIdx}`] !== '') ? exLast[`wt_${sIdx}`] : 0;
 
-          let prevHintHtml = '';
-          if (prevWt) {
-            prevHintHtml = `<span class="prev-hint" onclick="applyPrevWeight('${currentDay}', '${ex.id}', ${sIdx}, '${prevWt}')" title="กดเพื่อใส่ค่าน้ำหนักนี้">ก่อนหน้า: ${prevWt}กก.</span>`;
-          }
+          const prevHintHtml = `<span class="prev-hint" onclick="applyPrevWeight('${currentDay}', '${ex.id}', ${sIdx}, '${prevWt}')" title="กดเพื่อใส่น้ำหนักครั้งก่อน (${prevWt} กก.)">ครั้งก่อน: <strong>${prevWt} กก.</strong></span>`;
 
           return `
             <tr class="set-row ${isDone ? 'done' : ''}">
@@ -1679,7 +1706,7 @@
               </td>
               <td style="width: 22%;">
                 <div class="input-wrap">
-                  <input type="number" step="0.5" id="inp_${ex.id}_${sIdx}" class="input-field" placeholder="${prevWt || 'กก.'}" value="${weight}"
+                  <input type="number" step="0.5" id="inp_${ex.id}_${sIdx}" class="input-field" placeholder="${prevWt} กก." value="${weight}"
                     oninput="updateWeight('${currentDay}', '${ex.id}', ${sIdx}, this.value)">
                   ${prevHintHtml}
                 </div>
@@ -1724,7 +1751,7 @@
                 <tr>
                   <th>ประเภท</th>
                   <th>เป้าหมาย</th>
-                  <th style="text-align: center;">น้ำหนัก</th>
+                  <th style="text-align: center;">น้ำหนักวันนี้</th>
                   <th style="text-align: center;">สำเร็จ</th>
                 </tr>
               </thead>
@@ -1750,16 +1777,17 @@
           const exLast = lastWeights[bEx.id] || {};
           let allDone = true;
 
+          const prevWarm = (exLast && exLast.wt_0 !== undefined && exLast.wt_0 !== '') ? exLast.wt_0 : 0;
+          const prevTouch = (exLast && exLast.wt_1 !== undefined && exLast.wt_1 !== '') ? exLast.wt_1 : 0;
+          const lastBadgeText = `<div class="last-record-badge">⏱️ ครั้งก่อน: วอร์ม <strong>${prevWarm} กก.</strong> | เล่นเสริม <strong>${prevTouch} กก.</strong></div>`;
+
           let setsRows = bEx.sets.map((set, sIdx) => {
             const isDone = !!exState[`set_${sIdx}`];
             if (!isDone) allDone = false;
             const weight = exState[`wt_${sIdx}`] !== undefined ? exState[`wt_${sIdx}`] : '';
-            const prevWt = exLast[`wt_${sIdx}`];
+            const prevWt = (exLast && exLast[`wt_${sIdx}`] !== undefined && exLast[`wt_${sIdx}`] !== '') ? exLast[`wt_${sIdx}`] : 0;
 
-            let prevHintHtml = '';
-            if (prevWt) {
-              prevHintHtml = `<span class="prev-hint" onclick="applyPrevWeight('${currentDay}', '${bEx.id}', ${sIdx}, '${prevWt}')">ก่อนหน้า: ${prevWt}กก.</span>`;
-            }
+            const prevHintHtml = `<span class="prev-hint" onclick="applyPrevWeight('${currentDay}', '${bEx.id}', ${sIdx}, '${prevWt}')" title="กดเพื่อใส่น้ำหนักครั้งก่อน (${prevWt} กก.)">ครั้งก่อน: <strong>${prevWt} กก.</strong></span>`;
 
             return `
               <tr class="set-row ${isDone ? 'done' : ''}">
@@ -1773,7 +1801,7 @@
                 </td>
                 <td style="width: 22%;">
                   <div class="input-wrap">
-                    <input type="number" step="0.5" id="inp_${bEx.id}_${sIdx}" class="input-field" placeholder="${prevWt || 'กก.'}" value="${weight}"
+                    <input type="number" step="0.5" id="inp_${bEx.id}_${sIdx}" class="input-field" placeholder="${prevWt} กก." value="${weight}"
                       oninput="updateWeight('${currentDay}', '${bEx.id}', ${sIdx}, this.value)">
                     ${prevHintHtml}
                   </div>
@@ -1798,6 +1826,7 @@
                   </div>
                   <div class="ex-title">${bEx.name}</div>
                   <div class="ex-subtitle">${bEx.altName}</div>
+                  ${lastBadgeText}
                 </div>
                 <a href="${bEx.videoUrl}" target="_blank" rel="noopener noreferrer" class="video-btn">
                   ▶ คลิป
@@ -1813,7 +1842,7 @@
                   <tr>
                     <th>ประเภท</th>
                     <th>เป้าหมาย</th>
-                    <th style="text-align: center;">น้ำหนัก</th>
+                    <th style="text-align: center;">น้ำหนักวันนี้</th>
                     <th style="text-align: center;">สำเร็จ</th>
                   </tr>
                 </thead>
