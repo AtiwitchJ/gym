@@ -1,0 +1,478 @@
+export const workoutData = {
+  mon: {
+    title: "วันจันทร์: ขา + ก้น ครบทุกมิติ (Legs & Glutes)",
+    subtitle: "เน้นการสร้างฐานกล้ามเนื้อมวลรวมของร่างกาย",
+    exercises: [
+      {
+        id: "m1",
+        name: "Seated Leg Press Machine",
+        isMain: true,
+        altName: "เครื่องถีบขา หรือ Squat",
+        mainMuscle: "ต้นขาด้านหน้า (Quads), ก้น (Glutes)",
+        subMuscle: "ต้นขาด้านหลัง, น่อง (วางเท้าสูงโดนก้นมากขึ้น)",
+        videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (40-50%)" },
+          { type: "work", reps: "6–8 ครั้ง (ท้าทาย)" },
+          { type: "work", reps: "6–8 ครั้ง (ท้าทาย)" },
+          { type: "work", reps: "6–8 ครั้ง (ท้าทาย)" }
+        ]
+      },
+      {
+        id: "m2",
+        name: "Smith Machine Hip Thrust",
+        isMain: true,
+        altName: "หรือ Bulgarian Split Squat",
+        mainMuscle: "ก้นมัดใหญ่ (Gluteus Maximus เน้น ๆ)",
+        subMuscle: "แกนกลางลำตัว และ ขาด้านหลังช่วยพยุง",
+        videoUrl: "https://www.youtube.com/watch?v=s1gUMRjpgqM",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (40-50%)" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "m3",
+        name: "Leg Extension Machine",
+        isMain: false,
+        altName: "เครื่องเตะขาหน้า",
+        mainMuscle: "ต้นขาด้านหน้า 4 มัดล้วน (Quadriceps)",
+        subMuscle: "กล้ามเนื้อพยุงรอบหัวเข่า",
+        videoUrl: "https://www.youtube.com/watch?v=dpn7z7nYRcQ",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "m4",
+        name: "Seated / Prone Leg Curl Machine",
+        isMain: false,
+        altName: "เครื่องพับขาหลัง หรือเลือกเล่น RDL แทน",
+        mainMuscle: "ต้นขาด้านหลังล้วน (Hamstrings)",
+        subMuscle: "น่องส่วนบน",
+        videoUrl: "https://www.youtube.com/watch?v=WzS7KK4eI0g",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "m5",
+        name: "Hip Abduction Machine & Calf Raise",
+        isMain: false,
+        altName: "เครื่องกางขา / เขย่งน่องบน Leg Press",
+        mainMuscle: "ก้นด้านข้าง/สะโพก (Gluteus Medius) & น่อง (Calves)",
+        subMuscle: "Soleus & Gastrocnemius",
+        videoUrl: "https://www.youtube.com/watch?v=dfzTjPMGVYw",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" },
+          { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" },
+          { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" }
+        ]
+      }
+    ],
+    bonusExercises: [
+      {
+        id: "b_m_back",
+        name: "Lat Pulldown Machine",
+        part: "หลัง (Back)",
+        altName: "ดึงปีกกว้างทรง V-Shape",
+        tip: "วันหลังคือวันพุธ (พัก 48 ชม. ฟื้นตัวทันแน่นอน)",
+        videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (วอร์มปีก)" },
+          { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8 เหลือแรง 2 ครั้ง)" }
+        ]
+      },
+      {
+        id: "b_m_shoulder",
+        name: "Shoulder Press Machine",
+        part: "ไหล่ (Shoulders)",
+        altName: "ดันไหล่รวมมิติรอบด้าน",
+        tip: "วันไหล่คือวันพฤหัสบดี (มีเวลาพักยาว)",
+        videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (วอร์มข้อต่อ)" },
+          { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
+        ]
+      },
+      {
+        id: "b_m_chest",
+        name: "Chest Press Machine",
+        part: "อก (Chest)",
+        altName: "เครื่องผลักอกกลาง",
+        tip: "พรุ่งนี้ (อังคาร) เป็นวันอกเต็มระบบ เล่นเบา ๆ แค่โฟกัสฟอร์ม",
+        videoUrl: "https://www.youtube.com/watch?v=F9k2K2aDi38",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักปานกลาง)" }
+        ]
+      }
+    ]
+  },
+  tue: {
+    title: "วันอังคาร: อกรวมทุกมุม + หลังแขน (Chest & Triceps)",
+    subtitle: "เน้นการระเบิดพลังมวลกล้ามเนื้อช่วงบนและการดัน",
+    exercises: [
+      {
+        id: "t1",
+        name: "Chest Press Machine",
+        isMain: true,
+        altName: "เครื่องผลักอก หรือ Flat Bench Press",
+        mainMuscle: "อกส่วนกลาง (Mid Chest)",
+        subMuscle: "ไหล่หน้า (Front Delts), หลังแขน (Triceps)",
+        videoUrl: "https://www.youtube.com/watch?v=F9k2K2aDi38",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "t2",
+        name: "Incline Dumbbell / Smith Press",
+        isMain: true,
+        altName: "ดันอกเบาะเอียง 30–45 องศา",
+        mainMuscle: "อกส่วนบน (Upper Chest / แนวไหปลาร้า)",
+        subMuscle: "ไหล่หน้า, หลังแขน",
+        videoUrl: "https://www.youtube.com/watch?v=0bnc96eUvG0",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "t3",
+        name: "Pec Fly Machine",
+        isMain: false,
+        altName: "เครื่องหนีบอก Matrix หรือ Cable Fly",
+        mainMuscle: "อกด้านใน/ร่องอก และขยายฐานอก (Inner & Mid Chest)",
+        subMuscle: "ไหล่ด้านหน้า",
+        videoUrl: "https://www.youtube.com/watch?v=rTATwLKP548",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "t4",
+        name: "Assisted Dip Machine",
+        isMain: false,
+        altName: "เครื่องดิปมีแท่นรับเข่า หรือ วิดพื้น",
+        mainMuscle: "อกส่วนล่าง (Lower Chest)",
+        subMuscle: "หลังแขน (Triceps), ไหล่ด้านหน้า",
+        videoUrl: "https://www.youtube.com/watch?v=6oaLJs4dAwA",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "t5",
+        name: "Cable Triceps Pushdown",
+        isMain: false,
+        altName: "กดเชือกหรือบาร์ที่เสาเคเบิล",
+        mainMuscle: "แขนด้านหลังทั้ง 3 หัว (Triceps เน้น ๆ)",
+        subMuscle: "ท่อนแขนส่วนปลาย (Forearms)",
+        videoUrl: "https://www.youtube.com/watch?v=oz0gmMXpMAc",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      }
+    ],
+    bonusExercises: [
+      {
+        id: "b_t_leg",
+        name: "Seated Leg Press Machine",
+        part: "ขา/ก้น (Legs)",
+        altName: "ถีบขากระตุ้นต้นขาหน้าและก้น",
+        tip: "ปั๊มเลือดคลายความตึงจากวันจันทร์ได้ดีมาก",
+        videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
+        ]
+      },
+      {
+        id: "b_t_shoulder",
+        name: "Shoulder Press Machine",
+        part: "ไหล่ (Shoulders)",
+        altName: "ดันไหล่เหนือศีรษะ",
+        tip: "แตะเบา ๆ เพราะไหล่หน้าเพิ่งช่วยดันอกมาหมาด ๆ",
+        videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "b_t_back",
+        name: "Lat Pulldown หรือ Seated Row",
+        part: "หลัง (Back)",
+        altName: "เครื่องดึงปีกหรือดึงหลัง",
+        tip: "พรุ่งนี้ (พุธ) เป็นวันหลังเต็มระบบ เล่นเบา ๆ แค่ยืดเส้น",
+        videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักเบา)" }
+        ]
+      }
+    ]
+  },
+  wed: {
+    title: "วันพุธ: หลัง + หน้าแขน (Back & Biceps)",
+    subtitle: "สร้างปีก V-Shape และความหนาของแผ่นหลัง",
+    exercises: [
+      {
+        id: "w1",
+        name: "Seated Row Machine",
+        isMain: true,
+        altName: "เครื่องดึงหลังพิงเบาะ หรือ Barbell Row",
+        mainMuscle: "หลังส่วนกลางเพิ่มความหนา (Mid Back / Rhomboids)",
+        subMuscle: "ปีก (Lats), ไหล่หลัง, หน้าแขน (Biceps)",
+        videoUrl: "https://www.youtube.com/watch?v=0U8VMBXPQco",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "w2",
+        name: "Lat Pulldown Machine",
+        isMain: true,
+        altName: "ดึงบาร์ลงข้างหน้า หรือ Assisted Chin-up",
+        mainMuscle: "หลังส่วนกว้าง/ปีก (Latissimus Dorsi - V-Shape)",
+        subMuscle: "หน้าแขน (Biceps), สะบักและหลังบน",
+        videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "w3",
+        name: "Seated Cable Row",
+        isMain: false,
+        altName: "เคเบิลดึงหลังท่านั่งจับแคบ (V-Bar)",
+        mainMuscle: "หลังส่วนกลางและปีกส่วนล่าง (Mid Back & Lower Lats)",
+        subMuscle: "หน้าแขน, หลังล่างช่วยพยุงตัว",
+        videoUrl: "https://www.youtube.com/watch?v=5Y32un_XBts",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "w4",
+        name: "Dumbbell / Cable Biceps Curl",
+        isMain: false,
+        altName: "พับแขนหงายมือ โฟกัสลูกหนู",
+        mainMuscle: "แขนด้านหน้ามัดหลัก (Biceps Brachii)",
+        subMuscle: "ท่อนแขน (Forearms)",
+        videoUrl: "https://www.youtube.com/watch?v=TFUznuXdPVo",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "w5",
+        name: "Hammer Curl",
+        isMain: false,
+        altName: "พับแขนจับดัมเบลแนวตั้ง หรือเชือกเคเบิล",
+        mainMuscle: "กล้ามเนื้อแขนมัดลึกดันแขนหนา (Brachialis) + ท่อนแขน",
+        subMuscle: "หน้าแขน (Biceps)",
+        videoUrl: "https://www.youtube.com/watch?v=YQAo_78-ruc",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      }
+    ],
+    bonusExercises: [
+      {
+        id: "b_w_chest",
+        name: "Chest Press Machine",
+        part: "อก (Chest)",
+        altName: "เครื่องผลักอก",
+        tip: "ปั๊มเลือดเข้าอก (Feeder Set) ที่เพิ่งเล่นเมื่อวาน ช่วยฟื้นตัวเร็ว",
+        videoUrl: "https://www.youtube.com/watch?v=F9k2K2aDi38",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
+        ]
+      },
+      {
+        id: "b_w_leg",
+        name: "Seated Leg Press Machine",
+        part: "ขา/ก้น (Legs)",
+        altName: "ถีบขาเพิ่มมวลรวม",
+        tip: "กระตุ้นขามวลรวมได้ดี",
+        videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "b_w_shoulder",
+        name: "Shoulder Press Machine",
+        part: "ไหล่ (Shoulders)",
+        altName: "ดันไหล่",
+        tip: "พรุ่งนี้ (พฤหัส) เป็นวันไหล่เต็มระบบ เล่นเบา ๆ แค่วอร์มข้อต่อ",
+        videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักเบา)" }
+        ]
+      }
+    ]
+  },
+  thu: {
+    title: "วันพฤหัสบดี: ไหล่ครบทุกมุม + หน้าท้อง (Shoulders & Abs)",
+    subtitle: "สร้างมิติไหล่ 3D รอบทิศทาง และแกนกลางลำตัว",
+    exercises: [
+      {
+        id: "th1",
+        name: "Shoulder Press Machine",
+        isMain: true,
+        altName: "เครื่องดันไหล่ หรือ ดัมเบล",
+        mainMuscle: "หัวไหล่ด้านหน้าและด้านข้าง (Front & Side Delts)",
+        subMuscle: "แขนด้านหลัง (Triceps), บ่าส่วนบน",
+        videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "th2",
+        name: "Dumbbell / Cable Lateral Raise",
+        isMain: false,
+        altName: "กางแขนยกด้านข้าง (สร้างมิติไหล่กว้าง 3D)",
+        mainMuscle: "หัวไหล่ด้านข้าง (Side Delts)",
+        subMuscle: "บ่า (Traps หากยกสูงเกินระดับไหล่)",
+        videoUrl: "https://www.youtube.com/watch?v=puqaiVqacvQ",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง (หรือ 10–12)" },
+          { type: "work", reps: "6–8 ครั้ง (หรือ 10–12)" },
+          { type: "work", reps: "6–8 ครั้ง (หรือ 10–12)" }
+        ]
+      },
+      {
+        id: "th3",
+        name: "Rear Delt Machine / Face Pull",
+        isMain: false,
+        altName: "หันหน้าเข้าเครื่อง Pec Fly กวาดแขนไปหลัง / เชือกดึงหน้าผาก",
+        mainMuscle: "หัวไหล่ด้านหลัง (Rear Delts) & สะบัก",
+        subMuscle: "หลังส่วนบน (ช่วยแก้ปัญหาไหล่ห่อ)",
+        videoUrl: "https://www.youtube.com/watch?v=woIoS0MbNYg",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "th4",
+        name: "Dumbbell / Cable Shrug",
+        isMain: false,
+        altName: "ยักไหล่ถือดัมเบล หรือ บาร์เบล",
+        mainMuscle: "กล้ามเนื้อบ่า/สะพานคอ (Upper Trapezius)",
+        subMuscle: "กำลังมือและท่อนแขน (Grip & Forearms)",
+        videoUrl: "https://www.youtube.com/watch?v=wTSt22ay31w",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "th5",
+        name: "Abdominal Machine / Plank",
+        isMain: false,
+        altName: "เครื่องเล่นท้อง หรือ ทำ Plank",
+        mainMuscle: "หน้าท้องส่วนหน้า (Six Pack) & แกนกลางลำตัว (Core)",
+        subMuscle: "หน้าท้องด้านข้าง (Obliques)",
+        videoUrl: "https://www.youtube.com/watch?v=H1RkFIBeolk",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (หรือ 30s)" },
+          { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" },
+          { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" },
+          { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" }
+        ]
+      }
+    ],
+    bonusExercises: [
+      {
+        id: "b_th_chest",
+        name: "Chest Press Machine",
+        part: "อก (Chest)",
+        altName: "เครื่องผลักอกกลาง",
+        tip: "พรุ่งนี้วันพัก 3 วันติด เล่นน้ำหนักท้าทายได้เต็มที่",
+        videoUrl: "https://www.youtube.com/watch?v=F9k2K2aDi38",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง (ท้าทาย)" }
+        ]
+      },
+      {
+        id: "b_th_back",
+        name: "Lat Pulldown Machine",
+        part: "หลัง (Back)",
+        altName: "ดึงปีก V-Shape",
+        tip: "กระตุ้นปีกก่อนเข้าช่วงวันพักผ่อน",
+        videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "b_th_leg",
+        name: "Seated Leg Press Machine",
+        part: "ขา/ก้น (Legs)",
+        altName: "ถีบขา",
+        tip: "ปั๊มเลือดเข้ากล้ามเนื้อขาและก้นมวลรวม",
+        videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "touchup", reps: "6–8 ครั้ง" }
+        ]
+      }
+    ]
+  }
+};
