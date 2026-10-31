@@ -1,102 +1,102 @@
-# 🏋️ Jetts Fitness 4-Day Workout Tracker & Plan
+# 🏋️ Jetts Fitness — Precision Athletic Tracker & Plan
 
 โปรแกรมออกกำลังกาย 4 วัน สำหรับเล่นที่ **Jetts Fitness** เน้นการสร้างกล้ามเนื้อ (Hypertrophy) และความแข็งแรง ด้วยรูปแบบเซ็ต:
 - **ท่าประจำวัน 5 ท่า:** 4 เซ็ตต่อท่า = 1 วอร์ม (15 ครั้ง) + 3 เล่นจริง (6–8 ครั้ง เน้นน้ำหนักท้าทาย)
-- **⚡ ซ้อมเสริมท่าหลักส่วนที่เหลือท้ายคาบ (Bonus Touch-Up):** 2 เซ็ตต่อส่วน = 1 วอร์ม (15 ครั้ง) + 1 เล่นจริง (6–8 ครั้ง RPE 7–8 ห้ามหมดแรง)
+- **ซ้อมเสริมท่าหลักส่วนที่เหลือท้ายคาบ (Bonus Touch-Up):** 2 เซ็ตต่อส่วน = 1 วอร์ม (15 ครั้ง) + 1 เล่นจริง (6–8 ครั้ง RPE 7–8 ห้ามหมดแรง)
 
 ---
 
 ## 🔒 สถานะ Repository: Private (Self-Hosted via Tailscale VPN)
 
-Repository นี้เป็น **Private** และออกแบบมาเพื่อ **Self-Host ใช้งานส่วนตัวผ่าน Tailscale VPN** ปลอดภัย 100% ไม่ต้องพึ่งพา Cloud ภายนอก
+Repository นี้เป็น **Private** และออกแบบมาเพื่อ **Self-Host ใช้งานส่วนตัวผ่าน Tailscale VPN** ซิงค์ข้อมูลระหว่างมือถือในยิมกับคอมพิวเตอร์ที่บ้านผ่านฐานข้อมูล **SQLite (`gym.db`)** ปลอดภัย 100%
 
 ---
 
-## 🌐 วิธีเปิดใช้งาน Web App ผ่าน Tailscale VPN บนมือถือ
+## 🌟 จุดเด่นของเวอร์ชันใหม่ (Vue 3 + SQLite + Tailwind)
 
-เมื่อเปิด VPN Tailscale บนมือถือและเครื่องโฮสต์ (Mac / Home Server) คุณสามารถเข้าใช้งานได้ด้วยวิธีต่อไปนี้:
+1. **🎨 Precision Athletic UI (ไม่ใช่หน้าตาเทมเพลต AI):**
+   - ธีม Titanium Slate + Signal Crimson ได้แรงบันดาลใจจากอุปกรณ์และแอปฟิตเนสระดับโปร (Hevy, Whoop, Eleiko)
+   - ตัดการใช้อีโมจิพร่ำเพรื่อทิ้งทั้งหมด แทนที่ด้วย SVG ไอคอนคมชัด
+   - แถวเซ็ตแบบ Tactile แตะง่ายด้วยนิ้วโป้งตอนเหงื่อออก พร้อมปุ่มลัด `[+2.5]`
+   - ตัวเลขแบบ **Tabular Numerals (`tabular-nums`)** สไตล์นาฬิกาดิจิทัล ตัวเลขไม่สั่น/ไม่เลื่อนตอนนับเวลา
+2. **🗄️ SQLite Server Database (`gym.db`):**
+   - บันทึกข้อมูลลงฐานข้อมูล SQLite กลางบน Docker หรือ Mac
+   - ซิงค์ประวัติน้ำหนักและ Draft การกรอกระหว่างมือถือและคอมพิวเตอร์ผ่าน Tailscale VPN อัตโนมัติ
+   - ทำงานแบบ Offline-First: เน็ตหลุดในจุดอับสัญญาณของยิมก็ยังกรอกและติ๊กได้ตามปกติ
+3. **📊 Dual Export (Excel & SQLite):**
+   - 📗 **Export Excel (.xlsx):** ดาวน์โหลดตารางสถิติแยกตามท่า/เซ็ต/น้ำหนัก/Reps สวยงาม
+   - 🗄️ **ดาวน์โหลด .db (SQLite):** โหลดไฟล์ฐานข้อมูลจริงออกมาสำรอง (Backup) ได้ตลอดเวลา
+4. **⏱️ Background-Safe Rest Timer:**
+   - ระบบนับถอยหลังด้วย Timestamp (`Date.now()`) พร้อมตรวจจับ `visibilitychange`
+   - แม้หน้าจอดับ ล็อกเครื่อง หรือสลับไปฟังเพลง Spotify เวลาจะไม่กระตุก/ไม่ค้าง และคำนวณวินาทีที่เหลือจริงเมื่อเปิดจอกลับมา พร้อมเสียง Beep และสั่นเตือน
 
-### วิธีที่ 1: ใช้ `tailscale serve` (แนะนำที่สุด - ได้ HTTPS รองรับ PWA & Offline)
-Tailscale มีระบบออกใบรับรอง HTTPS อัตโนมัติ ทำให้ iOS/Android ยอมรับการติดตั้ง PWA (Add to Home Screen) และ Service Worker ได้อย่างสมบูรณ์แบบ:
+---
 
+## 🌐 วิธีเปิดใช้งาน Web App ผ่าน Tailscale VPN
+
+### วิธีที่ 1: รันผ่าน Docker Compose (แนะนำ)
 ```bash
-# 1. สั่งรัน Tailscale Serve ชี้มาที่พอร์ต 8080 ในแบบ background
-/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg 8080
+./serve.sh docker
+# หรือ
+docker compose up -d --build
 ```
-ตรวจสอบโดเมน HTTPS ส่วนตัวของคุณได้ด้วย:
+- เซิร์ฟเวอร์จะรันที่พอร์ต `8080` พร้อมสร้างฐานข้อมูลไว้ที่ `./data/gym.db`
+- เข้าใช้งานผ่านมือถือในวง Tailscale: `http://<Tailscale-IP-ของเครื่อง>:8080`
+
+### วิธีที่ 2: รัน Tailscale Serve (ได้ HTTPS + รองรับ PWA ติดตั้งลงหน้าจอมือถือ)
+```bash
+./serve.sh tailscale
+```
+ตรวจสอบโดเมน HTTPS ส่วนตัวของคุณด้วย:
 ```bash
 /Applications/Tailscale.app/Contents/MacOS/Tailscale serve status
 ```
-จะได้ URL ประจำเครื่อง เช่น:  
-👉 `https://<ชื่อเครื่อง>.<tailnet-name>.ts.net`  
-*(เปิดลิงก์นี้บนมือถือที่ต่อ Tailscale VPN อยู่เพื่อใช้งานและ Add to Home Screen ได้ทันที)*
+👉 เข้าใช้งานผ่าน `https://<ชื่อเครื่อง>.<tailnet-name>.ts.net` และกด **"Add to Home Screen"** บนมือถือได้ทันที
 
----
-
-### วิธีที่ 2: รันผ่าน Docker Compose (Nginx)
-หากต้องการให้เว็บเซิร์ฟเวอร์รันอยู่เบื้องหลังตลอดเวลา:
-
+### วิธีที่ 3: รันแบบ Native (ไม่ต้องใช้ Docker)
 ```bash
-docker compose up -d
-```
-เข้าใช้งานผ่านเบราว์เซอร์มือถือด้วย Tailscale IP ของเครื่อง:
-👉 `http://<Tailscale-IP-ของเครื่อง>:8080`
-
-*(หากต้องการหยุด container ให้พิมพ์ `docker compose down`)*
-
----
-
-### วิธีที่ 3: สคริปต์รันเร็ว `serve.sh`
-```bash
-./serve.sh docker     # รันด้วย Docker Compose
-./serve.sh tailscale  # รัน Python + Tailscale Serve
-./serve.sh            # รัน Python HTTP Server ธรรมดา
+./serve.sh native
+# หรือ
+npm run build && node server/server.js
 ```
 
 ---
 
 ## 🎯 สรุป "ท่าหลัก" ประจำวัน (Compound Lifts)
 
-ท่าหลักคือท่ามวลรวมที่ใช้หลายข้อต่อและกล้ามเนื้อขนาดใหญ่ ต้องใช้พลังงานมากที่สุด **ห้ามข้าม** ควรเล่นตอนเริ่มซ้อม:
-
 1. **วันจันทร์ (ขา + ก้น):**
-   - ⭐ **ท่า 1:** Seated Leg Press Machine `(ท่าหลัก - ต้นขาและสะโพก)`
-   - ⭐ **ท่า 2:** Smith Machine Hip Thrust `(ท่าหลัก - ก้นมัดใหญ่)`
+   - `[MAIN]` Seated Leg Press Machine (ต้นขาและสะโพก)
+   - `[MAIN]` Smith Machine Hip Thrust (ก้นมัดใหญ่)
 2. **วันอังคาร (อก + หลังแขน):**
-   - ⭐ **ท่า 1:** Chest Press Machine `(ท่าหลัก - อกกลาง)`
-   - ⭐ **ท่า 2:** Incline Dumbbell / Smith Press `(ท่าหลัก - อกบน)`
+   - `[MAIN]` Chest Press Machine (อกกลาง)
+   - `[MAIN]` Incline Dumbbell / Smith Press (อกบน)
 3. **วันพุธ (หลัง + หน้าแขน):**
-   - ⭐ **ท่า 1:** Seated Row Machine `(ท่าหลัก - ความหนาหลัง)`
-   - ⭐ **ท่า 2:** Lat Pulldown Machine `(ท่าหลัก - ความกว้างปีก V-Shape)`
-4. **วันพฤหัสบดี (ไหล่ + แกนกลางลำตัว):**
-   - ⭐ **ท่า 1:** Shoulder Press Machine `(ท่าหลัก - หัวไหล่รวม)`
-
-*(ท่าลำดับที่ 3, 4, 5 ในแต่ละวัน เป็น **🔹 ท่าเสริม (Accessory / Isolation)** สำหรับเก็บรายละเอียดเฉพาะจุด)*
+   - `[MAIN]` Seated Row Machine (ความหนาหลัง)
+   - `[MAIN]` Lat Pulldown Machine (ความกว้างปีก V-Shape)
+4. **วันพฤหัสบดี (ไหล่ + หน้าท้อง):**
+   - `[MAIN]` Shoulder Press Machine (หัวไหล่รวม)
 
 ---
 
-## ⚡ ระบบซ้อมเสริมท้ายคาบ (Bonus Touch-Up: 2 เซ็ต)
+## 📂 โครงสร้างโปรเจกต์ใหม่
 
-ช่วยกระตุ้นการสร้างกล้ามเนื้อและส่งสัญญาณประสาทให้ถี่ขึ้น (High Frequency) โดยเลือกแตะท่าหลักของส่วนอื่นเบา ๆ 2 เซ็ต พร้อมคำแนะนำป้องกันการชนกับตารางวันถัดไป
-
----
-
-## 📂 โครงสร้างไฟล์ในโปรเจกต์
-
-- **[workout-plan.md](workout-plan.md)**: สรุปตารางออกกำลังกายฉบับสมบูรณ์ มีระบุคอลัมน์ประเภท **⭐ (ท่าหลัก)**, **🔹 (ท่าเสริม)** และตาราง **⚡ ซ้อมเสริม 2 เซ็ต** ท้ายแต่ละวัน
-- **[index.html](index.html)**: เว็บแอปพลิเคชันสำหรับเปิดใช้งานบนมือถือหรือเบราว์เซอร์ขณะเล่นที่ยิม มีป้าย Badge กำกับท่าหลัก-ท่าเสริม, การ์ดซ้อมเสริมสีส้มทอง พร้อมฟีเจอร์เด่น:
-  - 🧠 **ระบบจำน้ำหนักล่าสุด (Last Weights Memory):** แสดงสถิติน้ำหนักที่เคยยกครั้งล่าสุด (ทั้งเซ็ตวอร์มและเซ็ตเล่นจริง) อัตโนมัติทุกท่า ไม่ต้องกลัวลืม พร้อมปุ่มกดเติมน้ำหนักเดิมในคลิกเดียว
-  - 💾 **บันทึกประวัติการฝึก (Workout History):** บันทึกเซสชันการฝึกเก็บไว้ในเครื่องเพื่อดูย้อนหลัง
-  - 📥 **Export to Excel (.xlsx):** ส่งออกสถิติและประวัติการฝึกทั้งหมดเป็นไฟล์ Excel (.xlsx) มีการจัดตารางเรียบร้อย สำหรับดูพัฒนาการหรือสำรองข้อมูล
-  - ⏱️ **Rest Timer ในตัว:** ตัวจับเวลาพักเซ็ต (60s / 90s / 120s) พร้อมเสียงเตือน Beep และระบบสั่น
-  - 📝 **Interactive To-Do Checklist:** บันทึกเช็คลิสต์สิ่งที่ต้องทำประจำวันในยิม
-  - 🎬 **Quick YouTube Links:** ปุ่มเปิดดูคลิปสอนฟอร์มการเล่นของทุกท่า
-- **[xlsx.full.min.js](xlsx.full.min.js)**: ไลบรารีสำหรับสร้างไฟล์ Excel แบบออฟไลน์ 100% ในยิม ไม่ต้องใช้อินเทอร์เน็ต
-
----
-
-## 🚀 วิธีเปิดใช้งาน Tracker ในเบราว์เซอร์
-
-```bash
-open index.html
+```text
+gym/
+├── server/
+│   ├── db.js                 # SQLite schema & repository
+│   ├── server.js             # Express REST API + Static dist server
+│   └── test-api.js           # Automated backend test suite
+├── src/
+│   ├── components/           # HeaderBar, DayTabs, ExerciseCard, BonusCard, RestTimer, HistoryView, TodoView, RestDayView
+│   ├── composables/          # useWorkoutStore, useTimer, useExcelExport
+│   ├── data/                 # workouts.js, defaultTodos.js
+│   ├── App.vue               # Main layout
+│   ├── main.js
+│   └── style.css             # Tailwind CSS + Precision athletic theme
+├── public/                   # PWA icons & manifest.json
+├── data/
+│   └── gym.db                # SQLite database (persisted via Docker volume)
+├── Dockerfile                # Multi-stage build (Vite build -> Node.js + SQLite)
+├── docker-compose.yml        # Container orchestration
+└── serve.sh                  # Launch script (docker / tailscale / native / dev)
 ```
