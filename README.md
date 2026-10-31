@@ -12,24 +12,46 @@ Repository นี้ได้รับการตั้งค่าเป็น
 
 ---
 
-## 🌐 วิธีเปิดใช้งาน Web App บนมือถือ (เมื่อ Repo เป็น Private)
+## 🏠 วิธี Self-Host เอง และเข้าใช้งานผ่าน VPN (WireGuard / Tailscale / OpenVPN)
 
-เนื่องจาก GitHub Pages แบบฟรีไม่รองรับ Private Repository คุณสามารถเปิดใช้งานได้ 2 วิธีง่าย ๆ:
+ระบบนี้รองรับการรันแบบ Self-Host ได้อย่างสมบูรณ์แบบ ทั้งบน **Home Server, NAS, Raspberry Pi หรือเครื่อง Mac/Linux** โดยเปิดพอร์ตให้เข้าถึงได้เฉพาะในวง VPN เพื่อความปลอดภัยและเป็นส่วนตัว 100%
 
-### 1. นำขึ้น Vercel / Cloudflare Pages ฟรี (แนะนำที่สุด - ได้ลิงก์เข้าจากมือถือตลอดชีพ)
-1. เข้าไปที่ **[Vercel](https://vercel.com)** หรือ **[Cloudflare Pages](https://pages.cloudflare.com)**
-2. กด **Add New Project** ➔ เลือกเชื่อมต่อกับ GitHub Account `AtiwitchJ`
-3. เลือก Repository **`gym`** (ที่เป็น Private) แล้วกด **Deploy** ได้ทันทีใน 10 วินาที
-4. จะได้ URL ฟรี (เช่น `https://gym-xxx.vercel.app`) สามารถเปิดบนมือถือและ Add to Home Screen ได้เหมือนเดิมทุกประการ!
+### วิธีที่ 1: รันด้วย Docker / Docker Compose (แนะนำ)
+มีไฟล์ `Dockerfile` และ `docker-compose.yml` (ใช้ Nginx Alpine น้ำหนักเบา ~20MB) พร้อมใช้งานทันที:
 
-### 2. เปิดใช้งานบนเครื่องคอมพิวเตอร์ / เครือข่าย Local
 ```bash
-open index.html
+# สั่งรันขึ้นมาใน Background บนพอร์ต 8080
+docker compose up -d --build
 ```
-หรือรัน Local Server:
+*(หากต้องการเปลี่ยนพอร์ต สามารถแก้ไขใน `docker-compose.yml` ได้ เช่น `"3000:80"`)*
+
+---
+
+### วิธีที่ 2: รันด้วย Script สำเร็จรูป หรือ Python (ไม่ต้องติดตั้งอะไรเพิ่ม)
 ```bash
-python3 -m http.server 8080
+./start.sh
+# หรือระบุพอร์ตที่ต้องการ
+PORT=8080 ./start.sh
 ```
+
+---
+
+### 📲 การเชื่อมต่อจากมือถือขณะอยู่ที่ Jetts Fitness ผ่าน VPN
+
+1. **เปิด VPN บนมือถือ** (เช่น แอป WireGuard, Tailscale หรือ OpenVPN)
+2. **เปิดเบราว์เซอร์บนมือถือ** แล้วพิมพ์ URL:
+   ```text
+   http://<VPN-IP-ของเครื่อง-Host>:8080
+   ```
+   *ตัวอย่าง:*
+   - ถ้าใช้ **Tailscale:** `http://100.x.y.z:8080` หรือชื่อเครื่อง `http://mac-mini:8080`
+   - ถ้าใช้ **WireGuard:** `http://10.0.0.x:8080`
+3. **กด "Add to Home Screen"** บนมือถือเพื่อใช้งานเหมือนแอปจริงเต็มจอได้ทันที
+
+> [!TIP]
+> **เคล็ดลับสำหรับผู้ใช้ Tailscale:**  
+> หากต้องการเปิดแบบ HTTPS อัตโนมัติ (เพื่อเปิดฟีเจอร์ PWA เต็มรูปแบบบน Android):  
+> สามารถรันคำสั่ง `tailscale serve --bg 8080` บนเครื่อง Host ได้ทันที จะได้โดเมน HTTPS ส่วนตัวในวง VPN ฟรี!
 
 ---
 
