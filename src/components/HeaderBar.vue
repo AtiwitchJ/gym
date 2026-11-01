@@ -29,6 +29,22 @@
           {{ saveStatus === 'saving' ? 'SYNCING...' : 'SAVED' }}
         </span>
 
+        <!-- Image Preview Toggle -->
+        <button
+          v-if="isWorkoutDay"
+          @click="toggleExerciseImages"
+          class="text-[11px] font-mono font-bold px-2 py-1 rounded-full border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none"
+          :class="showExerciseImages ? 'bg-flame-bg text-flame border-flame' : 'bg-surface text-ink-muted opacity-80'"
+          :title="showExerciseImages ? 'คลิกเพื่อซ่อนรูป (โหมดกระชับ)' : 'คลิกเพื่อแสดงภาพตัวอย่าง'"
+        >
+          <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+          <span class="hidden xs:inline">{{ showExerciseImages ? 'รูป' : 'ซ่อน' }}</span>
+        </button>
+
         <!-- Reset Button -->
         <button
           v-if="isWorkoutDay"
@@ -47,7 +63,13 @@
 import { computed } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 
-const { currentDay, saveStatus, resetDayData } = useWorkoutStore();
+const {
+  currentDay,
+  saveStatus,
+  resetDayData,
+  showExerciseImages,
+  toggleExerciseImages
+} = useWorkoutStore();
 
 const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu'].includes(currentDay.value));
 

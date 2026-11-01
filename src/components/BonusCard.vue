@@ -31,18 +31,26 @@
           </div>
         </div>
 
-        <a
-          v-if="bonus.videoUrl"
-          :href="bonus.videoUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center gap-1.5 text-[11px] font-mono font-bold text-ink bg-white hover:bg-flame hover:text-white px-2.5 py-1.5 rounded-lg border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
+        <!-- Inline Video Toggle Button -->
+        <button
+          v-if="videoId"
+          type="button"
+          @click="toggleVideo"
+          class="flex items-center gap-1.5 text-[11px] font-mono font-bold px-2.5 py-1.5 rounded-lg border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
+          :class="isPlayingVideo
+            ? 'bg-flame text-white'
+            : 'bg-white hover:bg-paper-subtle text-ink'"
+          :title="isPlayingVideo ? 'ซ่อนคลิป' : 'เปิดดูคลิปในหน้านี้'"
         >
-          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <svg v-if="!isPlayingVideo" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z" />
           </svg>
-          <span>VIDEO</span>
-        </a>
+          <svg v-else class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+          <span>{{ isPlayingVideo ? 'ปิดคลิป' : 'ดูคลิป' }}</span>
+        </button>
       </div>
 
       <div class="mt-2.5 text-xs text-ink bg-white p-2.5 rounded-lg border border-plate/20 shadow-sm font-body">
@@ -55,6 +63,53 @@
         <span>วอร์ม <strong class="tabular-nums font-bold text-flame">{{ prevWarm }}</strong> กก.</span>
         <span class="text-plate/30">|</span>
         <span>เล่นเสริม <strong class="tabular-nums font-bold text-flame">{{ prevTouch }}</strong> กก.</span>
+      </div>
+    </div>
+
+    <!-- Visual Demonstration / Inline Video Player -->
+    <div v-if="showExerciseImages && videoId" class="p-3 bg-paper-subtle/50 border-b-2 border-plate">
+      <!-- 1. Inline Video Player -->
+      <div v-if="isPlayingVideo" class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[3px_3px_0px_#1e2220] bg-black">
+        <iframe
+          :src="embedUrl"
+          class="w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+        <button
+          @click="isPlayingVideo = false"
+          class="absolute top-2 right-2 bg-plate/80 hover:bg-plate text-white font-mono text-[11px] font-bold px-2.5 py-1 rounded-md border border-white/30 backdrop-blur-sm shadow-md transition-all flex items-center gap-1 select-none"
+        >
+          <span>✕ ปิดคลิป</span>
+        </button>
+      </div>
+
+      <!-- 2. Preview Thumbnail Image with Quick Play Trigger -->
+      <div
+        v-else
+        @click="isPlayingVideo = true"
+        class="relative w-full aspect-[21/9] sm:aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[3px_3px_0px_#1e2220] group cursor-pointer bg-plate"
+        title="แตะเพื่อเล่นคลิปตัวอย่างในหน้านี้ทันที"
+      >
+        <img
+          :src="thumbnailUrl"
+          :alt="bonus.name"
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100"
+          loading="lazy"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-plate/85 via-plate/25 to-transparent flex items-end justify-between p-3 select-none">
+          <div class="flex items-center gap-1.5 text-[11px] font-mono text-white font-bold bg-plate/70 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/20">
+            <svg class="w-3.5 h-3.5 fill-flame" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <span>แตะดูคลิปสาธิตในแอป</span>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-flame text-white border-2 border-plate flex items-center justify-center shadow-[2px_2px_0px_#1e2220] group-hover:scale-110 transition-transform">
+            <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -119,17 +174,36 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useTimer } from '../composables/useTimer';
+import { getYoutubeId } from '../utils/youtube';
 
 const props = defineProps({
   bonus: { type: Object, required: true },
   index: { type: Number, required: true }
 });
 
-const { currentDay, userState, lastWeights, updateWeight, toggleSetDone } = useWorkoutStore();
+const isPlayingVideo = ref(false);
+
+const {
+  currentDay,
+  userState,
+  lastWeights,
+  updateWeight,
+  toggleSetDone,
+  showExerciseImages
+} = useWorkoutStore();
+
 const { startTimer, triggerHaptic } = useTimer();
+
+const videoId = computed(() => getYoutubeId(props.bonus.videoUrl));
+const thumbnailUrl = computed(() => videoId.value ? `https://img.youtube.com/vi/${videoId.value}/hqdefault.jpg` : null);
+const embedUrl = computed(() => videoId.value ? `https://www.youtube-nocookie.com/embed/${videoId.value}?autoplay=1&rel=0` : null);
+
+function toggleVideo() {
+  isPlayingVideo.value = !isPlayingVideo.value;
+}
 
 const exState = computed(() => (userState[currentDay.value] && userState[currentDay.value][props.bonus.id]) || {});
 const exLast = computed(() => lastWeights[props.bonus.id] || {});

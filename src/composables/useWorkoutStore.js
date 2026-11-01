@@ -21,6 +21,14 @@ const saveStatus = ref('saved'); // 'saved', 'saving', 'error'
 const toastMessage = ref('');
 let toastTimer = null;
 
+const showExerciseImages = ref(localStorage.getItem('atiwitch_show_images') !== 'false');
+
+function toggleExerciseImages() {
+  showExerciseImages.value = !showExerciseImages.value;
+  localStorage.setItem('atiwitch_show_images', String(showExerciseImages.value));
+  showToast(showExerciseImages.value ? 'เปิดแสดงภาพตัวอย่างท่าฝึก' : 'ซ่อนภาพตัวอย่าง (โหมดกระชับ)');
+}
+
 function showToast(msg) {
   toastMessage.value = msg;
   clearTimeout(toastTimer);
@@ -338,6 +346,8 @@ export function useWorkoutStore() {
     toggleTodo,
     deleteTodo,
     showToast,
-    fetchServerState
+    fetchServerState,
+    showExerciseImages,
+    toggleExerciseImages
   };
 }
