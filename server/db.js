@@ -42,6 +42,7 @@ db.exec(`
     type TEXT NOT NULL,
     target TEXT NOT NULL,
     weight REAL,
+    actual_reps INTEGER,
     done INTEGER DEFAULT 0,
     FOREIGN KEY (session_exercise_id) REFERENCES session_exercises(id) ON DELETE CASCADE
   );
@@ -50,6 +51,7 @@ db.exec(`
     exercise_id TEXT NOT NULL,
     set_index INTEGER NOT NULL,
     weight REAL NOT NULL,
+    reps INTEGER,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (exercise_id, set_index)
   );
@@ -67,6 +69,15 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
+
+// Safe migrations for columns
+try {
+  db.exec("ALTER TABLE session_sets ADD COLUMN actual_reps INTEGER;");
+} catch(e) {}
+
+try {
+  db.exec("ALTER TABLE exercise_last_weights ADD COLUMN reps INTEGER;");
+} catch(e) {}
 
 // Repository helpers
 const repo = {
@@ -102,28 +113,38 @@ const repo = {
     db.prepare('DELETE FROM daily_draft_state WHERE day_key = ?').run(dayKey);
   },
 
-  // Last Weights
+  // Last Weights & Reps
   getLastWeights() {
-    const rows = db.prepare('SELECT exercise_id, set_index, weight, updated_at FROM exercise_last_weights').all();
+    const rows = db.prepare('SELECT exercise_id, set_index, weight, reps, updated_at FROM exercise_last_weights').all();
     const result = {};
     for (const r of rows) {
       if (!result[r.exercise_id]) result[r.exercise_id] = {};
       result[r.exercise_id][`wt_${r.set_index}`] = r.weight;
+      if (r.reps !== null && r.reps !== undefined) {
+        result[r.exercise_id][`reps_${r.set_index}`] = r.reps;
+      }
       result[r.exercise_id].updatedAt = r.updated_at;
     }
     return result;
   },
 
-  saveLastWeight(exerciseId, setIndex, weight) {
+  saveLastRecord(exerciseId, setIndex, weight, reps) {
     const dateStr = new Date().toISOString().split('T')[0];
     const stmt = db.prepare(`
-      INSERT INTO exercise_last_weights (exercise_id, set_index, weight, updated_at)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO exercise_last_weights (exercise_id, set_index, weight, reps, updated_at)
+      VALUES (?, ?, ?, ?, ?)
       ON CONFLICT(exercise_id, set_index) DO UPDATE SET
         weight = excluded.weight,
+        reps = COALESCE(excluded.reps, exercise_last_weights.reps),
         updated_at = excluded.updated_at
     `);
-    stmt.run(exerciseId, setIndex, Number(weight) || 0, dateStr);
+    stmt.run(
+      exerciseId,
+      setIndex,
+      Number(weight) || 0,
+      reps !== undefined && reps !== '' && reps !== null ? Number(reps) : null,
+      dateStr
+    );
   },
 
   // History Sessions
@@ -139,6 +160,7 @@ const repo = {
           type: set.type,
           target: set.target,
           weight: set.weight,
+          actualReps: set.actual_reps,
           done: Boolean(set.done)
         }));
         return {
@@ -173,8 +195,8 @@ const repo = {
     `);
 
     const insertSet = db.prepare(`
-      INSERT INTO session_sets (session_exercise_id, set_index, type, target, weight, done)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO session_sets (session_exercise_id, set_index, type, target, weight, actual_reps, done)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
 
     const transaction = db.transaction(() => {
@@ -195,18 +217,21 @@ const repo = {
           if (Array.isArray(ex.sets)) {
             for (const set of ex.sets) {
               const wt = (set.weight !== undefined && set.weight !== '') ? Number(set.weight) : null;
+              const reps = (set.actualReps !== undefined && set.actualReps !== '') ? Number(set.actualReps) : null;
+
               insertSet.run(
                 exerciseRowId,
                 set.setIndex,
                 set.type,
                 set.target,
                 wt,
+                reps,
                 set.done ? 1 : 0
               );
 
-              // Also persist to last_weights if weight provided
-              if (wt !== null && !isNaN(wt)) {
-                this.saveLastWeight(ex.id, set.setIndex - 1, wt);
+              // Persist to last record
+              if (wt !== null || reps !== null) {
+                this.saveLastRecord(ex.id, set.setIndex - 1, wt || 0, reps);
               }
             }
           }

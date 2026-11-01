@@ -129,7 +129,12 @@
               >
                 {{ set.type === 'วอร์ม' ? 'W' : 'S' }}{{ set.setIndex }}:
                 {{ (set.weight !== undefined && set.weight !== '') ? set.weight : 0 }} กก.
-                ({{ set.target }})
+                <span v-if="set.actualReps !== undefined && set.actualReps !== null && set.actualReps !== ''">
+                  ({{ set.actualReps }} ครั้ง)
+                </span>
+                <span v-else>
+                  ({{ set.target }})
+                </span>
               </span>
             </div>
           </div>

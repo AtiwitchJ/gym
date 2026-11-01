@@ -126,6 +126,9 @@
 
     <!-- Floating Rest Timer Dock -->
     <RestTimer />
+
+    <!-- In-App Numeric PIN Keypad Bottom Sheet -->
+    <PinKeypad />
   </div>
 </template>
 
@@ -140,6 +143,7 @@ import RestTimer from './components/RestTimer.vue';
 import HistoryView from './components/HistoryView.vue';
 import TodoView from './components/TodoView.vue';
 import RestDayView from './components/RestDayView.vue';
+import PinKeypad from './components/PinKeypad.vue';
 
 const {
   currentDay,

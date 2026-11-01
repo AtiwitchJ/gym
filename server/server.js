@@ -41,7 +41,8 @@ app.post('/api/state', (req, res) => {
           if (k.startsWith('wt_') && v !== '' && v !== undefined) {
             const setIdx = parseInt(k.replace('wt_', ''), 10);
             if (!isNaN(setIdx)) {
-              repo.saveLastWeight(exId, setIdx, v);
+              const repsVal = wObj[`reps_${setIdx}`];
+              repo.saveLastRecord(exId, setIdx, v, repsVal);
             }
           }
         }

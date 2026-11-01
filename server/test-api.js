@@ -10,12 +10,13 @@ assert(drafts.mon, 'Draft for monday should exist');
 assert.strictEqual(drafts.mon.ex_bench.wt_0, '60');
 console.log('✓ Draft state save & get passed');
 
-// 2. Test last weights
-repo.saveLastWeight('ex_bench', 0, 62.5);
+// 2. Test last weights and reps
+repo.saveLastRecord('ex_bench', 0, 62.5, 12);
 const weights = repo.getLastWeights();
-assert(weights.ex_bench, 'ex_bench weight should exist');
+assert(weights.ex_bench, 'ex_bench record should exist');
 assert.strictEqual(weights.ex_bench.wt_0, 62.5);
-console.log('✓ Last weight save & get passed');
+assert.strictEqual(weights.ex_bench.reps_0, 12);
+console.log('✓ Last weight & reps save & get passed');
 
 // 3. Test workout session
 const testSession = {
@@ -23,7 +24,7 @@ const testSession = {
   date: '2026-10-31',
   time: '23:30',
   dayKey: 'mon',
-  dayTitle: 'วันจันทร์ - อก + หน้าแขน + ท้อง',
+  dayTitle: 'วันจันทร์ - ขา + ก้น',
   totalSetsDone: 3,
   exercises: [
     {
@@ -31,8 +32,8 @@ const testSession = {
       name: 'Barbell Bench Press',
       category: 'ท่าหลัก',
       sets: [
-        { setIndex: 1, type: 'warm', target: '15 reps', weight: 40, done: true },
-        { setIndex: 2, type: 'work', target: '6-8 reps', weight: 70, done: true }
+        { setIndex: 1, type: 'warm', target: '15 reps', weight: 40, actualReps: 15, done: true },
+        { setIndex: 2, type: 'work', target: '6-8 reps', weight: 70, actualReps: 8, done: true }
       ]
     }
   ]
@@ -45,6 +46,7 @@ const saved = history.find(h => h.id === 'test_session_1');
 assert(saved, 'Saved session should be found');
 assert.strictEqual(saved.totalSetsDone, 3);
 assert.strictEqual(saved.exercises[0].sets[1].weight, 70);
+assert.strictEqual(saved.exercises[0].sets[1].actualReps, 8);
 console.log('✓ Workout session save & get passed');
 
 // 4. Test delete

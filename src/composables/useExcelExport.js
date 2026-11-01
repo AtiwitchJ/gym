@@ -23,6 +23,7 @@ export function useExcelExport() {
                 'ประเภทเซ็ต': set.type,
                 'เป้าหมาย': set.target,
                 'น้ำหนัก (กก.)': set.weight !== undefined && set.weight !== '' ? Number(set.weight) : 0,
+                'จำนวนครั้งจริง': set.actualReps !== undefined && set.actualReps !== '' ? Number(set.actualReps) : '',
                 'สถานะ': set.done ? 'ผ่าน ✓' : 'ข้าม'
               });
             });
@@ -44,6 +45,7 @@ export function useExcelExport() {
       { wch: 12 }, // Set Type
       { wch: 14 }, // Target
       { wch: 14 }, // Weight
+      { wch: 14 }, // Actual Reps
       { wch: 10 }  // Status
     ];
     worksheet['!cols'] = colWidths;

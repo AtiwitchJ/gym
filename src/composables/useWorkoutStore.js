@@ -138,6 +138,30 @@ function updateWeight(day, exId, setIdx, val) {
   triggerSave(day);
 }
 
+function updateReps(day, exId, setIdx, val) {
+  if (!userState[day]) userState[day] = {};
+  if (!userState[day][exId]) userState[day][exId] = {};
+  userState[day][exId][`reps_${setIdx}`] = val;
+
+  if (val !== '' && val !== undefined) {
+    if (!lastWeights[exId]) lastWeights[exId] = {};
+    lastWeights[exId][`reps_${setIdx}`] = val;
+    lastWeights[exId].updatedAt = new Date().toISOString().split('T')[0];
+  }
+
+  triggerSave(day);
+}
+
+function applyPrevRecord(day, exId, setIdx, prevWt, prevReps) {
+  if (prevWt !== undefined && prevWt !== '') {
+    updateWeight(day, exId, setIdx, prevWt);
+  }
+  if (prevReps !== undefined && prevReps !== '') {
+    updateReps(day, exId, setIdx, prevReps);
+  }
+  showToast(`ใส่สถิติ ${prevWt || 0} กก. (${prevReps || 0} ครั้ง) แล้ว`);
+}
+
 function applyPrevWeight(day, exId, setIdx, prevWt) {
   updateWeight(day, exId, setIdx, prevWt);
   showToast(`ใส่น้ำหนัก ${prevWt} กก.`);
@@ -190,9 +214,17 @@ async function finishAndSaveWorkout() {
         ? exState[`wt_${sIdx}`]
         : (lastWeights[ex.id] && lastWeights[ex.id][`wt_${sIdx}`]) || '';
 
+      const reps = (exState[`reps_${sIdx}`] !== undefined && exState[`reps_${sIdx}`] !== '')
+        ? exState[`reps_${sIdx}`]
+        : (lastWeights[ex.id] && lastWeights[ex.id][`reps_${sIdx}`]) || '';
+
       if (wt !== '') {
         if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
         lastWeights[ex.id][`wt_${sIdx}`] = wt;
+      }
+      if (reps !== '') {
+        if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
+        lastWeights[ex.id][`reps_${sIdx}`] = reps;
       }
 
       return {
@@ -200,6 +232,7 @@ async function finishAndSaveWorkout() {
         type: set.type === 'warm' ? 'วอร์ม' : 'เล่นจริง',
         target: set.reps,
         weight: wt,
+        actualReps: reps,
         done: isDone
       };
     });
@@ -223,9 +256,17 @@ async function finishAndSaveWorkout() {
           ? bState[`wt_${sIdx}`]
           : (lastWeights[bEx.id] && lastWeights[bEx.id][`wt_${sIdx}`]) || '';
 
+        const reps = (bState[`reps_${sIdx}`] !== undefined && bState[`reps_${sIdx}`] !== '')
+          ? bState[`reps_${sIdx}`]
+          : (lastWeights[bEx.id] && lastWeights[bEx.id][`reps_${sIdx}`]) || '';
+
         if (wt !== '') {
           if (!lastWeights[bEx.id]) lastWeights[bEx.id] = {};
           lastWeights[bEx.id][`wt_${sIdx}`] = wt;
+        }
+        if (reps !== '') {
+          if (!lastWeights[bEx.id]) lastWeights[bEx.id] = {};
+          lastWeights[bEx.id][`reps_${sIdx}`] = reps;
         }
 
         return {
@@ -233,6 +274,7 @@ async function finishAndSaveWorkout() {
           type: set.type === 'warm' ? 'วอร์ม' : 'ซ้อมเสริม',
           target: set.reps,
           weight: wt,
+          actualReps: reps,
           done: isDone
         };
       });
@@ -337,7 +379,9 @@ export function useWorkoutStore() {
     userTodos,
     switchDay,
     updateWeight,
+    updateReps,
     applyPrevWeight,
+    applyPrevRecord,
     toggleSetDone,
     resetDayData,
     finishAndSaveWorkout,
