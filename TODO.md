@@ -1,4 +1,4 @@
-# 📝 TODO & Project Roadmap (Jetts Fitness Web App สำหรับทุกอุปกรณ์)
+# 📝 TODO & Project Roadmap (Personal Gym Tracker สำหรับทุกอุปกรณ์)
 
 โปรเจกต์นี้ได้รับการพัฒนาให้เป็น **Progressive Web App (PWA)** ที่รองรับการใช้งานบนทุกอุปกรณ์ ทั้ง **iOS (iPhone/iPad), Android, Tablet และ Desktop/PC** พร้อมใช้งานแบบ **Offline** ในยิมได้ทันที
 

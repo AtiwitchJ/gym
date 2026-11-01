@@ -105,6 +105,43 @@
           ใช้สถิติเดิมทั้งหมด
         </button>
       </div>
+
+      <!-- Progressive Overload Recommendation Banner -->
+      <div
+        v-if="exerciseAdvice"
+        class="mt-2 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all flex-wrap"
+        :class="exerciseAdvice.status === 'increase'
+          ? 'bg-flame-bg/80 border-flame text-ink'
+          : exerciseAdvice.status === 'decrease'
+            ? 'bg-amber-50 border-amber-500 text-ink'
+            : 'bg-emerald-bg/60 border-emerald text-ink'"
+      >
+        <div class="flex items-center gap-2 flex-wrap">
+          <span
+            class="text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-xs select-none"
+            :class="exerciseAdvice.status === 'increase'
+              ? 'bg-flame text-white border-plate'
+              : exerciseAdvice.status === 'decrease'
+                ? 'bg-amber-500 text-white border-plate'
+                : 'bg-emerald text-white border-plate'"
+          >
+            {{ exerciseAdvice.badgeText }}
+          </span>
+          <span class="text-xs font-bold leading-tight">
+            {{ exerciseAdvice.headline }}
+          </span>
+        </div>
+
+        <button
+          v-if="exerciseAdvice.delta !== 0"
+          type="button"
+          @click="applyRecommendedWeightAll"
+          class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
+          :title="`คลิกเพื่อปรับค่าน้ำหนักเซ็ตเล่นเสริมเป็น ${exerciseAdvice.suggestedWeight} กก.`"
+        >
+          ⚡ ปรับเซ็ตเล่นเสริมเป็น {{ exerciseAdvice.suggestedWeight }} กก.
+        </button>
+      </div>
     </div>
 
     <!-- Inline Video Player (Smooth Slide-Down when active) -->
@@ -191,6 +228,18 @@
             <span class="text-[10px] text-sky font-bold">ครั้ง</span>
           </button>
 
+          <!-- Progressive Overload Advice Chip for this Set -->
+          <button
+            v-if="getSetAdvice(sIdx)"
+            type="button"
+            @click="applySetAdvice(sIdx)"
+            class="text-[10px] font-mono font-bold px-1.5 py-1 rounded-md border-2 border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all select-none whitespace-nowrap"
+            :class="getSetAdvice(sIdx).badgeClass"
+            :title="`${getSetAdvice(sIdx).reasonText} (คลิกเพื่อปรับน้ำหนักเซ็ตนี้ทันที)`"
+          >
+            {{ getSetAdvice(sIdx).badgeText }}
+          </button>
+
           <!-- 3. Quick Copy Set Record (Desktop/Tablet) -->
           <button
             v-if="hasPrevRecord(sIdx)"
@@ -227,6 +276,7 @@
 import { ref, computed } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { usePinKeypad } from '../composables/usePinKeypad';
+import { useWeightAdvisor } from '../composables/useWeightAdvisor';
 import { useTimer } from '../composables/useTimer';
 import { getYoutubeId } from '../utils/youtube';
 
@@ -319,15 +369,63 @@ function applyAllPrev() {
   });
 }
 
+const { calculateWeightAdvice, getExerciseOverallAdvice } = useWeightAdvisor();
+
+function getSetAdvice(sIdx) {
+  const set = props.bonus.sets[sIdx];
+  if (!set || set.type === 'warm') return null;
+
+  const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
+  const reps = getReps(sIdx) !== '' ? getReps(sIdx) : getPrevReps(sIdx);
+  if (!reps || Number(reps) <= 0) return null;
+
+  return calculateWeightAdvice({ weight: wt, reps, type: 'touch' });
+}
+
+function applySetAdvice(sIdx) {
+  const advice = getSetAdvice(sIdx);
+  if (advice && advice.suggestedWeight !== undefined) {
+    updateWeight(currentDay.value, props.bonus.id, sIdx, advice.suggestedWeight);
+  }
+}
+
+const exerciseAdvice = computed(() => {
+  const setsData = props.bonus.sets.map((set, sIdx) => {
+    const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
+    const reps = getReps(sIdx) !== '' ? getReps(sIdx) : getPrevReps(sIdx);
+    return {
+      type: set.type,
+      weight: wt,
+      reps
+    };
+  });
+  return getExerciseOverallAdvice(setsData);
+});
+
+function applyRecommendedWeightAll() {
+  if (!exerciseAdvice.value || exerciseAdvice.value.suggestedWeight === undefined) return;
+  const targetWt = exerciseAdvice.value.suggestedWeight;
+  props.bonus.sets.forEach((set, sIdx) => {
+    if (set.type !== 'warm') {
+      updateWeight(currentDay.value, props.bonus.id, sIdx, targetWt);
+    }
+  });
+}
+
 function openWeightKeypad(sIdx) {
   const currentVal = getWeight(sIdx);
   const prevVal = getPrevWeight(sIdx);
+  const advice = getSetAdvice(sIdx);
+  const suggestedVal = advice && advice.delta !== 0 ? advice.suggestedWeight : (exerciseAdvice.value?.delta !== 0 ? exerciseAdvice.value?.suggestedWeight : null);
+
   openKeypad({
     mode: 'weight',
     unit: 'กก.',
     title: props.bonus.name,
     subtitle: `เซ็ต ${sIdx === 0 ? 'วอร์ม (W1)' : `เล่นเสริม (T1)`} • น้ำหนักยก`,
-    currentValue: currentVal !== '' ? currentVal : (prevVal || ''),
+    currentValue: currentVal !== '' ? currentVal : (suggestedVal || prevVal || ''),
+    suggestedHint: suggestedVal,
+    suggestedLabel: suggestedVal ? `แนะนำ: ${suggestedVal} กก. (${(advice?.delta || exerciseAdvice.value?.delta) > 0 ? '+2' : '-2'})` : '',
     prevHint: prevVal ? `${prevVal}` : '',
     presets: [1.25, 2.5, 5, -2.5],
     onConfirm: (val) => {

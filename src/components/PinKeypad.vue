@@ -67,6 +67,16 @@
 
         <!-- Quick Stepper / Hint Chips -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-3 scrollbar-none">
+          <!-- Progressive Overload Suggested Chip -->
+          <button
+            v-if="suggestedHint"
+            @click="setValue(suggestedHint)"
+            class="px-2.5 py-1 rounded-full border-2 border-plate bg-flame hover:bg-flame-glow text-white text-xs font-mono font-bold shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none whitespace-nowrap transition-all flex items-center gap-1 select-none"
+            :title="`กดเพื่อใส่ค่าน้ำหนักแนะนำ ${suggestedHint} ${unit}`"
+          >
+            <span>⚡ {{ suggestedLabel || `แนะนำ: ${suggestedHint} ${unit}` }}</span>
+          </button>
+
           <!-- Previous Hint Chip -->
           <button
             v-if="prevHint"
@@ -172,6 +182,8 @@ const {
   displayValue,
   targetHint,
   prevHint,
+  suggestedHint,
+  suggestedLabel,
   presets,
   closeKeypad,
   append,

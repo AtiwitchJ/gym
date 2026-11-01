@@ -8,6 +8,8 @@ const unit = ref('กก.');
 const displayValue = ref('');
 const targetHint = ref('');
 const prevHint = ref('');
+const suggestedHint = ref('');
+const suggestedLabel = ref('');
 const presets = ref([]);
 let onConfirmCallback = null;
 
@@ -27,6 +29,8 @@ function openKeypad(config) {
   displayValue.value = config.currentValue !== undefined && config.currentValue !== null ? String(config.currentValue) : '';
   targetHint.value = config.targetHint || '';
   prevHint.value = config.prevHint || '';
+  suggestedHint.value = config.suggestedHint !== undefined && config.suggestedHint !== null ? String(config.suggestedHint) : '';
+  suggestedLabel.value = config.suggestedLabel || '';
   presets.value = config.presets || (mode.value === 'weight' ? [1.25, 2.5, 5, -2.5] : [1, 2, -1]);
   onConfirmCallback = config.onConfirm || null;
   isOpen.value = true;
@@ -108,6 +112,8 @@ export function usePinKeypad() {
     displayValue,
     targetHint,
     prevHint,
+    suggestedHint,
+    suggestedLabel,
     presets,
     openKeypad,
     closeKeypad,
