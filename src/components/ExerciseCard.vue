@@ -14,17 +14,17 @@
     ></div>
 
     <!-- Card Header -->
-    <div class="p-4 bg-surface-low/50 border-b-2 border-plate">
+    <div class="p-3.5 sm:p-4 bg-surface-low/50 border-b-2 border-plate">
       <div class="flex items-start justify-between gap-3">
         <!-- Number & Titles -->
-        <div class="flex items-start gap-3">
-          <span class="font-mono text-sm font-bold text-flame mt-0.5 select-none bg-flame-bg px-1.5 py-0.5 rounded border border-flame/30">
+        <div class="flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0">
+          <span class="font-mono text-xs sm:text-sm font-bold text-flame mt-0.5 select-none bg-flame-bg px-1.5 py-0.5 rounded border border-flame/30 flex-shrink-0">
             {{ String(index + 1).padStart(2, '0') }}
           </span>
-          <div>
+          <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 mb-1">
               <span
-                class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full tracking-wide uppercase border"
+                class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full tracking-wide uppercase border select-none"
                 :class="exercise.isMain
                   ? 'bg-flame-bg text-flame border-flame'
                   : 'bg-surface text-ink-muted border-plate/30'"
@@ -32,7 +32,7 @@
                 {{ exercise.isMain ? 'MAIN LIFT' : 'ASSISTANCE' }}
               </span>
             </div>
-            <h3 class="text-base font-bold text-ink font-heading tracking-tight leading-snug">
+            <h3 class="text-base sm:text-lg font-bold text-ink font-heading tracking-tight leading-snug">
               {{ exercise.name }}
             </h3>
             <p class="text-xs text-ink-muted mt-0.5 font-body">
@@ -41,30 +41,59 @@
           </div>
         </div>
 
-        <!-- Inline Video Toggle Button -->
-        <button
-          v-if="videoId"
-          type="button"
-          @click="toggleVideo"
-          class="flex items-center gap-1.5 text-[11px] font-mono font-bold px-2.5 py-1.5 rounded-lg border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
-          :class="isPlayingVideo
-            ? 'bg-flame text-white'
-            : 'bg-surface hover:bg-paper-subtle text-ink'"
-          :title="isPlayingVideo ? 'ซ่อนคลิป' : 'เปิดดูคลิปในหน้านี้'"
-        >
-          <svg v-if="!isPlayingVideo" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-          <svg v-else class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-          <span>{{ isPlayingVideo ? 'ปิดคลิป' : 'ดูคลิป' }}</span>
-        </button>
+        <!-- Compact Thumbnail Box or Toggle Button -->
+        <div v-if="videoId" class="flex-shrink-0">
+          <!-- 1. Compact Thumbnail Preview (When Images Enabled) -->
+          <div
+            v-if="showExerciseImages && !isPlayingVideo"
+            @click="isPlayingVideo = true"
+            class="relative w-28 sm:w-36 aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[2px_2px_0px_#1e2220] group cursor-pointer bg-plate transition-transform active:scale-95"
+            title="แตะเพื่อเปิดเล่นคลิปในหน้านี้"
+          >
+            <img
+              :src="thumbnailUrl"
+              :alt="exercise.name"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 opacity-90 group-hover:opacity-100"
+              loading="lazy"
+            />
+            <!-- Play Overlay -->
+            <div class="absolute inset-0 bg-plate/25 group-hover:bg-plate/10 transition-colors flex items-center justify-center">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-flame text-white border border-plate flex items-center justify-center shadow-[1px_1px_0px_#1e2220] group-hover:scale-110 transition-transform">
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+            <span class="absolute bottom-1 right-1 bg-plate/80 text-[9px] font-mono font-bold text-white px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none">
+              คลิป
+            </span>
+          </div>
+
+          <!-- 2. Action Button (When Video is playing OR Images disabled) -->
+          <button
+            v-else
+            type="button"
+            @click="toggleVideo"
+            class="flex items-center gap-1.5 text-[11px] font-mono font-bold px-2.5 py-1.5 rounded-lg border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
+            :class="isPlayingVideo
+              ? 'bg-flame text-white'
+              : 'bg-surface hover:bg-paper-subtle text-ink'"
+            :title="isPlayingVideo ? 'ปิดคลิป' : 'เปิดดูคลิปในหน้านี้'"
+          >
+            <svg v-if="!isPlayingVideo" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <svg v-else class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            <span>{{ isPlayingVideo ? 'ปิดคลิป' : 'ดูคลิป' }}</span>
+          </button>
+        </div>
       </div>
 
       <!-- Muscles & Guidance -->
-      <div class="mt-2.5 pt-2 border-t border-plate/15 text-xs text-ink-muted flex flex-wrap gap-x-3 gap-y-1">
+      <div class="mt-2 text-xs text-ink-muted flex flex-wrap gap-x-3 gap-y-0.5">
         <span><strong class="text-ink font-semibold">เป้าหมาย:</strong> {{ exercise.mainMuscle }}</span>
         <span v-if="exercise.subMuscle" class="text-ink-muted/80">• {{ exercise.subMuscle }}</span>
       </div>
@@ -89,52 +118,32 @@
       </div>
     </div>
 
-    <!-- Visual Demonstration / Inline Video Player -->
-    <div v-if="showExerciseImages && videoId" class="p-3 bg-paper-subtle/50 border-b-2 border-plate">
-      <!-- 1. Inline Video Player -->
-      <div v-if="isPlayingVideo" class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[3px_3px_0px_#1e2220] bg-black">
-        <iframe
-          :src="embedUrl"
-          class="w-full h-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen
-        ></iframe>
-        <button
-          @click="isPlayingVideo = false"
-          class="absolute top-2 right-2 bg-plate/80 hover:bg-plate text-white font-mono text-[11px] font-bold px-2.5 py-1 rounded-md border border-white/30 backdrop-blur-sm shadow-md transition-all flex items-center gap-1 select-none"
-        >
-          <span>✕ ปิดคลิป</span>
-        </button>
-      </div>
-
-      <!-- 2. Preview Thumbnail Image with Quick Play Trigger -->
-      <div
-        v-else
-        @click="isPlayingVideo = true"
-        class="relative w-full aspect-[21/9] sm:aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[3px_3px_0px_#1e2220] group cursor-pointer bg-plate"
-        title="แตะเพื่อเล่นคลิปตัวอย่างในหน้านี้ทันที"
-      >
-        <img
-          :src="thumbnailUrl"
-          :alt="exercise.name"
-          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100"
-          loading="lazy"
-        />
-        <div class="absolute inset-0 bg-gradient-to-t from-plate/85 via-plate/25 to-transparent flex items-end justify-between p-3 select-none">
-          <div class="flex items-center gap-1.5 text-[11px] font-mono text-white font-bold bg-plate/70 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/20">
-            <svg class="w-3.5 h-3.5 fill-flame" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            <span>แตะดูคลิปสาธิตในแอป</span>
-          </div>
-          <div class="w-9 h-9 rounded-full bg-flame text-white border-2 border-plate flex items-center justify-center shadow-[2px_2px_0px_#1e2220] group-hover:scale-110 transition-transform">
-            <svg class="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </div>
+    <!-- Inline Video Player (Smooth Slide-Down when active) -->
+    <transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div v-if="isPlayingVideo && videoId" class="p-3 bg-paper-subtle/80 border-b-2 border-plate">
+        <div class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[3px_3px_0px_#1e2220] bg-black">
+          <iframe
+            :src="embedUrl"
+            class="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+          <button
+            @click="isPlayingVideo = false"
+            class="absolute top-2 right-2 bg-plate/80 hover:bg-plate text-white font-mono text-[11px] font-bold px-2.5 py-1 rounded-md border border-white/30 backdrop-blur-sm shadow-md transition-all flex items-center gap-1 select-none"
+          >
+            <span>✕ ปิดคลิป</span>
+          </button>
         </div>
       </div>
-    </div>
+    </transition>
 
     <!-- Sets List -->
     <div class="divide-y-2 divide-plate/10 bg-white">
