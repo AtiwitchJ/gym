@@ -25,46 +25,31 @@
 
     <!-- Main Container -->
     <main class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden">
-      <!-- Platform Quick Actions (Exercise Library & Routine Builder) -->
-      <div class="flex items-center gap-2 mb-3.5 select-none">
-        <button
-          @click="showExerciseLibrary = true"
-          class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
-          title="เปิดคลังท่าออกกำลังกายและสร้างท่าใหม่"
-        >
-          <svg class="w-4 h-4 stroke-current fill-none stroke-2 text-flame" viewBox="0 0 24 24">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-          </svg>
-          <span>คลังท่า (Library)</span>
-        </button>
+      <!-- 1. Workouts View (Global Tab) -->
+      <WorkoutsView
+        v-if="currentTab === 'workouts'"
+        @create-routine="openNewRoutine"
+        @edit-routine="openEditRoutine"
+        @open-runner="isRunnerMinimized = false"
+      />
 
-        <button
-          @click="openNewRoutine"
-          class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
-          title="สร้างตารางออกกำลังกายใหม่"
-        >
-          <svg class="w-4 h-4 stroke-current fill-none stroke-2 text-emerald" viewBox="0 0 24 24">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          <span>สร้างตาราง (Routine)</span>
-        </button>
+      <!-- 2. Exercises View (Global Tab) -->
+      <ExerciseLibraryModal
+        v-else-if="currentTab === 'exercises'"
+        :is-open="true"
+        :inline="true"
+        mode="browse"
+        @close="currentTab = 'workouts'"
+      />
 
-        <button
-          @click="startTodayLiveWorkout"
-          class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-flame hover:bg-flame-glow text-white font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
-          title="เริ่มฝึกตามตารางประจำวันนี้แบบ Live Session"
-        >
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-          <span>เริ่มฝึก (Start)</span>
-        </button>
-      </div>
+      <!-- 3. History View (Global Tab) -->
+      <HistoryView v-else-if="currentTab === 'history'" />
 
-      <!-- 1. Workout Day View -->
-      <div v-if="isWorkoutDay && currentDayData">
+      <!-- 4. Profile View (Global Tab) -->
+      <ProfileView v-else-if="currentTab === 'profile'" />
+
+      <!-- Fallback / Legacy Day View (if currentDay or currentTab is mon/tue/wed/thu) -->
+      <div v-else-if="isWorkoutDay && currentDayData">
         <!-- Routine Banner -->
         <div class="archive-card p-4 mb-4">
           <div class="flex items-center gap-2 mb-1">
@@ -159,14 +144,11 @@
         </div>
       </div>
 
-      <!-- 2. Rest Day View -->
-      <RestDayView v-else-if="currentDay === 'rest'" />
+      <!-- Rest Day View Fallback -->
+      <RestDayView v-else-if="currentDay === 'rest' || currentTab === 'rest'" />
 
-      <!-- 3. History View -->
-      <HistoryView v-else-if="currentDay === 'history'" />
-
-      <!-- 4. Todo View -->
-      <TodoView v-else-if="currentDay === 'todo'" />
+      <!-- Todo View Fallback -->
+      <TodoView v-else-if="currentDay === 'todo' || currentTab === 'todo'" />
     </main>
 
     <!-- Fixed Bottom Mobile Navigation & Timer Dock -->
@@ -183,8 +165,8 @@
         <RestTimer v-if="isWorkoutDay || isTimerRunning" />
       </transition>
 
-      <!-- Day Navigation Bottom Bar -->
-      <DayTabs />
+      <!-- 4-Tab Global Navigation Bottom Bar -->
+      <DayTabs v-model:current-tab="currentTab" />
     </div>
 
     <!-- In-App Numeric PIN Keypad Bottom Sheet (z-50) -->
@@ -207,8 +189,10 @@
 
     <!-- Active Live Workout Runner Sheet -->
     <ActiveWorkoutSheet
-      v-if="isWorkoutActive"
+      v-if="isWorkoutActive && !isRunnerMinimized"
       @finish="handleWorkoutFinished"
+      @discard="isRunnerMinimized = false"
+      @minimize="isRunnerMinimized = true"
     />
 
     <!-- Workout Summary Celebration Modal -->
@@ -239,9 +223,12 @@ import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
 import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
 import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
 import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
+import WorkoutsView from './components/WorkoutsView.vue';
+import ProfileView from './components/ProfileView.vue';
 
 const {
   currentDay,
+  currentTab,
   workoutData,
   userState,
   lastWeights,
@@ -260,14 +247,17 @@ const showRoutineBuilder = ref(false);
 const editingRoutine = ref(null);
 const isSummaryModalOpen = ref(false);
 const lastWorkoutSummary = ref(null);
+const isRunnerMinimized = ref(false);
 
 function handleWorkoutFinished(summary) {
   lastWorkoutSummary.value = summary;
   isSummaryModalOpen.value = true;
+  isRunnerMinimized.value = false;
   showToast('ยินดีด้วย! บันทึกรอบฝึกเรียบร้อย');
 }
 
 function startTodayLiveWorkout() {
+  isRunnerMinimized.value = false;
   if (currentDayData.value && currentDayData.value.exercises) {
     const routine = {
       id: currentDay.value,
@@ -296,6 +286,11 @@ function startTodayLiveWorkout() {
 
 function openNewRoutine() {
   editingRoutine.value = null;
+  showRoutineBuilder.value = true;
+}
+
+function openEditRoutine(routine) {
+  editingRoutine.value = routine;
   showRoutineBuilder.value = true;
 }
 

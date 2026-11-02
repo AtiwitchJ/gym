@@ -9,11 +9,11 @@
   >
     <div
       v-if="isOpen"
-      class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-plate/60 backdrop-blur-sm select-none"
-      @click.self="emit('close')"
+      :class="inline ? 'w-full' : 'fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-plate/60 backdrop-blur-sm select-none'"
+      @click.self="!inline && emit('close')"
     >
       <div
-        class="w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-paper border-t-2 sm:border-2 border-plate shadow-[4px_4px_0px_#1e2220] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200"
+        :class="inline ? 'w-full bg-paper border-2 border-plate shadow-[4px_4px_0px_#1e2220] rounded-2xl flex flex-col overflow-hidden mb-6' : 'w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] bg-paper border-t-2 sm:border-2 border-plate shadow-[4px_4px_0px_#1e2220] rounded-t-2xl sm:rounded-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-200'"
       >
         <!-- Modal Header -->
         <header class="p-3.5 sm:p-4 bg-surface border-b-2 border-plate flex items-center justify-between gap-3 flex-shrink-0">
@@ -368,6 +368,10 @@ const props = defineProps({
     type: String,
     default: 'browse',
     validator: val => ['browse', 'picker'].includes(val)
+  },
+  inline: {
+    type: Boolean,
+    default: false
   }
 });
 

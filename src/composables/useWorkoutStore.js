@@ -1,10 +1,24 @@
 import { ref, reactive, watch } from 'vue';
-import { workoutData } from '../data/workouts';
-import { defaultTodos } from '../data/defaultTodos';
+import { workoutData } from '../data/workouts.js';
+import { defaultTodos } from '../data/defaultTodos.js';
+
+// Helper for safe environment storage access
+function safeGetStorage(key, fallback = null) {
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem(key) || fallback;
+  }
+  return fallback;
+}
+
+function safeSetStorage(key, value) {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(key, value);
+  }
+}
 
 // Active Day restoration
 function getInitialDay() {
-  const saved = localStorage.getItem('atiwitch_active_tab') || localStorage.getItem('jetts_active_tab');
+  const saved = safeGetStorage('atiwitch_active_tab') || safeGetStorage('jetts_active_tab');
   if (saved && (workoutData[saved] || saved === 'rest' || saved === 'history' || saved === 'todo')) {
     return saved;
   }
@@ -17,15 +31,16 @@ function getInitialDay() {
 }
 
 const currentDay = ref(getInitialDay());
+const currentTab = ref(safeGetStorage('atiwitch_active_global_tab', 'workouts'));
 const saveStatus = ref('saved'); // 'saved', 'saving', 'error'
 const toastMessage = ref('');
 let toastTimer = null;
 
-const showExerciseImages = ref(localStorage.getItem('atiwitch_show_images') !== 'false');
+const showExerciseImages = ref(safeGetStorage('atiwitch_show_images') !== 'false');
 
 function toggleExerciseImages() {
   showExerciseImages.value = !showExerciseImages.value;
-  localStorage.setItem('atiwitch_show_images', String(showExerciseImages.value));
+  safeSetStorage('atiwitch_show_images', String(showExerciseImages.value));
   showToast(showExerciseImages.value ? 'เปิดแสดงภาพตัวอย่างท่าฝึก' : 'ซ่อนภาพตัวอย่าง (โหมดกระชับ)');
 }
 
@@ -38,19 +53,19 @@ function showToast(msg) {
 }
 
 // Reactive store models (supports both new and previous storage keys seamlessly)
-const userState = reactive(JSON.parse(localStorage.getItem('atiwitch_workout_state') || localStorage.getItem('jetts_workout_state') || '{}'));
-const lastWeights = reactive(JSON.parse(localStorage.getItem('atiwitch_last_weights') || localStorage.getItem('jetts_last_weights') || '{}'));
-const workoutHistory = ref(JSON.parse(localStorage.getItem('atiwitch_workout_history') || localStorage.getItem('jetts_workout_history') || '[]'));
-const userTodos = ref(JSON.parse(localStorage.getItem('atiwitch_gym_todos') || localStorage.getItem('jetts_gym_todos') || JSON.stringify(defaultTodos)));
+const userState = reactive(JSON.parse(safeGetStorage('atiwitch_workout_state') || safeGetStorage('jetts_workout_state') || '{}'));
+const lastWeights = reactive(JSON.parse(safeGetStorage('atiwitch_last_weights') || safeGetStorage('jetts_last_weights') || '{}'));
+const workoutHistory = ref(JSON.parse(safeGetStorage('atiwitch_workout_history') || safeGetStorage('jetts_workout_history') || '[]'));
+const userTodos = ref(JSON.parse(safeGetStorage('atiwitch_gym_todos') || safeGetStorage('jetts_gym_todos') || JSON.stringify(defaultTodos)));
 
 // Auto-save triggers
 let syncDebounceTimer = null;
 
 function persistLocal() {
-  localStorage.setItem('atiwitch_workout_state', JSON.stringify(userState));
-  localStorage.setItem('atiwitch_last_weights', JSON.stringify(lastWeights));
-  localStorage.setItem('atiwitch_workout_history', JSON.stringify(workoutHistory.value));
-  localStorage.setItem('atiwitch_gym_todos', JSON.stringify(userTodos.value));
+  safeSetStorage('atiwitch_workout_state', JSON.stringify(userState));
+  safeSetStorage('atiwitch_last_weights', JSON.stringify(lastWeights));
+  safeSetStorage('atiwitch_workout_history', JSON.stringify(workoutHistory.value));
+  safeSetStorage('atiwitch_gym_todos', JSON.stringify(userTodos.value));
 }
 
 function triggerSave(dayKey = currentDay.value) {
@@ -121,7 +136,12 @@ async function fetchServerState() {
 // Actions
 function switchDay(dayKey) {
   currentDay.value = dayKey;
-  localStorage.setItem('atiwitch_active_tab', dayKey);
+  safeSetStorage('atiwitch_active_tab', dayKey);
+}
+
+function switchTab(tabKey) {
+  currentTab.value = tabKey;
+  safeSetStorage('atiwitch_active_global_tab', tabKey);
 }
 
 function updateWeight(day, exId, setIdx, val) {
@@ -371,6 +391,7 @@ export function useWorkoutStore() {
   return {
     workoutData,
     currentDay,
+    currentTab,
     saveStatus,
     toastMessage,
     userState,
@@ -378,6 +399,7 @@ export function useWorkoutStore() {
     workoutHistory,
     userTodos,
     switchDay,
+    switchTab,
     updateWeight,
     updateReps,
     applyPrevWeight,

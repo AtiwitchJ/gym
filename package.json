@@ -12,7 +12,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/server.js",
-    "test": "node server/test-api.js && node test/test-advisor.js"
+    "test": "node server/test-api.js && node test/test-advisor.js && node test/test-exercise-store.js && node test/test-routine-store.js && node test/test-active-session.js && node test/test-modals-contract.js && node test/test-runner-contract.js && node test/test-global-shell-contract.js"
   },
   "repository": {
     "type": "git",

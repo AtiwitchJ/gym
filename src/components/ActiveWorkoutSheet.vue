@@ -27,8 +27,21 @@
           </p>
         </div>
 
-        <!-- Header Actions: Add Exercise, Discard & Finish Buttons -->
+        <!-- Header Actions: Add Exercise, Minimize, Discard & Finish Buttons -->
         <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <!-- Minimize Sheet Button -->
+          <button
+            type="button"
+            @click="emit('minimize')"
+            class="px-2 py-1.5 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
+            title="ย่อหน้าต่างออกกำลังกาย (Minimize)"
+          >
+            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 text-ink-muted" viewBox="0 0 24 24">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+            <span class="hidden sm:inline">ย่อ</span>
+          </button>
+
           <!-- Compact Add Exercise Button -->
           <button
             type="button"
@@ -331,7 +344,7 @@ import { useWeightAdvisor } from '../composables/useWeightAdvisor.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 
-const emit = defineEmits(['finish', 'discard']);
+const emit = defineEmits(['finish', 'discard', 'minimize']);
 
 const {
   isWorkoutActive,
