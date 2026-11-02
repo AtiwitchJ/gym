@@ -36,12 +36,16 @@ assert(sheetContent.includes('finishSession') || sheetContent.includes('handleFi
 assert(sheetContent.includes('toggleSetComplete'), 'ActiveWorkoutSheet supports checkmark toggling set completion');
 assert(sheetContent.includes('addSet'), 'ActiveWorkoutSheet supports adding sets to exercises');
 assert(sheetContent.includes('bg-emerald'), 'ActiveWorkoutSheet uses emerald color for completed checkmarks');
+assert(sheetContent.includes('+ ท่า'), 'ActiveWorkoutSheet includes compact + ท่า button in header');
 
 // Table column headers check: SET, PREV, KG, REPS, checkmark
 assert(sheetContent.includes('SET') || sheetContent.includes('เซ็ต'), 'ActiveWorkoutSheet has SET column header');
 assert(sheetContent.includes('PREV') || sheetContent.includes('ครั้งก่อน'), 'ActiveWorkoutSheet has PREV column header');
 assert(sheetContent.includes('KG') || sheetContent.includes('นน.'), 'ActiveWorkoutSheet has KG column header');
 assert(sheetContent.includes('REPS') || sheetContent.includes('ครั้ง'), 'ActiveWorkoutSheet has REPS column header');
+
+// Check warm and warmup handling in ActiveWorkoutSheet
+assert(sheetContent.includes("case 'warm':"), 'ActiveWorkoutSheet handles both warm and warmup types');
 
 // 3. WorkoutSummaryModal Contract Checks
 assert(summaryContent.includes('isOpen'), 'WorkoutSummaryModal accepts isOpen prop');
@@ -57,6 +61,9 @@ assert(appContent.includes('ActiveWorkoutSheet'), 'App.vue includes ActiveWorkou
 assert(appContent.includes('WorkoutSummaryModal'), 'App.vue includes WorkoutSummaryModal');
 assert(appContent.includes('isWorkoutActive'), 'App.vue conditionally renders ActiveWorkoutSheet based on isWorkoutActive');
 assert(appContent.includes('lastWorkoutSummary') || appContent.includes('summary'), 'App.vue handles workout summary state');
+assert(appContent.includes('muscleGroup: ex.mainMuscle'), 'App.vue passes mainMuscle as muscleGroup');
+assert(appContent.includes('name: ex.name'), 'App.vue passes exercise name');
+assert(appContent.includes("s.type === 'warm' ? 'warmup' :"), 'App.vue normalizes warm sets to warmup');
 
 // 5. Store finishSession contract enriched fields verification
 const store = useActiveSessionStore();
@@ -95,5 +102,28 @@ assert.strictEqual(summary.completedSetsCount, 3, 'Summary has completedSetsCoun
 assert.strictEqual(summary.totalSetsCount, 3, 'Summary has totalSetsCount');
 assert(summary.startedAt, 'Summary has startedAt timestamp');
 assert(summary.completedAt || summary.finishedAt, 'Summary has completedAt timestamp');
+
+// 6. Metadata preservation & warmup normalization verification
+store.startSessionFromRoutine({
+  id: 'mon',
+  title: 'วันจันทร์: ขา + ก้น',
+  exercises: [
+    {
+      exerciseId: 'm1',
+      name: 'Seated Leg Press Machine',
+      muscleGroup: 'ต้นขาด้านหน้า (Quads), ก้น (Glutes)',
+      equipment: 'เครื่องถีบขา หรือ Squat',
+      sets: [
+        { type: 'warmup', targetReps: 15, targetWeight: 40 }
+      ]
+    }
+  ]
+});
+
+assert.strictEqual(store.activeSession.value.exercises[0].name, 'Seated Leg Press Machine', 'Preserves custom exercise name');
+assert.strictEqual(store.activeSession.value.exercises[0].muscleGroup, 'ต้นขาด้านหน้า (Quads), ก้น (Glutes)', 'Preserves custom muscle group');
+assert.strictEqual(store.activeSession.value.exercises[0].equipment, 'เครื่องถีบขา หรือ Squat', 'Preserves custom equipment');
+assert.strictEqual(store.activeSession.value.exercises[0].sets[0].type, 'warmup', 'Set type is warmup');
+store.discardSession();
 
 console.log('✓ All Active Workout Sheet & Summary Modal contract tests passed successfully!');

@@ -27,8 +27,22 @@
           </p>
         </div>
 
-        <!-- Header Actions: Discard & Finish Buttons -->
+        <!-- Header Actions: Add Exercise, Discard & Finish Buttons -->
         <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <!-- Compact Add Exercise Button -->
+          <button
+            type="button"
+            @click="isPickerOpen = true"
+            class="px-2 sm:px-2.5 py-1.5 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
+            title="เพิ่มท่าฝึก (Add Exercise)"
+          >
+            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 text-flame" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>+ ท่า</span>
+          </button>
+
           <!-- Discard Button -->
           <button
             type="button"
@@ -426,7 +440,8 @@ function getPrevWeightOnly(exerciseId, setIdx) {
 
 // Cycle Set Type: warmup -> working -> dropset -> failure -> warmup
 function cycleSetType(exIdx, setIdx) {
-  const current = activeSession.value?.exercises?.[exIdx]?.sets?.[setIdx]?.type || 'working';
+  const rawType = activeSession.value?.exercises?.[exIdx]?.sets?.[setIdx]?.type || 'working';
+  const current = rawType === 'warm' ? 'warmup' : rawType;
   const order = ['warmup', 'working', 'dropset', 'failure'];
   const nextIdx = (order.indexOf(current) + 1) % order.length;
   updateSetMetric(exIdx, setIdx, 'type', order[nextIdx]);
@@ -434,6 +449,7 @@ function cycleSetType(exIdx, setIdx) {
 
 function getSetTypeShort(type) {
   switch (type) {
+    case 'warm':
     case 'warmup':
       return 'W';
     case 'dropset':
@@ -448,6 +464,7 @@ function getSetTypeShort(type) {
 
 function getSetTypeBadgeClass(type) {
   switch (type) {
+    case 'warm':
     case 'warmup':
       return 'bg-gold-bg text-gold border-gold';
     case 'dropset':
@@ -462,19 +479,28 @@ function getSetTypeBadgeClass(type) {
 
 // Keypad Numeric Tap Targets
 function openWeightKeypad(exercise, exIdx, set, setIdx) {
+  const isWarm = set.type === 'warm' || set.type === 'warmup';
   const advice = getOverloadAdvice(exercise.exerciseId);
   const prevW = getPrevWeightOnly(exercise.exerciseId, setIdx);
   const currentVal = set.weight !== undefined && set.weight !== null ? set.weight : (set.targetWeight ?? 0);
 
+  const suggestedWeightVal = isWarm && advice?.warmAdvice?.suggestedWeight !== undefined
+    ? advice.warmAdvice.suggestedWeight
+    : (advice?.suggestedWeight !== undefined ? advice.suggestedWeight : (set.suggestedWeight !== undefined ? set.suggestedWeight : ''));
+
+  const suggestedLabelVal = isWarm && advice?.warmAdvice?.actionLabel
+    ? `แนะนำ: ${advice.warmAdvice.actionLabel}`
+    : (advice?.actionLabel ? `แนะนำ: ${advice.actionLabel}` : '');
+
   openKeypad({
     title: exercise.name,
-    subtitle: `เซ็ตที่ ${setIdx + 1} (${set.type === 'warmup' ? 'วอร์ม' : 'เล่นจริง'}) - ใส่น้ำหนัก (กก.)`,
+    subtitle: `เซ็ตที่ ${setIdx + 1} (${isWarm ? 'วอร์ม' : 'เล่นจริง'}) - ใส่น้ำหนัก (กก.)`,
     mode: 'weight',
     unit: 'กก.',
     currentValue: currentVal,
     prevHint: prevW !== '' ? String(prevW) : '',
-    suggestedHint: advice?.suggestedWeight !== undefined ? String(advice.suggestedWeight) : (set.suggestedWeight !== undefined ? String(set.suggestedWeight) : ''),
-    suggestedLabel: advice?.actionLabel ? `แนะนำ: ${advice.actionLabel}` : '',
+    suggestedHint: suggestedWeightVal !== '' ? String(suggestedWeightVal) : '',
+    suggestedLabel: suggestedLabelVal,
     presets: [1.25, 2.5, 5, -2.5],
     onConfirm: (val) => {
       const num = parseFloat(val);
@@ -484,12 +510,13 @@ function openWeightKeypad(exercise, exIdx, set, setIdx) {
 }
 
 function openRepsKeypad(exercise, exIdx, set, setIdx) {
+  const isWarm = set.type === 'warm' || set.type === 'warmup';
   const currentVal = set.reps !== undefined && set.reps !== null ? set.reps : (set.targetReps ?? 8);
-  const targetVal = String(set.targetReps || (set.type === 'warmup' ? 15 : 8));
+  const targetVal = String(set.targetReps || (isWarm ? 15 : 8));
 
   openKeypad({
     title: exercise.name,
-    subtitle: `เซ็ตที่ ${setIdx + 1} (${set.type === 'warmup' ? 'วอร์ม' : 'เล่นจริง'}) - ใส่จำนวนครั้ง`,
+    subtitle: `เซ็ตที่ ${setIdx + 1} (${isWarm ? 'วอร์ม' : 'เล่นจริง'}) - ใส่จำนวนครั้ง`,
     mode: 'reps',
     unit: 'ครั้ง',
     currentValue: currentVal,

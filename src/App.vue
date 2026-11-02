@@ -275,11 +275,17 @@ function startTodayLiveWorkout() {
       subtitle: currentDayData.value.subtitle,
       exercises: currentDayData.value.exercises.map(ex => ({
         exerciseId: ex.id,
-        sets: (ex.sets || []).map(s => ({
-          type: s.type || 'working',
-          targetReps: s.targetReps || (s.type === 'warm' ? 15 : 8),
-          targetWeight: s.targetWeight || 0
-        }))
+        name: ex.name,
+        muscleGroup: ex.mainMuscle,
+        equipment: ex.altName || ex.equipment,
+        sets: (ex.sets || []).map(s => {
+          const setType = s.type === 'warm' ? 'warmup' : (s.type || 'working');
+          return {
+            type: setType,
+            targetReps: s.targetReps || (setType === 'warmup' ? 15 : 8),
+            targetWeight: s.targetWeight || 0
+          };
+        })
       }))
     };
     startSessionFromRoutine(routine);
