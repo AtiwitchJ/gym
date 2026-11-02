@@ -25,6 +25,33 @@
 
     <!-- Main Container -->
     <main class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden">
+      <!-- Platform Quick Actions (Exercise Library & Routine Builder) -->
+      <div class="flex items-center gap-2 mb-3.5 select-none">
+        <button
+          @click="showExerciseLibrary = true"
+          class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+          title="เปิดคลังท่าออกกำลังกายและสร้างท่าใหม่"
+        >
+          <svg class="w-4 h-4 stroke-current fill-none stroke-2 text-flame" viewBox="0 0 24 24">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+          <span>คลังท่า (Library)</span>
+        </button>
+
+        <button
+          @click="openNewRoutine"
+          class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+          title="สร้างตารางออกกำลังกายใหม่"
+        >
+          <svg class="w-4 h-4 stroke-current fill-none stroke-2 text-emerald" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span>สร้างตาราง (Routine)</span>
+        </button>
+      </div>
+
       <!-- 1. Workout Day View -->
       <div v-if="isWorkoutDay && currentDayData">
         <!-- Routine Banner -->
@@ -151,11 +178,26 @@
 
     <!-- In-App Numeric PIN Keypad Bottom Sheet (z-50) -->
     <PinKeypad />
+
+    <!-- Exercise Library Modal (Browse / Search / Create Custom) -->
+    <ExerciseLibraryModal
+      :is-open="showExerciseLibrary"
+      mode="browse"
+      @close="showExerciseLibrary = false"
+    />
+
+    <!-- Routine Builder Modal (Create / Edit Routine) -->
+    <RoutineBuilderModal
+      :is-open="showRoutineBuilder"
+      :initial-routine="editingRoutine"
+      @close="showRoutineBuilder = false"
+      @saved="onRoutineSaved"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useWorkoutStore } from './composables/useWorkoutStore';
 import { useTimer } from './composables/useTimer';
 import HeaderBar from './components/HeaderBar.vue';
@@ -168,6 +210,8 @@ import HistoryView from './components/HistoryView.vue';
 import TodoView from './components/TodoView.vue';
 import RestDayView from './components/RestDayView.vue';
 import PinKeypad from './components/PinKeypad.vue';
+import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
+import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
 
 const {
   currentDay,
@@ -175,11 +219,28 @@ const {
   userState,
   lastWeights,
   toastMessage,
+  showToast,
   finishAndSaveWorkout,
   fetchServerState
 } = useWorkoutStore();
 
 const { isRunning: isTimerRunning } = useTimer();
+
+// Modal Visibility State
+const showExerciseLibrary = ref(false);
+const showRoutineBuilder = ref(false);
+const editingRoutine = ref(null);
+
+function openNewRoutine() {
+  editingRoutine.value = null;
+  showRoutineBuilder.value = true;
+}
+
+function onRoutineSaved(routine) {
+  if (routine && routine.title) {
+    showToast(`บันทึกตาราง "${routine.title}" เรียบร้อยแล้ว!`);
+  }
+}
 
 onMounted(() => {
   fetchServerState();
