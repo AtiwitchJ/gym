@@ -65,17 +65,47 @@ export const workoutData = {
       },
       {
         id: "m5",
-        name: "Hip Abduction Machine & Calf Raise",
+        name: "Seated Hip Abduction Machine",
         isMain: false,
-        altName: "เครื่องกางขา / เขย่งน่องบน Leg Press",
-        mainMuscle: "ก้นด้านข้าง/สะโพก (Gluteus Medius) & น่อง (Calves)",
-        subMuscle: "Soleus & Gastrocnemius",
+        altName: "เครื่องกางขาออก",
+        mainMuscle: "ก้นด้านข้าง/สะโพก (Gluteus Medius & Minimus)",
+        subMuscle: "กล้ามเนื้อพยุงเชิงกรานด้านข้าง",
         videoUrl: "https://www.youtube.com/watch?v=dfzTjPMGVYw",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
-          { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" },
-          { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" },
-          { type: "work", reps: "6–8 ครั้ง (น่อง 12–15)" }
+          { type: "work", reps: "8–10 ครั้ง (กางสุดค้าง 1 วิ)" },
+          { type: "work", reps: "8–10 ครั้ง (กางสุดค้าง 1 วิ)" },
+          { type: "work", reps: "8–10 ครั้ง (กางสุดค้าง 1 วิ)" }
+        ]
+      },
+      {
+        id: "m6",
+        name: "Seated Hip Adduction Machine",
+        isMain: false,
+        altName: "เครื่องหนีบขาเข้า",
+        mainMuscle: "ต้นขาด้านใน (Adductor Longus / Magnus / Brevis)",
+        subMuscle: "กล้ามเนื้อขาหนีบ และพยุงเข่าด้านใน",
+        videoUrl: "https://www.youtube.com/watch?v=fpVHoidfg60",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง (หนีบสุดค้าง 1 วิ)" },
+          { type: "work", reps: "8–10 ครั้ง (หนีบสุดค้าง 1 วิ)" },
+          { type: "work", reps: "8–10 ครั้ง (หนีบสุดค้าง 1 วิ)" }
+        ]
+      },
+      {
+        id: "m7",
+        name: "Standing Calf Raise Machine",
+        isMain: false,
+        altName: "เครื่องยืนเขย่งน่อง (หรือเขย่งบน Smith / Leg Press)",
+        mainMuscle: "น่องมัดใหญ่ (Gastrocnemius)",
+        subMuscle: "น่องมัดลึก (Soleus) และเอ็นร้อยหวาย",
+        videoUrl: "https://www.youtube.com/watch?v=Lqpb-IiSFC4",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "12–15 ครั้ง (ยืดสุด-บีบสุดค้าง 1 วิ)" },
+          { type: "work", reps: "12–15 ครั้ง (ยืดสุด-บีบสุดค้าง 1 วิ)" },
+          { type: "work", reps: "12–15 ครั้ง (ยืดสุด-บีบสุดค้าง 1 วิ)" }
         ]
       }
     ],

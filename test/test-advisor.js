@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { isWarmupType, calculateWeightAdvice, getExerciseOverallAdvice } from '../src/composables/useWeightAdvisor.js';
+import { isWarmupType, parseRepTarget, calculateWeightAdvice, getExerciseOverallAdvice } from '../src/composables/useWeightAdvisor.js';
 
 console.log('Testing Progressive Overload Advisor...');
 
@@ -129,5 +129,43 @@ assert.strictEqual(overallAdv2.status, 'decrease');
 assert.strictEqual(overallAdv2.delta, -2);
 assert.strictEqual(overallAdv2.suggestedWeight, 58);
 console.log('✓ Overall advice for low reps aggregates to -2 kg');
+
+// 8. Test Custom Rep Ranges (e.g. Calf Raise 12–15 reps, Hip Adduction 8–10 reps)
+assert.deepStrictEqual(parseRepTarget('12–15 ครั้ง'), { min: 12, max: 15 });
+assert.deepStrictEqual(parseRepTarget('8-10 ครั้ง'), { min: 8, max: 10 });
+assert.deepStrictEqual(parseRepTarget('15-20'), { min: 15, max: 20 });
+assert.deepStrictEqual(parseRepTarget('12'), { min: 12, max: 12 });
+assert.deepStrictEqual(parseRepTarget(null), { min: 6, max: 8 });
+console.log('✓ parseRepTarget accurately extracts min/max from various string formats');
+
+// Calf Raise (target 12–15 reps)
+const calfOptimal = calculateWeightAdvice({ weight: 40, reps: 14, type: 'work', targetReps: '12–15 ครั้ง' });
+assert.strictEqual(calfOptimal.status, 'optimal');
+assert.strictEqual(calfOptimal.delta, 0);
+
+const calfIncrease = calculateWeightAdvice({ weight: 40, reps: 16, type: 'work', targetReps: '12–15 ครั้ง' });
+assert.strictEqual(calfIncrease.status, 'increase');
+assert.strictEqual(calfIncrease.delta, 2);
+assert.strictEqual(calfIncrease.suggestedWeight, 42);
+
+const calfDecrease = calculateWeightAdvice({ weight: 40, reps: 10, type: 'work', targetReps: '12–15 ครั้ง' });
+assert.strictEqual(calfDecrease.status, 'decrease');
+assert.strictEqual(calfDecrease.delta, -2);
+assert.strictEqual(calfDecrease.suggestedWeight, 38);
+console.log('✓ Calf Raise (12–15 reps) set advice correctly handles optimal, increase (>15), decrease (<12)');
+
+// Overall Advice with custom target reps
+const setsCalf = [
+  { type: 'warm', weight: 25, reps: 20 },
+  { type: 'work', weight: 40, reps: 14, targetReps: '12–15 ครั้ง' },
+  { type: 'work', weight: 40, reps: 13, targetReps: '12–15 ครั้ง' },
+  { type: 'work', weight: 40, reps: 14, targetReps: '12–15 ครั้ง' }
+];
+const calfOverall = getExerciseOverallAdvice(setsCalf);
+assert.strictEqual(calfOverall.workAdvice.status, 'increase');
+assert.strictEqual(calfOverall.workAdvice.delta, 2);
+assert.strictEqual(calfOverall.workAdvice.suggestedWeight, 42);
+assert.strictEqual(calfOverall.workAdvice.reason.includes('12–15'), true);
+console.log('✓ Calf Raise overall advice recommends +2 kg next week when target range 12–15 is hit');
 
 console.log('All Progressive Overload Advisor tests passed successfully!');

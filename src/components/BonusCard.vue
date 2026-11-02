@@ -147,7 +147,7 @@
             <!-- ซ้อมเสริม -->
             <tr>
               <td class="py-1.5 px-2.5 font-bold text-ink whitespace-nowrap">
-                ซ้อมเสริม (6–8)
+                ซ้อมเสริม ({{ workRepTargetLabel }})
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span v-if="displayTouchWeight !== 0 || displayTouchReps !== null" class="font-bold">
@@ -431,7 +431,16 @@ function applyAllPrev() {
   });
 }
 
-const { isWarmupType, calculateWeightAdvice, getExerciseOverallAdvice } = useWeightAdvisor();
+const { isWarmupType, parseRepTarget, calculateWeightAdvice, getExerciseOverallAdvice } = useWeightAdvisor();
+
+const workRepTargetLabel = computed(() => {
+  const touchSet = props.bonus.sets.find(s => !isWarmupType(s.type));
+  if (touchSet && touchSet.reps) {
+    const parsed = parseRepTarget(touchSet.reps);
+    return parsed.min === parsed.max ? `${parsed.min}` : `${parsed.min}–${parsed.max}`;
+  }
+  return '6–8';
+});
 
 function getSetAdvice(sIdx) {
   const set = props.bonus.sets[sIdx];
@@ -441,7 +450,7 @@ function getSetAdvice(sIdx) {
   const reps = getReps(sIdx) !== '' ? getReps(sIdx) : getPrevReps(sIdx);
   if (!reps || Number(reps) <= 0) return null;
 
-  return calculateWeightAdvice({ weight: wt, reps, type: set.type });
+  return calculateWeightAdvice({ weight: wt, reps, type: set.type, targetReps: set.reps });
 }
 
 function applySetAdvice(sIdx) {
@@ -458,7 +467,8 @@ const exerciseAdvice = computed(() => {
     return {
       type: set.type,
       weight: wt,
-      reps
+      reps,
+      targetReps: set.reps
     };
   });
   return getExerciseOverallAdvice(setsData);

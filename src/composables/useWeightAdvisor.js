@@ -13,7 +13,24 @@ export function isWarmupType(type) {
   return t === 'warm' || t === 'warmup' || t === 'วอร์ม';
 }
 
-export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
+export function parseRepTarget(repStr) {
+  if (!repStr) return { min: 6, max: 8 };
+  const match = String(repStr).match(/(\d+)\s*[–-]\s*(\d+)/);
+  if (match) {
+    return {
+      min: parseInt(match[1], 10),
+      max: parseInt(match[2], 10)
+    };
+  }
+  const single = String(repStr).match(/\d+/);
+  if (single) {
+    const val = parseInt(single[0], 10);
+    return { min: val, max: val };
+  }
+  return { min: 6, max: 8 };
+}
+
+export function calculateWeightAdvice({ weight, reps, type = 'work', targetReps = null }) {
   const numWeight = parseFloat(weight) || 0;
   const numReps = parseInt(reps, 10);
 
@@ -21,9 +38,9 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
     return null;
   }
 
-  // Warmup sets (Target: 15–20 reps. If > 20 reps, recommend +2 kg warmup weight; if < 12 reps, recommend -2 kg)
+  // Warmup sets (Target: 15–20 reps. If >= 20 reps, recommend +2 kg warmup weight; if < 12 reps, recommend -2 kg)
   if (isWarmupType(type)) {
-    if (numReps > 20) {
+    if (numReps >= 20) {
       const suggestedWeight = Math.round((numWeight + 2) * 10) / 10;
       return {
         type: 'warm',
@@ -34,7 +51,7 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
         reps: numReps,
         badgeText: '+2 kg วอร์ม',
         badgeClass: 'bg-flame text-white border-plate shadow-[1px_1px_0px_#1e2220]',
-        reasonText: `วอร์ม ${numReps} ครั้ง (> 20) — เพิ่ม +2 กก.`,
+        reasonText: `วอร์ม ${numReps} ครั้ง (>= 20) — เพิ่ม +2 กก.`,
         shortText: '+2 กก. วอร์ม',
         actionLabel: `${suggestedWeight} กก.`
       };
@@ -72,8 +89,12 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
     };
   }
 
-  // Working sets
-  if (numReps > 8) {
+  // Working sets (respect custom target range if provided e.g. 12-15 for calves, or 6-8 default)
+  const target = parseRepTarget(targetReps);
+  const minTarget = target.min || 6;
+  const maxTarget = target.max || 8;
+
+  if (numReps > maxTarget) {
     const suggestedWeight = Math.round((numWeight + 2) * 10) / 10;
     return {
       type: 'work',
@@ -84,13 +105,13 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
       reps: numReps,
       badgeText: '+2 kg',
       badgeClass: 'bg-flame text-white border-plate shadow-[1px_1px_0px_#1e2220]',
-      reasonText: `เล่นจริง ${numReps} ครั้ง (> 8) — เพิ่ม +2 กก.`,
+      reasonText: `เล่นจริง ${numReps} ครั้ง (> ${maxTarget}) — เพิ่ม +2 กก.`,
       shortText: '+2 กก.',
       actionLabel: `${suggestedWeight} กก.`
     };
   }
 
-  if (numReps < 6) {
+  if (numReps < minTarget) {
     const suggestedWeight = Math.max(0, Math.round((numWeight - 2) * 10) / 10);
     return {
       type: 'work',
@@ -101,13 +122,13 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
       reps: numReps,
       badgeText: '-2 kg',
       badgeClass: 'bg-amber-500 text-white border-plate shadow-[1px_1px_0px_#1e2220]',
-      reasonText: `เล่นจริง ${numReps} ครั้ง (< 6) — ลด -2 กก.`,
+      reasonText: `เล่นจริง ${numReps} ครั้ง (< ${minTarget}) — ลด -2 กก.`,
       shortText: '-2 กก.',
       actionLabel: `${suggestedWeight} กก.`
     };
   }
 
-  // 6 - 8 reps
+  // Sweet spot range (minTarget <= numReps <= maxTarget)
   return {
     type: 'work',
     status: 'optimal',
@@ -117,7 +138,7 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
     reps: numReps,
     badgeText: 'พอดี ✓',
     badgeClass: 'bg-emerald text-white border-plate shadow-[1px_1px_0px_#059669]',
-    reasonText: `เล่นจริง ${numReps} ครั้ง (6–8) — พอดี`,
+    reasonText: `เล่นจริง ${numReps} ครั้ง (${minTarget}–${maxTarget}) — พอดี`,
     shortText: 'พอดี',
     actionLabel: `${numWeight} กก.`
   };
@@ -189,19 +210,26 @@ export function getExerciseOverallAdvice(sets = []) {
     let decreaseCount = 0;
     let lastWorkWeight = 0;
 
+    const workWithTarget = workSets.find(s => s.targetReps) || workSets[0];
+    const target = parseRepTarget(workWithTarget?.targetReps);
+    const minTarget = target.min || 6;
+    const maxTarget = target.max || 8;
+
     workSets.forEach(s => {
       const r = Number(s.reps);
       const w = Number(s.weight) || 0;
       if (w > 0) lastWorkWeight = w;
-      if (r < 6) decreaseCount++;
+      const sTarget = parseRepTarget(s.targetReps);
+      const sMin = sTarget.min || minTarget;
+      if (r < sMin) decreaseCount++;
     });
 
     const isTouch = workSets.some(s => s.type === 'touchup' || s.type === 'touch');
     const setLabel = isTouch ? 'เซ็ตเล่นเสริม' : 'เซ็ตเล่นจริง';
 
     // Rule:
-    // If < 6 reps (majority failed to reach 6 reps): decrease by -2 kg
-    // If >= 6 reps (achieved 6-8 sweet spot or > 8): for NEXT WEEK, progressive overload +2 kg!
+    // If < minTarget reps (majority failed to reach target): decrease by -2 kg
+    // If >= minTarget reps (achieved sweet spot or higher): for NEXT WEEK, progressive overload +2 kg!
     if (decreaseCount >= workSets.length / 2) {
       const suggested = Math.max(0, Math.round((lastWorkWeight - 2) * 10) / 10);
       workAdvice = {
@@ -213,7 +241,7 @@ export function getExerciseOverallAdvice(sets = []) {
         badgeText: '-2 kg',
         badgeClass: 'bg-amber-500 text-white border-plate shadow-[0.5px_0.5px_0px_#1e2220]',
         headline: `รอบหน้า: -2 กก. (${suggested} กก.)`,
-        reason: `ยกไม่ถึง 6 ครั้ง แนะนำลดน้ำหนักลง`,
+        reason: `ยกไม่ถึง ${minTarget} ครั้ง แนะนำลดน้ำหนักลง`,
         actionLabel: `${suggested} กก.`
       };
     } else {
@@ -227,7 +255,7 @@ export function getExerciseOverallAdvice(sets = []) {
         badgeText: '+2 kg',
         badgeClass: 'bg-flame text-white border-plate shadow-[0.5px_0.5px_0px_#1e2220]',
         headline: `รอบหน้า: +2 กก. (${suggested} กก.)`,
-        reason: `เล่นได้ตามเป้าหมาย (6–8 ครั้งขึ้นไป) แนะนำเพิ่มน้ำหนักสัปดาห์หน้า`,
+        reason: `เล่นได้ตามเป้าหมาย (${minTarget}–${maxTarget} ครั้งขึ้นไป) แนะนำเพิ่มน้ำหนักสัปดาห์หน้า`,
         actionLabel: `${suggested} กก.`
       };
     }
@@ -249,6 +277,7 @@ export function getExerciseOverallAdvice(sets = []) {
 export function useWeightAdvisor() {
   return {
     isWarmupType,
+    parseRepTarget,
     calculateWeightAdvice,
     getExerciseOverallAdvice
   };
