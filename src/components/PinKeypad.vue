@@ -9,12 +9,12 @@
   >
     <div
       v-if="isOpen"
-      class="fixed inset-0 z-50 flex flex-col justify-end bg-plate/60 backdrop-blur-sm select-none"
+      class="fixed inset-0 z-50 flex flex-col justify-end bg-plate/60 backdrop-blur-sm select-none touch-none"
       @click.self="closeKeypad"
     >
       <!-- Keypad Drawer Box -->
       <div
-        class="w-full max-w-md mx-auto bg-paper border-t-4 sm:border-4 border-plate sm:rounded-3xl shadow-[0_-8px_35px_rgba(30,34,32,0.25)] p-4 sm:p-5 pb-[max(20px,env(safe-area-inset-bottom))] transition-all"
+        class="w-full max-w-md mx-auto bg-paper border-t-4 sm:border-4 border-plate sm:rounded-3xl shadow-[0_-8px_35px_rgba(30,34,32,0.25)] p-4 sm:p-5 pb-[max(20px,env(safe-area-inset-bottom))] transition-all select-none touch-manipulation"
         @click.stop
       >
         <!-- Top Handle & Header -->

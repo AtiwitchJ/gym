@@ -3,14 +3,30 @@
 @tailwind utilities;
 
 @layer base {
-  * {
+  *, *::before, *::after {
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
-  html, body {
+  html {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
     background-color: #fdfbf7;
     color: #1e2220;
     font-family: 'Noto Sans Thai', 'Prompt', 'Space Grotesk', sans-serif;
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  button, a, input, select, textarea, [role="button"] {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
   }
 
   /* Force Tabular Numbers for all weights, sets, and stopwatch */

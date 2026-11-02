@@ -238,7 +238,7 @@
           <button
             type="button"
             @click="openWeightKeypad(sIdx)"
-            class="h-9 px-2.5 rounded-lg border-2 border-plate flex items-center justify-center gap-1 font-mono text-xs font-bold transition-all select-none min-w-[76px] sm:min-w-[84px]"
+            class="h-9 px-2.5 rounded-lg border-2 border-plate flex items-center justify-center gap-1 font-mono text-xs font-bold transition-all select-none touch-manipulation min-w-[76px] sm:min-w-[84px]"
             :class="getWeight(sIdx) !== ''
               ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
               : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
@@ -254,7 +254,7 @@
           <button
             type="button"
             @click="openRepsKeypad(sIdx, set.reps)"
-            class="h-9 px-2 sm:px-2.5 rounded-lg border-2 border-plate flex items-center justify-center gap-1 font-mono text-xs font-bold transition-all select-none min-w-[68px] sm:min-w-[74px]"
+            class="h-9 px-2 sm:px-2.5 rounded-lg border-2 border-plate flex items-center justify-center gap-1 font-mono text-xs font-bold transition-all select-none touch-manipulation min-w-[68px] sm:min-w-[74px]"
             :class="getReps(sIdx) !== ''
               ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
               : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
