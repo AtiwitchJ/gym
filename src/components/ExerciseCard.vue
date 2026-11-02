@@ -14,17 +14,17 @@
     ></div>
 
     <!-- Card Header -->
-    <div class="p-3.5 sm:p-4 bg-surface-low/50 border-b-2 border-plate">
-      <div class="flex items-start justify-between gap-3">
+    <div class="p-3 sm:p-4 bg-surface-low/50 border-b-2 border-plate">
+      <div class="flex items-start justify-between gap-2.5 sm:gap-3">
         <!-- Number & Titles -->
-        <div class="flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0">
+        <div class="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
           <span class="font-mono text-xs sm:text-sm font-bold text-flame mt-0.5 select-none bg-flame-bg px-1.5 py-0.5 rounded border border-flame/30 flex-shrink-0">
             {{ String(index + 1).padStart(2, '0') }}
           </span>
           <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-2 mb-1">
+            <div class="flex items-center gap-1.5 mb-1">
               <span
-                class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full tracking-wide uppercase border select-none"
+                class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full tracking-wide uppercase border select-none"
                 :class="exercise.isMain
                   ? 'bg-flame-bg text-flame border-flame'
                   : 'bg-surface text-ink-muted border-plate/30'"
@@ -32,10 +32,10 @@
                 {{ exercise.isMain ? 'MAIN LIFT' : 'ASSISTANCE' }}
               </span>
             </div>
-            <h3 class="text-base sm:text-lg font-bold text-ink font-heading tracking-tight leading-snug">
+            <h3 class="text-sm sm:text-lg font-bold text-ink font-heading tracking-tight leading-snug">
               {{ exercise.name }}
             </h3>
-            <p class="text-xs text-ink-muted mt-0.5 font-body">
+            <p class="text-[11px] sm:text-xs text-ink-muted mt-0.5 font-body">
               {{ exercise.altName }}
             </p>
           </div>
@@ -47,7 +47,7 @@
           <div
             v-if="showExerciseImages && !isPlayingVideo"
             @click="isPlayingVideo = true"
-            class="relative w-28 sm:w-36 aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[2px_2px_0px_#1e2220] group cursor-pointer bg-plate transition-transform active:scale-95"
+            class="relative w-24 sm:w-36 aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[2px_2px_0px_#1e2220] group cursor-pointer bg-plate transition-transform active:scale-95"
             title="แตะเพื่อเปิดเล่นคลิปในหน้านี้"
           >
             <img
@@ -58,13 +58,13 @@
             />
             <!-- Play Overlay -->
             <div class="absolute inset-0 bg-plate/25 group-hover:bg-plate/10 transition-colors flex items-center justify-center">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-flame text-white border border-plate flex items-center justify-center shadow-[1px_1px_0px_#1e2220] group-hover:scale-110 transition-transform">
-                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+              <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-flame text-white border border-plate flex items-center justify-center shadow-[1px_1px_0px_#1e2220] group-hover:scale-110 transition-transform">
+                <svg class="w-3 h-3 sm:w-4 sm:h-4 fill-current ml-0.5" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </div>
             </div>
-            <span class="absolute bottom-1 right-1 bg-plate/80 text-[9px] font-mono font-bold text-white px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none">
+            <span class="absolute bottom-1 right-1 bg-plate/80 text-[8px] sm:text-[9px] font-mono font-bold text-white px-1 sm:px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none">
               คลิป
             </span>
           </div>
@@ -74,7 +74,7 @@
             v-else
             type="button"
             @click="toggleVideo"
-            class="flex items-center gap-1.5 text-[11px] font-mono font-bold px-2.5 py-1.5 rounded-lg border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
+            class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
             :class="isPlayingVideo
               ? 'bg-flame text-white'
               : 'bg-surface hover:bg-paper-subtle text-ink'"
@@ -93,24 +93,24 @@
       </div>
 
       <!-- Muscles & Guidance -->
-      <div class="mt-2 text-xs text-ink-muted flex flex-wrap gap-x-3 gap-y-0.5">
+      <div class="mt-2 text-[11px] sm:text-xs text-ink-muted flex flex-wrap gap-x-2.5 gap-y-0.5">
         <span><strong class="text-ink font-semibold">เป้าหมาย:</strong> {{ exercise.mainMuscle }}</span>
         <span v-if="exercise.subMuscle" class="text-ink-muted/80">• {{ exercise.subMuscle }}</span>
       </div>
 
       <!-- Last Record Hint -->
-      <div class="mt-2.5 flex items-center justify-between gap-2 text-[11px] font-mono bg-white px-3 py-1.5 rounded-lg border border-plate/20 text-ink flex-wrap">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-ink-muted font-bold uppercase tracking-wider text-[10px]">สถิติล่าสุด:</span>
-          <span>วอร์ม <strong class="tabular-nums font-bold text-flame">{{ prevWarm }}</strong> กก.<template v-if="prevWarmReps !== null"> (<strong class="tabular-nums font-bold text-sky">{{ prevWarmReps }}</strong> ครั้ง)</template></span>
+      <div class="mt-2 flex items-center justify-between gap-1.5 text-[10px] sm:text-[11px] font-mono bg-white px-2.5 sm:px-3 py-1.5 rounded-lg border border-plate/20 text-ink flex-wrap">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-ink-muted font-bold uppercase tracking-wider text-[9px] sm:text-[10px]">สถิติล่าสุด:</span>
+          <span>วอร์ม <strong class="tabular-nums font-bold text-flame">{{ prevWarm }}</strong> กก.<template v-if="prevWarmReps !== null"> (<strong class="tabular-nums font-bold text-sky">{{ prevWarmReps }}</strong>)</template></span>
           <span class="text-plate/30">|</span>
-          <span>เล่นจริง <strong class="tabular-nums font-bold text-flame">{{ prevWork }}</strong> กก.<template v-if="prevWorkReps !== null"> (<strong class="tabular-nums font-bold text-sky">{{ prevWorkReps }}</strong> ครั้ง)</template></span>
+          <span>เล่นจริง <strong class="tabular-nums font-bold text-flame">{{ prevWork }}</strong> กก.<template v-if="prevWorkReps !== null"> (<strong class="tabular-nums font-bold text-sky">{{ prevWorkReps }}</strong>)</template></span>
         </div>
         <button
           v-if="hasAnyPrev"
           type="button"
           @click="applyAllPrev"
-          class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-flame-bg text-flame hover:bg-flame hover:text-white border border-flame/30 transition-all select-none shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
+          class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-flame-bg text-flame hover:bg-flame hover:text-white border border-flame/30 transition-all select-none shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
           title="ดึงสถิติล่าสุดทั้งน้ำหนักและจำนวนครั้งมาใส่ทุกเซ็ต"
         >
           ใช้สถิติเดิมทั้งหมด
@@ -120,16 +120,16 @@
       <!-- Progressive Overload Recommendation Banner (Working Sets) -->
       <div
         v-if="exerciseAdvice && exerciseAdvice.workAdvice"
-        class="mt-2 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all flex-wrap"
+        class="mt-2 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 p-2 sm:px-3 sm:py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all"
         :class="exerciseAdvice.workAdvice.status === 'increase'
           ? 'bg-flame-bg/80 border-flame text-ink'
           : exerciseAdvice.workAdvice.status === 'decrease'
             ? 'bg-amber-50 border-amber-500 text-ink'
             : 'bg-emerald-bg/60 border-emerald text-ink'"
       >
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <span
-            class="text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-xs select-none"
+            class="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border shadow-xs select-none"
             :class="exerciseAdvice.workAdvice.status === 'increase'
               ? 'bg-flame text-white border-plate'
               : exerciseAdvice.workAdvice.status === 'decrease'
@@ -147,7 +147,7 @@
           v-if="exerciseAdvice.workAdvice.delta !== 0"
           type="button"
           @click="applyRecommendedWeightAll"
-          class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
+          class="w-full xs:w-auto text-center text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
           :title="`คลิกเพื่อปรับค่าน้ำหนักเซ็ตเล่นจริงเป็น ${exerciseAdvice.workAdvice.suggestedWeight} กก.`"
         >
           ⚡ ปรับเซ็ตเล่นจริงเป็น {{ exerciseAdvice.workAdvice.suggestedWeight }} กก.
@@ -157,11 +157,11 @@
       <!-- Warm-up Specific Recommendation Banner (if warmup reps > 20 or < 12) -->
       <div
         v-if="exerciseAdvice && exerciseAdvice.hasWarmAdvice"
-        class="mt-2 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all flex-wrap bg-sky-50 border-sky-400 text-ink"
+        class="mt-2 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 p-2 sm:px-3 sm:py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all bg-sky-50 border-sky-400 text-ink"
       >
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <span
-            class="text-[10px] font-bold px-2 py-0.5 rounded-full border border-plate shadow-xs select-none"
+            class="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-plate shadow-xs select-none"
             :class="exerciseAdvice.warmAdvice.delta > 0 ? 'bg-flame text-white' : 'bg-amber-500 text-white'"
           >
             {{ exerciseAdvice.warmAdvice.badgeText }}
@@ -174,7 +174,7 @@
         <button
           type="button"
           @click="applyRecommendedWarmupWeight"
-          class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
+          class="w-full xs:w-auto text-center text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
           :title="`คลิกเพื่อปรับค่าน้ำหนักเซ็ตวอร์มเป็น ${exerciseAdvice.warmAdvice.suggestedWeight} กก.`"
         >
           ⚡ ปรับเซ็ตวอร์มเป็น {{ exerciseAdvice.warmAdvice.suggestedWeight }} กก.
@@ -214,56 +214,56 @@
       <div
         v-for="(set, sIdx) in exercise.sets"
         :key="sIdx"
-        class="px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-3 transition-colors"
+        class="px-2.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-3 transition-colors"
         :class="isSetDone(sIdx) ? 'bg-emerald-bg/50' : 'hover:bg-surface-low/40'"
       >
         <!-- Set Indicator & Target Reps -->
-        <div class="flex items-center gap-2 min-w-[70px] sm:min-w-[85px] flex-shrink-0">
+        <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0 min-w-[48px] sm:min-w-[76px]">
           <span
-            class="text-[11px] font-mono font-bold px-2 py-0.5 rounded tracking-wider uppercase border select-none"
+            class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded tracking-wider uppercase border select-none"
             :class="set.type === 'warm'
               ? 'bg-sky-bg text-sky border-sky/40'
               : 'bg-surface-card text-ink border-plate/30'"
           >
             {{ set.type === 'warm' ? 'W1' : `S${sIdx}` }}
           </span>
-          <span class="text-[11px] font-mono text-ink-muted select-none">
+          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none">
             {{ set.reps.replace(' ครั้ง', '') }}
           </span>
         </div>
 
         <!-- Interactive PIN Trigger Buttons (No OS Keyboard) -->
-        <div class="flex items-center gap-1.5 sm:gap-2 flex-1 justify-end max-w-xs">
+        <div class="flex items-center gap-1 sm:gap-1.5 flex-1 justify-end min-w-0">
           <!-- 1. Weight Button -->
           <button
             type="button"
             @click="openWeightKeypad(sIdx)"
-            class="h-9 px-2.5 rounded-lg border-2 border-plate flex items-center justify-center gap-1 font-mono text-xs font-bold transition-all select-none touch-manipulation min-w-[76px] sm:min-w-[84px]"
+            class="h-8 sm:h-9 px-1.5 sm:px-2.5 rounded-lg border-2 border-plate flex items-center justify-center gap-0.5 sm:gap-1 font-mono text-xs font-bold transition-all select-none touch-manipulation min-w-[62px] sm:min-w-[80px] flex-shrink-0"
             :class="getWeight(sIdx) !== ''
               ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
               : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
             title="แตะเพื่อระบุน้ำหนักด้วยแป้น PIN"
           >
-            <span class="tabular-nums font-extrabold text-sm" :class="getWeight(sIdx) !== '' ? 'text-ink' : 'text-ink-muted/60'">
+            <span class="tabular-nums font-extrabold text-xs sm:text-sm" :class="getWeight(sIdx) !== '' ? 'text-ink' : 'text-ink-muted/60'">
               {{ getWeight(sIdx) !== '' ? getWeight(sIdx) : (getPrevWeight(sIdx) || '0') }}
             </span>
-            <span class="text-[10px] text-flame font-bold">กก.</span>
+            <span class="text-[9px] sm:text-[10px] text-flame font-bold">กก.</span>
           </button>
 
           <!-- 2. Reps Button -->
           <button
             type="button"
             @click="openRepsKeypad(sIdx, set.reps)"
-            class="h-9 px-2 sm:px-2.5 rounded-lg border-2 border-plate flex items-center justify-center gap-1 font-mono text-xs font-bold transition-all select-none touch-manipulation min-w-[68px] sm:min-w-[74px]"
+            class="h-8 sm:h-9 px-1 sm:px-2 rounded-lg border-2 border-plate flex items-center justify-center gap-0.5 sm:gap-1 font-mono text-xs font-bold transition-all select-none touch-manipulation min-w-[54px] sm:min-w-[68px] flex-shrink-0"
             :class="getReps(sIdx) !== ''
               ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
               : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
             title="แตะเพื่อระบุจำนวนครั้งจริงด้วยแป้น PIN"
           >
-            <span class="tabular-nums font-extrabold text-sm" :class="getReps(sIdx) !== '' ? 'text-ink' : 'text-ink-muted/60'">
+            <span class="tabular-nums font-extrabold text-xs sm:text-sm" :class="getReps(sIdx) !== '' ? 'text-ink' : 'text-ink-muted/60'">
               {{ getReps(sIdx) !== '' ? getReps(sIdx) : (getPrevReps(sIdx) || targetRepNumber(set.reps) || '—') }}
             </span>
-            <span class="text-[10px] text-sky font-bold">ครั้ง</span>
+            <span class="text-[9px] sm:text-[10px] text-sky font-bold">ครั้ง</span>
           </button>
 
           <!-- Progressive Overload Advice Chip for this Set -->
@@ -271,7 +271,7 @@
             v-if="getSetAdvice(sIdx)"
             type="button"
             @click="applySetAdvice(sIdx)"
-            class="text-[10px] font-mono font-bold px-1.5 py-1 rounded-md border-2 border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all select-none whitespace-nowrap"
+            class="h-8 sm:h-9 px-1.5 sm:px-2 rounded-md border-2 border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all select-none whitespace-nowrap text-[9px] sm:text-[10px] font-mono font-bold flex items-center justify-center flex-shrink-0"
             :class="getSetAdvice(sIdx).badgeClass"
             :title="`${getSetAdvice(sIdx).reasonText} (คลิกเพื่อปรับน้ำหนักเซ็ตนี้ทันที)`"
           >
@@ -293,16 +293,16 @@
           <button
             type="button"
             @click="onToggle(sIdx)"
-            class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-base transition-all select-none border-2 border-plate flex-shrink-0"
+            class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base transition-all select-none border-2 border-plate flex-shrink-0"
             :class="isSetDone(sIdx)
-              ? 'bg-emerald text-white shadow-[2px_2px_0px_#059669]'
-              : 'bg-surface hover:bg-paper-subtle text-ink-muted shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
+              ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669] sm:shadow-[2px_2px_0px_#059669]'
+              : 'bg-surface hover:bg-paper-subtle text-ink-muted shadow-[1.5px_1.5px_0px_#1e2220] sm:shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
             title="ทำเซ็ตนี้สำเร็จ"
           >
-            <svg v-if="isSetDone(sIdx)" class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+            <svg v-if="isSetDone(sIdx)" class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
-            <span v-else class="text-xs font-mono opacity-50 font-bold">✓</span>
+            <span v-else class="text-[11px] sm:text-xs font-mono opacity-50 font-bold">✓</span>
           </button>
         </div>
       </div>

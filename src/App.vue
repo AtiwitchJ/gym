@@ -25,7 +25,7 @@
     <DayTabs />
 
     <!-- Main Container -->
-    <main class="max-w-3xl mx-auto px-4 py-4">
+    <main class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden">
       <!-- 1. Workout Day View -->
       <div v-if="isWorkoutDay && currentDayData">
         <!-- Routine Banner -->

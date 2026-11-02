@@ -12,6 +12,7 @@
     touch-action: manipulation;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    overflow-x: hidden;
   }
 
   body {
@@ -22,6 +23,9 @@
     overscroll-behavior-y: none;
     -webkit-user-select: none;
     user-select: none;
+    overflow-x: hidden;
+    width: 100%;
+    min-width: 320px;
   }
 
   button, a, input, select, textarea, [role="button"] {
