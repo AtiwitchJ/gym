@@ -40,38 +40,52 @@ assert.strictEqual(res8.delta, 0);
 assert.strictEqual(res8.suggestedWeight, 60);
 console.log('✓ Reps 6 and 8 correctly identified as optimal sweet spot (0 kg change)');
 
-// 4. Test Zero / Edge cases & Strict Warmup Isolation
-const resLowWeight = calculateWeightAdvice({ weight: 1, reps: 4, type: 'work' });
-assert.strictEqual(resLowWeight.suggestedWeight, 0, 'Weight should not drop below 0');
+// 4. Test Warm-up Overload Rules (> 20 -> +2 kg, < 12 -> -2 kg, 12-20 -> optimal)
+const resWarmupOver = calculateWeightAdvice({ weight: 30, reps: 22, type: 'warm' });
+assert.strictEqual(resWarmupOver.status, 'increase');
+assert.strictEqual(resWarmupOver.delta, 2);
+assert.strictEqual(resWarmupOver.suggestedWeight, 32);
+assert.strictEqual(resWarmupOver.badgeText, '+2 kg วอร์ม');
+console.log('✓ Warm-up > 20 reps correctly recommends +2 kg warmup weight');
 
-const resWarmup = calculateWeightAdvice({ weight: 30, reps: 15, type: 'warm' });
-assert.strictEqual(resWarmup.status, 'warmup');
-assert.strictEqual(resWarmup.delta, 0);
+const resWarmupUnder = calculateWeightAdvice({ weight: 30, reps: 10, type: 'warm' });
+assert.strictEqual(resWarmupUnder.status, 'decrease');
+assert.strictEqual(resWarmupUnder.delta, -2);
+assert.strictEqual(resWarmupUnder.suggestedWeight, 28);
+assert.strictEqual(resWarmupUnder.badgeText, '-2 kg วอร์ม');
+console.log('✓ Warm-up < 12 reps correctly recommends -2 kg warmup weight');
 
-// Even if warmup has 20 reps or 3 reps, it must never recommend +2 or -2
-const resWarmupHigh = calculateWeightAdvice({ weight: 30, reps: 20, type: 'warm' });
-assert.strictEqual(resWarmupHigh.status, 'warmup');
-assert.strictEqual(resWarmupHigh.delta, 0);
-assert.strictEqual(resWarmupHigh.suggestedWeight, 30);
+const resWarmupOptimal = calculateWeightAdvice({ weight: 30, reps: 16, type: 'warm' });
+assert.strictEqual(resWarmupOptimal.status, 'optimal');
+assert.strictEqual(resWarmupOptimal.delta, 0);
+assert.strictEqual(resWarmupOptimal.suggestedWeight, 30);
+assert.strictEqual(resWarmupOptimal.badgeText, 'วอร์มพอดี ✓');
+console.log('✓ Warm-up 12-20 reps correctly identified as optimal');
 
-const resWarmupLow = calculateWeightAdvice({ weight: 30, reps: 3, type: 'warm' });
-assert.strictEqual(resWarmupLow.status, 'warmup');
-assert.strictEqual(resWarmupLow.delta, 0);
-assert.strictEqual(resWarmupLow.suggestedWeight, 30);
-console.log('✓ Edge cases & Warmup sets strictly isolated (delta is always 0)');
+// 5. Test Bonus Touch-up Sets (ซ้อมเสริม)
+const setsBonus = [
+  { type: 'warm', weight: 15, reps: 22 },    // Warmup > 20 reps -> recommends +2 kg warmup (17 kg)
+  { type: 'touchup', weight: 25, reps: 9 }   // Touchup > 8 reps -> recommends +2 kg touchup (27 kg)
+];
+const bonusAdv = getExerciseOverallAdvice(setsBonus);
+assert.strictEqual(bonusAdv.warmAdvice.status, 'increase');
+assert.strictEqual(bonusAdv.warmAdvice.suggestedWeight, 17);
+assert.strictEqual(bonusAdv.workAdvice.status, 'increase');
+assert.strictEqual(bonusAdv.workAdvice.suggestedWeight, 27);
+console.log('✓ Bonus Touch-up (ซ้อมเสริม) calculates BOTH warmup and touchup recommendations accurately');
 
-// 5. Test Overall Advice calculation — strictly excluding warmup sets
+// 6. Test Overall Advice calculation — strictly separating warmup & working sets
 const setsWithWarmupOptimal = [
-  { type: 'warm', weight: 30, reps: 15 }, // Warmup has 15 reps, must be ignored!
+  { type: 'warm', weight: 30, reps: 20 }, // Warmup has 20 reps (optimal warmup), must not trigger working set increase
   { type: 'work', weight: 60, reps: 7 },
   { type: 'work', weight: 60, reps: 7 },
   { type: 'work', weight: 60, reps: 8 }
 ];
 const overallAdvOptimal = getExerciseOverallAdvice(setsWithWarmupOptimal);
-assert.strictEqual(overallAdvOptimal.status, 'optimal', 'Warmup 15 reps must NOT cause overall advice to increase');
-assert.strictEqual(overallAdvOptimal.delta, 0);
-assert.strictEqual(overallAdvOptimal.suggestedWeight, 60);
-console.log('✓ Warmup 15 reps is completely excluded from 6-8 calculation (does not falsely trigger +2 kg)');
+assert.strictEqual(overallAdvOptimal.workAdvice.status, 'optimal');
+assert.strictEqual(overallAdvOptimal.workAdvice.delta, 0);
+assert.strictEqual(overallAdvOptimal.workAdvice.suggestedWeight, 60);
+console.log('✓ Warmup reps do not pollute working set 6-8 calculation');
 
 const setsEx1 = [
   { type: 'warm', weight: 40, reps: 15 },

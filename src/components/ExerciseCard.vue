@@ -117,40 +117,67 @@
         </button>
       </div>
 
-      <!-- Progressive Overload Recommendation Banner -->
+      <!-- Progressive Overload Recommendation Banner (Working Sets) -->
       <div
-        v-if="exerciseAdvice"
+        v-if="exerciseAdvice && exerciseAdvice.workAdvice"
         class="mt-2 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all flex-wrap"
-        :class="exerciseAdvice.status === 'increase'
+        :class="exerciseAdvice.workAdvice.status === 'increase'
           ? 'bg-flame-bg/80 border-flame text-ink'
-          : exerciseAdvice.status === 'decrease'
+          : exerciseAdvice.workAdvice.status === 'decrease'
             ? 'bg-amber-50 border-amber-500 text-ink'
             : 'bg-emerald-bg/60 border-emerald text-ink'"
       >
         <div class="flex items-center gap-2 flex-wrap">
           <span
             class="text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-xs select-none"
-            :class="exerciseAdvice.status === 'increase'
+            :class="exerciseAdvice.workAdvice.status === 'increase'
               ? 'bg-flame text-white border-plate'
-              : exerciseAdvice.status === 'decrease'
+              : exerciseAdvice.workAdvice.status === 'decrease'
                 ? 'bg-amber-500 text-white border-plate'
                 : 'bg-emerald text-white border-plate'"
           >
-            {{ exerciseAdvice.badgeText }}
+            {{ exerciseAdvice.workAdvice.badgeText }}
           </span>
           <span class="text-xs font-bold leading-tight">
-            {{ exerciseAdvice.headline }}
+            {{ exerciseAdvice.workAdvice.headline }}
           </span>
         </div>
 
         <button
-          v-if="exerciseAdvice.delta !== 0"
+          v-if="exerciseAdvice.workAdvice.delta !== 0"
           type="button"
           @click="applyRecommendedWeightAll"
           class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
-          :title="`คลิกเพื่อปรับค่าน้ำหนักเซ็ตเล่นจริงเป็น ${exerciseAdvice.suggestedWeight} กก.`"
+          :title="`คลิกเพื่อปรับค่าน้ำหนักเซ็ตเล่นจริงเป็น ${exerciseAdvice.workAdvice.suggestedWeight} กก.`"
         >
-          ⚡ ปรับเซ็ตเล่นจริงเป็น {{ exerciseAdvice.suggestedWeight }} กก.
+          ⚡ ปรับเซ็ตเล่นจริงเป็น {{ exerciseAdvice.workAdvice.suggestedWeight }} กก.
+        </button>
+      </div>
+
+      <!-- Warm-up Specific Recommendation Banner (if warmup reps > 20 or < 12) -->
+      <div
+        v-if="exerciseAdvice && exerciseAdvice.hasWarmAdvice"
+        class="mt-2 flex items-center justify-between gap-2 px-3 py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all flex-wrap bg-sky-50 border-sky-400 text-ink"
+      >
+        <div class="flex items-center gap-2 flex-wrap">
+          <span
+            class="text-[10px] font-bold px-2 py-0.5 rounded-full border border-plate shadow-xs select-none"
+            :class="exerciseAdvice.warmAdvice.delta > 0 ? 'bg-flame text-white' : 'bg-amber-500 text-white'"
+          >
+            {{ exerciseAdvice.warmAdvice.badgeText }}
+          </span>
+          <span class="text-xs font-bold leading-tight">
+            {{ exerciseAdvice.warmAdvice.reasonText }}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          @click="applyRecommendedWarmupWeight"
+          class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
+          :title="`คลิกเพื่อปรับค่าน้ำหนักเซ็ตวอร์มเป็น ${exerciseAdvice.warmAdvice.suggestedWeight} กก.`"
+        >
+          ⚡ ปรับเซ็ตวอร์มเป็น {{ exerciseAdvice.warmAdvice.suggestedWeight }} กก.
         </button>
       </div>
     </div>
@@ -384,13 +411,13 @@ const { isWarmupType, calculateWeightAdvice, getExerciseOverallAdvice } = useWei
 
 function getSetAdvice(sIdx) {
   const set = props.exercise.sets[sIdx];
-  if (!set || isWarmupType(set.type)) return null;
+  if (!set) return null;
 
   const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
   const reps = getReps(sIdx) !== '' ? getReps(sIdx) : getPrevReps(sIdx);
   if (!reps || Number(reps) <= 0) return null;
 
-  return calculateWeightAdvice({ weight: wt, reps, type: 'work' });
+  return calculateWeightAdvice({ weight: wt, reps, type: set.type });
 }
 
 function applySetAdvice(sIdx) {
@@ -414,11 +441,21 @@ const exerciseAdvice = computed(() => {
 });
 
 function applyRecommendedWeightAll() {
-  if (!exerciseAdvice.value || exerciseAdvice.value.suggestedWeight === undefined) return;
-  const targetWt = exerciseAdvice.value.suggestedWeight;
+  const targetWt = exerciseAdvice.value?.workAdvice?.suggestedWeight || exerciseAdvice.value?.suggestedWeight;
+  if (!targetWt) return;
   props.exercise.sets.forEach((set, sIdx) => {
     // ข้ามเซ็ตวอร์มโดยเด็ดขาด ห้ามนำน้ำหนักเล่นจริงไปทับเซ็ตวอร์ม
     if (!isWarmupType(set.type)) {
+      updateWeight(currentDay.value, props.exercise.id, sIdx, targetWt);
+    }
+  });
+}
+
+function applyRecommendedWarmupWeight() {
+  if (!exerciseAdvice.value?.warmAdvice?.suggestedWeight) return;
+  const targetWt = exerciseAdvice.value.warmAdvice.suggestedWeight;
+  props.exercise.sets.forEach((set, sIdx) => {
+    if (isWarmupType(set.type)) {
       updateWeight(currentDay.value, props.exercise.id, sIdx, targetWt);
     }
   });
@@ -429,20 +466,26 @@ function openWeightKeypad(sIdx) {
   const isWarm = isWarmupType(set?.type);
   const currentVal = getWeight(sIdx);
   const prevVal = getPrevWeight(sIdx);
+  const advice = getSetAdvice(sIdx);
 
-  // วอร์มและเล่นจริงห้ามนำมาคิดรวมกัน: เซ็ตวอร์มจะไม่มีคำแนะนำ Progressive Overload ของเซ็ตเล่นจริง
   let suggestedVal = null;
   let suggestedLabel = '';
 
-  if (!isWarm) {
-    const advice = getSetAdvice(sIdx);
-    suggestedVal = advice && advice.delta !== 0
-      ? advice.suggestedWeight
-      : (exerciseAdvice.value?.delta !== 0 ? exerciseAdvice.value?.suggestedWeight : null);
-
-    if (suggestedVal !== null && suggestedVal !== undefined) {
-      const delta = (advice?.delta !== undefined && advice?.delta !== 0) ? advice.delta : exerciseAdvice.value?.delta;
-      suggestedLabel = `แนะนำ: ${suggestedVal} กก. (${delta > 0 ? '+2' : '-2'})`;
+  if (isWarm) {
+    if (advice && advice.delta !== 0) {
+      suggestedVal = advice.suggestedWeight;
+      suggestedLabel = `แนะนำวอร์ม: ${suggestedVal} กก. (${advice.delta > 0 ? '+2' : '-2'})`;
+    } else if (exerciseAdvice.value?.warmAdvice && exerciseAdvice.value.warmAdvice.delta !== 0) {
+      suggestedVal = exerciseAdvice.value.warmAdvice.suggestedWeight;
+      suggestedLabel = `แนะนำวอร์ม: ${suggestedVal} กก. (${exerciseAdvice.value.warmAdvice.delta > 0 ? '+2' : '-2'})`;
+    }
+  } else {
+    if (advice && advice.delta !== 0) {
+      suggestedVal = advice.suggestedWeight;
+      suggestedLabel = `แนะนำ: ${suggestedVal} กก. (${advice.delta > 0 ? '+2' : '-2'})`;
+    } else if (exerciseAdvice.value?.workAdvice && exerciseAdvice.value.workAdvice.delta !== 0) {
+      suggestedVal = exerciseAdvice.value.workAdvice.suggestedWeight;
+      suggestedLabel = `แนะนำ: ${suggestedVal} กก. (${exerciseAdvice.value.workAdvice.delta > 0 ? '+2' : '-2'})`;
     }
   }
 
@@ -451,7 +494,7 @@ function openWeightKeypad(sIdx) {
     unit: 'กก.',
     title: props.exercise.name,
     subtitle: `เซ็ต ${isWarm ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`} • น้ำหนักยก`,
-    currentValue: currentVal !== '' ? currentVal : (!isWarm && suggestedVal ? suggestedVal : (prevVal || '')),
+    currentValue: currentVal !== '' ? currentVal : (suggestedVal || prevVal || ''),
     suggestedHint: suggestedVal,
     suggestedLabel,
     prevHint: prevVal ? `${prevVal}` : '',
