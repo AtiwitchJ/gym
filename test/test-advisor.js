@@ -74,18 +74,37 @@ assert.strictEqual(bonusAdv.workAdvice.status, 'increase');
 assert.strictEqual(bonusAdv.workAdvice.suggestedWeight, 27);
 console.log('✓ Bonus Touch-up (ซ้อมเสริม) calculates BOTH warmup and touchup recommendations accurately');
 
-// 6. Test Overall Advice calculation — strictly separating warmup & working sets
+// 6. Test Overall Advice calculation — next week progressive overload when playing in sweet spot (6-8 reps)
 const setsWithWarmupOptimal = [
-  { type: 'warm', weight: 30, reps: 20 }, // Warmup has 20 reps (optimal warmup), must not trigger working set increase
+  { type: 'warm', weight: 30, reps: 16 }, // Warmup 16 reps (12-19 optimal warmup)
   { type: 'work', weight: 60, reps: 7 },
   { type: 'work', weight: 60, reps: 7 },
   { type: 'work', weight: 60, reps: 8 }
 ];
 const overallAdvOptimal = getExerciseOverallAdvice(setsWithWarmupOptimal);
-assert.strictEqual(overallAdvOptimal.workAdvice.status, 'optimal');
-assert.strictEqual(overallAdvOptimal.workAdvice.delta, 0);
-assert.strictEqual(overallAdvOptimal.workAdvice.suggestedWeight, 60);
-console.log('✓ Warmup reps do not pollute working set 6-8 calculation');
+assert.strictEqual(overallAdvOptimal.warmAdvice.status, 'optimal');
+assert.strictEqual(overallAdvOptimal.warmAdvice.delta, 0);
+assert.strictEqual(overallAdvOptimal.warmAdvice.suggestedWeight, 30);
+assert.strictEqual(overallAdvOptimal.workAdvice.status, 'increase');
+assert.strictEqual(overallAdvOptimal.workAdvice.delta, 2);
+assert.strictEqual(overallAdvOptimal.workAdvice.suggestedWeight, 62);
+console.log('✓ Successfully playing in 6-8 sweet spot correctly recommends +2 kg for next week');
+
+// 7. Test Leg 01 (Seated Leg Press Machine: W1 65kgx20, S1-S3 84kgx8)
+const setsLeg01 = [
+  { type: 'warm', weight: 65, reps: 20 },
+  { type: 'work', weight: 84, reps: 8 },
+  { type: 'work', weight: 84, reps: 8 },
+  { type: 'work', weight: 84, reps: 8 }
+];
+const leg01Advice = getExerciseOverallAdvice(setsLeg01);
+assert.strictEqual(leg01Advice.warmAdvice.status, 'increase');
+assert.strictEqual(leg01Advice.warmAdvice.delta, 2);
+assert.strictEqual(leg01Advice.warmAdvice.suggestedWeight, 67);
+assert.strictEqual(leg01Advice.workAdvice.status, 'increase');
+assert.strictEqual(leg01Advice.workAdvice.delta, 2);
+assert.strictEqual(leg01Advice.workAdvice.suggestedWeight, 86);
+console.log('✓ Leg 01 (played 84kg x 8 reps) correctly recommends 86kg (+2kg) for next week!');
 
 const setsEx1 = [
   { type: 'warm', weight: 40, reps: 15 },

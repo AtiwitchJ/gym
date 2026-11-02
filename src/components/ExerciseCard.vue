@@ -129,8 +129,8 @@
                 วอร์ม (15–20)
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
-                <span v-if="prevWarm !== 0 || prevWarmReps !== null" class="font-bold">
-                  {{ prevWarm }} kg × {{ prevWarmReps || '—' }}
+                <span v-if="displayWarmWeight !== 0 || displayWarmReps !== null" class="font-bold">
+                  {{ displayWarmWeight }} kg × {{ displayWarmReps || '—' }}
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
@@ -138,14 +138,14 @@
                 <span v-if="exerciseAdvice?.warmAdvice">
                   {{ exerciseAdvice.warmAdvice.suggestedWeight }} kg
                 </span>
-                <span v-else-if="prevWarm !== 0">
-                  {{ prevWarm }} kg
+                <span v-else-if="displayWarmWeight !== 0">
+                  {{ displayWarmWeight }} kg
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span
-                  v-if="exerciseAdvice?.warmAdvice && (prevWarm !== 0 || prevWarmReps !== null)"
+                  v-if="exerciseAdvice?.warmAdvice && (displayWarmWeight !== 0 || displayWarmReps !== null)"
                   class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
                   :class="exerciseAdvice.warmAdvice.badgeClass"
                 >
@@ -161,8 +161,8 @@
                 เล่นจริง (6–8)
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
-                <span v-if="prevWork !== 0 || prevWorkReps !== null" class="font-bold">
-                  {{ prevWork }} kg × {{ prevWorkReps || '—' }}
+                <span v-if="displayWorkWeight !== 0 || displayWorkReps !== null" class="font-bold">
+                  {{ displayWorkWeight }} kg × {{ displayWorkReps || '—' }}
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
@@ -170,14 +170,14 @@
                 <span v-if="exerciseAdvice?.workAdvice">
                   {{ exerciseAdvice.workAdvice.suggestedWeight }} kg
                 </span>
-                <span v-else-if="prevWork !== 0">
-                  {{ prevWork }} kg
+                <span v-else-if="displayWorkWeight !== 0">
+                  {{ displayWorkWeight }} kg
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span
-                  v-if="exerciseAdvice?.workAdvice && (prevWork !== 0 || prevWorkReps !== null)"
+                  v-if="exerciseAdvice?.workAdvice && (displayWorkWeight !== 0 || displayWorkReps !== null)"
                   class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
                   :class="exerciseAdvice.workAdvice.badgeClass"
                 >
@@ -364,6 +364,34 @@ const prevWorkReps = computed(() => (exLast.value.reps_1 !== undefined && exLast
 
 const hasAnyPrev = computed(() => {
   return prevWarm.value > 0 || prevWork.value > 0 || prevWarmReps.value !== null || prevWorkReps.value !== null;
+});
+
+const displayWarmWeight = computed(() => {
+  const cur = getWeight(0);
+  if (cur !== '' && Number(cur) > 0) return Number(cur);
+  return prevWarm.value;
+});
+
+const displayWarmReps = computed(() => {
+  const cur = getReps(0);
+  if (cur !== '' && Number(cur) > 0) return Number(cur);
+  return prevWarmReps.value;
+});
+
+const displayWorkWeight = computed(() => {
+  for (let i = props.exercise.sets.length - 1; i >= 1; i--) {
+    const cur = getWeight(i);
+    if (cur !== '' && Number(cur) > 0) return Number(cur);
+  }
+  return prevWork.value;
+});
+
+const displayWorkReps = computed(() => {
+  for (let i = props.exercise.sets.length - 1; i >= 1; i--) {
+    const cur = getReps(i);
+    if (cur !== '' && Number(cur) > 0) return Number(cur);
+  }
+  return prevWorkReps.value;
 });
 
 function getPrevWeight(sIdx) {

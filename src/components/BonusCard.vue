@@ -118,8 +118,8 @@
                 วอร์ม (15–20)
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
-                <span v-if="prevWarm !== 0 || prevWarmReps !== null" class="font-bold">
-                  {{ prevWarm }} kg × {{ prevWarmReps || '—' }}
+                <span v-if="displayWarmWeight !== 0 || displayWarmReps !== null" class="font-bold">
+                  {{ displayWarmWeight }} kg × {{ displayWarmReps || '—' }}
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
@@ -127,14 +127,14 @@
                 <span v-if="exerciseAdvice?.warmAdvice">
                   {{ exerciseAdvice.warmAdvice.suggestedWeight }} kg
                 </span>
-                <span v-else-if="prevWarm !== 0">
-                  {{ prevWarm }} kg
+                <span v-else-if="displayWarmWeight !== 0">
+                  {{ displayWarmWeight }} kg
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span
-                  v-if="exerciseAdvice?.warmAdvice && (prevWarm !== 0 || prevWarmReps !== null)"
+                  v-if="exerciseAdvice?.warmAdvice && (displayWarmWeight !== 0 || displayWarmReps !== null)"
                   class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
                   :class="exerciseAdvice.warmAdvice.badgeClass"
                 >
@@ -150,8 +150,8 @@
                 ซ้อมเสริม (6–8)
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
-                <span v-if="prevTouch !== 0 || prevTouchReps !== null" class="font-bold">
-                  {{ prevTouch }} kg × {{ prevTouchReps || '—' }}
+                <span v-if="displayTouchWeight !== 0 || displayTouchReps !== null" class="font-bold">
+                  {{ displayTouchWeight }} kg × {{ displayTouchReps || '—' }}
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
@@ -159,14 +159,14 @@
                 <span v-if="exerciseAdvice?.workAdvice">
                   {{ exerciseAdvice.workAdvice.suggestedWeight }} kg
                 </span>
-                <span v-else-if="prevTouch !== 0">
-                  {{ prevTouch }} kg
+                <span v-else-if="displayTouchWeight !== 0">
+                  {{ displayTouchWeight }} kg
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span
-                  v-if="exerciseAdvice?.workAdvice && (prevTouch !== 0 || prevTouchReps !== null)"
+                  v-if="exerciseAdvice?.workAdvice && (displayTouchWeight !== 0 || displayTouchReps !== null)"
                   class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
                   :class="exerciseAdvice.workAdvice.badgeClass"
                 >
@@ -353,6 +353,34 @@ const prevTouchReps = computed(() => (exLast.value.reps_1 !== undefined && exLas
 
 const hasAnyPrev = computed(() => {
   return prevWarm.value > 0 || prevTouch.value > 0 || prevWarmReps.value !== null || prevTouchReps.value !== null;
+});
+
+const displayWarmWeight = computed(() => {
+  const cur = getWeight(0);
+  if (cur !== '' && Number(cur) > 0) return Number(cur);
+  return prevWarm.value;
+});
+
+const displayWarmReps = computed(() => {
+  const cur = getReps(0);
+  if (cur !== '' && Number(cur) > 0) return Number(cur);
+  return prevWarmReps.value;
+});
+
+const displayTouchWeight = computed(() => {
+  for (let i = props.bonus.sets.length - 1; i >= 1; i--) {
+    const cur = getWeight(i);
+    if (cur !== '' && Number(cur) > 0) return Number(cur);
+  }
+  return prevTouch.value;
+});
+
+const displayTouchReps = computed(() => {
+  for (let i = props.bonus.sets.length - 1; i >= 1; i--) {
+    const cur = getReps(i);
+    if (cur !== '' && Number(cur) > 0) return Number(cur);
+  }
+  return prevTouchReps.value;
 });
 
 function getPrevWeight(sIdx) {

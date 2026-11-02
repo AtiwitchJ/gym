@@ -137,48 +137,72 @@ export function getExerciseOverallAdvice(sets = []) {
   let warmAdvice = null;
   if (warmSets.length > 0) {
     const lastWarm = warmSets[warmSets.length - 1];
-    warmAdvice = calculateWeightAdvice({
-      weight: lastWarm.weight,
-      reps: lastWarm.reps,
-      type: 'warm'
-    });
+    const warmReps = Number(lastWarm.reps);
+    const warmWeight = Number(lastWarm.weight) || 0;
+
+    if (warmReps >= 20) {
+      const suggested = Math.round((warmWeight + 2) * 10) / 10;
+      warmAdvice = {
+        type: 'warm',
+        status: 'increase',
+        delta: 2,
+        baseWeight: warmWeight,
+        suggestedWeight: suggested,
+        badgeText: '+2 kg',
+        badgeClass: 'bg-flame text-white border-plate shadow-[0.5px_0.5px_0px_#1e2220]',
+        headline: `รอบหน้าวอร์ม: +2 กก. (${suggested} กก.)`,
+        reason: `วอร์มได้ ${warmReps} ครั้ง (>= 20) แนะนำเพิ่มน้ำหนักวอร์มสัปดาห์หน้า`,
+        actionLabel: `${suggested} กก.`
+      };
+    } else if (warmReps < 12) {
+      const suggested = Math.max(0, Math.round((warmWeight - 2) * 10) / 10);
+      warmAdvice = {
+        type: 'warm',
+        status: 'decrease',
+        delta: -2,
+        baseWeight: warmWeight,
+        suggestedWeight: suggested,
+        badgeText: '-2 kg',
+        badgeClass: 'bg-amber-500 text-white border-plate shadow-[0.5px_0.5px_0px_#1e2220]',
+        headline: `รอบหน้าวอร์ม: -2 กก. (${suggested} กก.)`,
+        reason: `วอร์มได้ ${warmReps} ครั้ง (< 12) แนะนำลดน้ำหนักวอร์มลง`,
+        actionLabel: `${suggested} กก.`
+      };
+    } else {
+      warmAdvice = {
+        type: 'warm',
+        status: 'optimal',
+        delta: 0,
+        baseWeight: warmWeight,
+        suggestedWeight: warmWeight,
+        badgeText: '0 kg',
+        badgeClass: 'bg-emerald text-white border-plate shadow-[0.5px_0.5px_0px_#059669]',
+        headline: `รอบหน้าวอร์ม: คงเดิม (${warmWeight} กก.)`,
+        reason: `วอร์มได้ ${warmReps} ครั้ง (12–19) กำลังพอดี`,
+        actionLabel: `${warmWeight} กก.`
+      };
+    }
   }
 
   let workAdvice = null;
   if (workSets.length > 0) {
-    let increaseCount = 0;
     let decreaseCount = 0;
-    let optimalCount = 0;
     let lastWorkWeight = 0;
 
     workSets.forEach(s => {
-      const advice = calculateWeightAdvice({ weight: s.weight, reps: s.reps, type: s.type || 'work' });
-      if (advice && advice.type !== 'warm') {
-        if (advice.delta > 0) increaseCount++;
-        else if (advice.delta < 0) decreaseCount++;
-        else optimalCount++;
-        lastWorkWeight = advice.currentWeight;
-      }
+      const r = Number(s.reps);
+      const w = Number(s.weight) || 0;
+      if (w > 0) lastWorkWeight = w;
+      if (r < 6) decreaseCount++;
     });
 
     const isTouch = workSets.some(s => s.type === 'touchup' || s.type === 'touch');
     const setLabel = isTouch ? 'เซ็ตเล่นเสริม' : 'เซ็ตเล่นจริง';
 
-    if (increaseCount >= workSets.length / 2) {
-      const suggested = Math.round((lastWorkWeight + 2) * 10) / 10;
-      workAdvice = {
-        type: isTouch ? 'touch' : 'work',
-        status: 'increase',
-        delta: 2,
-        baseWeight: lastWorkWeight,
-        suggestedWeight: suggested,
-        badgeText: '+2 kg',
-        badgeClass: 'bg-flame text-white',
-        headline: `รอบหน้า: +2 กก. (${suggested} กก.)`,
-        reason: `ยกเกิน 8 ครั้ง`,
-        actionLabel: `${suggested} กก.`
-      };
-    } else if (decreaseCount >= workSets.length / 2) {
+    // Rule:
+    // If < 6 reps (majority failed to reach 6 reps): decrease by -2 kg
+    // If >= 6 reps (achieved 6-8 sweet spot or > 8): for NEXT WEEK, progressive overload +2 kg!
+    if (decreaseCount >= workSets.length / 2) {
       const suggested = Math.max(0, Math.round((lastWorkWeight - 2) * 10) / 10);
       workAdvice = {
         type: isTouch ? 'touch' : 'work',
@@ -187,23 +211,24 @@ export function getExerciseOverallAdvice(sets = []) {
         baseWeight: lastWorkWeight,
         suggestedWeight: suggested,
         badgeText: '-2 kg',
-        badgeClass: 'bg-amber-500 text-white',
+        badgeClass: 'bg-amber-500 text-white border-plate shadow-[0.5px_0.5px_0px_#1e2220]',
         headline: `รอบหน้า: -2 กก. (${suggested} กก.)`,
-        reason: `ยกไม่ถึง 6 ครั้ง`,
+        reason: `ยกไม่ถึง 6 ครั้ง แนะนำลดน้ำหนักลง`,
         actionLabel: `${suggested} กก.`
       };
     } else {
+      const suggested = Math.round((lastWorkWeight + 2) * 10) / 10;
       workAdvice = {
         type: isTouch ? 'touch' : 'work',
-        status: 'optimal',
-        delta: 0,
+        status: 'increase',
+        delta: 2,
         baseWeight: lastWorkWeight,
-        suggestedWeight: lastWorkWeight,
-        badgeText: '0 kg',
-        badgeClass: 'bg-emerald text-white',
-        headline: `รอบหน้า: คงเดิม (${lastWorkWeight} กก.)`,
-        reason: `อยู่ในเกณฑ์ 6–8 ครั้ง`,
-        actionLabel: `${lastWorkWeight} กก.`
+        suggestedWeight: suggested,
+        badgeText: '+2 kg',
+        badgeClass: 'bg-flame text-white border-plate shadow-[0.5px_0.5px_0px_#1e2220]',
+        headline: `รอบหน้า: +2 กก. (${suggested} กก.)`,
+        reason: `เล่นได้ตามเป้าหมาย (6–8 ครั้งขึ้นไป) แนะนำเพิ่มน้ำหนักสัปดาห์หน้า`,
+        actionLabel: `${suggested} กก.`
       };
     }
   }
