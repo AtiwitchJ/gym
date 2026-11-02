@@ -117,68 +117,33 @@
         </button>
       </div>
 
-      <!-- Progressive Overload Recommendation Banner (Working Sets) -->
+      <!-- Next Session Target Strip (Low Verbosity, No Emojis) -->
       <div
-        v-if="exerciseAdvice && exerciseAdvice.workAdvice"
-        class="mt-2 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 p-2 sm:px-3 sm:py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all"
-        :class="exerciseAdvice.workAdvice.status === 'increase'
-          ? 'bg-flame-bg/80 border-flame text-ink'
-          : exerciseAdvice.workAdvice.status === 'decrease'
-            ? 'bg-amber-50 border-amber-500 text-ink'
-            : 'bg-emerald-bg/60 border-emerald text-ink'"
+        v-if="exerciseAdvice && (exerciseAdvice.workAdvice || exerciseAdvice.warmAdvice)"
+        class="mt-2 px-2.5 py-1.5 rounded-md border border-plate/30 bg-paper-subtle text-[11px] font-mono flex items-center justify-between gap-1.5 flex-wrap"
       >
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <span
-            class="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border shadow-xs select-none"
-            :class="exerciseAdvice.workAdvice.status === 'increase'
-              ? 'bg-flame text-white border-plate'
-              : exerciseAdvice.workAdvice.status === 'decrease'
-                ? 'bg-amber-500 text-white border-plate'
-                : 'bg-emerald text-white border-plate'"
-          >
-            {{ exerciseAdvice.workAdvice.badgeText }}
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-[9px] uppercase tracking-wider font-bold text-ink-muted">เป้าหมายรอบหน้า:</span>
+          <span v-if="exerciseAdvice.warmAdvice" class="text-sky-700 font-bold">
+            วอร์ม {{ exerciseAdvice.warmAdvice.suggestedWeight }} kg
+            <span class="text-[9px] font-normal" :class="exerciseAdvice.warmAdvice.delta > 0 ? 'text-flame' : exerciseAdvice.warmAdvice.delta < 0 ? 'text-amber-600' : 'text-ink-muted'">
+              ({{ exerciseAdvice.warmAdvice.delta > 0 ? '+2' : exerciseAdvice.warmAdvice.delta < 0 ? '-2' : '0' }})
+            </span>
           </span>
-          <span class="text-xs font-bold leading-tight">
-            {{ exerciseAdvice.workAdvice.headline }}
+          <span v-if="exerciseAdvice.warmAdvice && exerciseAdvice.workAdvice" class="text-plate/30">|</span>
+          <span v-if="exerciseAdvice.workAdvice" class="text-ink font-bold">
+            จริง {{ exerciseAdvice.workAdvice.suggestedWeight }} kg
+            <span class="text-[9px] font-normal" :class="exerciseAdvice.workAdvice.delta > 0 ? 'text-flame' : exerciseAdvice.workAdvice.delta < 0 ? 'text-amber-600' : 'text-emerald'">
+              ({{ exerciseAdvice.workAdvice.delta > 0 ? '+2' : exerciseAdvice.workAdvice.delta < 0 ? '-2' : '0' }})
+            </span>
           </span>
         </div>
-
-        <button
-          v-if="exerciseAdvice.workAdvice.delta !== 0"
-          type="button"
-          @click="applyRecommendedWeightAll"
-          class="w-full xs:w-auto text-center text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
-          :title="`คลิกเพื่อปรับค่าน้ำหนักเซ็ตเล่นจริงเป็น ${exerciseAdvice.workAdvice.suggestedWeight} กก.`"
+        <span
+          class="text-[9px] font-bold px-1.5 py-0.5 rounded border border-plate shadow-[1px_1px_0px_#1e2220]"
+          :class="exerciseAdvice.workAdvice ? exerciseAdvice.workAdvice.badgeClass : exerciseAdvice.warmAdvice.badgeClass"
         >
-          ⚡ ปรับเซ็ตเล่นจริงเป็น {{ exerciseAdvice.workAdvice.suggestedWeight }} กก.
-        </button>
-      </div>
-
-      <!-- Warm-up Specific Recommendation Banner (if warmup reps > 20 or < 12) -->
-      <div
-        v-if="exerciseAdvice && exerciseAdvice.hasWarmAdvice"
-        class="mt-2 flex flex-col xs:flex-row items-start xs:items-center justify-between gap-2 p-2 sm:px-3 sm:py-2 rounded-lg border-2 border-plate text-xs font-mono transition-all bg-sky-50 border-sky-400 text-ink"
-      >
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <span
-            class="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-plate shadow-xs select-none"
-            :class="exerciseAdvice.warmAdvice.delta > 0 ? 'bg-flame text-white' : 'bg-amber-500 text-white'"
-          >
-            {{ exerciseAdvice.warmAdvice.badgeText }}
-          </span>
-          <span class="text-xs font-bold leading-tight">
-            {{ exerciseAdvice.warmAdvice.reasonText }}
-          </span>
-        </div>
-
-        <button
-          type="button"
-          @click="applyRecommendedWarmupWeight"
-          class="w-full xs:w-auto text-center text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap bg-white hover:bg-paper-subtle text-ink select-none"
-          :title="`คลิกเพื่อปรับค่าน้ำหนักเซ็ตวอร์มเป็น ${exerciseAdvice.warmAdvice.suggestedWeight} กก.`"
-        >
-          ⚡ ปรับเซ็ตวอร์มเป็น {{ exerciseAdvice.warmAdvice.suggestedWeight }} กก.
-        </button>
+          {{ exerciseAdvice.workAdvice ? exerciseAdvice.workAdvice.badgeText : exerciseAdvice.warmAdvice.badgeText }}
+        </span>
       </div>
     </div>
 
@@ -266,17 +231,15 @@
             <span class="text-[9px] sm:text-[10px] text-sky font-bold">ครั้ง</span>
           </button>
 
-          <!-- Progressive Overload Advice Chip for this Set -->
-          <button
+          <!-- Progressive Overload Advice Chip for this Set (Status Tag) -->
+          <div
             v-if="getSetAdvice(sIdx)"
-            type="button"
-            @click="applySetAdvice(sIdx)"
-            class="h-8 sm:h-9 px-1.5 sm:px-2 rounded-md border-2 border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all select-none whitespace-nowrap text-[9px] sm:text-[10px] font-mono font-bold flex items-center justify-center flex-shrink-0"
+            class="h-8 sm:h-9 px-1.5 sm:px-2 rounded-md border-2 border-plate shadow-[1px_1px_0px_#1e2220] select-none whitespace-nowrap text-[9px] sm:text-[10px] font-mono font-bold flex items-center justify-center flex-shrink-0"
             :class="getSetAdvice(sIdx).badgeClass"
-            :title="`${getSetAdvice(sIdx).reasonText} (คลิกเพื่อปรับน้ำหนักเซ็ตนี้ทันที)`"
+            :title="getSetAdvice(sIdx).reasonText"
           >
             {{ getSetAdvice(sIdx).badgeText }}
-          </button>
+          </div>
 
           <!-- 3. Quick Copy Set Record (Desktop/Tablet) -->
           <button
