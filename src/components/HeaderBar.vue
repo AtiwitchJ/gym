@@ -1,5 +1,5 @@
 <template>
-  <header class="sticky top-0 z-40 bg-paper/95 backdrop-blur-md border-b-2 border-plate px-2.5 sm:px-4 py-2 sm:py-2.5">
+  <header class="sticky top-0 z-40 bg-paper/95 backdrop-blur-md border-b-2 border-plate px-2.5 sm:px-4 py-2 sm:py-2.5 pt-[max(8px,env(safe-area-inset-top))] select-none">
     <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
       <!-- Brand Seal Chop -->
       <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">

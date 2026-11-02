@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed bottom-0 left-0 right-0 z-50 bg-paper/95 backdrop-blur-lg border-t-2 border-plate px-2.5 sm:px-4 py-2 sm:py-2.5 pb-[max(10px,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(30,34,32,0.08)]">
+  <div class="w-full bg-paper/95 backdrop-blur-lg border-b-2 border-plate/20 px-2.5 sm:px-4 py-1.5 sm:py-2 select-none">
     <div class="max-w-3xl mx-auto flex items-center justify-between gap-1.5 sm:gap-3">
       <!-- Digital Stopwatch Readout -->
       <div class="flex items-center gap-2 sm:gap-3 min-w-0">

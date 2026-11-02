@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-paper text-ink pb-36 font-body selection:bg-flame selection:text-white">
+  <div class="min-h-screen bg-paper text-ink pb-44 sm:pb-48 font-body selection:bg-flame selection:text-white">
     <!-- Floating Toast Notification -->
     <transition
       enter-active-class="transition duration-300 ease-out"
@@ -20,9 +20,8 @@
       </div>
     </transition>
 
-    <!-- Header & Navigation -->
+    <!-- Header -->
     <HeaderBar />
-    <DayTabs />
 
     <!-- Main Container -->
     <main class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden">
@@ -132,10 +131,25 @@
       <TodoView v-else-if="currentDay === 'todo'" />
     </main>
 
-    <!-- Floating Rest Timer Dock -->
-    <RestTimer />
+    <!-- Fixed Bottom Mobile Navigation & Timer Dock -->
+    <div class="fixed bottom-0 left-0 right-0 z-40 bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-6px_25px_rgba(30,34,32,0.12)]">
+      <!-- Rest Timer Bar (Workout days or whenever timer is actively running) -->
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <RestTimer v-if="isWorkoutDay || isTimerRunning" />
+      </transition>
 
-    <!-- In-App Numeric PIN Keypad Bottom Sheet -->
+      <!-- Day Navigation Bottom Bar -->
+      <DayTabs />
+    </div>
+
+    <!-- In-App Numeric PIN Keypad Bottom Sheet (z-50) -->
     <PinKeypad />
   </div>
 </template>
@@ -143,6 +157,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useWorkoutStore } from './composables/useWorkoutStore';
+import { useTimer } from './composables/useTimer';
 import HeaderBar from './components/HeaderBar.vue';
 import DayTabs from './components/DayTabs.vue';
 import NextSessionOverview from './components/NextSessionOverview.vue';
@@ -163,6 +178,8 @@ const {
   finishAndSaveWorkout,
   fetchServerState
 } = useWorkoutStore();
+
+const { isRunning: isTimerRunning } = useTimer();
 
 onMounted(() => {
   fetchServerState();
