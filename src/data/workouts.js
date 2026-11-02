@@ -226,6 +226,36 @@ export const workoutData = {
           { type: "work", reps: "6–8 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" }
         ]
+      },
+      {
+        id: "t6",
+        name: "Overhead Cable Triceps Extension",
+        isMain: false,
+        altName: "ดึงเชือกหลังแขนเหนือศีรษะ",
+        mainMuscle: "หลังแขนหัวยาว (Triceps Long Head)",
+        subMuscle: "ข้อศอกและเอ็นยึดแขนด้านหลัง",
+        videoUrl: "https://www.youtube.com/watch?v=1u18yJcLDA0",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง (ยืดสุด-บีบสุด)" },
+          { type: "work", reps: "8–10 ครั้ง (ยืดสุด-บีบสุด)" },
+          { type: "work", reps: "8–10 ครั้ง (ยืดสุด-บีบสุด)" }
+        ]
+      },
+      {
+        id: "t7",
+        name: "Cable Crossover / Low-to-High Fly",
+        isMain: false,
+        altName: "เคเบิลตัดขอบอกล่าง หรือ บีบร่องอก",
+        mainMuscle: "อกส่วนล่างและร่องอก (Lower & Inner Chest)",
+        subMuscle: "ไหล่ด้านหน้า",
+        videoUrl: "https://www.youtube.com/watch?v=taI4XduLpTk",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง (บีบค้าง 1 วิ)" },
+          { type: "work", reps: "8–10 ครั้ง (บีบค้าง 1 วิ)" },
+          { type: "work", reps: "8–10 ครั้ง (บีบค้าง 1 วิ)" }
+        ]
       }
     ],
     bonusExercises: [
@@ -345,6 +375,36 @@ export const workoutData = {
           { type: "work", reps: "6–8 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" }
         ]
+      },
+      {
+        id: "w6",
+        name: "Straight Arm Lat Pulldown",
+        isMain: false,
+        altName: "เคเบิลกดแขนตรง หรือ Cable Pullover",
+        mainMuscle: "หลังส่วนกว้าง/ปีกโดดเดี่ยว (Lats Isolation)",
+        subMuscle: "หลังแขนหัวยาว, กล้ามเนื้อสะบัก",
+        videoUrl: "https://www.youtube.com/watch?v=GxD_YyS7jLg",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง (กดสุดค้าง 1 วิ)" },
+          { type: "work", reps: "8–10 ครั้ง (กดสุดค้าง 1 วิ)" },
+          { type: "work", reps: "8–10 ครั้ง (กดสุดค้าง 1 วิ)" }
+        ]
+      },
+      {
+        id: "w7",
+        name: "Hyperextension / Back Extension Bench",
+        isMain: false,
+        altName: "ม้านั่งพับหลังล่าง หรือ หลังเครื่อง Machine",
+        mainMuscle: "หลังส่วนล่าง (Erector Spinae)",
+        subMuscle: "ก้น (Glutes) และต้นขาด้านหลัง",
+        videoUrl: "https://www.youtube.com/watch?v=ph3pddpKzzw",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (ตัวเปล่า)" },
+          { type: "work", reps: "10–12 ครั้ง (ขึ้นตรงไม่แอ่นเกิน)" },
+          { type: "work", reps: "10–12 ครั้ง (ขึ้นตรงไม่แอ่นเกิน)" },
+          { type: "work", reps: "10–12 ครั้ง (ขึ้นตรงไม่แอ่นเกิน)" }
+        ]
       }
     ],
     bonusExercises: [
@@ -422,17 +482,17 @@ export const workoutData = {
       },
       {
         id: "th3",
-        name: "Rear Delt Machine / Face Pull",
+        name: "Reverse Pec Fly Machine (Rear Delt Fly)",
         isMain: false,
-        altName: "หันหน้าเข้าเครื่อง Pec Fly กวาดแขนไปหลัง / เชือกดึงหน้าผาก",
+        altName: "หันหน้าเข้าเครื่อง Pec Fly กวาดแขนไปด้านหลัง",
         mainMuscle: "หัวไหล่ด้านหลัง (Rear Delts) & สะบัก",
         subMuscle: "หลังส่วนบน (ช่วยแก้ปัญหาไหล่ห่อ)",
         videoUrl: "https://www.youtube.com/watch?v=woIoS0MbNYg",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
-          { type: "work", reps: "6–8 ครั้ง" },
-          { type: "work", reps: "6–8 ครั้ง" },
-          { type: "work", reps: "6–8 ครั้ง" }
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
         ]
       },
       {
@@ -445,9 +505,9 @@ export const workoutData = {
         videoUrl: "https://www.youtube.com/watch?v=wTSt22ay31w",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
-          { type: "work", reps: "6–8 ครั้ง" },
-          { type: "work", reps: "6–8 ครั้ง" },
-          { type: "work", reps: "6–8 ครั้ง" }
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
         ]
       },
       {
@@ -460,9 +520,39 @@ export const workoutData = {
         videoUrl: "https://www.youtube.com/watch?v=H1RkFIBeolk",
         sets: [
           { type: "warm", reps: "15 ครั้ง (หรือ 30s)" },
-          { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" },
-          { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" },
-          { type: "work", reps: "8–12 ครั้ง (หรือ 45-60s)" }
+          { type: "work", reps: "10–12 ครั้ง (หรือ 45-60s)" },
+          { type: "work", reps: "10–12 ครั้ง (หรือ 45-60s)" },
+          { type: "work", reps: "10–12 ครั้ง (หรือ 45-60s)" }
+        ]
+      },
+      {
+        id: "th6",
+        name: "Cable Face Pull",
+        isMain: false,
+        altName: "เคเบิลดึงเชือกเข้าหน้าผาก/หัวตา",
+        mainMuscle: "หัวไหล่ด้านหลัง (Rear Delts) & บ่ากลาง-ล่าง",
+        subMuscle: "กลุ่มกล้ามเนื้อหมุนหัวไหล่ (Rotator Cuff) เปิดไหล่กว้าง",
+        videoUrl: "https://www.youtube.com/watch?v=rep-qVOkqgk",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง (ดึงศอกสูงค้าง 1 วิ)" },
+          { type: "work", reps: "10–12 ครั้ง (ดึงศอกสูงค้าง 1 วิ)" },
+          { type: "work", reps: "10–12 ครั้ง (ดึงศอกสูงค้าง 1 วิ)" }
+        ]
+      },
+      {
+        id: "th7",
+        name: "Hanging Knee / Leg Raise",
+        isMain: false,
+        altName: "โหนบาร์หรือเครื่อง Captain's Chair ยกเข่า",
+        mainMuscle: "หน้าท้องส่วนล่าง (Lower Abs)",
+        subMuscle: "แกนกลางลำตัว และกล้ามเนื้องอสะโพก (Hip Flexors)",
+        videoUrl: "https://www.youtube.com/watch?v=hdng3Nm1x_E",
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง (ม้วนก้นขึ้น)" },
+          { type: "work", reps: "10–12 ครั้ง (ม้วนก้นขึ้น)" },
+          { type: "work", reps: "10–12 ครั้ง (ม้วนก้นขึ้น)" }
         ]
       }
     ],
