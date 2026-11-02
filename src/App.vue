@@ -64,6 +64,15 @@
           </div>
         </div>
 
+        <!-- Next Session Overview Bar -->
+        <NextSessionOverview
+          :day-key="currentDay"
+          :day-data="currentDayData"
+          :user-state="userState"
+          :last-weights="lastWeights"
+          @open-plan="showPlanModal = true"
+        />
+
         <!-- Exercise Cards List -->
         <div class="space-y-3">
           <ExerciseCard
@@ -129,14 +138,26 @@
 
     <!-- In-App Numeric PIN Keypad Bottom Sheet -->
     <PinKeypad />
+
+    <!-- Next-Session Plan Comparison Table Modal -->
+    <NextPlanModal
+      :show="showPlanModal"
+      :day-key="currentDay"
+      :day-data="currentDayData"
+      :user-state="userState"
+      :last-weights="lastWeights"
+      @close="showPlanModal = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useWorkoutStore } from './composables/useWorkoutStore';
 import HeaderBar from './components/HeaderBar.vue';
 import DayTabs from './components/DayTabs.vue';
+import NextSessionOverview from './components/NextSessionOverview.vue';
+import NextPlanModal from './components/NextPlanModal.vue';
 import ExerciseCard from './components/ExerciseCard.vue';
 import BonusCard from './components/BonusCard.vue';
 import RestTimer from './components/RestTimer.vue';
@@ -149,10 +170,13 @@ const {
   currentDay,
   workoutData,
   userState,
+  lastWeights,
   toastMessage,
   finishAndSaveWorkout,
   fetchServerState
 } = useWorkoutStore();
+
+const showPlanModal = ref(false);
 
 onMounted(() => {
   fetchServerState();
