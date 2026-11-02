@@ -33,10 +33,10 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
         suggestedWeight,
         reps: numReps,
         badgeText: '+2 kg วอร์ม',
-        badgeClass: 'bg-flame text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]',
-        reasonText: `เซ็ตวอร์มยกได้ ${numReps} ครั้ง (> 20) — เบาเกินไป แนะนำเพิ่มน้ำหนักวอร์ม +2 กก. เป็น ${suggestedWeight} กก.`,
-        shortText: '+2 กก. วอร์ม (เบาไป)',
-        actionLabel: `ปรับวอร์มเป็น ${suggestedWeight} กก.`
+        badgeClass: 'bg-flame text-white border-plate shadow-[1px_1px_0px_#1e2220]',
+        reasonText: `วอร์ม ${numReps} ครั้ง (> 20) — เพิ่ม +2 กก.`,
+        shortText: '+2 กก. วอร์ม',
+        actionLabel: `${suggestedWeight} กก.`
       };
     }
 
@@ -50,10 +50,10 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
         suggestedWeight,
         reps: numReps,
         badgeText: '-2 kg วอร์ม',
-        badgeClass: 'bg-amber-500 text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]',
-        reasonText: `เซ็ตวอร์มยกได้ ${numReps} ครั้ง (< 12) — หนักเกินไปสำหรับวอร์มข้อต่อ แนะนำลดน้ำหนักวอร์มลง -2 กก. เป็น ${suggestedWeight} กก.`,
-        shortText: '-2 กก. วอร์ม (หนักไป)',
-        actionLabel: `ปรับวอร์มเป็น ${suggestedWeight} กก.`
+        badgeClass: 'bg-amber-500 text-white border-plate shadow-[1px_1px_0px_#1e2220]',
+        reasonText: `วอร์ม ${numReps} ครั้ง (< 12) — ลด -2 กก.`,
+        shortText: '-2 กก. วอร์ม',
+        actionLabel: `${suggestedWeight} กก.`
       };
     }
 
@@ -66,9 +66,9 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
       reps: numReps,
       badgeText: 'วอร์มพอดี ✓',
       badgeClass: 'bg-sky-bg text-sky border-sky/40',
-      reasonText: `เซ็ตวอร์มยกได้ ${numReps} ครั้ง (ช่วง 15–20) — น้ำหนักวอร์มกำลังพอดีสำหรับการเตรียมข้อต่อ`,
-      shortText: 'วอร์มพอดี (15–20)',
-      actionLabel: `คงวอร์ม ${numWeight} กก.`
+      reasonText: `วอร์ม ${numReps} ครั้ง (15–20) — พอดี`,
+      shortText: 'วอร์มพอดี',
+      actionLabel: `${numWeight} กก.`
     };
   }
 
@@ -83,10 +83,10 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
       suggestedWeight,
       reps: numReps,
       badgeText: '+2 kg',
-      badgeClass: 'bg-flame text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]',
-      reasonText: `ยกได้ ${numReps} ครั้ง (> 8) — แรงยังเหลือ แนะนำเพิ่มน้ำหนัก +2 กก. เป็น ${suggestedWeight} กก.`,
-      shortText: '+2 กก. (แรงเหลือ)',
-      actionLabel: `ปรับเป็น ${suggestedWeight} กก.`
+      badgeClass: 'bg-flame text-white border-plate shadow-[1px_1px_0px_#1e2220]',
+      reasonText: `เล่นจริง ${numReps} ครั้ง (> 8) — เพิ่ม +2 กก.`,
+      shortText: '+2 กก.',
+      actionLabel: `${suggestedWeight} กก.`
     };
   }
 
@@ -100,10 +100,10 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
       suggestedWeight,
       reps: numReps,
       badgeText: '-2 kg',
-      badgeClass: 'bg-amber-500 text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]',
-      reasonText: `ยกได้ ${numReps} ครั้ง (< 6) — หนักเกินไป แนะนำลดน้ำหนัก -2 กก. เป็น ${suggestedWeight} กก.`,
-      shortText: '-2 กก. (หนักไป)',
-      actionLabel: `ปรับเป็น ${suggestedWeight} กก.`
+      badgeClass: 'bg-amber-500 text-white border-plate shadow-[1px_1px_0px_#1e2220]',
+      reasonText: `เล่นจริง ${numReps} ครั้ง (< 6) — ลด -2 กก.`,
+      shortText: '-2 กก.',
+      actionLabel: `${suggestedWeight} กก.`
     };
   }
 
@@ -116,10 +116,10 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
     suggestedWeight: numWeight,
     reps: numReps,
     badgeText: 'พอดี ✓',
-    badgeClass: 'bg-emerald text-white border-plate shadow-[1.5px_1.5px_0px_#059669]',
-    reasonText: `ยกได้ ${numReps} ครั้ง (อยู่ในช่วง 6–8) — น้ำหนักเหมาะสมมาก โฟกัสคุมจังหวะและคงน้ำหนักนี้ไว้`,
-    shortText: 'กำลังดี (6–8)',
-    actionLabel: `คงที่ ${numWeight} กก.`
+    badgeClass: 'bg-emerald text-white border-plate shadow-[1px_1px_0px_#059669]',
+    reasonText: `เล่นจริง ${numReps} ครั้ง (6–8) — พอดี`,
+    shortText: 'พอดี',
+    actionLabel: `${numWeight} กก.`
   };
 }
 
@@ -172,11 +172,11 @@ export function getExerciseOverallAdvice(sets = []) {
         delta: 2,
         baseWeight: lastWorkWeight,
         suggestedWeight: suggested,
-        badgeText: 'แนะนำ +2 กก.',
+        badgeText: '+2 kg',
         badgeClass: 'bg-flame text-white',
-        headline: `รอบหน้าแนะนำเพิ่ม ${setLabel} +2 กก. เป็น ${suggested} กก.`,
-        reason: `เพราะรอบล่าสุดคุณยก ${setLabel} ได้เกิน 8 ครั้ง แปลว่าแรงยังเหลือและพร้อมพัฒนาขึ้นอีกขั้น!`,
-        actionLabel: `ใช้ค่าน้ำหนักแนะนำ (${suggested} กก.)`
+        headline: `รอบหน้า: +2 กก. (${suggested} กก.)`,
+        reason: `ยกเกิน 8 ครั้ง`,
+        actionLabel: `${suggested} กก.`
       };
     } else if (decreaseCount >= workSets.length / 2) {
       const suggested = Math.max(0, Math.round((lastWorkWeight - 2) * 10) / 10);
@@ -186,11 +186,11 @@ export function getExerciseOverallAdvice(sets = []) {
         delta: -2,
         baseWeight: lastWorkWeight,
         suggestedWeight: suggested,
-        badgeText: 'แนะนำ -2 กก.',
+        badgeText: '-2 kg',
         badgeClass: 'bg-amber-500 text-white',
-        headline: `รอบหน้าแนะนำลด ${setLabel} -2 กก. เป็น ${suggested} กก.`,
-        reason: `เพราะรอบล่าสุดยก ${setLabel} ได้ไม่ถึง 6 ครั้ง น้ำหนักอาจจะหนักเกินไป ลดลงนิดเพื่อเน้นฟอร์มที่ถูกต้อง`,
-        actionLabel: `ใช้ค่าน้ำหนักแนะนำ (${suggested} กก.)`
+        headline: `รอบหน้า: -2 กก. (${suggested} กก.)`,
+        reason: `ยกไม่ถึง 6 ครั้ง`,
+        actionLabel: `${suggested} กก.`
       };
     } else {
       workAdvice = {
@@ -199,11 +199,11 @@ export function getExerciseOverallAdvice(sets = []) {
         delta: 0,
         baseWeight: lastWorkWeight,
         suggestedWeight: lastWorkWeight,
-        badgeText: 'น้ำหนักลงตัว ✓',
+        badgeText: '0 kg',
         badgeClass: 'bg-emerald text-white',
-        headline: `น้ำหนัก ${setLabel} เหมาะสมแล้ว (${lastWorkWeight} กก.)`,
-        reason: `คุณยกได้อยู่ในเกณฑ์ 6–8 ครั้งตามเป้าหมาย โฟกัสจังหวะการบีบกล้ามเนื้อและคงน้ำหนักนี้ไว้`,
-        actionLabel: `คงน้ำหนักเดิม (${lastWorkWeight} กก.)`
+        headline: `รอบหน้า: คงเดิม (${lastWorkWeight} กก.)`,
+        reason: `อยู่ในเกณฑ์ 6–8 ครั้ง`,
+        actionLabel: `${lastWorkWeight} กก.`
       };
     }
   }
