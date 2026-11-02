@@ -1,7 +1,16 @@
 import assert from 'node:assert';
-import { calculateWeightAdvice, getExerciseOverallAdvice } from '../src/composables/useWeightAdvisor.js';
+import { isWarmupType, calculateWeightAdvice, getExerciseOverallAdvice } from '../src/composables/useWeightAdvisor.js';
 
 console.log('Testing Progressive Overload Advisor...');
+
+// 0. Test isWarmupType
+assert.strictEqual(isWarmupType('warm'), true);
+assert.strictEqual(isWarmupType('warmup'), true);
+assert.strictEqual(isWarmupType('วอร์ม'), true);
+assert.strictEqual(isWarmupType('WARM'), true);
+assert.strictEqual(isWarmupType('work'), false);
+assert.strictEqual(isWarmupType('touchup'), false);
+console.log('✓ isWarmupType detects warmup variants correctly');
 
 // 1. Test Working Set > 8 reps -> increase weight by +2 kg
 const resMoreThan8 = calculateWeightAdvice({ weight: 60, reps: 10, type: 'work' });
@@ -31,16 +40,39 @@ assert.strictEqual(res8.delta, 0);
 assert.strictEqual(res8.suggestedWeight, 60);
 console.log('✓ Reps 6 and 8 correctly identified as optimal sweet spot (0 kg change)');
 
-// 4. Test Zero / Edge cases
+// 4. Test Zero / Edge cases & Strict Warmup Isolation
 const resLowWeight = calculateWeightAdvice({ weight: 1, reps: 4, type: 'work' });
 assert.strictEqual(resLowWeight.suggestedWeight, 0, 'Weight should not drop below 0');
 
 const resWarmup = calculateWeightAdvice({ weight: 30, reps: 15, type: 'warm' });
 assert.strictEqual(resWarmup.status, 'warmup');
 assert.strictEqual(resWarmup.delta, 0);
-console.log('✓ Edge cases & Warmup sets handled cleanly');
 
-// 5. Test Overall Advice calculation
+// Even if warmup has 20 reps or 3 reps, it must never recommend +2 or -2
+const resWarmupHigh = calculateWeightAdvice({ weight: 30, reps: 20, type: 'warm' });
+assert.strictEqual(resWarmupHigh.status, 'warmup');
+assert.strictEqual(resWarmupHigh.delta, 0);
+assert.strictEqual(resWarmupHigh.suggestedWeight, 30);
+
+const resWarmupLow = calculateWeightAdvice({ weight: 30, reps: 3, type: 'warm' });
+assert.strictEqual(resWarmupLow.status, 'warmup');
+assert.strictEqual(resWarmupLow.delta, 0);
+assert.strictEqual(resWarmupLow.suggestedWeight, 30);
+console.log('✓ Edge cases & Warmup sets strictly isolated (delta is always 0)');
+
+// 5. Test Overall Advice calculation — strictly excluding warmup sets
+const setsWithWarmupOptimal = [
+  { type: 'warm', weight: 30, reps: 15 }, // Warmup has 15 reps, must be ignored!
+  { type: 'work', weight: 60, reps: 7 },
+  { type: 'work', weight: 60, reps: 7 },
+  { type: 'work', weight: 60, reps: 8 }
+];
+const overallAdvOptimal = getExerciseOverallAdvice(setsWithWarmupOptimal);
+assert.strictEqual(overallAdvOptimal.status, 'optimal', 'Warmup 15 reps must NOT cause overall advice to increase');
+assert.strictEqual(overallAdvOptimal.delta, 0);
+assert.strictEqual(overallAdvOptimal.suggestedWeight, 60);
+console.log('✓ Warmup 15 reps is completely excluded from 6-8 calculation (does not falsely trigger +2 kg)');
+
 const setsEx1 = [
   { type: 'warm', weight: 40, reps: 15 },
   { type: 'work', weight: 60, reps: 9 },

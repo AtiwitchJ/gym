@@ -7,6 +7,12 @@
  *  - If 6 <= reps <= 8: Optimal sweet spot, maintain weight (กำลังดี โฟกัสฟอร์มและคงน้ำหนักเดิม)
  */
 
+export function isWarmupType(type) {
+  if (!type) return false;
+  const t = String(type).toLowerCase().trim();
+  return t === 'warm' || t === 'warmup' || t === 'วอร์ม';
+}
+
 export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
   const numWeight = parseFloat(weight) || 0;
   const numReps = parseInt(reps, 10);
@@ -15,8 +21,8 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
     return null;
   }
 
-  // Warmup sets (target ~15, not subject to 6-8 hypertrophy rule)
-  if (type === 'warm') {
+  // Warmup sets (target ~15, strictly excluded from 6-8 hypertrophy rule)
+  if (isWarmupType(type)) {
     return {
       type: 'warm',
       status: 'warmup',
@@ -26,7 +32,7 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
       reps: numReps,
       badgeText: 'วอร์ม',
       badgeClass: 'bg-sky-bg text-sky border-sky/40',
-      reasonText: `เซ็ตวอร์ม ${numReps} ครั้ง เพื่อวอร์มข้อต่อและกระตุ้นการไหลเวียนเลือด`,
+      reasonText: `เซ็ตวอร์ม ${numReps} ครั้ง เพื่อวอร์มข้อต่อและกระตุ้นการไหลเวียนเลือด (ไม่นำมาคิดรวมกับเซ็ตเล่นจริง)`,
       shortText: 'วอร์มข้อต่อ'
     };
   }
@@ -89,8 +95,8 @@ export function calculateWeightAdvice({ weight, reps, type = 'work' }) {
 export function getExerciseOverallAdvice(sets = []) {
   if (!sets || sets.length === 0) return null;
 
-  // Filter only working sets that have both weight and reps
-  const workSets = sets.filter(s => s.type !== 'warm' && s.reps && Number(s.reps) > 0);
+  // Filter only working sets that have both weight and reps (warm-up sets are strictly excluded)
+  const workSets = sets.filter(s => !isWarmupType(s.type) && s.reps && Number(s.reps) > 0);
   if (workSets.length === 0) return null;
 
   // Evaluate the primary working sets
@@ -155,6 +161,7 @@ export function getExerciseOverallAdvice(sets = []) {
 
 export function useWeightAdvisor() {
   return {
+    isWarmupType,
     calculateWeightAdvice,
     getExerciseOverallAdvice
   };

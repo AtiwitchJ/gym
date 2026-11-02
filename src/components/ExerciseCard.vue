@@ -380,11 +380,11 @@ function applyAllPrev() {
   });
 }
 
-const { calculateWeightAdvice, getExerciseOverallAdvice } = useWeightAdvisor();
+const { isWarmupType, calculateWeightAdvice, getExerciseOverallAdvice } = useWeightAdvisor();
 
 function getSetAdvice(sIdx) {
   const set = props.exercise.sets[sIdx];
-  if (!set || set.type === 'warm') return null;
+  if (!set || isWarmupType(set.type)) return null;
 
   const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
   const reps = getReps(sIdx) !== '' ? getReps(sIdx) : getPrevReps(sIdx);
@@ -417,26 +417,43 @@ function applyRecommendedWeightAll() {
   if (!exerciseAdvice.value || exerciseAdvice.value.suggestedWeight === undefined) return;
   const targetWt = exerciseAdvice.value.suggestedWeight;
   props.exercise.sets.forEach((set, sIdx) => {
-    if (set.type !== 'warm') {
+    // ข้ามเซ็ตวอร์มโดยเด็ดขาด ห้ามนำน้ำหนักเล่นจริงไปทับเซ็ตวอร์ม
+    if (!isWarmupType(set.type)) {
       updateWeight(currentDay.value, props.exercise.id, sIdx, targetWt);
     }
   });
 }
 
 function openWeightKeypad(sIdx) {
+  const set = props.exercise.sets[sIdx];
+  const isWarm = isWarmupType(set?.type);
   const currentVal = getWeight(sIdx);
   const prevVal = getPrevWeight(sIdx);
-  const advice = getSetAdvice(sIdx);
-  const suggestedVal = advice && advice.delta !== 0 ? advice.suggestedWeight : (exerciseAdvice.value?.delta !== 0 ? exerciseAdvice.value?.suggestedWeight : null);
+
+  // วอร์มและเล่นจริงห้ามนำมาคิดรวมกัน: เซ็ตวอร์มจะไม่มีคำแนะนำ Progressive Overload ของเซ็ตเล่นจริง
+  let suggestedVal = null;
+  let suggestedLabel = '';
+
+  if (!isWarm) {
+    const advice = getSetAdvice(sIdx);
+    suggestedVal = advice && advice.delta !== 0
+      ? advice.suggestedWeight
+      : (exerciseAdvice.value?.delta !== 0 ? exerciseAdvice.value?.suggestedWeight : null);
+
+    if (suggestedVal !== null && suggestedVal !== undefined) {
+      const delta = (advice?.delta !== undefined && advice?.delta !== 0) ? advice.delta : exerciseAdvice.value?.delta;
+      suggestedLabel = `แนะนำ: ${suggestedVal} กก. (${delta > 0 ? '+2' : '-2'})`;
+    }
+  }
 
   openKeypad({
     mode: 'weight',
     unit: 'กก.',
     title: props.exercise.name,
-    subtitle: `เซ็ต ${sIdx === 0 ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`} • น้ำหนักยก`,
-    currentValue: currentVal !== '' ? currentVal : (suggestedVal || prevVal || ''),
+    subtitle: `เซ็ต ${isWarm ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`} • น้ำหนักยก`,
+    currentValue: currentVal !== '' ? currentVal : (!isWarm && suggestedVal ? suggestedVal : (prevVal || '')),
     suggestedHint: suggestedVal,
-    suggestedLabel: suggestedVal ? `แนะนำ: ${suggestedVal} กก. (${(advice?.delta || exerciseAdvice.value?.delta) > 0 ? '+2' : '-2'})` : '',
+    suggestedLabel,
     prevHint: prevVal ? `${prevVal}` : '',
     presets: [1.25, 2.5, 5, -2.5],
     onConfirm: (val) => {
@@ -446,6 +463,8 @@ function openWeightKeypad(sIdx) {
 }
 
 function openRepsKeypad(sIdx, targetStr) {
+  const set = props.exercise.sets[sIdx];
+  const isWarm = isWarmupType(set?.type);
   const currentVal = getReps(sIdx);
   const prevVal = getPrevReps(sIdx);
   const targetNum = targetRepNumber(targetStr);
@@ -453,7 +472,7 @@ function openRepsKeypad(sIdx, targetStr) {
     mode: 'reps',
     unit: 'ครั้ง',
     title: props.exercise.name,
-    subtitle: `เซ็ต ${sIdx === 0 ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`} • จำนวนครั้งที่ยกจริง`,
+    subtitle: `เซ็ต ${isWarm ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`} • จำนวนครั้งที่ยกจริง`,
     currentValue: currentVal !== '' ? currentVal : (prevVal || targetNum || ''),
     targetHint: targetNum ? `${targetNum}` : '',
     prevHint: prevVal ? `${prevVal}` : '',
