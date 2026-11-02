@@ -238,6 +238,14 @@ export const defaultExercises = [
     isCustom: false,
     notes: 'Bodyweight knee flexion with powerful eccentric overload'
   },
+  {
+    id: 'hip_abduction_machine',
+    name: 'Hip Abduction Machine & Calf Raise',
+    muscleGroup: 'hamstrings',
+    equipment: 'machine',
+    isCustom: false,
+    notes: 'Gluteus medius hip abduction and seated/standing calf raises'
+  },
 
   // --- DELTS ---
   {
