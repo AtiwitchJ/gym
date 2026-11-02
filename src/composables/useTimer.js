@@ -64,6 +64,9 @@ function startTimer() {
 
   clearInterval(intervalId);
   intervalId = setInterval(checkTimerTick, 500);
+  if (intervalId && typeof intervalId.unref === 'function') {
+    intervalId.unref();
+  }
 }
 
 function pauseTimer() {

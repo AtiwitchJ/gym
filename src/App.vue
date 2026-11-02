@@ -50,6 +50,17 @@
           </svg>
           <span>สร้างตาราง (Routine)</span>
         </button>
+
+        <button
+          @click="startTodayLiveWorkout"
+          class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-flame hover:bg-flame-glow text-white font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+          title="เริ่มฝึกตามตารางประจำวันนี้แบบ Live Session"
+        >
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          <span>เริ่มฝึก (Start)</span>
+        </button>
       </div>
 
       <!-- 1. Workout Day View -->
@@ -193,6 +204,19 @@
       @close="showRoutineBuilder = false"
       @saved="onRoutineSaved"
     />
+
+    <!-- Active Live Workout Runner Sheet -->
+    <ActiveWorkoutSheet
+      v-if="isWorkoutActive"
+      @finish="handleWorkoutFinished"
+    />
+
+    <!-- Workout Summary Celebration Modal -->
+    <WorkoutSummaryModal
+      :is-open="isSummaryModalOpen"
+      :summary="lastWorkoutSummary"
+      @close="isSummaryModalOpen = false"
+    />
   </div>
 </template>
 
@@ -200,6 +224,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useWorkoutStore } from './composables/useWorkoutStore';
 import { useTimer } from './composables/useTimer';
+import { useActiveSessionStore } from './composables/useActiveSessionStore';
 import HeaderBar from './components/HeaderBar.vue';
 import DayTabs from './components/DayTabs.vue';
 import NextSessionOverview from './components/NextSessionOverview.vue';
@@ -212,6 +237,8 @@ import RestDayView from './components/RestDayView.vue';
 import PinKeypad from './components/PinKeypad.vue';
 import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
 import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
+import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
+import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
 
 const {
   currentDay,
@@ -225,11 +252,41 @@ const {
 } = useWorkoutStore();
 
 const { isRunning: isTimerRunning } = useTimer();
+const { isWorkoutActive, startSessionFromRoutine, startEmptySession } = useActiveSessionStore();
 
 // Modal Visibility State
 const showExerciseLibrary = ref(false);
 const showRoutineBuilder = ref(false);
 const editingRoutine = ref(null);
+const isSummaryModalOpen = ref(false);
+const lastWorkoutSummary = ref(null);
+
+function handleWorkoutFinished(summary) {
+  lastWorkoutSummary.value = summary;
+  isSummaryModalOpen.value = true;
+  showToast('ยินดีด้วย! บันทึกรอบฝึกเรียบร้อย');
+}
+
+function startTodayLiveWorkout() {
+  if (currentDayData.value && currentDayData.value.exercises) {
+    const routine = {
+      id: currentDay.value,
+      title: currentDayData.value.title,
+      subtitle: currentDayData.value.subtitle,
+      exercises: currentDayData.value.exercises.map(ex => ({
+        exerciseId: ex.id,
+        sets: (ex.sets || []).map(s => ({
+          type: s.type || 'working',
+          targetReps: s.targetReps || (s.type === 'warm' ? 15 : 8),
+          targetWeight: s.targetWeight || 0
+        }))
+      }))
+    };
+    startSessionFromRoutine(routine);
+  } else {
+    startEmptySession({ title: 'Quick Workout' });
+  }
+}
 
 function openNewRoutine() {
   editingRoutine.value = null;

@@ -394,6 +394,16 @@ function toggleSetComplete(exerciseIndex, setIndex) {
   return targetSet.completed;
 }
 
+function countTotalSets(exercises = []) {
+  if (!Array.isArray(exercises)) return 0;
+  let count = 0;
+  for (const ex of exercises) {
+    if (!Array.isArray(ex.sets)) continue;
+    count += ex.sets.length;
+  }
+  return count;
+}
+
 /**
  * Finish the active workout session, persist to history, and clear active draft
  */
@@ -401,13 +411,20 @@ function finishSession() {
   if (!isWorkoutActive.value || !activeSession.value) return null;
 
   const now = Date.now();
+  const finishedIso = new Date(now).toISOString();
+  const completedCount = countCompletedSets(activeSession.value.exercises);
+  const totalCount = countTotalSets(activeSession.value.exercises);
+
   const summary = {
     ...activeSession.value,
-    finishedAt: new Date(now).toISOString(),
+    finishedAt: finishedIso,
+    completedAt: finishedIso,
     endTime: now,
     durationSec: sessionDurationSec.value,
     totalVolumeKg: calculateTotalWorkingVolume(activeSession.value.exercises),
-    totalSetsCompleted: countCompletedSets(activeSession.value.exercises)
+    totalSetsCompleted: completedCount,
+    completedSetsCount: completedCount,
+    totalSetsCount: totalCount
   };
 
   sessionHistory.value.unshift(summary);
