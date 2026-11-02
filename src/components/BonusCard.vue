@@ -87,52 +87,96 @@
         <strong class="text-flame">คำแนะนำ:</strong> {{ bonus.tip }}
       </div>
 
-      <!-- Last Record Hint -->
-      <div class="mt-2 flex items-center justify-between gap-1.5 text-[10px] sm:text-[11px] font-mono bg-white px-2.5 sm:px-3 py-1.5 rounded-lg border border-plate/20 text-ink flex-wrap">
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <span class="text-ink-muted font-bold uppercase tracking-wider text-[9px] sm:text-[10px]">สถิติล่าสุด:</span>
-          <span>วอร์ม <strong class="tabular-nums font-bold text-flame">{{ prevWarm }}</strong> กก.<template v-if="prevWarmReps !== null"> (<strong class="tabular-nums font-bold text-sky">{{ prevWarmReps }}</strong>)</template></span>
-          <span class="text-plate/30">|</span>
-          <span>เล่นเสริม <strong class="tabular-nums font-bold text-flame">{{ prevTouch }}</strong> กก.<template v-if="prevTouchReps !== null"> (<strong class="tabular-nums font-bold text-sky">{{ prevTouchReps }}</strong>)</template></span>
+      <!-- Progressive Overload Plan & Target Table (Directly in Card) -->
+      <div class="mt-2.5 rounded-lg border-2 border-plate bg-white overflow-hidden shadow-[1.5px_1.5px_0px_#1e2220] font-mono">
+        <div class="px-2.5 py-1.5 bg-paper-subtle border-b-2 border-plate flex items-center justify-between">
+          <span class="text-[10px] font-bold text-ink uppercase tracking-wider">แผนและเป้าหมายรอบหน้า</span>
+          <button
+            v-if="hasAnyPrev"
+            type="button"
+            @click="applyAllPrev"
+            class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-flame-bg text-flame hover:bg-flame hover:text-white border border-flame/30 transition-all select-none shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
+            title="ดึงสถิติล่าสุดทั้งน้ำหนักและจำนวนครั้งมาใส่ทุกเซ็ต"
+          >
+            ดึงสถิติเดิมทั้งหมด
+          </button>
         </div>
-        <button
-          v-if="hasAnyPrev"
-          type="button"
-          @click="applyAllPrev"
-          class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-flame-bg text-flame hover:bg-flame hover:text-white border border-flame/30 transition-all select-none shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
-          title="ดึงสถิติล่าสุดทั้งน้ำหนักและจำนวนครั้งมาใส่ทุกเซ็ต"
-        >
-          ใช้สถิติเดิมทั้งหมด
-        </button>
-      </div>
 
-      <!-- Next Session Target Strip (Low Verbosity, No Emojis) -->
-      <div
-        v-if="exerciseAdvice && (exerciseAdvice.workAdvice || exerciseAdvice.warmAdvice)"
-        class="mt-2 px-2.5 py-1.5 rounded-md border border-plate/30 bg-paper-subtle text-[11px] font-mono flex items-center justify-between gap-1.5 flex-wrap"
-      >
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-[9px] uppercase tracking-wider font-bold text-ink-muted">เป้าหมายรอบหน้า:</span>
-          <span v-if="exerciseAdvice.warmAdvice" class="text-sky-700 font-bold">
-            วอร์ม {{ exerciseAdvice.warmAdvice.suggestedWeight }} kg
-            <span class="text-[9px] font-normal" :class="exerciseAdvice.warmAdvice.delta > 0 ? 'text-flame' : exerciseAdvice.warmAdvice.delta < 0 ? 'text-amber-600' : 'text-ink-muted'">
-              ({{ exerciseAdvice.warmAdvice.delta > 0 ? '+2' : exerciseAdvice.warmAdvice.delta < 0 ? '-2' : '0' }})
-            </span>
-          </span>
-          <span v-if="exerciseAdvice.warmAdvice && exerciseAdvice.workAdvice" class="text-plate/30">|</span>
-          <span v-if="exerciseAdvice.workAdvice" class="text-ink font-bold">
-            ซ้อมเสริม {{ exerciseAdvice.workAdvice.suggestedWeight }} kg
-            <span class="text-[9px] font-normal" :class="exerciseAdvice.workAdvice.delta > 0 ? 'text-flame' : exerciseAdvice.workAdvice.delta < 0 ? 'text-amber-600' : 'text-emerald'">
-              ({{ exerciseAdvice.workAdvice.delta > 0 ? '+2' : exerciseAdvice.workAdvice.delta < 0 ? '-2' : '0' }})
-            </span>
-          </span>
-        </div>
-        <span
-          class="text-[9px] font-bold px-1.5 py-0.5 rounded border border-plate shadow-[1px_1px_0px_#1e2220]"
-          :class="exerciseAdvice.workAdvice ? exerciseAdvice.workAdvice.badgeClass : exerciseAdvice.warmAdvice.badgeClass"
-        >
-          {{ exerciseAdvice.workAdvice ? exerciseAdvice.workAdvice.badgeText : exerciseAdvice.warmAdvice.badgeText }}
-        </span>
+        <table class="w-full text-left border-collapse text-[10px] sm:text-[11px]">
+          <thead>
+            <tr class="bg-paper-subtle/50 text-ink-muted border-b border-plate/20 text-[9px] sm:text-[10px]">
+              <th class="py-1 px-2.5 font-bold">ประเภท</th>
+              <th class="py-1 px-2 text-center font-bold">สถิติล่าสุด</th>
+              <th class="py-1 px-2 text-center font-bold">เป้าหมายรอบหน้า</th>
+              <th class="py-1 px-2 text-center font-bold">ปรับ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-plate/15">
+            <!-- วอร์ม -->
+            <tr>
+              <td class="py-1.5 px-2.5 font-bold text-sky-700 whitespace-nowrap">
+                วอร์ม (15–20)
+              </td>
+              <td class="py-1.5 px-2 text-center whitespace-nowrap">
+                <span v-if="prevWarm !== 0 || prevWarmReps !== null" class="font-bold">
+                  {{ prevWarm }} kg × {{ prevWarmReps || '—' }}
+                </span>
+                <span v-else class="text-ink-muted">-</span>
+              </td>
+              <td class="py-1.5 px-2 text-center font-bold text-sky-800 whitespace-nowrap">
+                <span v-if="exerciseAdvice?.warmAdvice">
+                  {{ exerciseAdvice.warmAdvice.suggestedWeight }} kg
+                </span>
+                <span v-else-if="prevWarm !== 0">
+                  {{ prevWarm }} kg
+                </span>
+                <span v-else class="text-ink-muted">-</span>
+              </td>
+              <td class="py-1.5 px-2 text-center whitespace-nowrap">
+                <span
+                  v-if="exerciseAdvice?.warmAdvice && (prevWarm !== 0 || prevWarmReps !== null)"
+                  class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
+                  :class="exerciseAdvice.warmAdvice.badgeClass"
+                >
+                  {{ exerciseAdvice.warmAdvice.delta > 0 ? '+2 kg' : exerciseAdvice.warmAdvice.delta < 0 ? '-2 kg' : '0 kg' }}
+                </span>
+                <span v-else class="text-ink-muted">-</span>
+              </td>
+            </tr>
+
+            <!-- ซ้อมเสริม -->
+            <tr>
+              <td class="py-1.5 px-2.5 font-bold text-ink whitespace-nowrap">
+                ซ้อมเสริม (6–8)
+              </td>
+              <td class="py-1.5 px-2 text-center whitespace-nowrap">
+                <span v-if="prevTouch !== 0 || prevTouchReps !== null" class="font-bold">
+                  {{ prevTouch }} kg × {{ prevTouchReps || '—' }}
+                </span>
+                <span v-else class="text-ink-muted">-</span>
+              </td>
+              <td class="py-1.5 px-2 text-center font-bold text-ink whitespace-nowrap">
+                <span v-if="exerciseAdvice?.workAdvice">
+                  {{ exerciseAdvice.workAdvice.suggestedWeight }} kg
+                </span>
+                <span v-else-if="prevTouch !== 0">
+                  {{ prevTouch }} kg
+                </span>
+                <span v-else class="text-ink-muted">-</span>
+              </td>
+              <td class="py-1.5 px-2 text-center whitespace-nowrap">
+                <span
+                  v-if="exerciseAdvice?.workAdvice && (prevTouch !== 0 || prevTouchReps !== null)"
+                  class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
+                  :class="exerciseAdvice.workAdvice.badgeClass"
+                >
+                  {{ exerciseAdvice.workAdvice.delta > 0 ? '+2 kg' : exerciseAdvice.workAdvice.delta < 0 ? '-2 kg' : '0 kg' }}
+                </span>
+                <span v-else class="text-ink-muted">-</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 

@@ -1,12 +1,12 @@
 <template>
   <div
     v-if="dayData && totalCount > 0"
-    class="mb-3 p-2 sm:px-3 sm:py-2.5 rounded-lg border-2 border-plate bg-paper shadow-[2px_2px_0px_#1e2220] flex flex-wrap items-center justify-between gap-2 font-mono text-xs select-none"
+    class="mb-3 p-2 sm:px-3 sm:py-2.5 rounded-lg border-2 border-plate bg-paper shadow-[2px_2px_0px_#1e2220] flex items-center justify-between gap-2 font-mono text-xs select-none"
   >
     <!-- Left: Tally Badges -->
     <div class="flex items-center gap-1.5 flex-wrap">
       <span class="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-wider mr-1">
-        แผนรอบหน้า:
+        แผนรอบหน้ารวม:
       </span>
       <span
         v-if="increaseCount > 0"
@@ -27,15 +27,6 @@
         -2 kg ({{ decreaseCount }} ท่า)
       </span>
     </div>
-
-    <!-- Right: Trigger Modal Button -->
-    <button
-      type="button"
-      @click="$emit('open-plan')"
-      class="text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-md border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap"
-    >
-      ตารางแผนรอบหน้า ➔
-    </button>
   </div>
 </template>
 
