@@ -277,10 +277,15 @@
             : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
           title="แตะเพื่อระบุน้ำหนักด้วยแป้น PIN"
         >
-          <span class="tabular-nums font-extrabold text-xs sm:text-sm" :class="getWeight(sIdx) !== '' ? 'text-ink' : 'text-ink-muted/60'">
-            {{ getWeight(sIdx) !== '' ? getWeight(sIdx) : (getPrevWeight(sIdx) || '0') }}
-          </span>
-          <span class="text-[9px] sm:text-[10px] text-flame font-bold">กก.</span>
+          <template v-if="getWeight(sIdx) !== ''">
+            <span class="tabular-nums font-extrabold text-xs sm:text-sm text-ink">
+              {{ getWeight(sIdx) }}
+            </span>
+            <span class="text-[9px] sm:text-[10px] text-flame font-bold">กก.</span>
+          </template>
+          <template v-else>
+            <span class="text-xs sm:text-sm text-ink-muted/40 font-bold">—</span>
+          </template>
         </button>
 
         <!-- 3. Reps Button (Column-Aligned) -->
@@ -293,10 +298,15 @@
             : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
           title="แตะเพื่อระบุจำนวนครั้งจริงด้วยแป้น PIN"
         >
-          <span class="tabular-nums font-extrabold text-xs sm:text-sm" :class="getReps(sIdx) !== '' ? 'text-ink' : 'text-ink-muted/60'">
-            {{ getReps(sIdx) !== '' ? getReps(sIdx) : (getPrevReps(sIdx) || targetRepNumber(set.reps) || '—') }}
-          </span>
-          <span class="text-[9px] sm:text-[10px] text-sky font-bold">ครั้ง</span>
+          <template v-if="getReps(sIdx) !== ''">
+            <span class="tabular-nums font-extrabold text-xs sm:text-sm text-ink">
+              {{ getReps(sIdx) }}
+            </span>
+            <span class="text-[9px] sm:text-[10px] text-sky font-bold">ครั้ง</span>
+          </template>
+          <template v-else>
+            <span class="text-xs sm:text-sm text-ink-muted/40 font-bold">—</span>
+          </template>
         </button>
 
         <!-- 4. Progressive Overload Advice Badge (Column-Aligned) -->
@@ -501,10 +511,10 @@ function getSetAdvice(sIdx) {
   const set = props.exercise.sets[sIdx];
   if (!set) return null;
 
-  const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
-  const reps = getReps(sIdx) !== '' ? getReps(sIdx) : getPrevReps(sIdx);
-  if (!reps || Number(reps) <= 0) return null;
+  const reps = getReps(sIdx);
+  if (!reps || reps === '' || Number(reps) <= 0) return null;
 
+  const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
   return calculateWeightAdvice({ weight: wt, reps, type: set.type, targetReps: set.reps });
 }
 
@@ -553,7 +563,6 @@ function applyRecommendedWarmupWeight() {
 function openWeightKeypad(sIdx) {
   const set = props.exercise.sets[sIdx];
   const isWarm = isWarmupType(set?.type);
-  const currentVal = getWeight(sIdx);
   const prevVal = getPrevWeight(sIdx);
   const advice = getSetAdvice(sIdx);
 
@@ -588,7 +597,7 @@ function openWeightKeypad(sIdx) {
     unit: isDumbbell.value ? 'กก./ข้าง' : 'กก.',
     title: props.exercise.name,
     subtitle,
-    currentValue: currentVal !== '' ? currentVal : (suggestedVal || prevVal || ''),
+    currentValue: '',
     suggestedHint: suggestedVal,
     suggestedLabel,
     prevHint: prevVal ? `${prevVal}` : '',
@@ -602,15 +611,15 @@ function openWeightKeypad(sIdx) {
 function openRepsKeypad(sIdx, targetStr) {
   const set = props.exercise.sets[sIdx];
   const isWarm = isWarmupType(set?.type);
-  const currentVal = getReps(sIdx);
   const prevVal = getPrevReps(sIdx);
   const targetNum = targetRepNumber(targetStr);
+  const setLabel = isWarm ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`;
   openKeypad({
     mode: 'reps',
     unit: 'ครั้ง',
     title: props.exercise.name,
-    subtitle: `เซ็ต ${isWarm ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`} • จำนวนครั้งที่ยกจริง`,
-    currentValue: currentVal !== '' ? currentVal : (prevVal || targetNum || ''),
+    subtitle: `เซ็ต ${setLabel} • จำนวนครั้งที่ยกจริง`,
+    currentValue: '',
     targetHint: targetNum ? `${targetNum}` : '',
     prevHint: prevVal ? `${prevVal}` : '',
     presets: [1, 2, -1],

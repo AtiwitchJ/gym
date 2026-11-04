@@ -45,9 +45,9 @@
           <div class="flex items-baseline gap-2 overflow-hidden">
             <span
               class="font-mono tabular-nums text-3xl sm:text-4xl font-extrabold tracking-tight truncate"
-              :class="displayValue ? 'text-ink' : 'text-ink-muted/40'"
+              :class="displayValue ? 'text-ink' : 'text-ink-muted/30'"
             >
-              {{ displayValue || '0' }}
+              {{ displayValue || '—' }}
             </span>
             <span class="font-mono text-sm font-bold text-flame">
               {{ unit }}
