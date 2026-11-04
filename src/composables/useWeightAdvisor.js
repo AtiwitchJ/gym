@@ -15,14 +15,16 @@ export function isWarmupType(type) {
 
 export function parseRepTarget(repStr) {
   if (!repStr) return { min: 6, max: 8 };
-  const match = String(repStr).match(/(\d+)\s*[–-]\s*(\d+)/);
+  // Strip parenthetical notes first, e.g. "(40-50%)" or "(ท้าทาย)" so numbers inside them don't interfere with the target rep range
+  const clean = String(repStr).replace(/\([^)]*\)/g, '').trim();
+  const match = clean.match(/(\d+)\s*[–-]\s*(\d+)/);
   if (match) {
     return {
       min: parseInt(match[1], 10),
       max: parseInt(match[2], 10)
     };
   }
-  const single = String(repStr).match(/\d+/);
+  const single = clean.match(/\d+/);
   if (single) {
     const val = parseInt(single[0], 10);
     return { min: val, max: val };
