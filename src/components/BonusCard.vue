@@ -18,9 +18,15 @@
             +{{ index + 1 }}
           </span>
           <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5 mb-1">
+            <div class="flex items-center gap-1.5 mb-1 flex-wrap">
               <span class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full tracking-wide uppercase bg-flame-bg text-flame border border-flame select-none">
                 TOUCH-UP: {{ bonus.part }}
+              </span>
+              <span
+                v-if="isDumbbell"
+                class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-paper-subtle text-ink border border-plate/40 select-none inline-flex items-center gap-1"
+              >
+                ใส่น้ำหนักต่อข้าง (Per Dumbbell)
               </span>
             </div>
             <h3 class="text-sm sm:text-lg font-bold text-ink font-heading tracking-tight leading-snug">
@@ -210,7 +216,9 @@
     <!-- Sets Table Header -->
     <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[9px] sm:text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider grid grid-cols-[1fr_72px_58px_50px_34px] sm:grid-cols-[1fr_84px_70px_56px_38px] gap-1.5 sm:gap-2 items-center select-none">
       <div>เซ็ต</div>
-      <div class="text-center">น้ำหนัก</div>
+      <div class="text-center" :title="isDumbbell ? 'น้ำหนักดัมเบลต่อข้าง (Per Dumbbell)' : 'น้ำหนักยก'">
+        {{ isDumbbell ? 'น.น./ข้าง' : 'น้ำหนัก' }}
+      </div>
       <div class="text-center">ครั้ง</div>
       <div class="text-center">แนะนำ</div>
       <div class="text-center">เสร็จ</div>
@@ -346,6 +354,12 @@ const { startTimer, triggerHaptic } = useTimer();
 const videoId = computed(() => getYoutubeId(props.bonus.videoUrl));
 const thumbnailUrl = computed(() => videoId.value ? `https://img.youtube.com/vi/${videoId.value}/hqdefault.jpg` : null);
 const embedUrl = computed(() => videoId.value ? `https://www.youtube-nocookie.com/embed/${videoId.value}?autoplay=1&rel=0` : null);
+
+const isDumbbell = computed(() => {
+  const n = (props.bonus.name || '').toLowerCase();
+  const a = (props.bonus.altName || '').toLowerCase();
+  return n.includes('dumbbell') || n.includes('ดัมเบล') || a.includes('dumbbell') || a.includes('ดัมเบล');
+});
 
 function toggleVideo() {
   isPlayingVideo.value = !isPlayingVideo.value;
@@ -571,11 +585,16 @@ function openWeightKeypad(sIdx) {
     }
   }
 
+  const setLabel = isWarm ? 'วอร์ม (W1)' : `เล่นเสริม (T1)`;
+  const subtitle = isDumbbell.value
+    ? `เซ็ต ${setLabel} • ใส่น้ำหนักต่อข้าง (เช่น ถือข้างละ 18 ให้ใส่ 18)`
+    : `เซ็ต ${setLabel} • น้ำหนักยก`;
+
   openKeypad({
     mode: 'weight',
-    unit: 'กก.',
+    unit: isDumbbell.value ? 'กก./ข้าง' : 'กก.',
     title: props.bonus.name,
-    subtitle: `เซ็ต ${isWarm ? 'วอร์ม (W1)' : `เล่นเสริม (T1)`} • น้ำหนักยก`,
+    subtitle,
     currentValue: currentVal !== '' ? currentVal : (suggestedVal || prevVal || ''),
     suggestedHint: suggestedVal,
     suggestedLabel,
