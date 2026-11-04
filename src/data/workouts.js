@@ -1,3 +1,46 @@
+// Canonical Exercise Groups (shared across days between main lifts and bonus touch-ups)
+export const EXERCISE_CANONICAL_MAP = {
+  // Seated Leg Press Machine (Monday Main <-> Tue/Wed/Thu Bonus)
+  m1: 'seated_leg_press',
+  b_t_leg: 'seated_leg_press',
+  b_w_leg: 'seated_leg_press',
+  b_th_leg: 'seated_leg_press',
+
+  // Chest Press Machine (Tuesday Main <-> Mon/Wed/Thu Bonus)
+  t1: 'chest_press',
+  b_m_chest: 'chest_press',
+  b_w_chest: 'chest_press',
+  b_th_chest: 'chest_press',
+
+  // Lat Pulldown Machine (Wednesday Main <-> Mon/Tue/Thu Bonus)
+  w2: 'lat_pulldown',
+  b_m_back: 'lat_pulldown',
+  b_t_back: 'lat_pulldown',
+  b_th_back: 'lat_pulldown',
+
+  // Shoulder Press Machine (Thursday Main <-> Mon/Tue/Wed Bonus)
+  th1: 'shoulder_press',
+  b_m_shoulder: 'shoulder_press',
+  b_t_shoulder: 'shoulder_press',
+  b_w_shoulder: 'shoulder_press'
+};
+
+export function getCanonicalExerciseId(exId) {
+  return EXERCISE_CANONICAL_MAP[exId] || exId;
+}
+
+export function getLinkedExerciseIds(exId) {
+  const canon = getCanonicalExerciseId(exId);
+  const linked = [];
+  for (const [id, cId] of Object.entries(EXERCISE_CANONICAL_MAP)) {
+    if (cId === canon && !linked.includes(id)) {
+      linked.push(id);
+    }
+  }
+  if (!linked.includes(exId)) linked.push(exId);
+  return linked;
+}
+
 export const workoutData = {
   mon: {
     title: "วันจันทร์: ขา + ก้น ครบทุกมิติ (Legs & Glutes)",

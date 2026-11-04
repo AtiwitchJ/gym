@@ -343,6 +343,7 @@ const {
   currentDay,
   userState,
   lastWeights,
+  getExerciseLastRecord,
   updateWeight,
   updateReps,
   applyPrevRecord,
@@ -362,7 +363,7 @@ function toggleVideo() {
 }
 
 const exState = computed(() => (userState[currentDay.value] && userState[currentDay.value][props.exercise.id]) || {});
-const exLast = computed(() => lastWeights[props.exercise.id] || {});
+const exLast = computed(() => getExerciseLastRecord(props.exercise.id));
 
 const prevWarm = computed(() => (exLast.value.wt_0 !== undefined && exLast.value.wt_0 !== '') ? exLast.value.wt_0 : 0);
 const prevWork = computed(() => (exLast.value.wt_1 !== undefined && exLast.value.wt_1 !== '') ? exLast.value.wt_1 : 0);
@@ -402,15 +403,25 @@ const displayWorkReps = computed(() => {
 });
 
 function getPrevWeight(sIdx) {
-  return (exLast.value[`wt_${sIdx}`] !== undefined && exLast.value[`wt_${sIdx}`] !== '')
-    ? exLast.value[`wt_${sIdx}`]
-    : 0;
+  if (exLast.value[`wt_${sIdx}`] !== undefined && exLast.value[`wt_${sIdx}`] !== '') {
+    return exLast.value[`wt_${sIdx}`];
+  }
+  // For working sets (sIdx >= 2), if wt_2 or wt_3 isn't set, fall back to wt_1
+  if (sIdx >= 1 && exLast.value.wt_1 !== undefined && exLast.value.wt_1 !== '') {
+    return exLast.value.wt_1;
+  }
+  return 0;
 }
 
 function getPrevReps(sIdx) {
-  return (exLast.value[`reps_${sIdx}`] !== undefined && exLast.value[`reps_${sIdx}`] !== '')
-    ? exLast.value[`reps_${sIdx}`]
-    : '';
+  if (exLast.value[`reps_${sIdx}`] !== undefined && exLast.value[`reps_${sIdx}`] !== '') {
+    return exLast.value[`reps_${sIdx}`];
+  }
+  // For working sets (sIdx >= 2), if reps_2 or reps_3 isn't set, fall back to reps_1
+  if (sIdx >= 1 && exLast.value.reps_1 !== undefined && exLast.value.reps_1 !== '') {
+    return exLast.value.reps_1;
+  }
+  return '';
 }
 
 function getWeight(sIdx) {

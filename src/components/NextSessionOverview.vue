@@ -33,6 +33,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useWeightAdvisor } from '../composables/useWeightAdvisor';
+import { useWorkoutStore } from '../composables/useWorkoutStore';
 
 const props = defineProps({
   dayKey: { type: String, default: 'mon' },
@@ -44,6 +45,7 @@ const props = defineProps({
 defineEmits(['open-plan']);
 
 const { getExerciseOverallAdvice } = useWeightAdvisor();
+const { getExerciseLastRecord } = useWorkoutStore();
 
 const stats = computed(() => {
   let inc = 0;
@@ -58,14 +60,30 @@ const stats = computed(() => {
   function checkEx(ex) {
     total++;
     const exSt = daySt[ex.id] || {};
+    const exLast = getExerciseLastRecord(ex.id);
     const setsData = ex.sets.map((s, idx) => {
-      const wt = (exSt[`wt_${idx}`] !== undefined && exSt[`wt_${idx}`] !== '')
+      let wt = (exSt[`wt_${idx}`] !== undefined && exSt[`wt_${idx}`] !== '')
         ? exSt[`wt_${idx}`]
-        : (props.lastWeights[ex.id] && props.lastWeights[ex.id][`wt_${idx}`]) || '';
+        : (exLast[`wt_${idx}`] !== undefined && exLast[`wt_${idx}`] !== '')
+          ? exLast[`wt_${idx}`]
+          : '';
 
-      const reps = (exSt[`reps_${idx}`] !== undefined && exSt[`reps_${idx}`] !== '')
+      let reps = (exSt[`reps_${idx}`] !== undefined && exSt[`reps_${idx}`] !== '')
         ? exSt[`reps_${idx}`]
-        : (props.lastWeights[ex.id] && props.lastWeights[ex.id][`reps_${idx}`]) || '';
+        : (exLast[`reps_${idx}`] !== undefined && exLast[`reps_${idx}`] !== '')
+          ? exLast[`reps_${idx}`]
+          : '';
+
+      if (idx >= 1 && (wt === '' || wt === undefined)) {
+        if (exLast.wt_1 !== undefined && exLast.wt_1 !== '') wt = exLast.wt_1;
+        else if (exLast.wt_2 !== undefined && exLast.wt_2 !== '') wt = exLast.wt_2;
+        else if (exLast.wt_3 !== undefined && exLast.wt_3 !== '') wt = exLast.wt_3;
+      }
+      if (idx >= 1 && (reps === '' || reps === undefined)) {
+        if (exLast.reps_1 !== undefined && exLast.reps_1 !== '') reps = exLast.reps_1;
+        else if (exLast.reps_2 !== undefined && exLast.reps_2 !== '') reps = exLast.reps_2;
+        else if (exLast.reps_3 !== undefined && exLast.reps_3 !== '') reps = exLast.reps_3;
+      }
 
       return {
         type: s.type,

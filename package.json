@@ -12,7 +12,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/server.js",
-    "test": "node server/test-api.js && node test/test-advisor.js"
+    "test": "node server/test-api.js && node test/test-advisor.js && node test/test-sync.js"
   },
   "repository": {
     "type": "git",

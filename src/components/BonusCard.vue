@@ -336,7 +336,8 @@ const {
   updateReps,
   applyPrevRecord,
   toggleSetDone,
-  showExerciseImages
+  showExerciseImages,
+  getExerciseLastRecord
 } = useWorkoutStore();
 
 const { openKeypad } = usePinKeypad();
@@ -351,12 +352,28 @@ function toggleVideo() {
 }
 
 const exState = computed(() => (userState[currentDay.value] && userState[currentDay.value][props.bonus.id]) || {});
-const exLast = computed(() => lastWeights[props.bonus.id] || {});
+const exLast = computed(() => getExerciseLastRecord(props.bonus.id));
 
-const prevWarm = computed(() => (exLast.value.wt_0 !== undefined && exLast.value.wt_0 !== '') ? exLast.value.wt_0 : 0);
-const prevTouch = computed(() => (exLast.value.wt_1 !== undefined && exLast.value.wt_1 !== '') ? exLast.value.wt_1 : 0);
-const prevWarmReps = computed(() => (exLast.value.reps_0 !== undefined && exLast.value.reps_0 !== '') ? exLast.value.reps_0 : null);
-const prevTouchReps = computed(() => (exLast.value.reps_1 !== undefined && exLast.value.reps_1 !== '') ? exLast.value.reps_1 : null);
+const prevWarm = computed(() => {
+  const w = exLast.value.wt_0;
+  return (w !== undefined && w !== '') ? w : 0;
+});
+const prevTouch = computed(() => {
+  if (exLast.value.wt_1 !== undefined && exLast.value.wt_1 !== '') return exLast.value.wt_1;
+  if (exLast.value.wt_2 !== undefined && exLast.value.wt_2 !== '') return exLast.value.wt_2;
+  if (exLast.value.wt_3 !== undefined && exLast.value.wt_3 !== '') return exLast.value.wt_3;
+  return 0;
+});
+const prevWarmReps = computed(() => {
+  const r = exLast.value.reps_0;
+  return (r !== undefined && r !== '') ? r : null;
+});
+const prevTouchReps = computed(() => {
+  if (exLast.value.reps_1 !== undefined && exLast.value.reps_1 !== '') return exLast.value.reps_1;
+  if (exLast.value.reps_2 !== undefined && exLast.value.reps_2 !== '') return exLast.value.reps_2;
+  if (exLast.value.reps_3 !== undefined && exLast.value.reps_3 !== '') return exLast.value.reps_3;
+  return null;
+});
 
 const hasAnyPrev = computed(() => {
   return prevWarm.value > 0 || prevTouch.value > 0 || prevWarmReps.value !== null || prevTouchReps.value !== null;
@@ -391,15 +408,27 @@ const displayTouchReps = computed(() => {
 });
 
 function getPrevWeight(sIdx) {
-  return (exLast.value[`wt_${sIdx}`] !== undefined && exLast.value[`wt_${sIdx}`] !== '')
-    ? exLast.value[`wt_${sIdx}`]
-    : 0;
+  if (exLast.value[`wt_${sIdx}`] !== undefined && exLast.value[`wt_${sIdx}`] !== '') {
+    return exLast.value[`wt_${sIdx}`];
+  }
+  if (sIdx >= 1) {
+    if (exLast.value.wt_1 !== undefined && exLast.value.wt_1 !== '') return exLast.value.wt_1;
+    if (exLast.value.wt_2 !== undefined && exLast.value.wt_2 !== '') return exLast.value.wt_2;
+    if (exLast.value.wt_3 !== undefined && exLast.value.wt_3 !== '') return exLast.value.wt_3;
+  }
+  return 0;
 }
 
 function getPrevReps(sIdx) {
-  return (exLast.value[`reps_${sIdx}`] !== undefined && exLast.value[`reps_${sIdx}`] !== '')
-    ? exLast.value[`reps_${sIdx}`]
-    : '';
+  if (exLast.value[`reps_${sIdx}`] !== undefined && exLast.value[`reps_${sIdx}`] !== '') {
+    return exLast.value[`reps_${sIdx}`];
+  }
+  if (sIdx >= 1) {
+    if (exLast.value.reps_1 !== undefined && exLast.value.reps_1 !== '') return exLast.value.reps_1;
+    if (exLast.value.reps_2 !== undefined && exLast.value.reps_2 !== '') return exLast.value.reps_2;
+    if (exLast.value.reps_3 !== undefined && exLast.value.reps_3 !== '') return exLast.value.reps_3;
+  }
+  return '';
 }
 
 function getWeight(sIdx) {
@@ -429,9 +458,9 @@ function getSetNote(repStr) {
 }
 
 function hasPrevRecord(sIdx) {
-  const pw = exLast.value[`wt_${sIdx}`];
-  const pr = exLast.value[`reps_${sIdx}`];
-  return (pw !== undefined && pw !== '') || (pr !== undefined && pr !== '');
+  const pw = getPrevWeight(sIdx);
+  const pr = getPrevReps(sIdx);
+  return (pw !== undefined && pw !== '' && Number(pw) > 0) || (pr !== undefined && pr !== '');
 }
 
 function applyPrevRecordForSet(sIdx) {
