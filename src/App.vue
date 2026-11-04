@@ -20,12 +20,14 @@
       </div>
     </transition>
 
-    <!-- Header & Navigation -->
+    <!-- Header -->
     <HeaderBar />
-    <DayTabs />
 
     <!-- Main Container -->
-    <main class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden">
+    <main
+      class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden"
+      :class="isWorkoutDay ? 'pb-36 sm:pb-40' : 'pb-24 sm:pb-28'"
+    >
       <!-- 1. Workout Day View -->
       <div v-if="isWorkoutDay && currentDayData">
         <!-- Routine Banner -->
@@ -132,8 +134,15 @@
       <TodoView v-else-if="currentDay === 'todo'" />
     </main>
 
-    <!-- Floating Rest Timer Dock -->
-    <RestTimer />
+    <!-- Fixed Bottom Controls & Day Navigation Dock -->
+    <div class="fixed bottom-0 left-0 right-0 z-40 flex flex-col pointer-events-none">
+      <div class="pointer-events-auto">
+        <RestTimer />
+      </div>
+      <div class="pointer-events-auto">
+        <DayTabs />
+      </div>
+    </div>
 
     <!-- In-App Numeric PIN Keypad Bottom Sheet -->
     <PinKeypad />

@@ -1,5 +1,8 @@
 <template>
-  <div class="fixed bottom-0 left-0 right-0 z-50 bg-paper/95 backdrop-blur-lg border-t-2 border-plate px-2.5 sm:px-4 py-2 sm:py-2.5 pb-[max(10px,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(30,34,32,0.08)]">
+  <div
+    v-if="isWorkoutDay || isRunning"
+    class="w-full bg-paper/95 backdrop-blur-md border-t-2 border-plate px-2.5 sm:px-4 py-1.5 sm:py-2 shadow-[0_-4px_16px_rgba(30,34,32,0.08)]"
+  >
     <div class="max-w-3xl mx-auto flex items-center justify-between gap-1.5 sm:gap-3">
       <!-- Digital Stopwatch Readout -->
       <div class="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -8,7 +11,7 @@
             REST INTERVAL
           </span>
           <span
-            class="font-mono tabular-nums text-xl sm:text-2xl font-bold tracking-wider leading-tight"
+            class="font-mono tabular-nums text-lg sm:text-2xl font-bold tracking-wider leading-tight"
             :class="isRunning ? 'text-flame animate-pulse' : 'text-ink'"
           >
             {{ formatTime(timerRemaining) }}
@@ -36,7 +39,7 @@
         <!-- Play / Pause Button -->
         <button
           @click="toggleTimer"
-          class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-white transition-all select-none border-2 border-plate touch-manipulation"
+          class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-white transition-all select-none border-2 border-plate touch-manipulation"
           :class="isRunning
             ? 'bg-gold hover:bg-gold-glow text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
             : 'bg-flame hover:bg-flame-glow shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
@@ -53,7 +56,7 @@
         <!-- Reset Button -->
         <button
           @click="resetTimer"
-          class="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-surface hover:bg-paper-subtle border-2 border-plate flex items-center justify-center text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+          class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-surface hover:bg-paper-subtle border-2 border-plate flex items-center justify-center text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
           title="รีเซ็ตเวลา"
         >
           <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
@@ -67,7 +70,12 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useTimer } from '../composables/useTimer';
+import { useWorkoutStore } from '../composables/useWorkoutStore';
+
+const { currentDay } = useWorkoutStore();
+const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu'].includes(currentDay.value));
 
 const {
   timerDuration,
