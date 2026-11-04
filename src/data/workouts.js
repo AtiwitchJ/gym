@@ -179,11 +179,11 @@ export const workoutData = {
       },
       {
         id: "b_m_chest",
-        name: "Chest Press Machine",
+        name: "Flat Dumbbell Press / Chest Press",
         part: "อก (Chest)",
-        altName: "เครื่องผลักอกกลาง",
+        altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "พรุ่งนี้ (อังคาร) เป็นวันอกเต็มระบบ เล่นเบา ๆ แค่โฟกัสฟอร์ม",
-        videoUrl: "https://www.youtube.com/watch?v=F9k2K2aDi38",
+        videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักปานกลาง)" }
@@ -197,12 +197,12 @@ export const workoutData = {
     exercises: [
       {
         id: "t1",
-        name: "Chest Press Machine",
+        name: "Flat Dumbbell Bench Press",
         isMain: true,
-        altName: "เครื่องผลักอก หรือ Flat Bench Press",
+        altName: "ดัมเบลนอนดันอกบนม้านั่งราบ (ใส่น้ำหนักต่อข้าง) หรือเครื่อง Chest Press",
         mainMuscle: "อกส่วนกลาง (Mid Chest)",
         subMuscle: "ไหล่หน้า (Front Delts), หลังแขน (Triceps)",
-        videoUrl: "https://www.youtube.com/watch?v=F9k2K2aDi38",
+        videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -453,11 +453,11 @@ export const workoutData = {
     bonusExercises: [
       {
         id: "b_w_chest",
-        name: "Chest Press Machine",
+        name: "Flat Dumbbell Press / Chest Press",
         part: "อก (Chest)",
-        altName: "เครื่องผลักอก",
+        altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "ปั๊มเลือดเข้าอก (Feeder Set) ที่เพิ่งเล่นเมื่อวาน ช่วยฟื้นตัวเร็ว",
-        videoUrl: "https://www.youtube.com/watch?v=F9k2K2aDi38",
+        videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
@@ -602,11 +602,11 @@ export const workoutData = {
     bonusExercises: [
       {
         id: "b_th_chest",
-        name: "Chest Press Machine",
+        name: "Flat Dumbbell Press / Chest Press",
         part: "อก (Chest)",
-        altName: "เครื่องผลักอกกลาง",
+        altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "พรุ่งนี้วันพัก 3 วันติด เล่นน้ำหนักท้าทายได้เต็มที่",
-        videoUrl: "https://www.youtube.com/watch?v=F9k2K2aDi38",
+        videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (ท้าทาย)" }
