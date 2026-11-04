@@ -1,5 +1,6 @@
 /**
- * Pre-loaded default routines based on Atiwitch's 4-Day Hypertrophy Workout Plan.
+ * Pre-loaded default routines based on Atiwitch's 4-Day Hypertrophy Workout Plan (Jetts Fitness).
+ * Expanded to 7 exercises per day matching the latest Jetts Fitness protocol.
  * Mapped to the routine schema:
  * {
  *   id: string,
@@ -20,7 +21,7 @@ export const defaultRoutines = [
   {
     id: 'atiwitch_mon_legs',
     title: 'วันจันทร์: ขา + ก้น ครบทุกมิติ (Legs & Glutes)',
-    subtitle: 'เน้นการสร้างฐานกล้ามเนื้อมวลรวมของร่างกาย',
+    subtitle: 'เน้นการสร้างฐานกล้ามเนื้อมวลรวมของร่างกาย (7 ท่า)',
     exercises: [
       {
         exerciseId: 'seated_leg_press',
@@ -66,21 +67,39 @@ export const defaultRoutines = [
           { type: 'working', targetReps: 8, targetWeight: 50 },
           { type: 'working', targetReps: 8, targetWeight: 50 }
         ]
+      },
+      {
+        exerciseId: 'hip_adduction_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 30 },
+          { type: 'working', targetReps: 8, targetWeight: 50 },
+          { type: 'working', targetReps: 8, targetWeight: 50 },
+          { type: 'working', targetReps: 8, targetWeight: 50 }
+        ]
+      },
+      {
+        exerciseId: 'standing_calf_raise',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 30 },
+          { type: 'working', targetReps: 12, targetWeight: 60 },
+          { type: 'working', targetReps: 12, targetWeight: 60 },
+          { type: 'working', targetReps: 12, targetWeight: 60 }
+        ]
       }
     ]
   },
   {
     id: 'atiwitch_tue_chest',
     title: 'วันอังคาร: อกรวมทุกมุม + หลังแขน (Chest & Triceps)',
-    subtitle: 'เน้นการระเบิดพลังมวลกล้ามเนื้อช่วงบนและการดัน',
+    subtitle: 'เน้นการระเบิดพลังมวลกล้ามเนื้อช่วงบนและการดัน (7 ท่า)',
     exercises: [
       {
-        exerciseId: 'chest_press_machine',
+        exerciseId: 'flat_dumbbell_bench_press',
         sets: [
-          { type: 'warmup', targetReps: 15, targetWeight: 30 },
-          { type: 'working', targetReps: 8, targetWeight: 55 },
-          { type: 'working', targetReps: 8, targetWeight: 55 },
-          { type: 'working', targetReps: 8, targetWeight: 55 }
+          { type: 'warmup', targetReps: 15, targetWeight: 14 },
+          { type: 'working', targetReps: 8, targetWeight: 24 },
+          { type: 'working', targetReps: 8, targetWeight: 24 },
+          { type: 'working', targetReps: 8, targetWeight: 24 }
         ]
       },
       {
@@ -102,15 +121,6 @@ export const defaultRoutines = [
         ]
       },
       {
-        exerciseId: 'chest_dips',
-        sets: [
-          { type: 'warmup', targetReps: 15, targetWeight: 0 },
-          { type: 'working', targetReps: 8, targetWeight: 0 },
-          { type: 'working', targetReps: 8, targetWeight: 0 },
-          { type: 'working', targetReps: 8, targetWeight: 0 }
-        ]
-      },
-      {
         exerciseId: 'cable_triceps_pushdown',
         sets: [
           { type: 'warmup', targetReps: 15, targetWeight: 15 },
@@ -118,21 +128,48 @@ export const defaultRoutines = [
           { type: 'working', targetReps: 8, targetWeight: 25 },
           { type: 'working', targetReps: 8, targetWeight: 25 }
         ]
+      },
+      {
+        exerciseId: 'cable_overhead_triceps_extension',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 12 },
+          { type: 'working', targetReps: 8, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 20 }
+        ]
+      },
+      {
+        exerciseId: 'cable_incline_fly',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 10 },
+          { type: 'working', targetReps: 8, targetWeight: 16 },
+          { type: 'working', targetReps: 8, targetWeight: 16 },
+          { type: 'working', targetReps: 8, targetWeight: 16 }
+        ]
+      },
+      {
+        exerciseId: 'dips_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 30 },
+          { type: 'working', targetReps: 8, targetWeight: 50 },
+          { type: 'working', targetReps: 8, targetWeight: 50 },
+          { type: 'working', targetReps: 8, targetWeight: 50 }
+        ]
       }
     ]
   },
   {
     id: 'atiwitch_wed_back',
     title: 'วันพุธ: หลัง + หน้าแขน (Back & Biceps)',
-    subtitle: 'สร้างปีก V-Shape และความหนาของแผ่นหลัง',
+    subtitle: 'สร้างปีก V-Shape และความหนาของแผ่นหลัง (7 ท่า)',
     exercises: [
       {
-        exerciseId: 'seated_cable_row',
+        exerciseId: 'assisted_pull_up_machine',
         sets: [
-          { type: 'warmup', targetReps: 15, targetWeight: 30 },
-          { type: 'working', targetReps: 8, targetWeight: 55 },
-          { type: 'working', targetReps: 8, targetWeight: 55 },
-          { type: 'working', targetReps: 8, targetWeight: 55 }
+          { type: 'warmup', targetReps: 15, targetWeight: 35 },
+          { type: 'working', targetReps: 8, targetWeight: 25 },
+          { type: 'working', targetReps: 8, targetWeight: 25 },
+          { type: 'working', targetReps: 8, targetWeight: 25 }
         ]
       },
       {
@@ -145,21 +182,39 @@ export const defaultRoutines = [
         ]
       },
       {
-        exerciseId: 'barbell_bent_over_row',
+        exerciseId: 'seated_cable_row',
         sets: [
           { type: 'warmup', targetReps: 15, targetWeight: 30 },
-          { type: 'working', targetReps: 8, targetWeight: 50 },
-          { type: 'working', targetReps: 8, targetWeight: 50 },
-          { type: 'working', targetReps: 8, targetWeight: 50 }
+          { type: 'working', targetReps: 8, targetWeight: 55 },
+          { type: 'working', targetReps: 8, targetWeight: 55 },
+          { type: 'working', targetReps: 8, targetWeight: 55 }
         ]
       },
       {
-        exerciseId: 'barbell_biceps_curl',
+        exerciseId: 'dumbbell_biceps_curl',
         sets: [
-          { type: 'warmup', targetReps: 15, targetWeight: 15 },
-          { type: 'working', targetReps: 8, targetWeight: 25 },
-          { type: 'working', targetReps: 8, targetWeight: 25 },
-          { type: 'working', targetReps: 8, targetWeight: 25 }
+          { type: 'warmup', targetReps: 15, targetWeight: 8 },
+          { type: 'working', targetReps: 8, targetWeight: 14 },
+          { type: 'working', targetReps: 8, targetWeight: 14 },
+          { type: 'working', targetReps: 8, targetWeight: 14 }
+        ]
+      },
+      {
+        exerciseId: 'incline_dumbbell_curl',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 8 },
+          { type: 'working', targetReps: 8, targetWeight: 12 },
+          { type: 'working', targetReps: 8, targetWeight: 12 },
+          { type: 'working', targetReps: 8, targetWeight: 12 }
+        ]
+      },
+      {
+        exerciseId: 'chest_supported_row',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 12 },
+          { type: 'working', targetReps: 8, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 20 }
         ]
       },
       {
@@ -176,15 +231,15 @@ export const defaultRoutines = [
   {
     id: 'atiwitch_thu_shoulders',
     title: 'วันพฤหัสบดี: ไหล่ครบทุกมุม + หน้าท้อง (Shoulders & Abs)',
-    subtitle: 'สร้างมิติไหล่ 3D รอบทิศทาง และแกนกลางลำตัว',
+    subtitle: 'สร้างมิติไหล่ 3D รอบทิศทาง และแกนกลางลำตัว (7 ท่า)',
     exercises: [
       {
-        exerciseId: 'shoulder_press_machine',
+        exerciseId: 'seated_dumbbell_shoulder_press',
         sets: [
-          { type: 'warmup', targetReps: 15, targetWeight: 25 },
-          { type: 'working', targetReps: 8, targetWeight: 45 },
-          { type: 'working', targetReps: 8, targetWeight: 45 },
-          { type: 'working', targetReps: 8, targetWeight: 45 }
+          { type: 'warmup', targetReps: 15, targetWeight: 12 },
+          { type: 'working', targetReps: 8, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 20 }
         ]
       },
       {
@@ -197,12 +252,12 @@ export const defaultRoutines = [
         ]
       },
       {
-        exerciseId: 'rear_delt_fly_machine',
+        exerciseId: 'cable_lateral_raise',
         sets: [
-          { type: 'warmup', targetReps: 15, targetWeight: 20 },
-          { type: 'working', targetReps: 8, targetWeight: 35 },
-          { type: 'working', targetReps: 8, targetWeight: 35 },
-          { type: 'working', targetReps: 8, targetWeight: 35 }
+          { type: 'warmup', targetReps: 15, targetWeight: 5 },
+          { type: 'working', targetReps: 8, targetWeight: 8 },
+          { type: 'working', targetReps: 8, targetWeight: 8 },
+          { type: 'working', targetReps: 8, targetWeight: 8 }
         ]
       },
       {
@@ -221,6 +276,24 @@ export const defaultRoutines = [
           { type: 'working', targetReps: 8, targetWeight: 40 },
           { type: 'working', targetReps: 8, targetWeight: 40 },
           { type: 'working', targetReps: 8, targetWeight: 40 }
+        ]
+      },
+      {
+        exerciseId: 'face_pull',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 12 },
+          { type: 'working', targetReps: 8, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 20 }
+        ]
+      },
+      {
+        exerciseId: 'hanging_leg_raise',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 0 },
+          { type: 'working', targetReps: 10, targetWeight: 0 },
+          { type: 'working', targetReps: 10, targetWeight: 0 },
+          { type: 'working', targetReps: 10, targetWeight: 0 }
         ]
       }
     ]

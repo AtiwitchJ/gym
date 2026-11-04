@@ -49,6 +49,30 @@ export const defaultExercises = [
     notes: 'Constant cable tension across the entire chest range'
   },
   {
+    id: 'flat_dumbbell_bench_press',
+    name: 'Flat Dumbbell Bench Press',
+    muscleGroup: 'chest',
+    equipment: 'dumbbell',
+    isCustom: false,
+    notes: 'Dumbbell flat bench press for chest mass with independent unilateral stability'
+  },
+  {
+    id: 'cable_incline_fly',
+    name: 'Cable Incline Chest Fly (Low-to-High)',
+    muscleGroup: 'chest',
+    equipment: 'cable',
+    isCustom: false,
+    notes: 'Low-to-high cable fly emphasizing upper chest and inner clavicular fibers'
+  },
+  {
+    id: 'dips_machine',
+    name: 'Assisted Dips Machine',
+    muscleGroup: 'chest',
+    equipment: 'machine',
+    isCustom: false,
+    notes: 'Guided machine dip focusing on lower pectorals and triceps'
+  },
+  {
     id: 'chest_dips',
     name: 'Chest Dips',
     muscleGroup: 'chest',
@@ -66,6 +90,22 @@ export const defaultExercises = [
   },
 
   // --- BACK ---
+  {
+    id: 'assisted_pull_up_machine',
+    name: 'Assisted Pull-up Machine',
+    muscleGroup: 'back',
+    equipment: 'machine',
+    isCustom: false,
+    notes: 'Counterweight assisted vertical pull targeting back width and lat spread'
+  },
+  {
+    id: 'chest_supported_row',
+    name: 'Chest-Supported Row',
+    muscleGroup: 'back',
+    equipment: 'machine',
+    isCustom: false,
+    notes: 'Incline bench supported row isolating rhomboids and lats without lower back strain'
+  },
   {
     id: 'barbell_deadlift',
     name: 'Barbell Deadlift',
@@ -188,6 +228,14 @@ export const defaultExercises = [
     isCustom: false,
     notes: 'Angled quad squat minimizing spinal shear stress'
   },
+  {
+    id: 'hip_adduction_machine',
+    name: 'Seated Hip Adduction Machine',
+    muscleGroup: 'quads',
+    equipment: 'machine',
+    isCustom: false,
+    notes: 'Inner thigh adductor isolation, squeeze knees together smoothly'
+  },
 
   // --- HAMSTRINGS ---
   {
@@ -240,11 +288,19 @@ export const defaultExercises = [
   },
   {
     id: 'hip_abduction_machine',
-    name: 'Hip Abduction Machine & Calf Raise',
+    name: 'Hip Abduction Machine',
     muscleGroup: 'hamstrings',
     equipment: 'machine',
     isCustom: false,
-    notes: 'Gluteus medius hip abduction and seated/standing calf raises'
+    notes: 'Gluteus medius and minimus outer hip abduction'
+  },
+  {
+    id: 'standing_calf_raise',
+    name: 'Standing Calf Raise',
+    muscleGroup: 'hamstrings',
+    equipment: 'smith_machine',
+    isCustom: false,
+    notes: 'Straight-leg calf extension targeting gastrocnemius with full ankle stretch and contraction'
   },
 
   // --- DELTS ---
@@ -306,6 +362,14 @@ export const defaultExercises = [
   },
 
   // --- ARMS ---
+  {
+    id: 'dumbbell_biceps_curl',
+    name: 'Dumbbell Biceps Curl',
+    muscleGroup: 'arms',
+    equipment: 'dumbbell',
+    isCustom: false,
+    notes: 'Supinating dumbbell curl emphasizing biceps peak and wrist rotation'
+  },
   {
     id: 'barbell_biceps_curl',
     name: 'Barbell Biceps Curl',
