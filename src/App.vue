@@ -24,7 +24,11 @@
     <HeaderBar />
 
     <!-- Main Container -->
-    <main class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden">
+    <!-- Main Container -->
+    <main
+      class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden"
+      :class="isWorkoutDay ? 'pb-36 sm:pb-40' : 'pb-24 sm:pb-28'"
+    >
       <!-- 1. Workouts View (Global Tab) -->
       <WorkoutsView
         v-if="currentTab === 'workouts'"

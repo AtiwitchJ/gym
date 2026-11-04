@@ -1,24 +1,30 @@
 import { ref, reactive, watch } from 'vue';
-import { workoutData } from '../data/workouts.js';
+import { workoutData, EXERCISE_CANONICAL_MAP, getCanonicalExerciseId, getLinkedExerciseIds } from '../data/workouts.js';
 import { defaultTodos } from '../data/defaultTodos.js';
 
-// Helper for safe environment storage access
-function safeGetStorage(key, fallback = null) {
-  if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem(key) || fallback;
+// Safe localStorage helper for both browser and SSR / unit tests
+const storage = {
+  getItem(key, fallback = null) {
+    if (typeof localStorage !== 'undefined' && localStorage.getItem) {
+      try {
+        const val = localStorage.getItem(key);
+        return val !== null ? val : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+    return fallback;
+  },
+  setItem(key, val) {
+    if (typeof localStorage !== 'undefined' && localStorage.setItem) {
+      try { localStorage.setItem(key, val); } catch (e) {}
+    }
   }
-  return fallback;
-}
-
-function safeSetStorage(key, value) {
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(key, value);
-  }
-}
+};
 
 // Active Day restoration
 function getInitialDay() {
-  const saved = safeGetStorage('atiwitch_active_tab') || safeGetStorage('jetts_active_tab');
+  const saved = storage.getItem('atiwitch_active_tab') || storage.getItem('jetts_active_tab');
   if (saved && (workoutData[saved] || saved === 'rest' || saved === 'history' || saved === 'todo')) {
     return saved;
   }
@@ -31,16 +37,16 @@ function getInitialDay() {
 }
 
 const currentDay = ref(getInitialDay());
-const currentTab = ref(safeGetStorage('atiwitch_active_global_tab', 'workouts'));
+const currentTab = ref(storage.getItem('atiwitch_active_global_tab', 'workouts'));
 const saveStatus = ref('saved'); // 'saved', 'saving', 'error'
 const toastMessage = ref('');
 let toastTimer = null;
 
-const showExerciseImages = ref(safeGetStorage('atiwitch_show_images') !== 'false');
+const showExerciseImages = ref(storage.getItem('atiwitch_show_images') !== 'false');
 
 function toggleExerciseImages() {
   showExerciseImages.value = !showExerciseImages.value;
-  safeSetStorage('atiwitch_show_images', String(showExerciseImages.value));
+  storage.setItem('atiwitch_show_images', String(showExerciseImages.value));
   showToast(showExerciseImages.value ? 'เปิดแสดงภาพตัวอย่างท่าฝึก' : 'ซ่อนภาพตัวอย่าง (โหมดกระชับ)');
 }
 
@@ -53,19 +59,19 @@ function showToast(msg) {
 }
 
 // Reactive store models (supports both new and previous storage keys seamlessly)
-const userState = reactive(JSON.parse(safeGetStorage('atiwitch_workout_state') || safeGetStorage('jetts_workout_state') || '{}'));
-const lastWeights = reactive(JSON.parse(safeGetStorage('atiwitch_last_weights') || safeGetStorage('jetts_last_weights') || '{}'));
-const workoutHistory = ref(JSON.parse(safeGetStorage('atiwitch_workout_history') || safeGetStorage('jetts_workout_history') || '[]'));
-const userTodos = ref(JSON.parse(safeGetStorage('atiwitch_gym_todos') || safeGetStorage('jetts_gym_todos') || JSON.stringify(defaultTodos)));
+const userState = reactive(JSON.parse(storage.getItem('atiwitch_workout_state') || storage.getItem('jetts_workout_state') || '{}'));
+const lastWeights = reactive(JSON.parse(storage.getItem('atiwitch_last_weights') || storage.getItem('jetts_last_weights') || '{}'));
+const workoutHistory = ref(JSON.parse(storage.getItem('atiwitch_workout_history') || storage.getItem('jetts_workout_history') || '[]'));
+const userTodos = ref(JSON.parse(storage.getItem('atiwitch_gym_todos') || storage.getItem('jetts_gym_todos') || JSON.stringify(defaultTodos)));
 
 // Auto-save triggers
 let syncDebounceTimer = null;
 
 function persistLocal() {
-  safeSetStorage('atiwitch_workout_state', JSON.stringify(userState));
-  safeSetStorage('atiwitch_last_weights', JSON.stringify(lastWeights));
-  safeSetStorage('atiwitch_workout_history', JSON.stringify(workoutHistory.value));
-  safeSetStorage('atiwitch_gym_todos', JSON.stringify(userTodos.value));
+  storage.setItem('atiwitch_workout_state', JSON.stringify(userState));
+  storage.setItem('atiwitch_last_weights', JSON.stringify(lastWeights));
+  storage.setItem('atiwitch_workout_history', JSON.stringify(workoutHistory.value));
+  storage.setItem('atiwitch_gym_todos', JSON.stringify(userTodos.value));
 }
 
 function triggerSave(dayKey = currentDay.value) {
@@ -121,27 +127,186 @@ async function fetchServerState() {
       if (stateRes.todos && stateRes.todos.length > 0) {
         userTodos.value = stateRes.todos;
       }
+      healCrossDayExerciseRecords();
       persistLocal();
     }
 
     if (historyRes && Array.isArray(historyRes)) {
       workoutHistory.value = historyRes;
-      localStorage.setItem('jetts_workout_history', JSON.stringify(historyRes));
+      storage.setItem('jetts_workout_history', JSON.stringify(historyRes));
     }
   } catch (err) {
     console.log('Running in local/offline mode (SQLite server unreachable)');
   }
 }
 
+// Cross-Day Exercise Sync Helpers
+/**
+ * Propagate a recorded weight/reps to all linked exercises across different workout days
+ * (e.g. Seated Leg Press on Monday <-> Bonus Leg Press on Tue/Wed/Thu)
+ */
+function syncLinkedExerciseRecords(sourceExId, setIdx, weightVal, repsVal) {
+  const linkedIds = getLinkedExerciseIds(sourceExId);
+  const dateStr = new Date().toISOString().split('T')[0];
+
+  linkedIds.forEach(targetId => {
+    if (!lastWeights[targetId]) lastWeights[targetId] = {};
+    const targetObj = lastWeights[targetId];
+
+    if (setIdx === 0) {
+      // Warmup set
+      if (weightVal !== undefined && weightVal !== '') targetObj.wt_0 = weightVal;
+      if (repsVal !== undefined && repsVal !== '') targetObj.reps_0 = repsVal;
+    } else {
+      // Working / Touchup set:
+      if (weightVal !== undefined && weightVal !== '') {
+        targetObj[`wt_${setIdx}`] = weightVal;
+        // Ensure bonus touchup (which reads wt_1) has the latest working weight
+        if (targetObj.wt_1 === undefined || targetObj.wt_1 === '' || setIdx === 1) {
+          targetObj.wt_1 = weightVal;
+        }
+        // If target is a main lift (e.g. m1, t1, w2, th1), also seed working sets wt_2 and wt_3 if not yet set
+        if (!targetObj.wt_2) targetObj.wt_2 = weightVal;
+        if (!targetObj.wt_3) targetObj.wt_3 = weightVal;
+      }
+
+      if (repsVal !== undefined && repsVal !== '') {
+        targetObj[`reps_${setIdx}`] = repsVal;
+        if (targetObj.reps_1 === undefined || targetObj.reps_1 === '' || setIdx === 1) {
+          targetObj.reps_1 = repsVal;
+        }
+        if (!targetObj.reps_2) targetObj.reps_2 = repsVal;
+        if (!targetObj.reps_3) targetObj.reps_3 = repsVal;
+      }
+    }
+    targetObj.updatedAt = dateStr;
+  });
+}
+
+/**
+ * Intelligent cross-day last record resolver.
+ * Finds the latest weights and reps recorded for an exercise either directly,
+ * via linked exercises on other days (e.g. bonus vs main), or from recent drafts.
+ */
+function getExerciseLastRecord(exId) {
+  if (!exId) return {};
+
+  // 1. Direct match with actual weight data
+  const direct = lastWeights[exId];
+  if (direct && (direct.wt_0 !== undefined || direct.wt_1 !== undefined || direct.wt_2 !== undefined)) {
+    return direct;
+  }
+
+  // 2. Check linked exercises in lastWeights
+  const linked = getLinkedExerciseIds(exId);
+  for (const lId of linked) {
+    if (lId !== exId && lastWeights[lId]) {
+      const lObj = lastWeights[lId];
+      if (lObj.wt_0 !== undefined || lObj.wt_1 !== undefined || lObj.wt_2 !== undefined) {
+        return lObj;
+      }
+    }
+  }
+
+  // 3. Fallback: Search drafts in userState across all days
+  for (const dayKey of ['mon', 'tue', 'wed', 'thu']) {
+    const dayDraft = userState[dayKey] || {};
+    for (const lId of linked) {
+      const draft = dayDraft[lId];
+      if (draft) {
+        const found = {};
+        let hasData = false;
+        for (const [k, v] of Object.entries(draft)) {
+          if ((k.startsWith('wt_') || k.startsWith('reps_')) && v !== '' && v !== undefined) {
+            found[k] = v;
+            hasData = true;
+          }
+        }
+        if (hasData) {
+          return found;
+        }
+      }
+    }
+  }
+
+  return direct || {};
+}
+
+/**
+ * Run a healing sync across all linked exercise groups
+ * so existing data from Monday immediately lights up Tuesday, Wednesday, and Thursday!
+ */
+function healCrossDayExerciseRecords() {
+  const processed = new Set();
+  for (const [exId, canon] of Object.entries(EXERCISE_CANONICAL_MAP)) {
+    if (processed.has(canon)) continue;
+    processed.add(canon);
+
+    const linked = getLinkedExerciseIds(exId);
+    let bestRecord = null;
+
+    // Check lastWeights for any linked ID
+    for (const lId of linked) {
+      const rec = lastWeights[lId];
+      if (rec && (rec.wt_0 !== undefined || rec.wt_1 !== undefined)) {
+        bestRecord = rec;
+        break;
+      }
+    }
+
+    // Check userState drafts if not found in lastWeights
+    if (!bestRecord) {
+      for (const dayKey of ['mon', 'tue', 'wed', 'thu']) {
+        const dayDraft = userState[dayKey] || {};
+        for (const lId of linked) {
+          const draft = dayDraft[lId];
+          if (draft && (draft.wt_0 !== undefined || draft.wt_1 !== undefined)) {
+            bestRecord = draft;
+            break;
+          }
+        }
+        if (bestRecord) break;
+      }
+    }
+
+    // If found, populate all linked IDs
+    if (bestRecord) {
+      const wt0 = bestRecord.wt_0;
+      const r0 = bestRecord.reps_0;
+      const wt1 = bestRecord.wt_1 !== undefined ? bestRecord.wt_1 : (bestRecord.wt_2 !== undefined ? bestRecord.wt_2 : bestRecord.wt_3);
+      const r1 = bestRecord.reps_1 !== undefined ? bestRecord.reps_1 : (bestRecord.reps_2 !== undefined ? bestRecord.reps_2 : bestRecord.reps_3);
+
+      linked.forEach(lId => {
+        if (!lastWeights[lId]) lastWeights[lId] = {};
+        if (wt0 !== undefined && wt0 !== '') lastWeights[lId].wt_0 = wt0;
+        if (r0 !== undefined && r0 !== '') lastWeights[lId].reps_0 = r0;
+        if (wt1 !== undefined && wt1 !== '') {
+          if (!lastWeights[lId].wt_1) lastWeights[lId].wt_1 = wt1;
+          if (!lastWeights[lId].wt_2) lastWeights[lId].wt_2 = wt1;
+          if (!lastWeights[lId].wt_3) lastWeights[lId].wt_3 = wt1;
+        }
+        if (r1 !== undefined && r1 !== '') {
+          if (!lastWeights[lId].reps_1) lastWeights[lId].reps_1 = r1;
+          if (!lastWeights[lId].reps_2) lastWeights[lId].reps_2 = r1;
+          if (!lastWeights[lId].reps_3) lastWeights[lId].reps_3 = r1;
+        }
+      });
+    }
+  }
+}
+
+// Initial heal pass on store startup
+healCrossDayExerciseRecords();
+
 // Actions
 function switchDay(dayKey) {
   currentDay.value = dayKey;
-  safeSetStorage('atiwitch_active_tab', dayKey);
+  storage.setItem('atiwitch_active_tab', dayKey);
 }
 
 function switchTab(tabKey) {
   currentTab.value = tabKey;
-  safeSetStorage('atiwitch_active_global_tab', tabKey);
+  storage.setItem('atiwitch_active_global_tab', tabKey);
 }
 
 function updateWeight(day, exId, setIdx, val) {
@@ -153,6 +318,9 @@ function updateWeight(day, exId, setIdx, val) {
     if (!lastWeights[exId]) lastWeights[exId] = {};
     lastWeights[exId][`wt_${setIdx}`] = val;
     lastWeights[exId].updatedAt = new Date().toISOString().split('T')[0];
+
+    // Sync across linked exercises on other days (e.g. bonus vs main)
+    syncLinkedExerciseRecords(exId, setIdx, val, undefined);
   }
 
   triggerSave(day);
@@ -167,6 +335,9 @@ function updateReps(day, exId, setIdx, val) {
     if (!lastWeights[exId]) lastWeights[exId] = {};
     lastWeights[exId][`reps_${setIdx}`] = val;
     lastWeights[exId].updatedAt = new Date().toISOString().split('T')[0];
+
+    // Sync across linked exercises on other days (e.g. bonus vs main)
+    syncLinkedExerciseRecords(exId, setIdx, undefined, val);
   }
 
   triggerSave(day);
@@ -241,10 +412,12 @@ async function finishAndSaveWorkout() {
       if (wt !== '') {
         if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
         lastWeights[ex.id][`wt_${sIdx}`] = wt;
+        syncLinkedExerciseRecords(ex.id, sIdx, wt, undefined);
       }
       if (reps !== '') {
         if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
         lastWeights[ex.id][`reps_${sIdx}`] = reps;
+        syncLinkedExerciseRecords(ex.id, sIdx, undefined, reps);
       }
 
       return {
@@ -283,10 +456,12 @@ async function finishAndSaveWorkout() {
         if (wt !== '') {
           if (!lastWeights[bEx.id]) lastWeights[bEx.id] = {};
           lastWeights[bEx.id][`wt_${sIdx}`] = wt;
+          syncLinkedExerciseRecords(bEx.id, sIdx, wt, undefined);
         }
         if (reps !== '') {
           if (!lastWeights[bEx.id]) lastWeights[bEx.id] = {};
           lastWeights[bEx.id][`reps_${sIdx}`] = reps;
+          syncLinkedExerciseRecords(bEx.id, sIdx, undefined, reps);
         }
 
         return {
@@ -411,6 +586,10 @@ export function useWorkoutStore() {
     addTodo,
     toggleTodo,
     deleteTodo,
+    getCanonicalExerciseId,
+    getLinkedExerciseIds,
+    getExerciseLastRecord,
+    syncLinkedExerciseRecords,
     showToast,
     fetchServerState,
     showExerciseImages,

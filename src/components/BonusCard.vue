@@ -18,9 +18,15 @@
             +{{ index + 1 }}
           </span>
           <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5 mb-1">
+            <div class="flex items-center gap-1.5 mb-1 flex-wrap">
               <span class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full tracking-wide uppercase bg-flame-bg text-flame border border-flame select-none">
                 TOUCH-UP: {{ bonus.part }}
+              </span>
+              <span
+                v-if="isDumbbell"
+                class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-paper-subtle text-ink border border-plate/40 select-none inline-flex items-center gap-1"
+              >
+                ใส่น้ำหนักต่อข้าง (Per Dumbbell)
               </span>
             </div>
             <h3 class="text-sm sm:text-lg font-bold text-ink font-heading tracking-tight leading-snug">
@@ -118,8 +124,8 @@
                 วอร์ม (15–20)
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
-                <span v-if="prevWarm !== 0 || prevWarmReps !== null" class="font-bold">
-                  {{ prevWarm }} kg × {{ prevWarmReps || '—' }}
+                <span v-if="displayWarmWeight !== 0 || displayWarmReps !== null" class="font-bold">
+                  {{ displayWarmWeight }} kg × {{ displayWarmReps || '—' }}
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
@@ -127,14 +133,14 @@
                 <span v-if="exerciseAdvice?.warmAdvice">
                   {{ exerciseAdvice.warmAdvice.suggestedWeight }} kg
                 </span>
-                <span v-else-if="prevWarm !== 0">
-                  {{ prevWarm }} kg
+                <span v-else-if="displayWarmWeight !== 0">
+                  {{ displayWarmWeight }} kg
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span
-                  v-if="exerciseAdvice?.warmAdvice && (prevWarm !== 0 || prevWarmReps !== null)"
+                  v-if="exerciseAdvice?.warmAdvice && (displayWarmWeight !== 0 || displayWarmReps !== null)"
                   class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
                   :class="exerciseAdvice.warmAdvice.badgeClass"
                 >
@@ -147,11 +153,11 @@
             <!-- ซ้อมเสริม -->
             <tr>
               <td class="py-1.5 px-2.5 font-bold text-ink whitespace-nowrap">
-                ซ้อมเสริม (6–8)
+                ซ้อมเสริม ({{ workRepTargetLabel }})
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
-                <span v-if="prevTouch !== 0 || prevTouchReps !== null" class="font-bold">
-                  {{ prevTouch }} kg × {{ prevTouchReps || '—' }}
+                <span v-if="displayTouchWeight !== 0 || displayTouchReps !== null" class="font-bold">
+                  {{ displayTouchWeight }} kg × {{ displayTouchReps || '—' }}
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
@@ -159,14 +165,14 @@
                 <span v-if="exerciseAdvice?.workAdvice">
                   {{ exerciseAdvice.workAdvice.suggestedWeight }} kg
                 </span>
-                <span v-else-if="prevTouch !== 0">
-                  {{ prevTouch }} kg
+                <span v-else-if="displayTouchWeight !== 0">
+                  {{ displayTouchWeight }} kg
                 </span>
                 <span v-else class="text-ink-muted">-</span>
               </td>
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span
-                  v-if="exerciseAdvice?.workAdvice && (prevTouch !== 0 || prevTouchReps !== null)"
+                  v-if="exerciseAdvice?.workAdvice && (displayTouchWeight !== 0 || displayTouchReps !== null)"
                   class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
                   :class="exerciseAdvice.workAdvice.badgeClass"
                 >
@@ -207,100 +213,119 @@
       </div>
     </transition>
 
+    <!-- Sets Table Header -->
+    <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[9px] sm:text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider grid grid-cols-[1fr_72px_58px_50px_34px] sm:grid-cols-[1fr_84px_70px_56px_38px] gap-1.5 sm:gap-2 items-center select-none">
+      <div>เซ็ต</div>
+      <div class="text-center" :title="isDumbbell ? 'น้ำหนักดัมเบลต่อข้าง (Per Dumbbell)' : 'น้ำหนักยก'">
+        {{ isDumbbell ? 'น.น./ข้าง' : 'น้ำหนัก' }}
+      </div>
+      <div class="text-center">ครั้ง</div>
+      <div class="text-center">แนะนำ</div>
+      <div class="text-center">เสร็จ</div>
+    </div>
+
     <!-- Sets List -->
     <div class="divide-y-2 divide-plate/10 bg-white">
       <div
         v-for="(set, sIdx) in bonus.sets"
         :key="sIdx"
-        class="px-2.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-3 transition-colors"
+        class="px-2.5 sm:px-4 py-2 sm:py-2.5 grid grid-cols-[1fr_72px_58px_50px_34px] sm:grid-cols-[1fr_84px_70px_56px_38px] gap-1.5 sm:gap-2 items-center transition-colors"
         :class="isSetDone(sIdx) ? 'bg-emerald-bg/50' : 'hover:bg-surface-low/40'"
       >
-        <!-- Set Indicator & Target Reps -->
-        <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0 min-w-[48px] sm:min-w-[76px]">
+        <!-- 1. Set Indicator & Target Reps -->
+        <div class="flex flex-col justify-center min-w-0 pr-1 overflow-hidden">
+          <div class="flex items-center gap-1.5">
+            <span
+              class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded tracking-wider uppercase border select-none flex-shrink-0"
+              :class="set.type === 'warm'
+                ? 'bg-sky-bg text-sky border-sky/40'
+                : 'bg-flame-bg text-flame border-flame/40'"
+            >
+              {{ set.type === 'warm' ? 'W1' : 'T1' }}
+            </span>
+            <span class="text-xs sm:text-sm font-mono font-bold text-ink select-none truncate">
+              {{ getCleanTargetReps(set.reps) }}
+            </span>
+          </div>
           <span
-            class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded tracking-wider uppercase border select-none"
-            :class="set.type === 'warm'
-              ? 'bg-sky-bg text-sky border-sky/40'
-              : 'bg-flame-bg text-flame border-flame/40'"
+            v-if="getSetNote(set.reps)"
+            class="text-[8px] sm:text-[9px] font-mono text-ink-muted/80 truncate select-none mt-0.5"
+            :title="getSetNote(set.reps)"
           >
-            {{ set.type === 'warm' ? 'W1' : 'T1' }}
-          </span>
-          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none">
-            {{ set.reps.replace(' ครั้ง', '') }}
+            {{ getSetNote(set.reps) }}
           </span>
         </div>
 
-        <!-- Interactive PIN Trigger Buttons (No OS Keyboard) -->
-        <div class="flex items-center gap-1 sm:gap-1.5 flex-1 justify-end min-w-0">
-          <!-- 1. Weight Button -->
-          <button
-            type="button"
-            @click="openWeightKeypad(sIdx)"
-            class="h-8 sm:h-9 px-1.5 sm:px-2.5 rounded-lg border-2 border-plate flex items-center justify-center gap-0.5 sm:gap-1 font-mono text-xs font-bold transition-all select-none touch-manipulation min-w-[62px] sm:min-w-[80px] flex-shrink-0"
-            :class="getWeight(sIdx) !== ''
-              ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
-              : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
-            title="แตะเพื่อระบุน้ำหนักด้วยแป้น PIN"
-          >
-            <span class="tabular-nums font-extrabold text-xs sm:text-sm" :class="getWeight(sIdx) !== '' ? 'text-ink' : 'text-ink-muted/60'">
-              {{ getWeight(sIdx) !== '' ? getWeight(sIdx) : (getPrevWeight(sIdx) || '0') }}
+        <!-- 2. Weight Button (Column-Aligned) -->
+        <button
+          type="button"
+          @click="openWeightKeypad(sIdx)"
+          class="w-full h-8 sm:h-9 rounded-lg border-2 border-plate flex items-center justify-center gap-0.5 font-mono text-xs font-bold transition-all select-none touch-manipulation"
+          :class="getWeight(sIdx) !== ''
+            ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
+            : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
+          title="แตะเพื่อระบุน้ำหนักด้วยแป้น PIN"
+        >
+          <template v-if="getWeight(sIdx) !== ''">
+            <span class="tabular-nums font-extrabold text-xs sm:text-sm text-ink">
+              {{ getWeight(sIdx) }}
             </span>
             <span class="text-[9px] sm:text-[10px] text-flame font-bold">กก.</span>
-          </button>
+          </template>
+          <template v-else>
+            <span class="text-xs sm:text-sm text-ink-muted/40 font-bold">—</span>
+          </template>
+        </button>
 
-          <!-- 2. Reps Button -->
-          <button
-            type="button"
-            @click="openRepsKeypad(sIdx, set.reps)"
-            class="h-8 sm:h-9 px-1 sm:px-2 rounded-lg border-2 border-plate flex items-center justify-center gap-0.5 sm:gap-1 font-mono text-xs font-bold transition-all select-none touch-manipulation min-w-[54px] sm:min-w-[68px] flex-shrink-0"
-            :class="getReps(sIdx) !== ''
-              ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
-              : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
-            title="แตะเพื่อระบุจำนวนครั้งจริงด้วยแป้น PIN"
-          >
-            <span class="tabular-nums font-extrabold text-xs sm:text-sm" :class="getReps(sIdx) !== '' ? 'text-ink' : 'text-ink-muted/60'">
-              {{ getReps(sIdx) !== '' ? getReps(sIdx) : (getPrevReps(sIdx) || targetRepNumber(set.reps) || '—') }}
+        <!-- 3. Reps Button (Column-Aligned) -->
+        <button
+          type="button"
+          @click="openRepsKeypad(sIdx, set.reps)"
+          class="w-full h-8 sm:h-9 rounded-lg border-2 border-plate flex items-center justify-center gap-0.5 font-mono text-xs font-bold transition-all select-none touch-manipulation"
+          :class="getReps(sIdx) !== ''
+            ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
+            : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
+          title="แตะเพื่อระบุจำนวนครั้งจริงด้วยแป้น PIN"
+        >
+          <template v-if="getReps(sIdx) !== ''">
+            <span class="tabular-nums font-extrabold text-xs sm:text-sm text-ink">
+              {{ getReps(sIdx) }}
             </span>
             <span class="text-[9px] sm:text-[10px] text-sky font-bold">ครั้ง</span>
-          </button>
+          </template>
+          <template v-else>
+            <span class="text-xs sm:text-sm text-ink-muted/40 font-bold">—</span>
+          </template>
+        </button>
 
-          <!-- Progressive Overload Advice Chip for this Set (Status Tag) -->
+        <!-- 4. Progressive Overload Advice Badge (Column-Aligned) -->
+        <div class="flex items-center justify-center w-full">
           <div
             v-if="getSetAdvice(sIdx)"
-            class="h-8 sm:h-9 px-1.5 sm:px-2 rounded-md border-2 border-plate shadow-[1px_1px_0px_#1e2220] select-none whitespace-nowrap text-[9px] sm:text-[10px] font-mono font-bold flex items-center justify-center flex-shrink-0"
+            class="w-full h-7 sm:h-8 rounded-md border-2 border-plate shadow-[0.5px_0.5px_0px_#1e2220] select-none text-[9px] sm:text-[10px] font-mono font-bold flex items-center justify-center whitespace-nowrap"
             :class="getSetAdvice(sIdx).badgeClass"
             :title="getSetAdvice(sIdx).reasonText"
           >
-            {{ getSetAdvice(sIdx).badgeText }}
+            {{ getSetAdvice(sIdx).delta > 0 ? '+2 kg' : getSetAdvice(sIdx).delta < 0 ? '-2 kg' : 'พอดี' }}
           </div>
-
-          <!-- 3. Quick Copy Set Record (Desktop/Tablet) -->
-          <button
-            v-if="hasPrevRecord(sIdx)"
-            type="button"
-            @click="applyPrevRecordForSet(sIdx)"
-            class="hidden md:inline-flex text-[10px] font-mono font-bold px-1.5 py-1 rounded border border-plate/30 bg-paper-subtle hover:bg-flame-bg hover:text-flame text-ink-muted transition-all select-none whitespace-nowrap"
-            :title="`ดึงสถิติเดิม: ${getPrevWeight(sIdx)} กก. (${getPrevReps(sIdx) || '—'} ครั้ง)`"
-          >
-            เดิม
-          </button>
-
-          <!-- 4. Complete Checkbox Button -->
-          <button
-            type="button"
-            @click="onToggle(sIdx)"
-            class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base transition-all select-none border-2 border-plate flex-shrink-0"
-            :class="isSetDone(sIdx)
-              ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669] sm:shadow-[2px_2px_0px_#059669]'
-              : 'bg-surface hover:bg-paper-subtle text-ink-muted shadow-[1.5px_1.5px_0px_#1e2220] sm:shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
-            title="ทำเซ็ตนี้สำเร็จ"
-          >
-            <svg v-if="isSetDone(sIdx)" class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-            <span v-else class="text-[11px] sm:text-xs font-mono opacity-50 font-bold">✓</span>
-          </button>
+          <span v-else class="text-ink-muted/30 font-mono text-xs select-none">—</span>
         </div>
+
+        <!-- 5. Complete Checkbox Button (Column-Aligned) -->
+        <button
+          type="button"
+          @click="onToggle(sIdx)"
+          class="w-full h-8 sm:h-9 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base transition-all select-none border-2 border-plate"
+          :class="isSetDone(sIdx)
+            ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669]'
+            : 'bg-surface hover:bg-paper-subtle text-ink-muted shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
+          title="ทำเซ็ตนี้สำเร็จ"
+        >
+          <svg v-if="isSetDone(sIdx)" class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+          <span v-else class="text-[11px] sm:text-xs font-mono opacity-50 font-bold">✓</span>
+        </button>
       </div>
     </div>
   </div>
@@ -329,7 +354,8 @@ const {
   updateReps,
   applyPrevRecord,
   toggleSetDone,
-  showExerciseImages
+  showExerciseImages,
+  getExerciseLastRecord
 } = useWorkoutStore();
 
 const { openKeypad } = usePinKeypad();
@@ -339,32 +365,94 @@ const videoId = computed(() => getYoutubeId(props.bonus.videoUrl));
 const thumbnailUrl = computed(() => videoId.value ? `https://img.youtube.com/vi/${videoId.value}/hqdefault.jpg` : null);
 const embedUrl = computed(() => videoId.value ? `https://www.youtube-nocookie.com/embed/${videoId.value}?autoplay=1&rel=0` : null);
 
+const isDumbbell = computed(() => {
+  const n = (props.bonus.name || '').toLowerCase();
+  const a = (props.bonus.altName || '').toLowerCase();
+  return n.includes('dumbbell') || n.includes('ดัมเบล') || a.includes('dumbbell') || a.includes('ดัมเบล');
+});
+
 function toggleVideo() {
   isPlayingVideo.value = !isPlayingVideo.value;
 }
 
 const exState = computed(() => (userState[currentDay.value] && userState[currentDay.value][props.bonus.id]) || {});
-const exLast = computed(() => lastWeights[props.bonus.id] || {});
+const exLast = computed(() => getExerciseLastRecord(props.bonus.id));
 
-const prevWarm = computed(() => (exLast.value.wt_0 !== undefined && exLast.value.wt_0 !== '') ? exLast.value.wt_0 : 0);
-const prevTouch = computed(() => (exLast.value.wt_1 !== undefined && exLast.value.wt_1 !== '') ? exLast.value.wt_1 : 0);
-const prevWarmReps = computed(() => (exLast.value.reps_0 !== undefined && exLast.value.reps_0 !== '') ? exLast.value.reps_0 : null);
-const prevTouchReps = computed(() => (exLast.value.reps_1 !== undefined && exLast.value.reps_1 !== '') ? exLast.value.reps_1 : null);
+const prevWarm = computed(() => {
+  const w = exLast.value.wt_0;
+  return (w !== undefined && w !== '') ? w : 0;
+});
+const prevTouch = computed(() => {
+  if (exLast.value.wt_1 !== undefined && exLast.value.wt_1 !== '') return exLast.value.wt_1;
+  if (exLast.value.wt_2 !== undefined && exLast.value.wt_2 !== '') return exLast.value.wt_2;
+  if (exLast.value.wt_3 !== undefined && exLast.value.wt_3 !== '') return exLast.value.wt_3;
+  return 0;
+});
+const prevWarmReps = computed(() => {
+  const r = exLast.value.reps_0;
+  return (r !== undefined && r !== '') ? r : null;
+});
+const prevTouchReps = computed(() => {
+  if (exLast.value.reps_1 !== undefined && exLast.value.reps_1 !== '') return exLast.value.reps_1;
+  if (exLast.value.reps_2 !== undefined && exLast.value.reps_2 !== '') return exLast.value.reps_2;
+  if (exLast.value.reps_3 !== undefined && exLast.value.reps_3 !== '') return exLast.value.reps_3;
+  return null;
+});
 
 const hasAnyPrev = computed(() => {
   return prevWarm.value > 0 || prevTouch.value > 0 || prevWarmReps.value !== null || prevTouchReps.value !== null;
 });
 
+const displayWarmWeight = computed(() => {
+  const cur = getWeight(0);
+  if (cur !== '' && Number(cur) > 0) return Number(cur);
+  return prevWarm.value;
+});
+
+const displayWarmReps = computed(() => {
+  const cur = getReps(0);
+  if (cur !== '' && Number(cur) > 0) return Number(cur);
+  return prevWarmReps.value;
+});
+
+const displayTouchWeight = computed(() => {
+  for (let i = props.bonus.sets.length - 1; i >= 1; i--) {
+    const cur = getWeight(i);
+    if (cur !== '' && Number(cur) > 0) return Number(cur);
+  }
+  return prevTouch.value;
+});
+
+const displayTouchReps = computed(() => {
+  for (let i = props.bonus.sets.length - 1; i >= 1; i--) {
+    const cur = getReps(i);
+    if (cur !== '' && Number(cur) > 0) return Number(cur);
+  }
+  return prevTouchReps.value;
+});
+
 function getPrevWeight(sIdx) {
-  return (exLast.value[`wt_${sIdx}`] !== undefined && exLast.value[`wt_${sIdx}`] !== '')
-    ? exLast.value[`wt_${sIdx}`]
-    : 0;
+  if (exLast.value[`wt_${sIdx}`] !== undefined && exLast.value[`wt_${sIdx}`] !== '') {
+    return exLast.value[`wt_${sIdx}`];
+  }
+  if (sIdx >= 1) {
+    if (exLast.value.wt_1 !== undefined && exLast.value.wt_1 !== '') return exLast.value.wt_1;
+    if (exLast.value.wt_2 !== undefined && exLast.value.wt_2 !== '') return exLast.value.wt_2;
+    if (exLast.value.wt_3 !== undefined && exLast.value.wt_3 !== '') return exLast.value.wt_3;
+  }
+  return 0;
 }
 
 function getPrevReps(sIdx) {
-  return (exLast.value[`reps_${sIdx}`] !== undefined && exLast.value[`reps_${sIdx}`] !== '')
-    ? exLast.value[`reps_${sIdx}`]
-    : '';
+  if (exLast.value[`reps_${sIdx}`] !== undefined && exLast.value[`reps_${sIdx}`] !== '') {
+    return exLast.value[`reps_${sIdx}`];
+  }
+  if (sIdx >= 1) {
+    if (exLast.value.reps_1 !== undefined && exLast.value.reps_1 !== '') return exLast.value.reps_1;
+    if (exLast.value.reps_2 !== undefined && exLast.value.reps_2 !== '') return exLast.value.reps_2;
+    if (exLast.value.reps_3 !== undefined && exLast.value.reps_3 !== '') return exLast.value.reps_3;
+  }
+  return '';
 }
 
 function getWeight(sIdx) {
@@ -381,10 +469,22 @@ function targetRepNumber(repStr) {
   return match ? match[0] : '';
 }
 
+function getCleanTargetReps(repStr) {
+  if (!repStr) return '';
+  const parsed = parseRepTarget(repStr);
+  return parsed.min === parsed.max ? `${parsed.min}` : `${parsed.min}–${parsed.max}`;
+}
+
+function getSetNote(repStr) {
+  if (!repStr) return '';
+  const match = String(repStr).match(/\(([^)]+)\)/);
+  return match ? match[1] : '';
+}
+
 function hasPrevRecord(sIdx) {
-  const pw = exLast.value[`wt_${sIdx}`];
-  const pr = exLast.value[`reps_${sIdx}`];
-  return (pw !== undefined && pw !== '') || (pr !== undefined && pr !== '');
+  const pw = getPrevWeight(sIdx);
+  const pr = getPrevReps(sIdx);
+  return (pw !== undefined && pw !== '' && Number(pw) > 0) || (pr !== undefined && pr !== '');
 }
 
 function applyPrevRecordForSet(sIdx) {
@@ -403,17 +503,26 @@ function applyAllPrev() {
   });
 }
 
-const { isWarmupType, calculateWeightAdvice, getExerciseOverallAdvice } = useWeightAdvisor();
+const { isWarmupType, parseRepTarget, calculateWeightAdvice, getExerciseOverallAdvice } = useWeightAdvisor();
+
+const workRepTargetLabel = computed(() => {
+  const touchSet = props.bonus.sets.find(s => !isWarmupType(s.type));
+  if (touchSet && touchSet.reps) {
+    const parsed = parseRepTarget(touchSet.reps);
+    return parsed.min === parsed.max ? `${parsed.min}` : `${parsed.min}–${parsed.max}`;
+  }
+  return '6–8';
+});
 
 function getSetAdvice(sIdx) {
   const set = props.bonus.sets[sIdx];
   if (!set) return null;
 
-  const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
-  const reps = getReps(sIdx) !== '' ? getReps(sIdx) : getPrevReps(sIdx);
-  if (!reps || Number(reps) <= 0) return null;
+  const reps = getReps(sIdx);
+  if (!reps || reps === '' || Number(reps) <= 0) return null;
 
-  return calculateWeightAdvice({ weight: wt, reps, type: set.type });
+  const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
+  return calculateWeightAdvice({ weight: wt, reps, type: set.type, targetReps: set.reps });
 }
 
 function applySetAdvice(sIdx) {
@@ -430,7 +539,8 @@ const exerciseAdvice = computed(() => {
     return {
       type: set.type,
       weight: wt,
-      reps
+      reps,
+      targetReps: set.reps
     };
   });
   return getExerciseOverallAdvice(setsData);
@@ -460,7 +570,6 @@ function applyRecommendedWarmupWeight() {
 function openWeightKeypad(sIdx) {
   const set = props.bonus.sets[sIdx];
   const isWarm = isWarmupType(set?.type);
-  const currentVal = getWeight(sIdx);
   const prevVal = getPrevWeight(sIdx);
   const advice = getSetAdvice(sIdx);
 
@@ -485,12 +594,17 @@ function openWeightKeypad(sIdx) {
     }
   }
 
+  const setLabel = isWarm ? 'วอร์ม (W1)' : `เล่นเสริม (T1)`;
+  const subtitle = isDumbbell.value
+    ? `เซ็ต ${setLabel} • ใส่น้ำหนักต่อข้าง (เช่น ถือข้างละ 18 ให้ใส่ 18)`
+    : `เซ็ต ${setLabel} • น้ำหนักยก`;
+
   openKeypad({
     mode: 'weight',
-    unit: 'กก.',
+    unit: isDumbbell.value ? 'กก./ข้าง' : 'กก.',
     title: props.bonus.name,
-    subtitle: `เซ็ต ${isWarm ? 'วอร์ม (W1)' : `เล่นเสริม (T1)`} • น้ำหนักยก`,
-    currentValue: currentVal !== '' ? currentVal : (suggestedVal || prevVal || ''),
+    subtitle,
+    currentValue: '',
     suggestedHint: suggestedVal,
     suggestedLabel,
     prevHint: prevVal ? `${prevVal}` : '',
@@ -504,7 +618,6 @@ function openWeightKeypad(sIdx) {
 function openRepsKeypad(sIdx, targetStr) {
   const set = props.bonus.sets[sIdx];
   const isWarm = isWarmupType(set?.type);
-  const currentVal = getReps(sIdx);
   const prevVal = getPrevReps(sIdx);
   const targetNum = targetRepNumber(targetStr);
   openKeypad({
@@ -512,7 +625,7 @@ function openRepsKeypad(sIdx, targetStr) {
     unit: 'ครั้ง',
     title: props.bonus.name,
     subtitle: `เซ็ต ${isWarm ? 'วอร์ม (W1)' : `เล่นเสริม (T1)`} • จำนวนครั้งที่ยกจริง`,
-    currentValue: currentVal !== '' ? currentVal : (prevVal || targetNum || ''),
+    currentValue: '',
     targetHint: targetNum ? `${targetNum}` : '',
     prevHint: prevVal ? `${prevVal}` : '',
     presets: [1, 2, -1],
