@@ -308,18 +308,26 @@ onMounted(() => {
   fetchServerState();
 });
 
-const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu'].includes(currentDay.value));
-const currentDayData = computed(() => workoutData[currentDay.value]);
+const activeDayKey = computed(() => {
+  if (['mon', 'tue', 'wed', 'thu'].includes(currentTab.value)) return currentTab.value;
+  return currentDay.value;
+});
+const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu'].includes(activeDayKey.value));
+const currentDayData = computed(() => workoutData[activeDayKey.value]);
 
 // Progress calculation
 const totalSetsCount = computed(() => {
   if (!currentDayData.value) return 0;
-  return currentDayData.value.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+  let total = currentDayData.value.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+  if (Array.isArray(currentDayData.value.bonusExercises)) {
+    total += currentDayData.value.bonusExercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+  }
+  return total;
 });
 
 const completedSetsCount = computed(() => {
   if (!currentDayData.value) return 0;
-  const dayState = userState[currentDay.value] || {};
+  const dayState = userState[activeDayKey.value] || {};
   let done = 0;
   currentDayData.value.exercises.forEach(ex => {
     const exState = dayState[ex.id] || {};
@@ -327,6 +335,14 @@ const completedSetsCount = computed(() => {
       if (exState[`set_${sIdx}`]) done++;
     });
   });
+  if (Array.isArray(currentDayData.value.bonusExercises)) {
+    currentDayData.value.bonusExercises.forEach(ex => {
+      const exState = dayState[ex.id] || {};
+      ex.sets.forEach((_, sIdx) => {
+        if (exState[`set_${sIdx}`]) done++;
+      });
+    });
+  }
   return done;
 });
 

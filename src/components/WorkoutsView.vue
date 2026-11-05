@@ -170,6 +170,17 @@
               <span>เริ่มฝึก (Start)</span>
             </button>
 
+            <!-- View Day Protocol Button if linked to a default day -->
+            <button
+              v-if="getDayKeyForRoutine(routine)"
+              type="button"
+              @click="openDayProtocol(getDayKeyForRoutine(routine))"
+              class="flex items-center justify-center gap-1 py-2 px-2.5 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              title="เปิดดูตารางประจำวัน พร้อมเซ็ตเสริมและคลิปสาธิต"
+            >
+              <span>📋 ตารางวัน</span>
+            </button>
+
             <!-- Edit Routine Button -->
             <button
               type="button"
@@ -208,12 +219,14 @@ import { computed } from 'vue';
 import { useRoutineStore } from '../composables/useRoutineStore.js';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
 import { useExerciseStore } from '../composables/useExerciseStore.js';
+import { useWorkoutStore } from '../composables/useWorkoutStore.js';
 
 const emit = defineEmits(['create-routine', 'edit-routine', 'open-runner']);
 
 const { routines, deleteRoutine, getRoutineById } = useRoutineStore();
 const { isWorkoutActive, activeSession, sessionDurationSec, startSessionFromRoutine, startEmptySession } = useActiveSessionStore();
 const { getExerciseById } = useExerciseStore();
+const workoutStore = useWorkoutStore();
 
 const formattedDuration = computed(() => {
   const sec = sessionDurationSec.value || 0;
@@ -261,16 +274,27 @@ const scheduleChips = [
   { id: 'rest', routineId: null, dayName: 'ศุกร์-อาทิตย์', targetMuscle: 'พัก', sub: 'Rest', isRest: true }
 ];
 
+function getDayKeyForRoutine(routine) {
+  if (!routine) return null;
+  if (routine.id?.includes('mon') || routine.title?.includes('จันทร์')) return 'mon';
+  if (routine.id?.includes('tue') || routine.title?.includes('อังคาร')) return 'tue';
+  if (routine.id?.includes('wed') || routine.title?.includes('พุธ')) return 'wed';
+  if (routine.id?.includes('thu') || routine.title?.includes('พฤหัส')) return 'thu';
+  return null;
+}
+
+function openDayProtocol(dayKey) {
+  if (workoutStore.switchDay) workoutStore.switchDay(dayKey);
+  if (workoutStore.switchTab) workoutStore.switchTab(dayKey);
+}
+
 function handleChipLaunch(chip) {
   if (chip.isRest) {
-    alert('วันพักฟื้น (Rest Day): ฟื้นฟูกล้ามเนื้อ พักผ่อนให้เต็มที่เพื่อเตรียมพร้อมสำหรับสัปดาห์หน้า!');
+    if (workoutStore.switchDay) workoutStore.switchDay('rest');
+    if (workoutStore.switchTab) workoutStore.switchTab('rest');
     return;
   }
-  const routine = getRoutineById(chip.routineId) || routines.value.find(r => r.id === chip.routineId || r.title.includes(chip.dayName));
-  if (routine) {
-    handleStartRoutine(routine);
-  } else {
-    handleQuickStart();
-  }
+  if (workoutStore.switchDay) workoutStore.switchDay(chip.id);
+  if (workoutStore.switchTab) workoutStore.switchTab(chip.id);
 }
 </script>

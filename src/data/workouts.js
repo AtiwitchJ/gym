@@ -54,6 +54,8 @@ export const workoutData = {
         mainMuscle: "ต้นขาด้านหน้า (Quads), ก้น (Glutes)",
         subMuscle: "ต้นขาด้านหลัง, น่อง (วางเท้าสูงโดนก้นมากขึ้น)",
         videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        localVideo: "/videos/leg-press-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 1 (45° Leg Press)",
         sets: [
           { type: "warm", reps: "15 ครั้ง (40-50%)" },
           { type: "work", reps: "6–8 ครั้ง (ท้าทาย)" },
@@ -160,6 +162,8 @@ export const workoutData = {
         altName: "ดึงปีกกว้างทรง V-Shape",
         tip: "วันหลังคือวันพุธ (พัก 48 ชม. ฟื้นตัวทันแน่นอน)",
         videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        localVideo: "/videos/lat-pulldown-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 2 (Lat Pulldown)",
         sets: [
           { type: "warm", reps: "15 ครั้ง (วอร์มปีก)" },
           { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8 เหลือแรง 2 ครั้ง)" }
@@ -184,6 +188,8 @@ export const workoutData = {
         altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "พรุ่งนี้ (อังคาร) เป็นวันอกเต็มระบบ เล่นเบา ๆ แค่โฟกัสฟอร์ม",
         videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
+        localVideo: "/videos/chest-press-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 3 (Chest Press)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักปานกลาง)" }
@@ -203,6 +209,8 @@ export const workoutData = {
         mainMuscle: "อกส่วนกลาง (Mid Chest)",
         subMuscle: "ไหล่หน้า (Front Delts), หลังแขน (Triceps)",
         videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
+        localVideo: "/videos/chest-press-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 3 (Chest Press)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -309,6 +317,8 @@ export const workoutData = {
         altName: "ถีบขากระตุ้นต้นขาหน้าและก้น",
         tip: "ปั๊มเลือดคลายความตึงจากวันจันทร์ได้ดีมาก",
         videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        localVideo: "/videos/leg-press-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 1 (45° Leg Press)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
@@ -333,6 +343,8 @@ export const workoutData = {
         altName: "เครื่องดึงปีกหรือดึงหลัง",
         tip: "พรุ่งนี้ (พุธ) เป็นวันหลังเต็มระบบ เล่นเบา ๆ แค่ยืดเส้น",
         videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        localVideo: "/videos/lat-pulldown-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 2 (Lat Pulldown)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักเบา)" }
@@ -367,6 +379,8 @@ export const workoutData = {
         mainMuscle: "หลังส่วนกว้าง/ปีก (Latissimus Dorsi - V-Shape)",
         subMuscle: "หน้าแขน (Biceps), สะบักและหลังบน",
         videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        localVideo: "/videos/lat-pulldown-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 2 (Lat Pulldown)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -458,6 +472,8 @@ export const workoutData = {
         altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "ปั๊มเลือดเข้าอก (Feeder Set) ที่เพิ่งเล่นเมื่อวาน ช่วยฟื้นตัวเร็ว",
         videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
+        localVideo: "/videos/chest-press-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 3 (Chest Press)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
@@ -470,6 +486,8 @@ export const workoutData = {
         altName: "ถีบขาเพิ่มมวลรวม",
         tip: "กระตุ้นขามวลรวมได้ดี",
         videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        localVideo: "/videos/leg-press-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 1 (45° Leg Press)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง" }
@@ -607,6 +625,8 @@ export const workoutData = {
         altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "พรุ่งนี้วันพัก 3 วันติด เล่นน้ำหนักท้าทายได้เต็มที่",
         videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
+        localVideo: "/videos/chest-press-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 3 (Chest Press)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (ท้าทาย)" }
@@ -619,6 +639,8 @@ export const workoutData = {
         altName: "ดึงปีก V-Shape",
         tip: "กระตุ้นปีกก่อนเข้าช่วงวันพักผ่อน",
         videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        localVideo: "/videos/lat-pulldown-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 2 (Lat Pulldown)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง" }
@@ -631,6 +653,8 @@ export const workoutData = {
         altName: "ถีบขา",
         tip: "ปั๊มเลือดเข้ากล้ามเนื้อขาและก้นมวลรวม",
         videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        localVideo: "/videos/leg-press-machine.mp4",
+        localVideoTitle: "คลิปในเครื่อง: Machine 1 (45° Leg Press)",
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง" }

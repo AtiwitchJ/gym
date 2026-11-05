@@ -1,15 +1,23 @@
 <template>
-  <nav class="w-full px-2 sm:px-4 py-2 pb-[max(8px,env(safe-area-inset-bottom))] select-none">
-    <div class="max-w-md mx-auto grid grid-cols-4 gap-1.5 sm:gap-2">
+  <nav
+    ref="navContainer"
+    class="w-full bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-4px_20px_rgba(30,34,32,0.12)] px-2 sm:px-4 py-2 pb-[max(8px,env(safe-area-inset-bottom))] overflow-x-auto scrollbar-none select-none"
+  >
+    <div class="max-w-3xl mx-auto flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 min-w-max px-1">
       <button
         v-for="tab in tabs"
         :key="tab.id"
+        :data-tab-id="tab.id"
         type="button"
         @click="selectTab(tab.id)"
-        class="flex flex-col items-center justify-center py-2 sm:py-2.5 px-1 rounded-xl transition-all relative font-heading border-2 touch-manipulation group"
+        class="flex flex-col items-center justify-center py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-xl transition-all relative font-heading border-2 touch-manipulation group flex-shrink-0"
         :class="activeTabId === tab.id
-          ? 'bg-flame text-white border-plate shadow-[2px_2px_0px_#1e2220] -translate-y-0.5 font-bold'
-          : 'bg-surface/90 text-ink/75 hover:text-ink border-plate/30 hover:border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none'"
+          ? tab.id === 'history'
+            ? 'bg-emerald text-white border-plate shadow-[2px_2px_0px_#1e2220] -translate-y-0.5 font-bold'
+            : tab.id === 'profile'
+              ? 'bg-ink text-white border-plate shadow-[2px_2px_0px_#ea580c] -translate-y-0.5 font-bold'
+              : 'bg-flame text-white border-plate shadow-[2px_2px_0px_#1e2220] -translate-y-0.5 font-bold'
+          : 'bg-surface text-ink hover:text-ink border-plate/30 hover:border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none'"
         :title="tab.label"
       >
         <!-- Active Workout Running Dot Indicator on Workouts Tab -->
@@ -18,27 +26,45 @@
           class="absolute -top-1 right-2 w-2.5 h-2.5 rounded-full bg-emerald border-2 border-plate shadow-sm animate-pulse pointer-events-none"
         ></span>
 
-        <!-- Tab Icon -->
-        <div class="w-5 h-5 flex items-center justify-center mb-1 transition-transform group-active:scale-90">
-          <!-- 1. Workouts: Dumbbell / Barbell -->
-          <svg v-if="tab.id === 'workouts'" class="w-4.5 h-4.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+        <!-- Tab Icon or Short Badge -->
+        <div class="w-4 h-4 flex items-center justify-center mb-0.5 transition-transform group-active:scale-90">
+          <!-- Mon: Legs -->
+          <svg v-if="tab.id === 'mon'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+            <path d="M4 4v7a4 4 0 0 0 4 4h0a4 4 0 0 0 4-4V4M12 4v7a4 4 0 0 0 4 4h0a4 4 0 0 0 4-4V4" />
+          </svg>
+          <!-- Tue: Chest -->
+          <svg v-else-if="tab.id === 'tue'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
             <path d="M6 5v14M18 5v14M2 12h20M9 8h6M9 16h6" />
           </svg>
-
-          <!-- 2. Exercises: Book / Muscle -->
-          <svg v-else-if="tab.id === 'exercises'" class="w-4.5 h-4.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+          <!-- Wed: Back -->
+          <svg v-else-if="tab.id === 'wed'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+            <path d="M12 2v20M4 12h16M7 6l10 12M17 6L7 18" />
+          </svg>
+          <!-- Thu: Shoulders -->
+          <svg v-else-if="tab.id === 'thu'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" />
+            <line x1="12" y1="4" x2="12" y2="20" />
+          </svg>
+          <!-- Rest -->
+          <svg v-else-if="tab.id === 'rest'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <!-- Workouts -->
+          <svg v-else-if="tab.id === 'workouts'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+            <path d="M6 5v14M18 5v14M2 12h20M9 8h6M9 16h6" />
+          </svg>
+          <!-- Exercises -->
+          <svg v-else-if="tab.id === 'exercises'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
           </svg>
-
-          <!-- 3. History: Bar Chart / Clock -->
-          <svg v-else-if="tab.id === 'history'" class="w-4.5 h-4.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+          <!-- History -->
+          <svg v-else-if="tab.id === 'history'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
             <path d="M3 3v18h18" />
             <path d="M18 9l-5 5-4-4-3 3" />
           </svg>
-
-          <!-- 4. Profile: User -->
-          <svg v-else-if="tab.id === 'profile'" class="w-4.5 h-4.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+          <!-- Profile -->
+          <svg v-else-if="tab.id === 'profile'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
@@ -48,13 +74,16 @@
         <span class="text-[11px] sm:text-xs tracking-tight truncate leading-tight font-bold">
           {{ tab.label }}
         </span>
+        <span class="text-[9px] opacity-80 tracking-normal font-body font-normal truncate mt-0.5">
+          {{ tab.sub }}
+        </span>
       </button>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore.js';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
 
@@ -73,19 +102,38 @@ const emit = defineEmits(['update:currentTab', 'update:modelValue', 'switch-tab'
 
 const workoutStore = useWorkoutStore();
 const { isWorkoutActive } = useActiveSessionStore();
+const navContainer = ref(null);
 
 const tabs = [
-  { id: 'workouts', label: 'โปรแกรม', icon: 'dumbbell' },
-  { id: 'exercises', label: 'ท่าฝึก', icon: 'book' },
-  { id: 'history', label: 'ประวัติ', icon: 'chart' },
-  { id: 'profile', label: 'บัญชี', icon: 'user' }
+  { id: 'mon', label: 'จันทร์', sub: 'ขา + ก้น' },
+  { id: 'tue', label: 'อังคาร', sub: 'อก + หลังแขน' },
+  { id: 'wed', label: 'พุธ', sub: 'หลัง + หน้าแขน' },
+  { id: 'thu', label: 'พฤหัส', sub: 'ไหล่ + ท้อง' },
+  { id: 'rest', label: 'วันพัก', sub: 'ฟื้นฟู' },
+  { id: 'exercises', label: 'ท่าฝึก', sub: '51 ท่า' },
+  { id: 'history', label: 'ประวัติ', sub: 'Excel / DB' },
+  { id: 'profile', label: 'บัญชี', sub: 'สถิติ / ตั้งค่า' },
+  { id: 'workouts', label: 'โปรแกรม', sub: 'Routines' }
 ];
 
 const activeTabId = computed(() => {
-  return props.currentTab || props.modelValue || workoutStore.currentTab?.value || 'workouts';
+  return props.currentTab || props.modelValue || workoutStore.currentTab?.value || workoutStore.currentDay?.value || 'mon';
 });
 
+function scrollToActiveTab() {
+  nextTick(() => {
+    if (!navContainer.value) return;
+    const activeBtn = navContainer.value.querySelector(`[data-tab-id="${activeTabId.value}"]`);
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  });
+}
+
 function selectTab(id) {
+  if (['mon', 'tue', 'wed', 'thu', 'rest', 'todo'].includes(id)) {
+    if (workoutStore.switchDay) workoutStore.switchDay(id);
+  }
   if (workoutStore.switchTab) {
     workoutStore.switchTab(id);
   }
@@ -94,4 +142,12 @@ function selectTab(id) {
   emit('switch-tab', id);
   emit('change', id);
 }
+
+watch(activeTabId, () => {
+  scrollToActiveTab();
+});
+
+onMounted(() => {
+  scrollToActiveTab();
+});
 </script>

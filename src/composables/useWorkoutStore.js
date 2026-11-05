@@ -37,7 +37,7 @@ function getInitialDay() {
 }
 
 const currentDay = ref(getInitialDay());
-const currentTab = ref(storage.getItem('atiwitch_active_global_tab', 'workouts'));
+const currentTab = ref(storage.getItem('atiwitch_active_global_tab') || getInitialDay());
 const saveStatus = ref('saved'); // 'saved', 'saving', 'error'
 const toastMessage = ref('');
 let toastTimer = null;
@@ -301,11 +301,17 @@ healCrossDayExerciseRecords();
 // Actions
 function switchDay(dayKey) {
   currentDay.value = dayKey;
+  currentTab.value = dayKey;
   storage.setItem('atiwitch_active_tab', dayKey);
+  storage.setItem('atiwitch_active_global_tab', dayKey);
 }
 
 function switchTab(tabKey) {
   currentTab.value = tabKey;
+  if (['mon', 'tue', 'wed', 'thu', 'rest', 'todo', 'history'].includes(tabKey)) {
+    currentDay.value = tabKey;
+    storage.setItem('atiwitch_active_tab', tabKey);
+  }
   storage.setItem('atiwitch_active_global_tab', tabKey);
 }
 

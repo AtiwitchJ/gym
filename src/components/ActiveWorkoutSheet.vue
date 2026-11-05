@@ -160,8 +160,20 @@
               </h3>
             </div>
 
-            <!-- Exercise Action Buttons: Add Set & Remove Exercise -->
+            <!-- Exercise Action Buttons: Video Demo, Add Set & Remove Exercise -->
             <div class="flex items-center gap-1.5 flex-shrink-0">
+              <!-- Video Demo Button -->
+              <button
+                v-if="getExerciseVideoInfo(exercise.exerciseId).videoId || getExerciseVideoInfo(exercise.exerciseId).localVideo"
+                type="button"
+                @click="toggleExerciseVideo(exIdx)"
+                class="px-2 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none"
+                :class="activeVideos[exIdx] ? 'bg-flame text-white' : getExerciseVideoInfo(exercise.exerciseId).localVideo ? 'bg-emerald text-white' : 'bg-paper hover:bg-paper-dim text-ink'"
+                :title="activeVideos[exIdx] ? 'ปิดคลิป' : 'ดูคลิปสาธิต'"
+              >
+                <span>{{ activeVideos[exIdx] ? '✕ ปิด' : getExerciseVideoInfo(exercise.exerciseId).localVideo ? '🎬 ในเครื่อง' : '🎬 คลิป' }}</span>
+              </button>
+
               <button
                 type="button"
                 @click="addSet(exIdx)"
@@ -183,6 +195,64 @@
                 </svg>
               </button>
             </div>
+          </div>
+
+          <!-- Expandable Video Player Box -->
+          <div
+            v-if="activeVideos[exIdx]"
+            class="p-2.5 bg-paper-subtle rounded-xl border-2 border-plate shadow-xs"
+          >
+            <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <button
+                  v-if="getExerciseVideoInfo(exercise.exerciseId).localVideo"
+                  type="button"
+                  @click="activeVideoSources[exIdx] = 'local'"
+                  class="px-2 py-0.5 text-[10px] font-mono font-bold rounded border"
+                  :class="(activeVideoSources[exIdx] || 'local') === 'local' ? 'bg-emerald text-white border-plate' : 'bg-surface text-ink border-plate/30'"
+                >
+                  🎬 คลิปในเครื่อง (3 เครื่อง)
+                </button>
+                <button
+                  v-if="getExerciseVideoInfo(exercise.exerciseId).videoId"
+                  type="button"
+                  @click="activeVideoSources[exIdx] = 'youtube'"
+                  class="px-2 py-0.5 text-[10px] font-mono font-bold rounded border"
+                  :class="activeVideoSources[exIdx] === 'youtube' ? 'bg-flame text-white border-plate' : 'bg-surface text-ink border-plate/30'"
+                >
+                  🔴 YouTube
+                </button>
+              </div>
+              <button
+                type="button"
+                @click="activeVideos[exIdx] = false"
+                class="text-[10px] font-mono font-bold text-ink-muted hover:text-ink px-1.5 py-0.5 bg-surface rounded border border-plate/20"
+              >
+                ✕ ปิดคลิป
+              </button>
+            </div>
+
+            <div class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate bg-black">
+              <video
+                v-if="(activeVideoSources[exIdx] || 'local') === 'local' && getExerciseVideoInfo(exercise.exerciseId).localVideo"
+                :src="getExerciseVideoInfo(exercise.exerciseId).localVideo"
+                controls
+                playsinline
+                autoplay
+                loop
+                class="w-full h-full object-contain bg-black"
+              ></video>
+              <iframe
+                v-else-if="getExerciseVideoInfo(exercise.exerciseId).videoId"
+                :src="`https://www.youtube-nocookie.com/embed/${getExerciseVideoInfo(exercise.exerciseId).videoId}?autoplay=1&rel=0`"
+                class="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
+            </div>
+            <p v-if="getExerciseVideoInfo(exercise.exerciseId).localVideoTitle" class="text-[10px] font-mono text-emerald font-bold mt-1">
+              ✓ {{ getExerciseVideoInfo(exercise.exerciseId).localVideoTitle }}
+            </p>
           </div>
 
           <!-- Progressive Overload Advice Chip Banner -->
@@ -339,8 +409,10 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
+import { useExerciseStore } from '../composables/useExerciseStore.js';
 import { usePinKeypad } from '../composables/usePinKeypad.js';
 import { useWeightAdvisor } from '../composables/useWeightAdvisor.js';
+import { getYoutubeId } from '../utils/youtube.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 
@@ -364,8 +436,27 @@ const {
 
 const { openKeypad } = usePinKeypad();
 const { getExerciseOverallAdvice } = useWeightAdvisor();
+const { getExerciseById } = useExerciseStore();
 
 const isPickerOpen = ref(false);
+const activeVideos = ref({});
+const activeVideoSources = ref({});
+
+function getExerciseVideoInfo(exerciseId) {
+  const meta = getExerciseById(exerciseId);
+  if (!meta) return { videoUrl: null, localVideo: null, localVideoTitle: null, videoId: null };
+  const videoId = getYoutubeId(meta.videoUrl);
+  return {
+    videoUrl: meta.videoUrl,
+    localVideo: meta.localVideo,
+    localVideoTitle: meta.localVideoTitle,
+    videoId
+  };
+}
+
+function toggleExerciseVideo(exIdx) {
+  activeVideos.value[exIdx] = !activeVideos.value[exIdx];
+}
 
 // Format Stopwatch Elapsed Time (MM:SS or HH:MM:SS)
 const formattedStopwatch = computed(() => {

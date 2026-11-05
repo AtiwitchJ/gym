@@ -54,6 +54,9 @@ export const defaultExercises = [
     muscleGroup: 'chest',
     equipment: 'dumbbell',
     isCustom: false,
+    videoUrl: 'https://www.youtube.com/watch?v=Y_7aHqXeCfQ',
+    localVideo: '/videos/chest-press-machine.mp4',
+    localVideoTitle: 'คลิปในเครื่อง: Machine 3 (Chest Press Machine)',
     notes: 'Dumbbell flat bench press for chest mass with independent unilateral stability'
   },
   {
@@ -120,6 +123,9 @@ export const defaultExercises = [
     muscleGroup: 'back',
     equipment: 'machine',
     isCustom: false,
+    videoUrl: 'https://www.youtube.com/watch?v=BwV6jzYKiNY',
+    localVideo: '/videos/lat-pulldown-machine.mp4',
+    localVideoTitle: 'คลิปในเครื่อง: Machine 2 (Lat Pulldown Machine)',
     notes: 'Vertical pull targeting latissimus dorsi with wide or neutral grip'
   },
   {
@@ -186,6 +192,9 @@ export const defaultExercises = [
     muscleGroup: 'quads',
     equipment: 'machine',
     isCustom: false,
+    videoUrl: 'https://www.youtube.com/watch?v=kTM85YKV7ls',
+    localVideo: '/videos/leg-press-machine.mp4',
+    localVideoTitle: 'คลิปในเครื่อง: Machine 1 (45° Incline Leg Press)',
     notes: 'Heavy compound leg drive with supported back angle'
   },
   {

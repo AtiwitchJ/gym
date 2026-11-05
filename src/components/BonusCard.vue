@@ -39,7 +39,7 @@
         </div>
 
         <!-- Compact Thumbnail Box or Toggle Button -->
-        <div v-if="videoId" class="flex-shrink-0">
+        <div v-if="hasVideo" class="flex-shrink-0">
           <!-- 1. Compact Thumbnail Preview (When Images Enabled) -->
           <div
             v-if="showExerciseImages && !isPlayingVideo"
@@ -48,11 +48,19 @@
             title="แตะเพื่อเปิดเล่นคลิปในหน้านี้"
           >
             <img
+              v-if="thumbnailUrl"
               :src="thumbnailUrl"
               :alt="bonus.name"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 opacity-90 group-hover:opacity-100"
               loading="lazy"
             />
+            <div
+              v-else
+              class="w-full h-full bg-plate flex flex-col items-center justify-center p-1 text-center"
+            >
+              <span class="text-[10px] font-mono text-emerald font-bold">🎬 ในเครื่อง</span>
+              <span class="text-[8px] font-mono text-white/70 truncate max-w-full">เล่นออฟไลน์</span>
+            </div>
             <!-- Play Overlay -->
             <div class="absolute inset-0 bg-plate/25 group-hover:bg-plate/10 transition-colors flex items-center justify-center">
               <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-flame text-white border border-plate flex items-center justify-center shadow-[1px_1px_0px_#1e2220] group-hover:scale-110 transition-transform">
@@ -61,8 +69,11 @@
                 </svg>
               </div>
             </div>
-            <span class="absolute bottom-1 right-1 bg-plate/80 text-[8px] sm:text-[9px] font-mono font-bold text-white px-1 sm:px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none">
-              คลิป
+            <span
+              class="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono font-bold text-white px-1 sm:px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none"
+              :class="hasLocalVideo ? 'bg-emerald/90' : 'bg-plate/80'"
+            >
+              {{ hasLocalVideo ? '🎬 ในเครื่อง' : 'คลิป' }}
             </span>
           </div>
 
@@ -74,7 +85,9 @@
             class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
             :class="isPlayingVideo
               ? 'bg-flame text-white'
-              : 'bg-white hover:bg-paper-subtle text-ink'"
+              : hasLocalVideo
+                ? 'bg-emerald text-white hover:bg-emerald/90'
+                : 'bg-white hover:bg-paper-subtle text-ink'"
             :title="isPlayingVideo ? 'ปิดคลิป' : 'เปิดดูคลิปในหน้านี้'"
           >
             <svg v-if="!isPlayingVideo" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -84,7 +97,7 @@
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-            <span>{{ isPlayingVideo ? 'ปิดคลิป' : 'ดูคลิป' }}</span>
+            <span>{{ isPlayingVideo ? 'ปิดคลิป' : hasLocalVideo ? '🎬 ดูคลิปในเครื่อง' : 'ดูคลิป' }}</span>
           </button>
         </div>
       </div>
@@ -195,21 +208,66 @@
       leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-2"
     >
-      <div v-if="isPlayingVideo && videoId" class="p-3 bg-paper-subtle/80 border-b-2 border-plate">
+      <div v-if="isPlayingVideo && hasVideo" class="p-3 bg-paper-subtle/80 border-b-2 border-plate">
+        <!-- Video Source Switcher (Local vs YouTube) -->
+        <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button
+              v-if="hasLocalVideo"
+              type="button"
+              @click="videoSource = 'local'"
+              class="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border-2 transition-all"
+              :class="videoSource === 'local'
+                ? 'bg-emerald text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]'
+                : 'bg-surface hover:bg-paper-subtle text-ink border-plate/30'"
+            >
+              🎬 คลิปในเครื่อง (3 เครื่อง)
+            </button>
+            <button
+              v-if="videoId"
+              type="button"
+              @click="videoSource = 'youtube'"
+              class="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border-2 transition-all"
+              :class="videoSource === 'youtube'
+                ? 'bg-flame text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]'
+                : 'bg-surface hover:bg-paper-subtle text-ink border-plate/30'"
+            >
+              🔴 YouTube
+            </button>
+          </div>
+          <button
+            @click="isPlayingVideo = false"
+            class="text-[11px] font-mono font-bold text-ink-muted hover:text-ink px-2 py-0.5 rounded border border-plate/20 bg-surface shadow-xs active:translate-y-0.5"
+          >
+            ✕ ปิดคลิป
+          </button>
+        </div>
+
         <div class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[3px_3px_0px_#1e2220] bg-black">
+          <!-- Local Video Player -->
+          <video
+            v-if="videoSource === 'local' && bonus.localVideo"
+            :src="bonus.localVideo"
+            controls
+            playsinline
+            autoplay
+            loop
+            class="w-full h-full object-contain bg-black"
+          ></video>
+
+          <!-- YouTube Embed -->
           <iframe
+            v-else-if="embedUrl"
             :src="embedUrl"
             class="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen
           ></iframe>
-          <button
-            @click="isPlayingVideo = false"
-            class="absolute top-2 right-2 bg-plate/80 hover:bg-plate text-white font-mono text-[11px] font-bold px-2.5 py-1 rounded-md border border-white/30 backdrop-blur-sm shadow-md transition-all flex items-center gap-1 select-none"
-          >
-            <span>✕ ปิดคลิป</span>
-          </button>
         </div>
+        <p v-if="videoSource === 'local' && bonus.localVideoTitle" class="text-[11px] font-mono text-emerald font-bold mt-1.5 flex items-center gap-1">
+          <span>✓</span>
+          <span>{{ bonus.localVideoTitle }}</span>
+        </p>
       </div>
     </transition>
 
@@ -362,6 +420,10 @@ const { openKeypad } = usePinKeypad();
 const { startTimer, triggerHaptic } = useTimer();
 
 const videoId = computed(() => getYoutubeId(props.bonus.videoUrl));
+const hasLocalVideo = computed(() => !!props.bonus.localVideo);
+const hasVideo = computed(() => !!videoId.value || hasLocalVideo.value);
+const videoSource = ref(props.bonus.localVideo ? 'local' : 'youtube');
+
 const thumbnailUrl = computed(() => videoId.value ? `https://img.youtube.com/vi/${videoId.value}/hqdefault.jpg` : null);
 const embedUrl = computed(() => videoId.value ? `https://www.youtube-nocookie.com/embed/${videoId.value}?autoplay=1&rel=0` : null);
 
