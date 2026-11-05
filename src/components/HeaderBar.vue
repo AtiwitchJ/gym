@@ -18,16 +18,6 @@
 
       <!-- Actions -->
       <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-        <!-- 3 Machine Videos Pill -->
-        <button
-          type="button"
-          @click="emit('open-clips')"
-          class="text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 border-plate bg-emerald text-white shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none touch-manipulation hover:bg-emerald-600"
-          title="ดูคลิปวิดีโอในเครื่อง 3 เครื่องเล่น"
-        >
-          <span>🎬 3 คลิปในเครื่อง</span>
-        </button>
-
         <!-- Auto-save Pill -->
         <span
           class="text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 transition-all flex items-center gap-1 select-none"
@@ -72,8 +62,6 @@
 <script setup>
 import { computed } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
-
-const emit = defineEmits(['open-clips']);
 
 const {
   currentDay,

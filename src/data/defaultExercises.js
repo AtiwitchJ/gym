@@ -55,8 +55,23 @@ export const defaultExercises = [
     equipment: 'dumbbell',
     isCustom: false,
     videoUrl: 'https://www.youtube.com/watch?v=Y_7aHqXeCfQ',
-    localVideo: '/videos/chest-press-machine.mp4',
-    localVideoTitle: 'คลิปในเครื่อง: Machine 3 (Chest Press Machine)',
+    machineVideos: [
+      {
+        name: 'เครื่องแบบที่ 1 (Seated Pin Chest Press)',
+        equipment: 'เครื่อง Seated Chest Press แบบพินปรับระดับ',
+        videoUrl: 'https://www.youtube.com/watch?v=sqOw2Y68ecY'
+      },
+      {
+        name: 'เครื่องแบบที่ 2 (Plate-Loaded Chest Press)',
+        equipment: 'เครื่อง Iso-Lateral ใส่แผ่นเหล็ก',
+        videoUrl: 'https://www.youtube.com/watch?v=8iPEnn-ltC8'
+      },
+      {
+        name: 'เครื่องแบบที่ 3 (Flat Dumbbell / Smith)',
+        equipment: 'ม้านั่งดัมเบลราบ หรือ Smith Machine',
+        videoUrl: 'https://www.youtube.com/watch?v=Y_7aHqXeCfQ'
+      }
+    ],
     notes: 'Dumbbell flat bench press for chest mass with independent unilateral stability'
   },
   {
@@ -124,8 +139,23 @@ export const defaultExercises = [
     equipment: 'machine',
     isCustom: false,
     videoUrl: 'https://www.youtube.com/watch?v=BwV6jzYKiNY',
-    localVideo: '/videos/lat-pulldown-machine.mp4',
-    localVideoTitle: 'คลิปในเครื่อง: Machine 2 (Lat Pulldown Machine)',
+    machineVideos: [
+      {
+        name: 'เครื่องแบบที่ 1 (Wide-Grip Lat Pulldown)',
+        equipment: 'เครื่องเคเบิล Lat Pulldown มาตรฐานแบบพิน',
+        videoUrl: 'https://www.youtube.com/watch?v=BwV6jzYKiNY'
+      },
+      {
+        name: 'เครื่องแบบที่ 2 (Plate-Loaded High Row)',
+        equipment: 'เครื่องดึงหลังใส่แผ่นเหล็ก Iso-Lateral',
+        videoUrl: 'https://www.youtube.com/watch?v=bNji2b0y1rE'
+      },
+      {
+        name: 'เครื่องแบบที่ 3 (Assisted Pull-Up Machine)',
+        equipment: 'เครื่องช่วยดึงข้อ หรือ เคเบิลมือจับคู่',
+        videoUrl: 'https://www.youtube.com/watch?v=y3ha3652E10'
+      }
+    ],
     notes: 'Vertical pull targeting latissimus dorsi with wide or neutral grip'
   },
   {
@@ -193,8 +223,23 @@ export const defaultExercises = [
     equipment: 'machine',
     isCustom: false,
     videoUrl: 'https://www.youtube.com/watch?v=kTM85YKV7ls',
-    localVideo: '/videos/leg-press-machine.mp4',
-    localVideoTitle: 'คลิปในเครื่อง: Machine 1 (45° Incline Leg Press)',
+    machineVideos: [
+      {
+        name: 'เครื่องแบบที่ 1 (45° Incline Leg Press)',
+        equipment: 'เครื่องถีบขา 45 องศาแบบใส่แผ่นเหล็ก Plate-loaded',
+        videoUrl: 'https://www.youtube.com/watch?v=kTM85YKV7ls'
+      },
+      {
+        name: 'เครื่องแบบที่ 2 (Horizontal Cable Leg Press)',
+        equipment: 'เครื่องถีบขาแนวนอนแบบพินปรับระดับ Selectorized',
+        videoUrl: 'https://www.youtube.com/watch?v=IZxyjW7MPJQ'
+      },
+      {
+        name: 'เครื่องแบบที่ 3 (Hack Squat / Smith Machine)',
+        equipment: 'เครื่อง Hack Squat หรือ Smith Machine Squat',
+        videoUrl: 'https://www.youtube.com/watch?v=0tn5K9NlCfo'
+      }
+    ],
     notes: 'Heavy compound leg drive with supported back angle'
   },
   {

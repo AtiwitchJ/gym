@@ -21,7 +21,7 @@
     </transition>
 
     <!-- Header -->
-    <HeaderBar @open-clips="showClipsModal = true" />
+    <HeaderBar />
 
     <!-- Main Container -->
     <!-- Main Container -->
@@ -97,9 +97,6 @@
           :user-state="userState"
           :last-weights="lastWeights"
         />
-
-        <!-- 3 Machine Local Video Clips Showcase (In-App Offline Clips) -->
-        <MachineClipsShowcase />
 
         <!-- Exercise Cards List -->
         <div class="space-y-3">
@@ -208,34 +205,6 @@
       :summary="lastWorkoutSummary"
       @close="isSummaryModalOpen = false"
     />
-
-    <!-- 3 Machine Video Clips Modal (Accessible anywhere anytime from Header) -->
-    <div
-      v-if="showClipsModal"
-      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 select-none"
-      @click.self="showClipsModal = false"
-    >
-      <div class="w-full max-w-2xl bg-paper rounded-2xl border-2 border-plate shadow-[4px_4px_0px_#1e2220] overflow-hidden max-h-[90vh] flex flex-col">
-        <div class="p-3 sm:p-4 bg-emerald text-white flex items-center justify-between border-b-2 border-plate">
-          <div class="flex items-center gap-2">
-            <span class="text-base">🎬</span>
-            <h3 class="font-bold font-heading text-sm sm:text-base">
-              คลิปวิดีโอสาธิตในเครื่อง 3 ชนิดเครื่องเล่น (3 Machine Clips)
-            </h3>
-          </div>
-          <button
-            type="button"
-            @click="showClipsModal = false"
-            class="w-7 h-7 rounded-lg bg-black/20 hover:bg-black/40 flex items-center justify-center font-bold text-white transition-all"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="p-3 sm:p-4 overflow-y-auto">
-          <MachineClipsShowcase />
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -260,7 +229,6 @@ import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
 import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
 import WorkoutsView from './components/WorkoutsView.vue';
 import ProfileView from './components/ProfileView.vue';
-import MachineClipsShowcase from './components/MachineClipsShowcase.vue';
 
 const {
   currentDay,
@@ -280,7 +248,6 @@ const { isWorkoutActive, startSessionFromRoutine, startEmptySession } = useActiv
 // Modal Visibility State
 const showExerciseLibrary = ref(false);
 const showRoutineBuilder = ref(false);
-const showClipsModal = ref(false);
 const editingRoutine = ref(null);
 const isSummaryModalOpen = ref(false);
 const lastWorkoutSummary = ref(null);

@@ -41,6 +41,251 @@ export function getLinkedExerciseIds(exId) {
   return linked;
 }
 
+// 3 YouTube Video Alternatives for 3 Different Gym Machines / Equipment
+// (เผื่อยิมที่เล่นไม่มีเครื่องแบบใดแบบหนึ่ง สามารถเลือกดูคลิปสอนเล่นเครื่องแบบอื่นที่ยิมมีได้)
+export const MACHINE_VIDEO_PRESETS = {
+  seated_leg_press: [
+    {
+      name: "เครื่องแบบที่ 1 (45° Plate-Loaded Leg Press)",
+      shortName: "45° ใส่แผ่นเหล็ก",
+      equipment: "เครื่องถีบขา 45 องศาแบบใส่แผ่นเหล็ก (Plate-loaded)",
+      videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Seated Cable Pin Leg Press)",
+      shortName: "แนวนอนแบบพิน",
+      equipment: "เครื่อง Leg Press นั่งถีบแนวนอนแบบพินปรับระดับ (Selectorized)",
+      videoUrl: "https://www.youtube.com/watch?v=IZxyjW7MPJQ"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Hack Squat / Smith Machine)",
+      shortName: "Hack Squat / Smith",
+      equipment: "เครื่อง Hack Squat หรือ Smith Machine Squat",
+      videoUrl: "https://www.youtube.com/watch?v=0tn5K9NlCfo"
+    }
+  ],
+  chest_press: [
+    {
+      name: "เครื่องแบบที่ 1 (Seated Pin Chest Press)",
+      shortName: "เครื่องพินนั่งดันอก",
+      equipment: "เครื่อง Seated Chest Press แบบพินปรับระดับ",
+      videoUrl: "https://www.youtube.com/watch?v=sqOw2Y68ecY"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Plate-Loaded Chest Press)",
+      shortName: "เครื่องใส่แผ่นแยกแขน",
+      equipment: "เครื่อง Iso-Lateral Chest Press แบบใส่แผ่นเหล็ก",
+      videoUrl: "https://www.youtube.com/watch?v=8iPEnn-ltC8"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Smith Machine / Flat Dumbbell)",
+      shortName: "Smith / ดัมเบล",
+      equipment: "เครื่อง Smith Machine หรือ ม้านั่งดัมเบลราบ",
+      videoUrl: "https://www.youtube.com/watch?v=kZeqk_Nffy8"
+    }
+  ],
+  lat_pulldown: [
+    {
+      name: "เครื่องแบบที่ 1 (Wide-Grip Cable Pulldown)",
+      shortName: "เคเบิลดึงปีกกว้าง",
+      equipment: "เครื่องเคเบิล Lat Pulldown มาตรฐานแบบพิน",
+      videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Plate-Loaded High Row)",
+      shortName: "เครื่องดึงปีกใส่แผ่น",
+      equipment: "เครื่องดึงปีกใส่แผ่นเหล็ก Iso-Lateral High Row",
+      videoUrl: "https://www.youtube.com/watch?v=bNji2b0y1rE"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Assisted Pull-Up Machine)",
+      shortName: "เครื่องช่วยดึงข้อ",
+      equipment: "เครื่องช่วยดึงข้อ Assisted Chin-Up หรือ เคเบิลมือจับคู่",
+      videoUrl: "https://www.youtube.com/watch?v=y3ha3652E10"
+    }
+  ],
+  shoulder_press: [
+    {
+      name: "เครื่องแบบที่ 1 (Seated Pin Shoulder Press)",
+      shortName: "เครื่องพินนั่งดันไหล่",
+      equipment: "เครื่อง Seated Shoulder Press แบบพินปรับระดับ",
+      videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Plate-Loaded Shoulder Press)",
+      shortName: "เครื่องใส่แผ่นแยกแขน",
+      equipment: "เครื่องดันไหล่ใส่แผ่นเหล็ก Iso-Lateral",
+      videoUrl: "https://www.youtube.com/watch?v=cTsz42zGgW4"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Smith Machine / Seated DB Press)",
+      shortName: "Smith / ดัมเบลนั่ง",
+      equipment: "เครื่อง Smith Machine หรือ ดัมเบลนั่งดันไหล่",
+      videoUrl: "https://www.youtube.com/watch?v=XhI2mZl4rY0"
+    }
+  ],
+  row_back: [
+    {
+      name: "เครื่องแบบที่ 1 (Seated Cable Row)",
+      shortName: "เคเบิลนั่งดึงพิน",
+      equipment: "เครื่องเคเบิลนั่งดึงหน้าท้องแบบพินปรับระดับ",
+      videoUrl: "https://www.youtube.com/watch?v=0U8VMBXPQco"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Chest-Supported Machine Row)",
+      shortName: "เครื่องมีเบาะพิงอก",
+      equipment: "เครื่องดึงหลังแบบมีเบาะพิงหน้าอกใส่แผ่นเหล็ก",
+      videoUrl: "https://www.youtube.com/watch?v=roCP6wCXPqo"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (One-Arm DB Row / T-Bar)",
+      shortName: "ดัมเบล / T-Bar Row",
+      equipment: "ดัมเบลดึงหลังข้างเดียว หรือ บาร์เบล T-Bar Row",
+      videoUrl: "https://www.youtube.com/watch?v=pYcpY20QaE8"
+    }
+  ],
+  incline_chest: [
+    {
+      name: "เครื่องแบบที่ 1 (Incline Chest Press Machine)",
+      shortName: "เครื่องพินดันอกบน",
+      equipment: "เครื่อง Incline Chest Machine แบบพินปรับระดับ",
+      videoUrl: "https://www.youtube.com/watch?v=8iPEnn-ltC8"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Incline Dumbbell Bench Press)",
+      shortName: "ม้านั่งเอียงดัมเบล",
+      equipment: "ม้านั่งปรับเอียง 30-45 องศา ดันดัมเบล",
+      videoUrl: "https://www.youtube.com/watch?v=0bnc96eUvG0"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Incline Smith Machine Press)",
+      shortName: "Smith Machine เอียง",
+      equipment: "เครื่อง Smith Machine ตั้งม้านั่งเอียงดันอกบน",
+      videoUrl: "https://www.youtube.com/watch?v=M5VbY_U3a-c"
+    }
+  ],
+  chest_fly: [
+    {
+      name: "เครื่องแบบที่ 1 (Pec Deck Fly Machine)",
+      shortName: "เครื่อง Pec Deck",
+      equipment: "เครื่องหนีบอก Pec Deck Machine เบาะนั่ง",
+      videoUrl: "https://www.youtube.com/watch?v=rTATwLKP548"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Cable Crossover Dual Pulley)",
+      shortName: "เคเบิลรอกคู่ยืนบีบ",
+      equipment: "เครื่องรอกคู่เคเบิลยืนบีบอก (Cable Crossover)",
+      videoUrl: "https://www.youtube.com/watch?v=taI4XduLpTk"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Dumbbell Chest Fly)",
+      shortName: "ดัมเบลนอนกางแขน",
+      equipment: "ม้านั่งราบกางดัมเบลบีบอก (Dumbbell Fly)",
+      videoUrl: "https://www.youtube.com/watch?v=eozdVDA78K0"
+    }
+  ],
+  hip_thrust: [
+    {
+      name: "เครื่องแบบที่ 1 (Glute Drive / Hip Thrust Machine)",
+      shortName: "เครื่อง Glute Drive",
+      equipment: "เครื่องยกสะโพก Glute Drive Machine เฉพาะทาง",
+      videoUrl: "https://www.youtube.com/watch?v=q_JqQ6C48aE"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Smith Machine Hip Thrust)",
+      shortName: "Smith + ม้านั่ง",
+      equipment: "เครื่อง Smith Machine วางม้านั่งรองแผ่นหลัง",
+      videoUrl: "https://www.youtube.com/watch?v=s1gUMRjpgqM"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Barbell / Dumbbell Hip Thrust)",
+      shortName: "บาร์เบล / ดัมเบล",
+      equipment: "บาร์เบลพร้อมเบาะฟองน้ำ หรือ ดัมเบลวางหน้าตัก",
+      videoUrl: "https://www.youtube.com/watch?v=xDmFkJxPzeM"
+    }
+  ],
+  leg_extension: [
+    {
+      name: "เครื่องแบบที่ 1 (Selectorized Leg Extension)",
+      shortName: "เครื่องพินเตะขาหน้า",
+      equipment: "เครื่องเตะขาหน้า Leg Extension แบบพินปรับระดับ",
+      videoUrl: "https://www.youtube.com/watch?v=dpn7z7nYRcQ"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Plate-Loaded Leg Extension)",
+      shortName: "เครื่องใส่แผ่นเหล็ก",
+      equipment: "เครื่องเตะขาหน้าแบบใส่แผ่นเหล็กแยกข้าง",
+      videoUrl: "https://www.youtube.com/watch?v=YyvSfVjQeL0"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Smith / Sissy Squat Bench)",
+      shortName: "Sissy Squat / Smith",
+      equipment: "แท่น Sissy Squat หรือ Smith Squat โดนหน้าขา",
+      videoUrl: "https://www.youtube.com/watch?v=dG_4rW7sT74"
+    }
+  ],
+  leg_curl: [
+    {
+      name: "เครื่องแบบที่ 1 (Seated Leg Curl Machine)",
+      shortName: "นั่งพับขาแบบพิน",
+      equipment: "เครื่องนั่งพับขาหลัง Seated Leg Curl แบบพินปรับระดับ",
+      videoUrl: "https://www.youtube.com/watch?v=1Tq3QdYUuHs"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Lying Leg Curl Machine)",
+      shortName: "นอนคว่ำพับขา",
+      equipment: "เครื่องนอนคว่ำพับขาหลัง (Lying Leg Curl Machine)",
+      videoUrl: "https://www.youtube.com/watch?v=ELOCsoDSmrg"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Dumbbell Hamstring Curl)",
+      shortName: "ดัมเบลหนีบข้อเท้า",
+      equipment: "ดัมเบลหนีบข้อเท้านอนคว่ำ หรือ เคเบิลรัดข้อเท้า",
+      videoUrl: "https://www.youtube.com/watch?v=k4_vB3_T07c"
+    }
+  ],
+  lateral_raise: [
+    {
+      name: "เครื่องแบบที่ 1 (Lateral Raise Machine)",
+      shortName: "เครื่องนั่งกางไหล่",
+      equipment: "เครื่องนั่งกางแขนยกไหล่ข้างแบบพินปรับระดับ",
+      videoUrl: "https://www.youtube.com/watch?v=7sE12WbKzZc"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Cable Lateral Raise)",
+      shortName: "รอกเคเบิลเดี่ยว",
+      equipment: "เครื่องรอกเคเบิลเดี่ยวยืนดึงเฉียงข้าง",
+      videoUrl: "https://www.youtube.com/watch?v=PPrzBWZDOhA"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Dumbbell Lateral Raise)",
+      shortName: "ดัมเบลกางแขน",
+      equipment: "ดัมเบลกางแขนยกไหล่ข้าง ยืนหรือนั่ง",
+      videoUrl: "https://www.youtube.com/watch?v=3VcKaXpzqRo"
+    }
+  ],
+  calf_raise: [
+    {
+      name: "เครื่องแบบที่ 1 (Standing Calf Raise Machine)",
+      shortName: "เครื่องยืนเขย่งน่อง",
+      equipment: "เครื่องยืนเขย่งน่องแบบพินเบาะดันบ่า",
+      videoUrl: "https://www.youtube.com/watch?v=Lqpb-IiSFC4"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Seated Calf Raise Machine)",
+      shortName: "เครื่องนั่งเขย่งน่อง",
+      equipment: "เครื่องนั่งเขย่งน่องแบบใส่แผ่นเหล็ก",
+      videoUrl: "https://www.youtube.com/watch?v=JbyjNymZOt0"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Leg Press / Smith Calf Raise)",
+      shortName: "Leg Press / Smith",
+      equipment: "เขย่งปลายเท้าบนแป้น Leg Press หรือ Smith Machine",
+      videoUrl: "https://www.youtube.com/watch?v=oX8y-6T3j30"
+    }
+  ]
+};
+
 export const workoutData = {
   mon: {
     title: "วันจันทร์: ขา + ก้น ครบทุกมิติ (Legs & Glutes)",
@@ -54,8 +299,7 @@ export const workoutData = {
         mainMuscle: "ต้นขาด้านหน้า (Quads), ก้น (Glutes)",
         subMuscle: "ต้นขาด้านหลัง, น่อง (วางเท้าสูงโดนก้นมากขึ้น)",
         videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
-        localVideo: "/videos/leg-press-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 1 (45° Leg Press)",
+        machineVideos: MACHINE_VIDEO_PRESETS.seated_leg_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง (40-50%)" },
           { type: "work", reps: "6–8 ครั้ง (ท้าทาย)" },
@@ -71,6 +315,7 @@ export const workoutData = {
         mainMuscle: "ก้นมัดใหญ่ (Gluteus Maximus เน้น ๆ)",
         subMuscle: "แกนกลางลำตัว และ ขาด้านหลังช่วยพยุง",
         videoUrl: "https://www.youtube.com/watch?v=s1gUMRjpgqM",
+        machineVideos: MACHINE_VIDEO_PRESETS.hip_thrust,
         sets: [
           { type: "warm", reps: "15 ครั้ง (40-50%)" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -86,6 +331,7 @@ export const workoutData = {
         mainMuscle: "ต้นขาด้านหน้า 4 มัดล้วน (Quadriceps)",
         subMuscle: "กล้ามเนื้อพยุงรอบหัวเข่า",
         videoUrl: "https://www.youtube.com/watch?v=dpn7z7nYRcQ",
+        machineVideos: MACHINE_VIDEO_PRESETS.leg_extension,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -100,7 +346,8 @@ export const workoutData = {
         altName: "เครื่องพับขาหลัง หรือเลือกเล่น RDL แทน",
         mainMuscle: "ต้นขาด้านหลังล้วน (Hamstrings)",
         subMuscle: "น่องส่วนบน",
-        videoUrl: "https://www.youtube.com/watch?v=WzS7KK4eI0g",
+        videoUrl: "https://www.youtube.com/watch?v=1Tq3QdYUuHs",
+        machineVideos: MACHINE_VIDEO_PRESETS.leg_curl,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -146,6 +393,7 @@ export const workoutData = {
         mainMuscle: "น่องมัดใหญ่ (Gastrocnemius)",
         subMuscle: "น่องมัดลึก (Soleus) และเอ็นร้อยหวาย",
         videoUrl: "https://www.youtube.com/watch?v=Lqpb-IiSFC4",
+        machineVideos: MACHINE_VIDEO_PRESETS.calf_raise,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "12–15 ครั้ง (ยืดสุด-บีบสุดค้าง 1 วิ)" },
@@ -162,8 +410,7 @@ export const workoutData = {
         altName: "ดึงปีกกว้างทรง V-Shape",
         tip: "วันหลังคือวันพุธ (พัก 48 ชม. ฟื้นตัวทันแน่นอน)",
         videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
-        localVideo: "/videos/lat-pulldown-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 2 (Lat Pulldown)",
+        machineVideos: MACHINE_VIDEO_PRESETS.lat_pulldown,
         sets: [
           { type: "warm", reps: "15 ครั้ง (วอร์มปีก)" },
           { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8 เหลือแรง 2 ครั้ง)" }
@@ -176,6 +423,7 @@ export const workoutData = {
         altName: "ดันไหล่รวมมิติรอบด้าน",
         tip: "วันไหล่คือวันพฤหัสบดี (มีเวลาพักยาว)",
         videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        machineVideos: MACHINE_VIDEO_PRESETS.shoulder_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง (วอร์มข้อต่อ)" },
           { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
@@ -187,9 +435,8 @@ export const workoutData = {
         part: "อก (Chest)",
         altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "พรุ่งนี้ (อังคาร) เป็นวันอกเต็มระบบ เล่นเบา ๆ แค่โฟกัสฟอร์ม",
-        videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
-        localVideo: "/videos/chest-press-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 3 (Chest Press)",
+        videoUrl: "https://www.youtube.com/watch?v=sqOw2Y68ecY",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักปานกลาง)" }
@@ -208,9 +455,8 @@ export const workoutData = {
         altName: "ดัมเบลนอนดันอกบนม้านั่งราบ (ใส่น้ำหนักต่อข้าง) หรือเครื่อง Chest Press",
         mainMuscle: "อกส่วนกลาง (Mid Chest)",
         subMuscle: "ไหล่หน้า (Front Delts), หลังแขน (Triceps)",
-        videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
-        localVideo: "/videos/chest-press-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 3 (Chest Press)",
+        videoUrl: "https://www.youtube.com/watch?v=sqOw2Y68ecY",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -226,6 +472,7 @@ export const workoutData = {
         mainMuscle: "อกส่วนบน (Upper Chest / แนวไหปลาร้า)",
         subMuscle: "ไหล่หน้า, หลังแขน",
         videoUrl: "https://www.youtube.com/watch?v=0bnc96eUvG0",
+        machineVideos: MACHINE_VIDEO_PRESETS.incline_chest,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -241,6 +488,7 @@ export const workoutData = {
         mainMuscle: "อกด้านใน/ร่องอก และขยายฐานอก (Inner & Mid Chest)",
         subMuscle: "ไหล่ด้านหน้า",
         videoUrl: "https://www.youtube.com/watch?v=rTATwLKP548",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_fly,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -317,8 +565,7 @@ export const workoutData = {
         altName: "ถีบขากระตุ้นต้นขาหน้าและก้น",
         tip: "ปั๊มเลือดคลายความตึงจากวันจันทร์ได้ดีมาก",
         videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
-        localVideo: "/videos/leg-press-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 1 (45° Leg Press)",
+        machineVideos: MACHINE_VIDEO_PRESETS.seated_leg_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
@@ -331,6 +578,7 @@ export const workoutData = {
         altName: "ดันไหล่เหนือศีรษะ",
         tip: "แตะเบา ๆ เพราะไหล่หน้าเพิ่งช่วยดันอกมาหมาด ๆ",
         videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        machineVideos: MACHINE_VIDEO_PRESETS.shoulder_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง" }
@@ -343,8 +591,7 @@ export const workoutData = {
         altName: "เครื่องดึงปีกหรือดึงหลัง",
         tip: "พรุ่งนี้ (พุธ) เป็นวันหลังเต็มระบบ เล่นเบา ๆ แค่ยืดเส้น",
         videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
-        localVideo: "/videos/lat-pulldown-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 2 (Lat Pulldown)",
+        machineVideos: MACHINE_VIDEO_PRESETS.lat_pulldown,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักเบา)" }
@@ -364,6 +611,7 @@ export const workoutData = {
         mainMuscle: "หลังส่วนกลางเพิ่มความหนา (Mid Back / Rhomboids)",
         subMuscle: "ปีก (Lats), ไหล่หลัง, หน้าแขน (Biceps)",
         videoUrl: "https://www.youtube.com/watch?v=0U8VMBXPQco",
+        machineVideos: MACHINE_VIDEO_PRESETS.row_back,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -379,8 +627,7 @@ export const workoutData = {
         mainMuscle: "หลังส่วนกว้าง/ปีก (Latissimus Dorsi - V-Shape)",
         subMuscle: "หน้าแขน (Biceps), สะบักและหลังบน",
         videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
-        localVideo: "/videos/lat-pulldown-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 2 (Lat Pulldown)",
+        machineVideos: MACHINE_VIDEO_PRESETS.lat_pulldown,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -471,9 +718,8 @@ export const workoutData = {
         part: "อก (Chest)",
         altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "ปั๊มเลือดเข้าอก (Feeder Set) ที่เพิ่งเล่นเมื่อวาน ช่วยฟื้นตัวเร็ว",
-        videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
-        localVideo: "/videos/chest-press-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 3 (Chest Press)",
+        videoUrl: "https://www.youtube.com/watch?v=sqOw2Y68ecY",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (RPE 7-8)" }
@@ -486,8 +732,7 @@ export const workoutData = {
         altName: "ถีบขาเพิ่มมวลรวม",
         tip: "กระตุ้นขามวลรวมได้ดี",
         videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
-        localVideo: "/videos/leg-press-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 1 (45° Leg Press)",
+        machineVideos: MACHINE_VIDEO_PRESETS.seated_leg_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง" }
@@ -500,6 +745,7 @@ export const workoutData = {
         altName: "ดันไหล่",
         tip: "พรุ่งนี้ (พฤหัส) เป็นวันไหล่เต็มระบบ เล่นเบา ๆ แค่วอร์มข้อต่อ",
         videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        machineVideos: MACHINE_VIDEO_PRESETS.shoulder_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (น้ำหนักเบา)" }
@@ -519,6 +765,7 @@ export const workoutData = {
         mainMuscle: "หัวไหล่ด้านหน้าและด้านข้าง (Front & Side Delts)",
         subMuscle: "แขนด้านหลัง (Triceps), บ่าส่วนบน",
         videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        machineVideos: MACHINE_VIDEO_PRESETS.shoulder_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง" },
@@ -534,6 +781,7 @@ export const workoutData = {
         mainMuscle: "หัวไหล่ด้านข้าง (Side Delts)",
         subMuscle: "บ่า (Traps หากยกสูงเกินระดับไหล่)",
         videoUrl: "https://www.youtube.com/watch?v=puqaiVqacvQ",
+        machineVideos: MACHINE_VIDEO_PRESETS.lateral_raise,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "6–8 ครั้ง (หรือ 10–12)" },
@@ -624,9 +872,8 @@ export const workoutData = {
         part: "อก (Chest)",
         altName: "ดัมเบลนอนดันอก หรือเครื่องผลักอก",
         tip: "พรุ่งนี้วันพัก 3 วันติด เล่นน้ำหนักท้าทายได้เต็มที่",
-        videoUrl: "https://www.youtube.com/watch?v=Y_7aHqXeCfQ",
-        localVideo: "/videos/chest-press-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 3 (Chest Press)",
+        videoUrl: "https://www.youtube.com/watch?v=sqOw2Y68ecY",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง (ท้าทาย)" }
@@ -639,8 +886,7 @@ export const workoutData = {
         altName: "ดึงปีก V-Shape",
         tip: "กระตุ้นปีกก่อนเข้าช่วงวันพักผ่อน",
         videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
-        localVideo: "/videos/lat-pulldown-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 2 (Lat Pulldown)",
+        machineVideos: MACHINE_VIDEO_PRESETS.lat_pulldown,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง" }
@@ -653,8 +899,7 @@ export const workoutData = {
         altName: "ถีบขา",
         tip: "ปั๊มเลือดเข้ากล้ามเนื้อขาและก้นมวลรวม",
         videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
-        localVideo: "/videos/leg-press-machine.mp4",
-        localVideoTitle: "คลิปในเครื่อง: Machine 1 (45° Leg Press)",
+        machineVideos: MACHINE_VIDEO_PRESETS.seated_leg_press,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "touchup", reps: "6–8 ครั้ง" }

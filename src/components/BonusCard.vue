@@ -70,10 +70,9 @@
               </div>
             </div>
             <span
-              class="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono font-bold text-white px-1 sm:px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none"
-              :class="hasLocalVideo ? 'bg-emerald/90' : 'bg-plate/80'"
+              class="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono font-bold text-white px-1 sm:px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none bg-plate/85"
             >
-              {{ hasLocalVideo ? '🎬 ในเครื่อง' : 'คลิป' }}
+              {{ hasMultiMachineVideos ? '🎬 3 เครื่อง' : 'YouTube' }}
             </span>
           </div>
 
@@ -85,9 +84,7 @@
             class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
             :class="isPlayingVideo
               ? 'bg-flame text-white'
-              : hasLocalVideo
-                ? 'bg-emerald text-white hover:bg-emerald/90'
-                : 'bg-white hover:bg-paper-subtle text-ink'"
+              : 'bg-white hover:bg-paper-subtle text-ink'"
             :title="isPlayingVideo ? 'ปิดคลิป' : 'เปิดดูคลิปในหน้านี้'"
           >
             <svg v-if="!isPlayingVideo" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -97,7 +94,7 @@
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-            <span>{{ isPlayingVideo ? 'ปิดคลิป' : hasLocalVideo ? '🎬 ดูคลิปในเครื่อง' : 'ดูคลิป' }}</span>
+            <span>{{ isPlayingVideo ? 'ปิดคลิป' : (hasMultiMachineVideos ? '🎬 ดูคลิป (3 เครื่อง)' : 'ดูคลิป') }}</span>
           </button>
         </div>
       </div>
@@ -208,66 +205,86 @@
       leave-from-class="opacity-100 translate-y-0"
       leave-to-class="opacity-0 -translate-y-2"
     >
-      <div v-if="isPlayingVideo && hasVideo" class="p-3 bg-paper-subtle/80 border-b-2 border-plate">
-        <!-- Video Source Switcher (Local vs YouTube) -->
+      <div v-if="isPlayingVideo && hasVideo" class="p-3 bg-paper-subtle/90 border-b-2 border-plate">
+        <!-- Video Header & Direct YouTube link -->
         <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
           <div class="flex items-center gap-1.5 flex-wrap">
-            <button
-              v-if="hasLocalVideo"
-              type="button"
-              @click="videoSource = 'local'"
-              class="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border-2 transition-all"
-              :class="videoSource === 'local'
-                ? 'bg-emerald text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]'
-                : 'bg-surface hover:bg-paper-subtle text-ink border-plate/30'"
+            <span class="text-xs font-mono font-bold text-ink flex items-center gap-1">
+              <span class="text-flame">🔴</span>
+              <span>YouTube สอนเล่น</span>
+            </span>
+            <span
+              v-if="hasMultiMachineVideos"
+              class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-flame-bg text-flame border border-flame/30"
             >
-              🎬 คลิปในเครื่อง (3 เครื่อง)
-            </button>
-            <button
-              v-if="videoId"
-              type="button"
-              @click="videoSource = 'youtube'"
-              class="px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border-2 transition-all"
-              :class="videoSource === 'youtube'
-                ? 'bg-flame text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]'
-                : 'bg-surface hover:bg-paper-subtle text-ink border-plate/30'"
+              3 เครื่องทางเลือก
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <a
+              v-if="activeVideoUrl"
+              :href="activeVideoUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-[10px] font-mono font-bold text-flame hover:underline flex items-center gap-1"
+              title="เปิดดูในแอป YouTube"
             >
-              🔴 YouTube
+              <span>เปิด YouTube ↗</span>
+            </a>
+            <button
+              @click="isPlayingVideo = false"
+              class="text-[11px] font-mono font-bold text-ink-muted hover:text-ink px-2 py-0.5 rounded border border-plate/20 bg-surface shadow-xs active:translate-y-0.5"
+            >
+              ✕ ปิดคลิป
             </button>
           </div>
-          <button
-            @click="isPlayingVideo = false"
-            class="text-[11px] font-mono font-bold text-ink-muted hover:text-ink px-2 py-0.5 rounded border border-plate/20 bg-surface shadow-xs active:translate-y-0.5"
-          >
-            ✕ ปิดคลิป
-          </button>
         </div>
 
-        <div class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[3px_3px_0px_#1e2220] bg-black">
-          <!-- Local Video Player -->
-          <video
-            v-if="videoSource === 'local' && bonus.localVideo"
-            :src="bonus.localVideo"
-            controls
-            playsinline
-            autoplay
-            loop
-            class="w-full h-full object-contain bg-black"
-          ></video>
+        <!-- 3-Machine Selector (When exercise has alternative machines in gym) -->
+        <div v-if="hasMultiMachineVideos" class="mb-2.5 p-2 bg-surface rounded-xl border-2 border-plate shadow-xs">
+          <div class="text-[10px] font-mono font-bold text-ink-muted mb-1.5 flex items-center justify-between">
+            <span>🏋️ เผื่อยิมไม่มีเครื่องหลัก เลือกดูคลิปเครื่องที่มีแทนได้:</span>
+            <span class="text-flame font-bold text-[9px] tabular-nums">แบบ {{ activeMachineIndex + 1 }}/{{ machineOptions.length }}</span>
+          </div>
 
-          <!-- YouTube Embed -->
+          <div class="grid grid-cols-3 gap-1.5">
+            <button
+              v-for="(m, mIdx) in machineOptions"
+              :key="mIdx"
+              type="button"
+              @click="activeMachineIndex = mIdx"
+              class="p-1.5 rounded-lg border-2 text-left transition-all active:scale-[0.98] select-none flex flex-col justify-between"
+              :class="activeMachineIndex === mIdx
+                ? 'bg-flame text-white border-plate shadow-[1.5px_1.5px_0px_#1e2220]'
+                : 'bg-paper-subtle hover:bg-white text-ink border-plate/30 shadow-xs'"
+            >
+              <div class="flex items-center justify-between w-full mb-0.5">
+                <span class="text-[10px] font-mono font-bold truncate">เครื่องที่ {{ mIdx + 1 }}</span>
+                <span v-if="activeMachineIndex === mIdx" class="text-[9px]">●</span>
+              </div>
+              <span class="text-[9px] font-heading font-medium leading-tight line-clamp-1 opacity-90">
+                {{ m.shortName || m.name }}
+              </span>
+            </button>
+          </div>
+
+          <p class="text-[10px] text-ink-muted font-body mt-1.5 flex items-center gap-1">
+            <strong class="text-ink font-semibold flex-shrink-0">เครื่องนี้:</strong>
+            <span class="truncate">{{ activeMachine.equipment || activeMachine.name }}</span>
+          </p>
+        </div>
+
+        <!-- YouTube Video Player -->
+        <div class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[3px_3px_0px_#1e2220] bg-black">
           <iframe
-            v-else-if="embedUrl"
-            :src="embedUrl"
+            v-if="activeEmbedUrl"
+            :src="activeEmbedUrl"
             class="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen
           ></iframe>
         </div>
-        <p v-if="videoSource === 'local' && bonus.localVideoTitle" class="text-[11px] font-mono text-emerald font-bold mt-1.5 flex items-center gap-1">
-          <span>✓</span>
-          <span>{{ bonus.localVideoTitle }}</span>
-        </p>
       </div>
     </transition>
 
@@ -419,13 +436,51 @@ const {
 const { openKeypad } = usePinKeypad();
 const { startTimer, triggerHaptic } = useTimer();
 
-const videoId = computed(() => getYoutubeId(props.bonus.videoUrl));
-const hasLocalVideo = computed(() => !!props.bonus.localVideo);
-const hasVideo = computed(() => !!videoId.value || hasLocalVideo.value);
-const videoSource = ref(props.bonus.localVideo ? 'local' : 'youtube');
+const activeMachineIndex = ref(0);
 
-const thumbnailUrl = computed(() => videoId.value ? `https://img.youtube.com/vi/${videoId.value}/hqdefault.jpg` : null);
-const embedUrl = computed(() => videoId.value ? `https://www.youtube-nocookie.com/embed/${videoId.value}?autoplay=1&rel=0` : null);
+const machineOptions = computed(() => {
+  if (Array.isArray(props.bonus.machineVideos) && props.bonus.machineVideos.length > 0) {
+    return props.bonus.machineVideos;
+  }
+  if (props.bonus.videoUrl) {
+    return [{
+      name: props.bonus.name,
+      shortName: 'เครื่องหลัก',
+      equipment: props.bonus.altName || props.bonus.name,
+      videoUrl: props.bonus.videoUrl
+    }];
+  }
+  return [];
+});
+
+const hasMultiMachineVideos = computed(() => machineOptions.value.length > 1);
+
+const activeMachine = computed(() => {
+  return machineOptions.value[activeMachineIndex.value] || machineOptions.value[0] || {};
+});
+
+const activeVideoUrl = computed(() => {
+  return activeMachine.value.videoUrl || props.bonus.videoUrl || '';
+});
+
+const activeVideoId = computed(() => {
+  return getYoutubeId(activeVideoUrl.value);
+});
+
+const hasVideo = computed(() => !!activeVideoId.value || machineOptions.value.length > 0);
+
+const thumbnailUrl = computed(() => {
+  const primaryId = getYoutubeId(props.bonus.videoUrl) || (machineOptions.value[0] && getYoutubeId(machineOptions.value[0].videoUrl));
+  return primaryId ? `https://img.youtube.com/vi/${primaryId}/hqdefault.jpg` : null;
+});
+
+const activeEmbedUrl = computed(() => {
+  return activeVideoId.value ? `https://www.youtube-nocookie.com/embed/${activeVideoId.value}?autoplay=1&rel=0` : null;
+});
+
+// Backward compatibility alias for tests
+const videoId = computed(() => activeVideoId.value);
+const embedUrl = computed(() => activeEmbedUrl.value);
 
 const isDumbbell = computed(() => {
   const n = (props.bonus.name || '').toLowerCase();

@@ -290,12 +290,12 @@
                     CUSTOM
                   </span>
 
-                  <!-- Local Video Badge -->
+                  <!-- Video Available Badge -->
                   <span
-                    v-if="exercise.localVideo"
-                    class="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-bg text-emerald border border-emerald uppercase"
+                    v-if="exercise.videoUrl || (exercise.machineVideos && exercise.machineVideos.length > 0)"
+                    class="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded-full bg-flame-bg text-flame border border-flame/40 uppercase"
                   >
-                    🎬 ในเครื่อง
+                    🎬 {{ (exercise.machineVideos && exercise.machineVideos.length > 1) ? '3 คลิปเครื่อง' : 'YouTube' }}
                   </span>
                 </div>
 
@@ -309,13 +309,13 @@
               <div class="flex items-center gap-1.5 flex-shrink-0" @click.stop>
                 <!-- Info & Video Toggle Button -->
                 <button
-                  v-if="exercise.notes || exercise.localVideo || exercise.videoUrl"
+                  v-if="exercise.notes || exercise.videoUrl || (exercise.machineVideos && exercise.machineVideos.length > 0)"
                   @click="toggleInfo(exercise.id)"
                   class="px-2 py-1 rounded-lg border-2 border-plate/40 hover:border-plate bg-surface text-ink font-mono text-[10px] font-bold flex items-center gap-1 transition-all"
                   :class="expandedInfo[exercise.id] ? 'bg-paper-dim border-plate text-ink shadow-[1px_1px_0px_#1e2220]' : ''"
                   title="ดูรายละเอียดและคลิปสาธิต"
                 >
-                  <span>{{ exercise.localVideo ? '🎬 คลิป' : 'ℹ️ ข้อมูล' }}</span>
+                  <span>{{ (exercise.videoUrl || (exercise.machineVideos && exercise.machineVideos.length > 0)) ? '🎬 คลิป' : 'ℹ️ ข้อมูล' }}</span>
                 </button>
 
                 <!-- Select Button -->
@@ -339,22 +339,18 @@
               v-if="expandedInfo[exercise.id]"
               class="pt-2 mt-1 border-t border-plate/15 text-[11px] text-ink-muted font-body leading-relaxed bg-paper-subtle/50 p-2.5 rounded-xl space-y-2"
             >
-              <!-- Local Video Player if present -->
-              <div v-if="exercise.localVideo" class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate bg-black">
-                <video
-                  :src="exercise.localVideo"
-                  controls
-                  playsinline
-                  loop
-                  class="w-full h-full object-contain"
-                ></video>
+              <!-- YouTube Player if video present -->
+              <div v-if="getYoutubeId(exercise.videoUrl)" class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate bg-black">
+                <iframe
+                  :src="`https://www.youtube-nocookie.com/embed/${getYoutubeId(exercise.videoUrl)}?rel=0`"
+                  class="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                ></iframe>
               </div>
 
               <div v-if="exercise.notes">
                 <strong class="font-bold text-ink">ข้อแนะนำ:</strong> {{ exercise.notes }}
-              </div>
-              <div v-if="exercise.localVideoTitle" class="text-[10px] font-mono text-emerald font-bold">
-                ✓ {{ exercise.localVideoTitle }}
               </div>
             </div>
           </div>
@@ -378,6 +374,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useExerciseStore } from '../composables/useExerciseStore.js';
+import { getYoutubeId } from '../utils/youtube.js';
 
 const props = defineProps({
   isOpen: {
@@ -408,7 +405,6 @@ const {
 // Muscle categories chip filters
 const muscleChips = [
   { id: 'all', label: 'ทั้งหมด (All)' },
-  { id: 'video_machine', label: '🎬 คลิปในเครื่อง (3 เครื่อง)' },
   { id: 'chest', label: 'อก (Chest)' },
   { id: 'back', label: 'หลัง (Back)' },
   { id: 'quads', label: 'ขาหน้า (Quads)' },

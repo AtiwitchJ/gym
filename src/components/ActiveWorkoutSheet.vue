@@ -164,14 +164,14 @@
             <div class="flex items-center gap-1.5 flex-shrink-0">
               <!-- Video Demo Button -->
               <button
-                v-if="getExerciseVideoInfo(exercise.exerciseId).videoId || getExerciseVideoInfo(exercise.exerciseId).localVideo"
+                v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).videoId || getExerciseVideoInfo(exercise.exerciseId, exIdx).machineOptions.length > 0"
                 type="button"
                 @click="toggleExerciseVideo(exIdx)"
                 class="px-2 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none"
-                :class="activeVideos[exIdx] ? 'bg-flame text-white' : getExerciseVideoInfo(exercise.exerciseId).localVideo ? 'bg-emerald text-white' : 'bg-paper hover:bg-paper-dim text-ink'"
-                :title="activeVideos[exIdx] ? 'ปิดคลิป' : 'ดูคลิปสาธิต'"
+                :class="activeVideos[exIdx] ? 'bg-flame text-white' : 'bg-paper hover:bg-paper-dim text-ink'"
+                :title="activeVideos[exIdx] ? 'ปิดคลิป' : 'ดูคลิปสาธิต YouTube'"
               >
-                <span>{{ activeVideos[exIdx] ? '✕ ปิด' : getExerciseVideoInfo(exercise.exerciseId).localVideo ? '🎬 ในเครื่อง' : '🎬 คลิป' }}</span>
+                <span>{{ activeVideos[exIdx] ? '✕ ปิด' : (getExerciseVideoInfo(exercise.exerciseId, exIdx).hasMultiMachine ? '🎬 3 เครื่อง' : '🎬 คลิป') }}</span>
               </button>
 
               <button
@@ -204,55 +204,73 @@
           >
             <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
               <div class="flex items-center gap-1.5 flex-wrap">
-                <button
-                  v-if="getExerciseVideoInfo(exercise.exerciseId).localVideo"
-                  type="button"
-                  @click="activeVideoSources[exIdx] = 'local'"
-                  class="px-2 py-0.5 text-[10px] font-mono font-bold rounded border"
-                  :class="(activeVideoSources[exIdx] || 'local') === 'local' ? 'bg-emerald text-white border-plate' : 'bg-surface text-ink border-plate/30'"
+                <span class="text-xs font-mono font-bold text-ink flex items-center gap-1">
+                  <span class="text-flame">🔴</span>
+                  <span>YouTube สอนเล่น</span>
+                </span>
+                <span
+                  v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).hasMultiMachine"
+                  class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-flame-bg text-flame border border-flame/30"
                 >
-                  🎬 คลิปในเครื่อง (3 เครื่อง)
-                </button>
-                <button
-                  v-if="getExerciseVideoInfo(exercise.exerciseId).videoId"
-                  type="button"
-                  @click="activeVideoSources[exIdx] = 'youtube'"
-                  class="px-2 py-0.5 text-[10px] font-mono font-bold rounded border"
-                  :class="activeVideoSources[exIdx] === 'youtube' ? 'bg-flame text-white border-plate' : 'bg-surface text-ink border-plate/30'"
+                  3 เครื่องทางเลือก
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <a
+                  v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).videoUrl"
+                  :href="getExerciseVideoInfo(exercise.exerciseId, exIdx).videoUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-[10px] font-mono font-bold text-flame hover:underline"
                 >
-                  🔴 YouTube
+                  เปิด YouTube ↗
+                </a>
+                <button
+                  type="button"
+                  @click="activeVideos[exIdx] = false"
+                  class="text-[10px] font-mono font-bold text-ink-muted hover:text-ink px-1.5 py-0.5 bg-surface rounded border border-plate/20"
+                >
+                  ✕ ปิดคลิป
                 </button>
               </div>
-              <button
-                type="button"
-                @click="activeVideos[exIdx] = false"
-                class="text-[10px] font-mono font-bold text-ink-muted hover:text-ink px-1.5 py-0.5 bg-surface rounded border border-plate/20"
-              >
-                ✕ ปิดคลิป
-              </button>
             </div>
 
+            <!-- 3-Machine Selector (When exercise has alternative machines in gym) -->
+            <div
+              v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).hasMultiMachine"
+              class="mb-2 p-1.5 bg-surface rounded-lg border border-plate/30"
+            >
+              <div class="text-[9px] font-mono text-ink-muted mb-1 flex items-center justify-between">
+                <span>เลือกเครื่องที่ยิมมี (เผื่อยิมไม่มีเครื่องหลัก):</span>
+                <span class="text-flame font-bold">แบบ {{ getExerciseVideoInfo(exercise.exerciseId, exIdx).selectedIdx + 1 }}/{{ getExerciseVideoInfo(exercise.exerciseId, exIdx).machineOptions.length }}</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1">
+                <button
+                  v-for="(m, mIdx) in getExerciseVideoInfo(exercise.exerciseId, exIdx).machineOptions"
+                  :key="mIdx"
+                  type="button"
+                  @click="selectExerciseMachine(exIdx, mIdx)"
+                  class="p-1 rounded text-left border transition-all text-[9px] flex flex-col justify-between"
+                  :class="getExerciseVideoInfo(exercise.exerciseId, exIdx).selectedIdx === mIdx
+                    ? 'bg-flame text-white border-plate shadow-xs font-bold'
+                    : 'bg-paper-subtle text-ink border-plate/30'"
+                >
+                  <span class="truncate">เครื่องที่ {{ mIdx + 1 }}</span>
+                  <span class="truncate opacity-80">{{ m.shortName || m.name }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- YouTube Video Player -->
             <div class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate bg-black">
-              <video
-                v-if="(activeVideoSources[exIdx] || 'local') === 'local' && getExerciseVideoInfo(exercise.exerciseId).localVideo"
-                :src="getExerciseVideoInfo(exercise.exerciseId).localVideo"
-                controls
-                playsinline
-                autoplay
-                loop
-                class="w-full h-full object-contain bg-black"
-              ></video>
               <iframe
-                v-else-if="getExerciseVideoInfo(exercise.exerciseId).videoId"
-                :src="`https://www.youtube-nocookie.com/embed/${getExerciseVideoInfo(exercise.exerciseId).videoId}?autoplay=1&rel=0`"
+                v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).activeEmbedUrl"
+                :src="getExerciseVideoInfo(exercise.exerciseId, exIdx).activeEmbedUrl"
                 class="w-full h-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowfullscreen
               ></iframe>
             </div>
-            <p v-if="getExerciseVideoInfo(exercise.exerciseId).localVideoTitle" class="text-[10px] font-mono text-emerald font-bold mt-1">
-              ✓ {{ getExerciseVideoInfo(exercise.exerciseId).localVideoTitle }}
-            </p>
           </div>
 
           <!-- Progressive Overload Advice Chip Banner -->
@@ -440,18 +458,56 @@ const { getExerciseById } = useExerciseStore();
 
 const isPickerOpen = ref(false);
 const activeVideos = ref({});
-const activeVideoSources = ref({});
+const activeMachineIndices = ref({});
 
-function getExerciseVideoInfo(exerciseId) {
+function getExerciseVideoInfo(exerciseId, exIdx = null) {
   const meta = getExerciseById(exerciseId);
-  if (!meta) return { videoUrl: null, localVideo: null, localVideoTitle: null, videoId: null };
-  const videoId = getYoutubeId(meta.videoUrl);
+  if (!meta) {
+    return {
+      videoUrl: null,
+      videoId: null,
+      machineOptions: [],
+      hasMultiMachine: false,
+      activeEmbedUrl: null,
+      activeMachine: {},
+      selectedIdx: 0
+    };
+  }
+
+  let machineOptions = [];
+  if (Array.isArray(meta.machineVideos) && meta.machineVideos.length > 0) {
+    machineOptions = meta.machineVideos;
+  } else if (meta.videoUrl) {
+    machineOptions = [{
+      name: meta.name,
+      shortName: 'เครื่องหลัก',
+      equipment: meta.equipment || meta.name,
+      videoUrl: meta.videoUrl
+    }];
+  }
+
+  const selectedIdx = (exIdx !== null && activeMachineIndices.value[exIdx] !== undefined)
+    ? activeMachineIndices.value[exIdx]
+    : 0;
+
+  const activeMachine = machineOptions[selectedIdx] || machineOptions[0] || {};
+  const activeVideoUrl = activeMachine.videoUrl || meta.videoUrl || '';
+  const videoId = getYoutubeId(activeVideoUrl);
+  const activeEmbedUrl = videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0` : null;
+
   return {
-    videoUrl: meta.videoUrl,
-    localVideo: meta.localVideo,
-    localVideoTitle: meta.localVideoTitle,
-    videoId
+    videoUrl: activeVideoUrl,
+    videoId,
+    machineOptions,
+    hasMultiMachine: machineOptions.length > 1,
+    activeEmbedUrl,
+    activeMachine,
+    selectedIdx
   };
+}
+
+function selectExerciseMachine(exIdx, mIdx) {
+  activeMachineIndices.value[exIdx] = mIdx;
 }
 
 function toggleExerciseVideo(exIdx) {

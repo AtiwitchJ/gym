@@ -2,27 +2,19 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { workoutData } from '../src/data/workouts.js';
+import { workoutData, MACHINE_VIDEO_PRESETS } from '../src/data/workouts.js';
+import { getYoutubeId } from '../src/utils/youtube.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('Testing Bonus Sets (set เสริม) & 3 Local Machine Video Clips Contract...');
+console.log('Testing Bonus Sets (set เสริม) & 3 YouTube Gym Machine Alternatives Contract...');
 
-// 1. Verify existence of the 3 local video files on the machine
-const legPressVideo = path.resolve(__dirname, '../public/videos/leg-press-machine.mp4');
-const latPulldownVideo = path.resolve(__dirname, '../public/videos/lat-pulldown-machine.mp4');
-const chestPressVideo = path.resolve(__dirname, '../public/videos/chest-press-machine.mp4');
+// 1. Verify NO generated local mp4 files exist (user specifically forbade generated local machine files)
+const publicVideosDir = path.resolve(__dirname, '../public/videos');
+assert(!fs.existsSync(publicVideosDir) || fs.readdirSync(publicVideosDir).length === 0, 'No local mp4 files should be in public/videos');
 
-assert(fs.existsSync(legPressVideo), 'public/videos/leg-press-machine.mp4 must exist on machine');
-assert(fs.existsSync(latPulldownVideo), 'public/videos/lat-pulldown-machine.mp4 must exist on machine');
-assert(fs.existsSync(chestPressVideo), 'public/videos/chest-press-machine.mp4 must exist on machine');
-
-assert(fs.statSync(legPressVideo).size > 1000, 'Leg press video must have valid file size');
-assert(fs.statSync(latPulldownVideo).size > 1000, 'Lat pulldown video must have valid file size');
-assert(fs.statSync(chestPressVideo).size > 1000, 'Chest press video must have valid file size');
-
-console.log('✓ 3 Local gym machine video clips verified in public/videos/');
+console.log('✓ Confirmed no local generated video files on disk');
 
 // 2. Verify Bonus Sets (set เสริม) across all 4 workout days
 const days = ['mon', 'tue', 'wed', 'thu'];
@@ -40,56 +32,67 @@ for (const day of days) {
     assert.strictEqual(bEx.sets.length, 2, `Bonus exercise must have 2 sets (1 warm + 1 touchup)`);
     assert(bEx.sets[0].type === 'warm', 'Set 1 must be warm-up');
     assert(bEx.sets[1].type === 'touchup' || bEx.sets[1].type === 'work', 'Set 2 must be touchup/work set');
-    assert(bEx.videoUrl || bEx.localVideo, `Bonus exercise must have video demo link or local video: ${bEx.name}`);
+    assert(bEx.videoUrl, `Bonus exercise must have valid YouTube video demo link: ${bEx.name}`);
+    assert(getYoutubeId(bEx.videoUrl), `Bonus exercise videoUrl must have valid YouTube video ID: ${bEx.videoUrl}`);
+
+    // Bonus exercises must support 3 gym machine alternatives
+    assert(Array.isArray(bEx.machineVideos), `Bonus exercise must have machineVideos array: ${bEx.name}`);
+    assert.strictEqual(bEx.machineVideos.length, 3, `Bonus exercise must have 3 gym machine video options: ${bEx.name}`);
+    for (const opt of bEx.machineVideos) {
+      assert(opt.name, 'Option must have a machine name');
+      assert(opt.equipment, 'Option must have equipment detail');
+      assert(getYoutubeId(opt.videoUrl), `Option videoUrl must have valid YouTube ID: ${opt.videoUrl}`);
+    }
   }
 }
 console.log('✓ Bonus touch-up sets (set เสริม) across all 4 days verified (3 per day, 2 sets each)');
 
-// 3. Verify Local Video integration on the 3 distinct machines in workoutData
-assert(workoutData.mon.exercises[0].localVideo === '/videos/leg-press-machine.mp4', 'Monday Leg Press has local clip');
-assert(workoutData.tue.exercises[0].localVideo === '/videos/chest-press-machine.mp4', 'Tuesday Chest Press has local clip');
-assert(workoutData.wed.exercises[1].localVideo === '/videos/lat-pulldown-machine.mp4', 'Wednesday Lat Pulldown (w2) has local clip');
+// 3. Verify 3 YouTube Machine Alternatives on key main lifts across days
+const testExercises = [
+  { day: 'mon', ex: workoutData.mon.exercises[0], label: 'Monday Leg Press' },
+  { day: 'tue', ex: workoutData.tue.exercises[0], label: 'Tuesday Chest Press' },
+  { day: 'wed', ex: workoutData.wed.exercises[1], label: 'Wednesday Lat Pulldown' },
+  { day: 'thu', ex: workoutData.thu.exercises[0], label: 'Thursday Shoulder Press' }
+];
 
-// Verify bonus exercises link to local videos
-const monBonusBack = workoutData.mon.bonusExercises.find(b => b.id === 'b_m_back');
-assert(monBonusBack && monBonusBack.localVideo === '/videos/lat-pulldown-machine.mp4', 'Mon bonus back links to local lat pulldown clip');
+for (const { ex, label } of testExercises) {
+  assert(Array.isArray(ex.machineVideos), `${label} must have machineVideos array`);
+  assert.strictEqual(ex.machineVideos.length, 3, `${label} must have 3 distinct gym machine YouTube options`);
+  for (const mOpt of ex.machineVideos) {
+    assert(mOpt.name, `${label} machine option must have name`);
+    assert(mOpt.equipment, `${label} machine option must have equipment specification`);
+    assert(getYoutubeId(mOpt.videoUrl), `${label} option must have valid YouTube ID: ${mOpt.videoUrl}`);
+  }
+}
+console.log('✓ 3 Distinct Gym Machine YouTube Alternatives verified on main lifts');
 
-const tueBonusLeg = workoutData.tue.bonusExercises.find(b => b.id === 'b_t_leg');
-assert(tueBonusLeg && tueBonusLeg.localVideo === '/videos/leg-press-machine.mp4', 'Tue bonus leg links to local leg press clip');
-
-const wedBonusChest = workoutData.wed.bonusExercises.find(b => b.id === 'b_w_chest');
-assert(wedBonusChest && wedBonusChest.localVideo === '/videos/chest-press-machine.mp4', 'Wed bonus chest links to local chest press clip');
-
-console.log('✓ 3 Local machine clips correctly mapped to both main and bonus exercises');
-
-// 4. Component Implementation Verification (ExerciseCard, BonusCard, DayTabs, MachineClipsShowcase)
+// 4. Component Implementation Verification (ExerciseCard, BonusCard, ActiveWorkoutSheet, DayTabs)
 const exerciseCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ExerciseCard.vue'), 'utf8');
 const bonusCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/BonusCard.vue'), 'utf8');
 const dayTabsContent = fs.readFileSync(path.resolve(__dirname, '../src/components/DayTabs.vue'), 'utf8');
 const activeRunnerContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ActiveWorkoutSheet.vue'), 'utf8');
-const machineShowcaseContent = fs.readFileSync(path.resolve(__dirname, '../src/components/MachineClipsShowcase.vue'), 'utf8');
 const headerBarContent = fs.readFileSync(path.resolve(__dirname, '../src/components/HeaderBar.vue'), 'utf8');
 const appVueContent = fs.readFileSync(path.resolve(__dirname, '../src/App.vue'), 'utf8');
 
-assert(exerciseCardContent.includes('hasLocalVideo'), 'ExerciseCard supports hasLocalVideo');
-assert(exerciseCardContent.includes('🎬 คลิปในเครื่อง (3 เครื่อง)'), 'ExerciseCard has local video switcher');
-assert(exerciseCardContent.includes('<video'), 'ExerciseCard renders HTML5 video tag');
+// Ensure no fake local machine clip modal/button exists
+assert(!headerBarContent.includes('3 คลิปในเครื่อง'), 'HeaderBar should not have "3 คลิปในเครื่อง" local file button');
+assert(!appVueContent.includes('MachineClipsShowcase'), 'App.vue should not embed MachineClipsShowcase');
 
-assert(bonusCardContent.includes('hasLocalVideo'), 'BonusCard supports hasLocalVideo');
-assert(bonusCardContent.includes('🎬 คลิปในเครื่อง (3 เครื่อง)'), 'BonusCard has local video switcher');
-assert(bonusCardContent.includes('<video'), 'BonusCard renders HTML5 video tag');
+// Verify ExerciseCard multi-machine YouTube player
+assert(exerciseCardContent.includes('hasMultiMachineVideos'), 'ExerciseCard supports hasMultiMachineVideos');
+assert(exerciseCardContent.includes('activeMachineIndex'), 'ExerciseCard has machine switcher index');
+assert(exerciseCardContent.includes('youtube-nocookie.com/embed'), 'ExerciseCard embeds YouTube iframe');
 
+// Verify BonusCard multi-machine YouTube player
+assert(bonusCardContent.includes('hasMultiMachineVideos'), 'BonusCard supports hasMultiMachineVideos');
+assert(bonusCardContent.includes('activeMachineIndex'), 'BonusCard has machine switcher index');
+assert(bonusCardContent.includes('youtube-nocookie.com/embed'), 'BonusCard embeds YouTube iframe');
+
+// Verify ActiveWorkoutSheet YouTube player with machine alternatives
 assert(activeRunnerContent.includes('getExerciseVideoInfo'), 'ActiveWorkoutSheet accesses exercise video info');
-assert(activeRunnerContent.includes('toggleExerciseVideo'), 'ActiveWorkoutSheet toggles video playback');
+assert(activeRunnerContent.includes('youtube-nocookie.com/embed'), 'ActiveWorkoutSheet embeds YouTube iframe');
 
-assert(machineShowcaseContent.includes('leg-press-machine.mp4'), 'Showcase includes leg press video');
-assert(machineShowcaseContent.includes('lat-pulldown-machine.mp4'), 'Showcase includes lat pulldown video');
-assert(machineShowcaseContent.includes('chest-press-machine.mp4'), 'Showcase includes chest press video');
-assert(machineShowcaseContent.includes('<video'), 'Showcase renders video tag');
-
-assert(headerBarContent.includes('3 คลิปในเครื่อง'), 'HeaderBar has 3 machine clips button');
-assert(appVueContent.includes('MachineClipsShowcase'), 'App.vue embeds MachineClipsShowcase component');
-
+// Verify DayTabs has direct access to all days
 assert(dayTabsContent.includes('mon') && dayTabsContent.includes('tue') && dayTabsContent.includes('wed') && dayTabsContent.includes('thu'), 'DayTabs provides direct day navigation');
 
-console.log('✓ All Bonus Sets & 3 Local Machine Video Clips contract tests passed successfully!');
+console.log('✓ All Bonus Sets & 3 YouTube Gym Machine Alternatives contract tests passed successfully!');
