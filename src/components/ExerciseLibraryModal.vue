@@ -307,19 +307,15 @@
 
               <!-- Action Buttons -->
               <div class="flex items-center gap-1.5 flex-shrink-0" @click.stop>
-                <!-- Info Toggle Button -->
+                <!-- Info & Video Toggle Button -->
                 <button
-                  v-if="exercise.notes"
+                  v-if="exercise.notes || exercise.localVideo || exercise.videoUrl"
                   @click="toggleInfo(exercise.id)"
-                  class="w-7 h-7 rounded-lg border-2 border-plate/40 hover:border-plate bg-surface text-ink-muted hover:text-ink flex items-center justify-center transition-all"
-                  :class="expandedInfo[exercise.id] ? 'bg-paper-dim border-plate text-ink' : ''"
-                  title="ดูรายละเอียดท่า"
+                  class="px-2 py-1 rounded-lg border-2 border-plate/40 hover:border-plate bg-surface text-ink font-mono text-[10px] font-bold flex items-center gap-1 transition-all"
+                  :class="expandedInfo[exercise.id] ? 'bg-paper-dim border-plate text-ink shadow-[1px_1px_0px_#1e2220]' : ''"
+                  title="ดูรายละเอียดและคลิปสาธิต"
                 >
-                  <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="16" x2="12" y2="12" />
-                    <line x1="12" y1="8" x2="12.01" y2="8" />
-                  </svg>
+                  <span>{{ exercise.localVideo ? '🎬 คลิป' : 'ℹ️ ข้อมูล' }}</span>
                 </button>
 
                 <!-- Select Button -->
@@ -338,12 +334,28 @@
               </div>
             </div>
 
-            <!-- Expandable Notes / Description -->
+            <!-- Expandable Notes / Video Player -->
             <div
-              v-if="expandedInfo[exercise.id] && exercise.notes"
-              class="pt-2 mt-1 border-t border-plate/15 text-[11px] text-ink-muted font-body leading-relaxed bg-paper-subtle/50 p-2 rounded-lg"
+              v-if="expandedInfo[exercise.id]"
+              class="pt-2 mt-1 border-t border-plate/15 text-[11px] text-ink-muted font-body leading-relaxed bg-paper-subtle/50 p-2.5 rounded-xl space-y-2"
             >
-              <strong class="font-bold text-ink">ข้อแนะนำ:</strong> {{ exercise.notes }}
+              <!-- Local Video Player if present -->
+              <div v-if="exercise.localVideo" class="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-plate bg-black">
+                <video
+                  :src="exercise.localVideo"
+                  controls
+                  playsinline
+                  loop
+                  class="w-full h-full object-contain"
+                ></video>
+              </div>
+
+              <div v-if="exercise.notes">
+                <strong class="font-bold text-ink">ข้อแนะนำ:</strong> {{ exercise.notes }}
+              </div>
+              <div v-if="exercise.localVideoTitle" class="text-[10px] font-mono text-emerald font-bold">
+                ✓ {{ exercise.localVideoTitle }}
+              </div>
             </div>
           </div>
         </div>
@@ -396,6 +408,7 @@ const {
 // Muscle categories chip filters
 const muscleChips = [
   { id: 'all', label: 'ทั้งหมด (All)' },
+  { id: 'video_machine', label: '🎬 คลิปในเครื่อง (3 เครื่อง)' },
   { id: 'chest', label: 'อก (Chest)' },
   { id: 'back', label: 'หลัง (Back)' },
   { id: 'quads', label: 'ขาหน้า (Quads)' },

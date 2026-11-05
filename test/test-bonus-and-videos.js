@@ -62,11 +62,14 @@ assert(wedBonusChest && wedBonusChest.localVideo === '/videos/chest-press-machin
 
 console.log('✓ 3 Local machine clips correctly mapped to both main and bonus exercises');
 
-// 4. Component Implementation Verification (ExerciseCard & BonusCard & DayTabs)
+// 4. Component Implementation Verification (ExerciseCard, BonusCard, DayTabs, MachineClipsShowcase)
 const exerciseCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ExerciseCard.vue'), 'utf8');
 const bonusCardContent = fs.readFileSync(path.resolve(__dirname, '../src/components/BonusCard.vue'), 'utf8');
 const dayTabsContent = fs.readFileSync(path.resolve(__dirname, '../src/components/DayTabs.vue'), 'utf8');
 const activeRunnerContent = fs.readFileSync(path.resolve(__dirname, '../src/components/ActiveWorkoutSheet.vue'), 'utf8');
+const machineShowcaseContent = fs.readFileSync(path.resolve(__dirname, '../src/components/MachineClipsShowcase.vue'), 'utf8');
+const headerBarContent = fs.readFileSync(path.resolve(__dirname, '../src/components/HeaderBar.vue'), 'utf8');
+const appVueContent = fs.readFileSync(path.resolve(__dirname, '../src/App.vue'), 'utf8');
 
 assert(exerciseCardContent.includes('hasLocalVideo'), 'ExerciseCard supports hasLocalVideo');
 assert(exerciseCardContent.includes('🎬 คลิปในเครื่อง (3 เครื่อง)'), 'ExerciseCard has local video switcher');
@@ -78,6 +81,14 @@ assert(bonusCardContent.includes('<video'), 'BonusCard renders HTML5 video tag')
 
 assert(activeRunnerContent.includes('getExerciseVideoInfo'), 'ActiveWorkoutSheet accesses exercise video info');
 assert(activeRunnerContent.includes('toggleExerciseVideo'), 'ActiveWorkoutSheet toggles video playback');
+
+assert(machineShowcaseContent.includes('leg-press-machine.mp4'), 'Showcase includes leg press video');
+assert(machineShowcaseContent.includes('lat-pulldown-machine.mp4'), 'Showcase includes lat pulldown video');
+assert(machineShowcaseContent.includes('chest-press-machine.mp4'), 'Showcase includes chest press video');
+assert(machineShowcaseContent.includes('<video'), 'Showcase renders video tag');
+
+assert(headerBarContent.includes('3 คลิปในเครื่อง'), 'HeaderBar has 3 machine clips button');
+assert(appVueContent.includes('MachineClipsShowcase'), 'App.vue embeds MachineClipsShowcase component');
 
 assert(dayTabsContent.includes('mon') && dayTabsContent.includes('tue') && dayTabsContent.includes('wed') && dayTabsContent.includes('thu'), 'DayTabs provides direct day navigation');
 
