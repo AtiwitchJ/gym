@@ -134,6 +134,12 @@ app.get('/api/export/db', (req, res) => {
   }
 });
 
+// Serve static assets from public/ and dist/
+const PUBLIC_DIR = path.resolve(__dirname, '../public');
+if (fs.existsSync(PUBLIC_DIR)) {
+  app.use(express.static(PUBLIC_DIR));
+}
+
 // Serve frontend build if dist/ exists
 const DIST_DIR = path.resolve(__dirname, '../dist');
 if (fs.existsSync(DIST_DIR)) {

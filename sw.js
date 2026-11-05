@@ -1,11 +1,14 @@
-const CACHE_NAME = 'atiwitch-log-v4';
+const CACHE_NAME = 'atiwitch-log-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './apple-touch-icon.png'
+  './apple-touch-icon.png',
+  './videos/leg-press-machine.mp4',
+  './videos/lat-pulldown-machine.mp4',
+  './videos/chest-press-machine.mp4'
 ];
 
 self.addEventListener('install', (event) => {

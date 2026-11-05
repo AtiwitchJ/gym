@@ -499,18 +499,26 @@ async function finishAndSaveWorkout() {
     exercises: sessionExercises
   };
 
-  workoutHistory.value.unshift(session);
+  await recordSessionToHistory(session);
+  showToast(`บันทึกประวัติสำเร็จ (${totalSetsDone} เซ็ต)`);
+}
+
+async function recordSessionToHistory(session) {
+  if (!session || !session.id) return;
+  if (!workoutHistory.value.some(s => s.id === session.id)) {
+    workoutHistory.value.unshift(session);
+  }
   persistLocal();
 
-  try {
-    await fetch('/api/history', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(session)
-    });
-  } catch (e) {}
-
-  showToast(`บันทึกประวัติสำเร็จ (${totalSetsDone} เซ็ต)`);
+  if (typeof fetch === 'function') {
+    try {
+      await fetch('/api/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(session)
+      });
+    } catch (e) {}
+  }
 }
 
 async function deleteSession(id) {
@@ -598,6 +606,8 @@ export function useWorkoutStore() {
     syncLinkedExerciseRecords,
     showToast,
     fetchServerState,
+    recordSessionToHistory,
+    persistLocal,
     showExerciseImages,
     toggleExerciseImages
   };

@@ -2,6 +2,7 @@ import { ref, computed } from 'vue';
 import { useTimer } from './useTimer.js';
 import { useWeightAdvisor, isWarmupType } from './useWeightAdvisor.js';
 import { useExerciseStore } from './useExerciseStore.js';
+import { useWorkoutStore } from './useWorkoutStore.js';
 
 const STORAGE_KEY_DRAFT = 'active_session_draft';
 const STORAGE_KEY_HISTORY = 'global_session_history';
@@ -432,6 +433,58 @@ function finishSession() {
 
   // Clear active workout state
   discardSession();
+
+  // Cross-sync session to unified workout history & SQLite backend
+  try {
+    const { recordSessionToHistory, lastWeights } = useWorkoutStore();
+    const dateObj = new Date(now);
+    const dateStr = dateObj.toISOString().split('T')[0];
+    const timeStr = dateObj.toTimeString().split(' ')[0].substring(0, 5);
+
+    const sessionExercises = (summary.exercises || []).map(ex => {
+      const exId = ex.exerciseId || ex.id || 'ex';
+      return {
+        id: exId,
+        name: ex.name || 'แบบฝึก',
+        category: ex.targetMuscle || 'เวทเทรนนิ่ง',
+        sets: (ex.sets || []).map((s, sIdx) => ({
+          setIndex: sIdx + 1,
+          type: s.type === 'warmup' ? 'วอร์ม' : 'เล่นจริง',
+          target: s.targetReps || s.reps || 8,
+          weight: (s.weight !== undefined && s.weight !== '') ? Number(s.weight) : 0,
+          actualReps: (s.reps !== undefined && s.reps !== '') ? Number(s.reps) : (s.targetReps || 0),
+          done: Boolean(s.completed)
+        }))
+      };
+    });
+
+    const unifiedSession = {
+      id: summary.id || `${dateStr}_runner_${now}`,
+      date: dateStr,
+      time: timeStr,
+      dayKey: summary.dayKey || summary.routineId || 'active_run',
+      dayTitle: summary.title || 'Live Workout Session',
+      totalSetsDone: completedCount,
+      durationSec: summary.durationSec || 0,
+      totalVolumeKg: summary.totalVolumeKg || 0,
+      exercises: sessionExercises
+    };
+
+    // Update in-memory lastWeights for progressive overload advisor
+    for (const ex of sessionExercises) {
+      if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
+      for (const s of ex.sets) {
+        if (s.done && (s.weight > 0 || s.actualReps > 0)) {
+          lastWeights[ex.id][`wt_${s.setIndex - 1}`] = s.weight;
+          lastWeights[ex.id][`reps_${s.setIndex - 1}`] = s.actualReps;
+        }
+      }
+    }
+
+    recordSessionToHistory(unifiedSession);
+  } catch (err) {
+    // Non-blocking in headless or testing environments
+  }
 
   return summary;
 }

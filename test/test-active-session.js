@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { useActiveSessionStore } from '../src/composables/useActiveSessionStore.js';
+import { useWorkoutStore } from '../src/composables/useWorkoutStore.js';
 import { useTimer } from '../src/composables/useTimer.js';
 
 console.log('Testing Active Session Store...');
@@ -91,6 +92,12 @@ assert.strictEqual(summary.routineId, 'test_routine_1', 'Summary retains routine
 assert.strictEqual(summary.totalVolumeKg, 1120, `Working volume should be 1120kg, got ${summary.totalVolumeKg}`);
 assert.strictEqual(store.isWorkoutActive.value, false, 'Workout should no longer be active');
 assert.strictEqual(store.activeSession.value, null, 'Active session should be null after finish');
+
+// Test 7.1: Verify cross-sync to unified workoutHistory and lastWeights
+const workoutStore = useWorkoutStore();
+assert(workoutStore.workoutHistory.value.length > 0, 'Unified workoutHistory should receive finished active session');
+assert.strictEqual(workoutStore.workoutHistory.value[0].dayTitle, 'Chest & Triceps Hypertrophy', 'Unified session title matches');
+assert.strictEqual(workoutStore.lastWeights['barbell_bench_press']?.wt_1, 70, 'Last weight for working set 1 updated in workout store');
 
 // Test 8: Start empty session and discard
 store.startEmptySession();

@@ -76,7 +76,7 @@
         <!-- Session Header -->
         <div class="p-4 bg-surface-low/60 flex items-center justify-between gap-3 border-b-2 border-plate">
           <div>
-            <div class="flex items-center gap-2 mb-1">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
               <span class="text-xs font-mono font-bold text-ink tabular-nums">
                 {{ session.date }}
               </span>
@@ -85,6 +85,18 @@
               </span>
               <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-bg text-emerald border border-emerald">
                 สำเร็จ {{ session.totalSetsDone }} เซ็ต
+              </span>
+              <span
+                v-if="session.totalVolumeKg"
+                class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-surface text-ink border border-plate/30"
+              >
+                Volume: {{ Number(session.totalVolumeKg).toLocaleString() }} kg
+              </span>
+              <span
+                v-if="session.durationSec"
+                class="text-[10px] font-mono text-ink-muted"
+              >
+                ⏱ {{ Math.round(session.durationSec / 60) }} นาที
               </span>
             </div>
             <h4 class="text-sm font-bold text-ink font-heading tracking-tight">
