@@ -283,6 +283,26 @@ export const MACHINE_VIDEO_PRESETS = {
       equipment: "เขย่งปลายเท้าบนแป้น Leg Press หรือ Smith Machine",
       videoUrl: "https://www.youtube.com/watch?v=oX8y-6T3j30"
     }
+  ],
+  rear_delt_fly: [
+    {
+      name: "เครื่องแบบที่ 1 (Reverse Pec Fly Machine)",
+      shortName: "เครื่อง Pec Fly ปรับหลัง",
+      equipment: "หันหน้าเข้าเบาะเครื่อง Pec Deck ปรับแขนไปข้างหลังสุด",
+      videoUrl: "https://www.youtube.com/watch?v=woIoS0MbNYg"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Incline / Bent-Over Dumbbell Rear Delt)",
+      shortName: "ดัมเบลคว่ำหน้าบนม้านั่ง",
+      equipment: "ม้านั่งเอียง 30-45 องศา คว่ำหน้ากางดัมเบล หรือยืนก้มตัว (ไม่ต้องใช้เครื่อง)",
+      videoUrl: "https://www.youtube.com/watch?v=sIQNCJ6Xwsk"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Cross Cable Rear Delt Fly)",
+      shortName: "รอกเคเบิลคู่ดึงไขว้",
+      equipment: "เคเบิลคู่ปรับระดับเสมอหน้า ดึงกางแขนไขว้ไปข้างหลัง",
+      videoUrl: "https://www.youtube.com/watch?v=cGXBVOc5xIk"
+    }
   ]
 };
 
@@ -791,12 +811,13 @@ export const workoutData = {
       },
       {
         id: "th3",
-        name: "Reverse Pec Fly Machine (Rear Delt Fly)",
+        name: "Reverse Pec Fly Machine / Dumbbell Rear Delt",
         isMain: false,
-        altName: "หันหน้าเข้าเครื่อง Pec Fly กวาดแขนไปด้านหลัง",
+        altName: "เครื่อง Pec Fly ปรับหลัง, ดัมเบลคว่ำหน้าบนม้านั่ง, หรือเคเบิลไขว้ (ใส่น้ำหนักต่อข้าง)",
         mainMuscle: "หัวไหล่ด้านหลัง (Rear Delts) & สะบัก",
         subMuscle: "หลังส่วนบน (ช่วยแก้ปัญหาไหล่ห่อ)",
         videoUrl: "https://www.youtube.com/watch?v=woIoS0MbNYg",
+        machineVideos: MACHINE_VIDEO_PRESETS.rear_delt_fly,
         sets: [
           { type: "warm", reps: "15 ครั้ง" },
           { type: "work", reps: "8–10 ครั้ง" },
