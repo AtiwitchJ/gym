@@ -289,6 +289,14 @@
                   >
                     CUSTOM
                   </span>
+
+                  <!-- Local Video Badge -->
+                  <span
+                    v-if="exercise.localVideo"
+                    class="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-bg text-emerald border border-emerald uppercase"
+                  >
+                    🎬 ในเครื่อง
+                  </span>
                 </div>
 
                 <!-- Exercise Name -->

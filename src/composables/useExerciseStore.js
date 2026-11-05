@@ -55,9 +55,13 @@ const filteredExercises = computed(() => {
   return exercises.value.filter(exercise => {
     // Muscle group filtering (skip if empty or 'all')
     if (muscleFilter && muscleFilter !== 'all') {
-      const exMuscle = (exercise.muscleGroup || '').toLowerCase().trim();
-      if (exMuscle !== muscleFilter) {
-        return false;
+      if (muscleFilter === 'video_machine') {
+        if (!exercise.localVideo) return false;
+      } else {
+        const exMuscle = (exercise.muscleGroup || '').toLowerCase().trim();
+        if (exMuscle !== muscleFilter) {
+          return false;
+        }
       }
     }
 
