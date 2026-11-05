@@ -1,0 +1,159 @@
+name: CI/CD Pipeline & Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # -------------------------------------------------------------
+  # Job 1: Automated Unit & Contract Test Suite (Node 20 & 22)
+  # -------------------------------------------------------------
+  test:
+    name: Run Test Suite (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install server dependencies
+        run: |
+          cd server
+          npm ci
+
+      - name: Execute all 11 test suites
+        run: npm test
+
+  # -------------------------------------------------------------
+  # Job 2: Frontend Production Build & Full Smoke Test
+  # -------------------------------------------------------------
+  build-and-smoke:
+    name: Vite Production Build & API Smoke Test
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd server && npm ci
+
+      - name: Compile frontend (Vite Build)
+        run: npm run build
+
+      - name: Verify build outputs
+        run: |
+          test -f dist/index.html || { echo "dist/index.html missing"; exit 1; }
+          test -d dist/assets || { echo "dist/assets missing"; exit 1; }
+          echo "✓ Frontend bundle verified"
+
+      - name: Run server & API pre-deploy smoke test
+        run: npm run smoke
+
+      - name: Upload production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gym-production-dist
+          path: dist/
+          retention-days: 14
+
+  # -------------------------------------------------------------
+  # Job 3: Docker Multi-Stage Build & Container Runtime Check
+  # -------------------------------------------------------------
+  docker-verify:
+    name: Docker Container Build & Runtime Verification
+    needs: build-and-smoke
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image
+        run: |
+          docker build -t gym-tracker:ci .
+
+      - name: Start container and verify health
+        run: |
+          docker run -d -p 8080:8080 -e PORT=8080 --name test-gym-app gym-tracker:ci
+          sleep 4
+          
+          # Health check
+          curl -f http://localhost:8080/api/health || {
+            echo "Healthcheck failed";
+            docker logs test-gym-app;
+            exit 1;
+          }
+          
+          # State API check
+          curl -f http://localhost:8080/api/state || {
+            echo "State API failed";
+            docker logs test-gym-app;
+            exit 1;
+          }
+          
+          # Canonical cross-day history check
+          curl -f http://localhost:8080/api/exercises/shoulder_press/history || {
+            echo "Canonical history API failed";
+            docker logs test-gym-app;
+            exit 1;
+          }
+          
+          echo "✓ Docker container verified and running cleanly"
+          docker logs test-gym-app
+          docker stop test-gym-app
+
+  # -------------------------------------------------------------
+  # Job 4: Deploy Readiness Gate & Release Summary
+  # -------------------------------------------------------------
+  deploy-gate:
+    name: Deployment Readiness Gate
+    needs: [test, build-and-smoke, docker-verify]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Publish Deployment Summary
+        run: |
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          # 🚀 CI/CD Quality Gate: PASSED
+
+          All automated checks passed successfully before deployment:
+          - ✅ **11 Test Suites Passed** (Advisor, Synchronization, SQLite Schema, Routine Store, Video Contracts)
+          - ✅ **Vite Frontend Production Build Passed** (`dist/` generated)
+          - ✅ **API & Server Smoke Tests Passed** (`/api/health`, `/api/state`, `/api/history`)
+          - ✅ **Docker Multi-Stage Container Verified** (Alpine + Node 22 + better-sqlite3)
+          
+          **Status:** Ready for zero-downtime Host Deployment via `./serve.sh docker` or `./serve.sh native`.
+          EOF

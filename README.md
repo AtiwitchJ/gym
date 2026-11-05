@@ -98,5 +98,30 @@ gym/
 │   └── gym.db                # SQLite database (persisted via Docker volume)
 ├── Dockerfile                # Multi-stage build (Vite build -> Node.js + SQLite)
 ├── docker-compose.yml        # Container orchestration
-└── serve.sh                  # Launch script (docker / tailscale / native / dev)
+├── serve.sh                  # Launch script (docker / tailscale / native / dev)
+└── .github/workflows/
+    ├── ci.yml                # CI Quality Gate (11 test suites + build + smoke + docker)
+    └── deploy.yml            # CD Deployment pipeline to Host
+
+---
+
+## 🛡️ CI/CD Quality Gate & การป้องกัน Bug ก่อน Deploy
+
+โปรเจกต์นี้ติดตั้งระบบ **Continuous Integration & Continuous Deployment (CI/CD)** ผ่าน GitHub Actions เพื่อดักจับข้อผิดพลาดทั้งหมดก่อนขึ้นสู่ Production:
+
+### 1. การทำงานของ CI Pipeline (`.github/workflows/ci.yml`)
+ทุกครั้งที่มีการ `push` หรือสร้าง `pull request` เข้า branch `main`:
+1. **Automated Test Matrix:** รันการทดสอบครบทั้ง **11 Test Suites** บน Node 20.x และ Node 22.x (สูตร Progressive Overload, SQLite Canonical Sync ข้ามวัน, สัญญาของ Store และ Component)
+2. **Vite Production Build:** คอมไพล์ Frontend และตรวจสอบความสมบูรณ์ของ Assets ในโฟลเดอร์ `dist/`
+3. **API & Server Smoke Test (`npm run smoke`):** จำลองสตาร์ทเซิร์ฟเวอร์ Express + SQLite แล้วยิงตรวจสอบ `/api/health`, `/api/state`, `/api/history`, และการส่งมอบหน้าเว็บ
+4. **Docker Multi-Stage Verification:** บิลด์ Image Docker บน Alpine จริงเพื่อการันตีว่า `better-sqlite3` และการรัน Container จะไม่มีปัญหาบน Host
+5. **Deployment Gate:** สรุปผลการตรวจสอบลงใน GitHub Step Summary
+
+### 2. คำสั่งรันตรวจสอบด้วยตนเองก่อน Push หรือ Deploy (Local Pre-Deploy Gate)
+ก่อนนำโค้ดขึ้นเครื่อง Host หรือก่อน Commit สามารถรันคำสั่งเดียวเพื่อตรวจสอบทุกอย่าง:
+```bash
+npm run pre-deploy
+# หรือ
+npm run ci
 ```
+คำสั่งนี้จะรัน `npm test` $\rightarrow$ `npm run build` $\rightarrow$ `npm run smoke` ต่อเนื่องกันทันที หากมีข้อผิดพลาดระบบจะแจ้งเตือนและหยุดทำงานทันที ไม่ปล่อยให้หลุดไปถึงเครื่อง Production

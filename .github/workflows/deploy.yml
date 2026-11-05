@@ -1,0 +1,50 @@
+name: Continuous Deployment (Host Trigger)
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline & Quality Gate"]
+    types:
+      - completed
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Host Machine
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 1. Webhook trigger (e.g. Coolify, Portainer, Watchtower, or custom webhook)
+      - name: Trigger Webhook Deploy (if configured)
+        if: env.DEPLOY_WEBHOOK_URL != ''
+        env:
+          DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+        run: |
+          echo "Triggering host deployment webhook..."
+          curl -X POST -f "$DEPLOY_WEBHOOK_URL"
+          echo "✓ Webhook deployment triggered successfully"
+
+      # 2. SSH Deploy trigger (if SSH credentials configured in GitHub Secrets)
+      - name: Trigger SSH Remote Deploy (if configured)
+        if: env.HOST_SSH_KEY != '' && env.HOST_IP != ''
+        env:
+          HOST_SSH_KEY: ${{ secrets.HOST_SSH_KEY }}
+          HOST_USER: ${{ secrets.HOST_USER || 'root' }}
+          HOST_IP: ${{ secrets.HOST_IP }}
+          HOST_DIR: ${{ secrets.HOST_DIR || '~/gym' }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$HOST_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no "$HOST_USER@$HOST_IP" "cd $HOST_DIR && git pull origin main && ./serve.sh docker"
+          echo "✓ Remote SSH deployment executed successfully"
+
+      - name: Deployment Instructions & Log
+        run: |
+          echo "CI has verified and passed all checks."
+          echo "If automated webhook/SSH is not configured, the host machine can be updated simply by running:"
+          echo "  cd gym && git pull origin main && ./serve.sh docker"
