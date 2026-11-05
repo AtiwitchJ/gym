@@ -105,8 +105,17 @@
 
       <!-- Progressive Overload Plan & Target Table (Directly in Card) -->
       <div class="mt-2.5 rounded-lg border-2 border-plate bg-white overflow-hidden shadow-[1.5px_1.5px_0px_#1e2220] font-mono">
-        <div class="px-2.5 py-1.5 bg-paper-subtle border-b-2 border-plate flex items-center justify-between">
-          <span class="text-[10px] font-bold text-ink uppercase tracking-wider">แผนและเป้าหมายรอบหน้า</span>
+        <div class="px-2.5 py-1.5 bg-paper-subtle border-b-2 border-plate flex items-center justify-between gap-1 flex-wrap">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10px] font-bold text-ink uppercase tracking-wider">แผนและเป้าหมายรอบหน้า</span>
+            <span
+              v-if="linkedSourceBadge"
+              class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-sky-bg text-sky border border-sky/30 inline-flex items-center gap-1 select-none"
+              :title="`สถิตินี้เชื่อมโยงอัตโนมัติมาจาก ${linkedSourceBadge}`"
+            >
+              🔗 ซิงค์จาก {{ linkedSourceBadge }}
+            </span>
+          </div>
           <button
             v-if="hasAnyPrev"
             type="button"
@@ -494,6 +503,20 @@ function toggleVideo() {
 
 const exState = computed(() => (userState[currentDay.value] && userState[currentDay.value][props.bonus.id]) || {});
 const exLast = computed(() => getExerciseLastRecord(props.bonus.id));
+
+const linkedSourceBadge = computed(() => {
+  const srcId = exLast.value?._linkedSourceId;
+  if (!srcId || srcId === props.bonus.id) return null;
+  if (srcId.startsWith('b_m_')) return 'เซ็ตเสริม วันจันทร์';
+  if (srcId.startsWith('b_t_')) return 'เซ็ตเสริม วันอังคาร';
+  if (srcId.startsWith('b_w_')) return 'เซ็ตเสริม วันพุธ';
+  if (srcId.startsWith('b_th_')) return 'เซ็ตเสริม วันพฤหัสบดี';
+  if (srcId === 'th1') return 'ท่าหลัก วันพฤหัสบดี';
+  if (srcId === 't1') return 'ท่าหลัก วันอังคาร';
+  if (srcId === 'w2') return 'ท่าหลัก วันพุธ';
+  if (srcId === 'm1') return 'ท่าหลัก วันจันทร์';
+  return 'วันที่เชื่อมโยง';
+});
 
 const prevWarm = computed(() => {
   const w = exLast.value.wt_0;

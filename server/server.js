@@ -100,6 +100,17 @@ app.delete('/api/history/:id', (req, res) => {
   }
 });
 
+// Cross-Day Unified Exercise History
+app.get('/api/exercises/:id/history', (req, res) => {
+  try {
+    const history = repo.getExerciseHistory(req.params.id);
+    res.json(history);
+  } catch (err) {
+    console.error('Error fetching exercise history:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Todos
 app.get('/api/todos', (req, res) => {
   try {

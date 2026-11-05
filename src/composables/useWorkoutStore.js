@@ -143,93 +143,129 @@ async function fetchServerState() {
 // Cross-Day Exercise Sync Helpers
 /**
  * Propagate a recorded weight/reps to all linked exercises across different workout days
- * (e.g. Seated Leg Press on Monday <-> Bonus Leg Press on Tue/Wed/Thu)
+ * (e.g. Seated Leg Press on Monday <-> Bonus Leg Press on Tue/Wed/Thu,
+ *  Shoulder Press Machine on Thursday <-> Bonus Shoulder Press on Mon/Tue/Wed)
  */
 function syncLinkedExerciseRecords(sourceExId, setIdx, weightVal, repsVal) {
   const linkedIds = getLinkedExerciseIds(sourceExId);
-  const dateStr = new Date().toISOString().split('T')[0];
+  const nowIso = new Date().toISOString();
 
   linkedIds.forEach(targetId => {
     if (!lastWeights[targetId]) lastWeights[targetId] = {};
     const targetObj = lastWeights[targetId];
 
     if (setIdx === 0) {
-      // Warmup set
+      // Warmup set links to warmup set (wt_0, reps_0)
       if (weightVal !== undefined && weightVal !== '') targetObj.wt_0 = weightVal;
       if (repsVal !== undefined && repsVal !== '') targetObj.reps_0 = repsVal;
     } else {
-      // Working / Touchup set:
+      // Working / Touchup set
       if (weightVal !== undefined && weightVal !== '') {
         targetObj[`wt_${setIdx}`] = weightVal;
         // Ensure bonus touchup (which reads wt_1) has the latest working weight
-        if (targetObj.wt_1 === undefined || targetObj.wt_1 === '' || setIdx === 1) {
+        targetObj.wt_1 = weightVal;
+
+        // If target is a main lift (e.g. m1, t1, w2, th1), propagate working weight across all working sets (1, 2, 3)
+        if (['m1', 't1', 'w2', 'th1'].includes(targetId)) {
           targetObj.wt_1 = weightVal;
+          targetObj.wt_2 = weightVal;
+          targetObj.wt_3 = weightVal;
         }
-        // If target is a main lift (e.g. m1, t1, w2, th1), also seed working sets wt_2 and wt_3 if not yet set
-        if (!targetObj.wt_2) targetObj.wt_2 = weightVal;
-        if (!targetObj.wt_3) targetObj.wt_3 = weightVal;
       }
 
       if (repsVal !== undefined && repsVal !== '') {
         targetObj[`reps_${setIdx}`] = repsVal;
-        if (targetObj.reps_1 === undefined || targetObj.reps_1 === '' || setIdx === 1) {
+        targetObj.reps_1 = repsVal;
+
+        if (['m1', 't1', 'w2', 'th1'].includes(targetId)) {
           targetObj.reps_1 = repsVal;
+          targetObj.reps_2 = repsVal;
+          targetObj.reps_3 = repsVal;
         }
-        if (!targetObj.reps_2) targetObj.reps_2 = repsVal;
-        if (!targetObj.reps_3) targetObj.reps_3 = repsVal;
       }
     }
-    targetObj.updatedAt = dateStr;
+    targetObj.updatedAt = nowIso;
   });
 }
 
 /**
  * Intelligent cross-day last record resolver.
  * Finds the latest weights and reps recorded for an exercise either directly,
- * via linked exercises on other days (e.g. bonus vs main), or from recent drafts.
+ * via linked exercises on other days (e.g. bonus vs main), or from recent drafts,
+ * with deterministic timestamp comparison ensuring the newest session always wins!
  */
 function getExerciseLastRecord(exId) {
   if (!exId) return {};
 
-  // 1. Direct match with actual weight data
-  const direct = lastWeights[exId];
-  if (direct && (direct.wt_0 !== undefined || direct.wt_1 !== undefined || direct.wt_2 !== undefined)) {
-    return direct;
-  }
-
-  // 2. Check linked exercises in lastWeights
   const linked = getLinkedExerciseIds(exId);
+  const candidates = [];
+
+  // 1. Gather all candidates from lastWeights
   for (const lId of linked) {
-    if (lId !== exId && lastWeights[lId]) {
-      const lObj = lastWeights[lId];
-      if (lObj.wt_0 !== undefined || lObj.wt_1 !== undefined || lObj.wt_2 !== undefined) {
-        return lObj;
-      }
+    const obj = lastWeights[lId];
+    if (obj && (obj.wt_0 !== undefined || obj.wt_1 !== undefined || obj.wt_2 !== undefined || obj.wt_3 !== undefined)) {
+      candidates.push({
+        sourceId: lId,
+        data: obj,
+        updatedAt: obj.updatedAt || '1970-01-01',
+        isDirect: lId === exId
+      });
     }
   }
 
-  // 3. Fallback: Search drafts in userState across all days
+  // 2. Gather candidates from active day drafts
   for (const dayKey of ['mon', 'tue', 'wed', 'thu']) {
     const dayDraft = userState[dayKey] || {};
     for (const lId of linked) {
       const draft = dayDraft[lId];
-      if (draft) {
-        const found = {};
-        let hasData = false;
-        for (const [k, v] of Object.entries(draft)) {
-          if ((k.startsWith('wt_') || k.startsWith('reps_')) && v !== '' && v !== undefined) {
-            found[k] = v;
-            hasData = true;
-          }
-        }
-        if (hasData) {
-          return found;
-        }
+      if (draft && (draft.wt_0 !== undefined || draft.wt_1 !== undefined || draft.wt_2 !== undefined || draft.wt_3 !== undefined)) {
+        candidates.push({
+          sourceId: lId,
+          data: draft,
+          updatedAt: '9999-99-99', // In-memory session draft has highest freshness priority
+          isDirect: lId === exId
+        });
       }
     }
   }
 
-  return direct || {};
+  if (candidates.length === 0) {
+    return lastWeights[exId] || {};
+  }
+
+  // Sort candidates by updatedAt descending; if same timestamp, prefer direct exercise
+  candidates.sort((a, b) => {
+    if (b.updatedAt !== a.updatedAt) {
+      return String(b.updatedAt).localeCompare(String(a.updatedAt));
+    }
+    return (b.isDirect ? 1 : 0) - (a.isDirect ? 1 : 0);
+  });
+
+  const winnerData = candidates[0].data;
+  const winner = { ...winnerData, _linkedSourceId: candidates[0].sourceId };
+
+  // Harmonize working weights across sets 1, 2, 3 so main lifts and bonus lifts seamlessly share values
+  const workWt = winner.wt_1 !== undefined && winner.wt_1 !== ''
+    ? winner.wt_1
+    : (winner.wt_2 !== undefined && winner.wt_2 !== '' ? winner.wt_2 : (winner.wt_3 !== undefined && winner.wt_3 !== '' ? winner.wt_3 : undefined));
+
+  const workReps = winner.reps_1 !== undefined && winner.reps_1 !== ''
+    ? winner.reps_1
+    : (winner.reps_2 !== undefined && winner.reps_2 !== '' ? winner.reps_2 : (winner.reps_3 !== undefined && winner.reps_3 !== '' ? winner.reps_3 : undefined));
+
+  if (workWt !== undefined) {
+    if (winner.wt_1 === undefined || winner.wt_1 === '') winner.wt_1 = workWt;
+    if (winner.wt_2 === undefined || winner.wt_2 === '') winner.wt_2 = workWt;
+    if (winner.wt_3 === undefined || winner.wt_3 === '') winner.wt_3 = workWt;
+  }
+
+  if (workReps !== undefined) {
+    if (winner.reps_1 === undefined || winner.reps_1 === '') winner.reps_1 = workReps;
+    if (winner.reps_2 === undefined || winner.reps_2 === '') winner.reps_2 = workReps;
+    if (winner.reps_3 === undefined || winner.reps_3 === '') winner.reps_3 = workReps;
+  }
+
+  return winner;
 }
 
 /**
@@ -243,55 +279,71 @@ function healCrossDayExerciseRecords() {
     processed.add(canon);
 
     const linked = getLinkedExerciseIds(exId);
-    let bestRecord = null;
+    const candidates = [];
 
-    // Check lastWeights for any linked ID
+    // Check lastWeights for all linked IDs
     for (const lId of linked) {
       const rec = lastWeights[lId];
-      if (rec && (rec.wt_0 !== undefined || rec.wt_1 !== undefined)) {
-        bestRecord = rec;
-        break;
+      if (rec && (rec.wt_0 !== undefined || rec.wt_1 !== undefined || rec.wt_2 !== undefined)) {
+        candidates.push({
+          id: lId,
+          rec,
+          updatedAt: rec.updatedAt || '1970-01-01'
+        });
       }
     }
 
-    // Check userState drafts if not found in lastWeights
-    if (!bestRecord) {
-      for (const dayKey of ['mon', 'tue', 'wed', 'thu']) {
-        const dayDraft = userState[dayKey] || {};
-        for (const lId of linked) {
-          const draft = dayDraft[lId];
-          if (draft && (draft.wt_0 !== undefined || draft.wt_1 !== undefined)) {
-            bestRecord = draft;
-            break;
-          }
+    // Check drafts
+    for (const dayKey of ['mon', 'tue', 'wed', 'thu']) {
+      const dayDraft = userState[dayKey] || {};
+      for (const lId of linked) {
+        const draft = dayDraft[lId];
+        if (draft && (draft.wt_0 !== undefined || draft.wt_1 !== undefined)) {
+          candidates.push({
+            id: lId,
+            rec: draft,
+            updatedAt: '9999-99-99'
+          });
         }
-        if (bestRecord) break;
       }
     }
 
-    // If found, populate all linked IDs
-    if (bestRecord) {
-      const wt0 = bestRecord.wt_0;
-      const r0 = bestRecord.reps_0;
-      const wt1 = bestRecord.wt_1 !== undefined ? bestRecord.wt_1 : (bestRecord.wt_2 !== undefined ? bestRecord.wt_2 : bestRecord.wt_3);
-      const r1 = bestRecord.reps_1 !== undefined ? bestRecord.reps_1 : (bestRecord.reps_2 !== undefined ? bestRecord.reps_2 : bestRecord.reps_3);
+    if (candidates.length === 0) continue;
 
-      linked.forEach(lId => {
-        if (!lastWeights[lId]) lastWeights[lId] = {};
-        if (wt0 !== undefined && wt0 !== '') lastWeights[lId].wt_0 = wt0;
-        if (r0 !== undefined && r0 !== '') lastWeights[lId].reps_0 = r0;
-        if (wt1 !== undefined && wt1 !== '') {
-          if (!lastWeights[lId].wt_1) lastWeights[lId].wt_1 = wt1;
-          if (!lastWeights[lId].wt_2) lastWeights[lId].wt_2 = wt1;
-          if (!lastWeights[lId].wt_3) lastWeights[lId].wt_3 = wt1;
+    // Pick newest candidate by timestamp
+    candidates.sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+    const bestRecord = candidates[0].rec;
+    const bestDate = candidates[0].updatedAt !== '9999-99-99' ? candidates[0].updatedAt : new Date().toISOString();
+
+    const wt0 = bestRecord.wt_0;
+    const r0 = bestRecord.reps_0;
+    const wt1 = bestRecord.wt_1 !== undefined && bestRecord.wt_1 !== ''
+      ? bestRecord.wt_1
+      : (bestRecord.wt_2 !== undefined && bestRecord.wt_2 !== '' ? bestRecord.wt_2 : bestRecord.wt_3);
+    const r1 = bestRecord.reps_1 !== undefined && bestRecord.reps_1 !== ''
+      ? bestRecord.reps_1
+      : (bestRecord.reps_2 !== undefined && bestRecord.reps_2 !== '' ? bestRecord.reps_2 : bestRecord.reps_3);
+
+    linked.forEach(lId => {
+      if (!lastWeights[lId]) lastWeights[lId] = {};
+      if (wt0 !== undefined && wt0 !== '') lastWeights[lId].wt_0 = wt0;
+      if (r0 !== undefined && r0 !== '') lastWeights[lId].reps_0 = r0;
+      if (wt1 !== undefined && wt1 !== '') {
+        lastWeights[lId].wt_1 = wt1;
+        if (['th1', 't1', 'w2', 'm1'].includes(lId)) {
+          lastWeights[lId].wt_2 = wt1;
+          lastWeights[lId].wt_3 = wt1;
         }
-        if (r1 !== undefined && r1 !== '') {
-          if (!lastWeights[lId].reps_1) lastWeights[lId].reps_1 = r1;
-          if (!lastWeights[lId].reps_2) lastWeights[lId].reps_2 = r1;
-          if (!lastWeights[lId].reps_3) lastWeights[lId].reps_3 = r1;
+      }
+      if (r1 !== undefined && r1 !== '') {
+        lastWeights[lId].reps_1 = r1;
+        if (['th1', 't1', 'w2', 'm1'].includes(lId)) {
+          lastWeights[lId].reps_2 = r1;
+          lastWeights[lId].reps_3 = r1;
         }
-      });
-    }
+      }
+      lastWeights[lId].updatedAt = bestDate;
+    });
   }
 }
 
@@ -500,6 +552,22 @@ async function finishAndSaveWorkout() {
   };
 
   await recordSessionToHistory(session);
+
+  // Sync latest weights and draft state to SQLite backend
+  if (typeof fetch === 'function') {
+    try {
+      await fetch('/api/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dayKey: currentDay.value,
+          state: userState[currentDay.value] || {},
+          weights: lastWeights
+        })
+      });
+    } catch (e) {}
+  }
+
   showToast(`บันทึกประวัติสำเร็จ (${totalSetsDone} เซ็ต)`);
 }
 
