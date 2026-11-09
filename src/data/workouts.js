@@ -41,6 +41,17 @@ export function getLinkedExerciseIds(exId) {
   return linked;
 }
 
+export const EXERCISE_DAY_MAP = {
+  m1: 'mon', b_m_back: 'mon', b_m_chest: 'mon', b_m_shoulder: 'mon',
+  t1: 'tue', b_t_shoulder: 'tue', b_t_back: 'tue', b_t_leg: 'tue',
+  w2: 'wed', b_w_shoulder: 'wed', b_w_chest: 'wed', b_w_leg: 'wed',
+  th1: 'thu', b_th_back: 'thu', b_th_chest: 'thu', b_th_leg: 'thu'
+};
+
+export function getExerciseDay(exId) {
+  return EXERCISE_DAY_MAP[exId] || null;
+}
+
 // 3 YouTube Video Alternatives for 3 Different Gym Machines / Equipment
 // (เผื่อยิมที่เล่นไม่มีเครื่องแบบใดแบบหนึ่ง สามารถเลือกดูคลิปสอนเล่นเครื่องแบบอื่นที่ยิมมีได้)
 export const MACHINE_VIDEO_PRESETS = {

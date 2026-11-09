@@ -37,12 +37,13 @@ app.post('/api/state', (req, res) => {
     }
     if (weights && typeof weights === 'object') {
       for (const [exId, wObj] of Object.entries(weights)) {
+        const objUpdatedAt = wObj.updatedAt || null;
         for (const [k, v] of Object.entries(wObj)) {
           if (k.startsWith('wt_') && v !== '' && v !== undefined) {
             const setIdx = parseInt(k.replace('wt_', ''), 10);
             if (!isNaN(setIdx)) {
               const repsVal = wObj[`reps_${setIdx}`];
-              repo.saveLastRecord(exId, setIdx, v, repsVal);
+              repo.saveLastRecord(exId, setIdx, v, repsVal, objUpdatedAt);
             }
           }
         }
@@ -51,6 +52,17 @@ app.post('/api/state', (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('Error saving state:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Heal canonical records endpoint
+app.post('/api/heal-canonical', (req, res) => {
+  try {
+    const result = repo.healCanonicalRecords();
+    res.json(result);
+  } catch (err) {
+    console.error('Error healing canonical records:', err);
     res.status(500).json({ error: err.message });
   }
 });

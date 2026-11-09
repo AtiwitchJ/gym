@@ -215,6 +215,7 @@ const repo = {
         reps = COALESCE(excluded.reps, exercise_last_weights.reps),
         updated_at = excluded.updated_at,
         canonical_id = excluded.canonical_id
+      WHERE excluded.updated_at >= exercise_last_weights.updated_at OR exercise_last_weights.updated_at IS NULL
     `);
 
     const wNum = Number(weight) || 0;
@@ -236,8 +237,6 @@ const repo = {
         stmt.run(targetId, 0, wNum, rNum, dateStr, canon);
       } else {
         // Working set / touchup set
-        stmt.run(targetId, setIndex, wNum, rNum, dateStr, canon);
-
         // If target is a main lift (e.g. th1, t1, w2, m1) and source is a bonus touchup (set 1),
         // seed/sync sets 1, 2, and 3 so all working sets on the main day have this latest record!
         if (['th1', 't1', 'w2', 'm1'].includes(targetId)) {
@@ -245,8 +244,12 @@ const repo = {
           stmt.run(targetId, 2, wNum, rNum, dateStr, canon);
           stmt.run(targetId, 3, wNum, rNum, dateStr, canon);
         } else {
-          // Target is a bonus touchup exercise (which reads set_index = 1)
-          stmt.run(targetId, 1, wNum, rNum, dateStr, canon);
+          // Target is a bonus touchup exercise (which reads set_index = 1).
+          // Only primary working set 1 (or single working set) propagates to bonus touchup set 1,
+          // so drop/variation sets (sets 2, 3) don't overwrite the primary lift weight/reps!
+          if (setIndex === 1) {
+            stmt.run(targetId, 1, wNum, rNum, dateStr, canon);
+          }
         }
       }
     }
@@ -379,7 +382,10 @@ const repo = {
 
               // Persist to last record with bidirectional cross-day propagation
               if (wt !== null || reps !== null) {
-                this.saveLastRecord(ex.id, set.setIndex - 1, wt || 0, reps, session.date);
+                const sessionDateStr = session.date && session.time
+                  ? `${session.date}T${session.time}:00.000Z`
+                  : (session.date || new Date().toISOString());
+                this.saveLastRecord(ex.id, set.setIndex - 1, wt || 0, reps, sessionDateStr);
               }
             }
           }
@@ -420,7 +426,43 @@ const repo = {
 
     transaction();
     return { success: true };
+  },
+
+  // Heal all canonical records from true historical sessions
+  healCanonicalRecords() {
+    const canons = ['shoulder_press', 'chest_press', 'lat_pulldown', 'seated_leg_press'];
+    let healedCount = 0;
+
+    for (const canon of canons) {
+      const history = this.getExerciseHistory(canon);
+      if (!Array.isArray(history) || history.length === 0) continue;
+
+      // Find newest session with valid sets
+      const newestSession = history.find(s => Array.isArray(s.sets) && s.sets.some(st => st.weight !== null && st.weight !== undefined));
+      if (!newestSession) continue;
+
+      const dateStr = newestSession.date && newestSession.time
+        ? `${newestSession.date}T${newestSession.time}:00.000Z`
+        : (newestSession.date || new Date().toISOString());
+
+      // Save each set
+      newestSession.sets.forEach((set, sIdx) => {
+        if (set.weight !== null && set.weight !== undefined) {
+          this.saveLastRecord(newestSession.exerciseId, sIdx, set.weight, set.actualReps, dateStr);
+        }
+      });
+      healedCount++;
+    }
+
+    return { success: true, healedCount };
   }
 };
+
+// Run healing pass on DB initialization
+try {
+  repo.healCanonicalRecords();
+} catch (e) {
+  console.error('Error healing canonical records:', e.message);
+}
 
 module.exports = repo;

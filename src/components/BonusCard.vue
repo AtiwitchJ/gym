@@ -544,31 +544,33 @@ const hasAnyPrev = computed(() => {
 });
 
 const displayWarmWeight = computed(() => {
+  if (prevWarm.value > 0) return prevWarm.value;
   const cur = getWeight(0);
-  if (cur !== '' && Number(cur) > 0) return Number(cur);
-  return prevWarm.value;
+  return (cur !== '' && Number(cur) > 0) ? Number(cur) : 0;
 });
 
 const displayWarmReps = computed(() => {
+  if (prevWarmReps.value !== null) return prevWarmReps.value;
   const cur = getReps(0);
-  if (cur !== '' && Number(cur) > 0) return Number(cur);
-  return prevWarmReps.value;
+  return (cur !== '' && Number(cur) > 0) ? Number(cur) : null;
 });
 
 const displayTouchWeight = computed(() => {
+  if (prevTouch.value > 0) return prevTouch.value;
   for (let i = props.bonus.sets.length - 1; i >= 1; i--) {
     const cur = getWeight(i);
     if (cur !== '' && Number(cur) > 0) return Number(cur);
   }
-  return prevTouch.value;
+  return 0;
 });
 
 const displayTouchReps = computed(() => {
+  if (prevTouchReps.value !== null) return prevTouchReps.value;
   for (let i = props.bonus.sets.length - 1; i >= 1; i--) {
     const cur = getReps(i);
     if (cur !== '' && Number(cur) > 0) return Number(cur);
   }
-  return prevTouchReps.value;
+  return null;
 });
 
 function getPrevWeight(sIdx) {

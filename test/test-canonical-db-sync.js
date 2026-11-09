@@ -9,6 +9,10 @@ const __dirname = path.dirname(__filename);
 
 console.log('Testing Canonical Cross-Day Database & State Synchronization...');
 
+// Clean test records before running to ensure deterministic assertions
+repo.db.prepare("DELETE FROM exercise_last_weights WHERE exercise_id IN ('th1', 'b_m_shoulder', 'shoulder_press')").run();
+repo.db.prepare("DELETE FROM workout_sessions WHERE id IN ('test_session_mon_shoulder', 'test_session_thu_shoulder')").run();
+
 // 1. Verify Canonical ID mappings in DB layer
 assert.strictEqual(repo.getCanonicalExerciseId('th1'), 'shoulder_press', 'th1 should map to shoulder_press');
 assert.strictEqual(repo.getCanonicalExerciseId('b_m_shoulder'), 'shoulder_press', 'b_m_shoulder should map to shoulder_press');
@@ -27,7 +31,7 @@ assert.strictEqual(repo.getCanonicalExerciseId('b_th_leg'), 'seated_leg_press', 
 console.log('✓ Canonical ID mappings verified across all 4 movement groups');
 
 // 2. Test saving Monday session with bonus shoulder touchup (b_m_shoulder)
-const testDateMon = '2026-11-02';
+const testDateMon = '2026-11-16';
 const monSession = {
   id: 'test_session_mon_shoulder',
   date: testDateMon,
@@ -69,7 +73,7 @@ assert(th1History.some(s => s.exerciseId === 'b_m_shoulder'), 'th1 history query
 console.log('✓ Monday bonus shoulder (b_m_shoulder) seamlessly propagated to Thursday main (th1) in SQLite');
 
 // 3. Test saving Thursday session with main shoulder (th1)
-const testDateThu = '2026-11-05';
+const testDateThu = '2026-11-19';
 const thuSession = {
   id: 'test_session_thu_shoulder',
   date: testDateThu,

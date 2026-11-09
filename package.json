@@ -12,7 +12,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/server.js",
-    "test": "node server/test-api.js && node test/test-advisor.js && node test/test-sync.js && node test/test-exercise-store.js && node test/test-routine-store.js && node test/test-active-session.js && node test/test-modals-contract.js && node test/test-runner-contract.js && node test/test-global-shell-contract.js && node test/test-bonus-and-videos.js && node test/test-canonical-db-sync.js",
+    "test": "node server/test-api.js && node test/test-advisor.js && node test/test-sync.js && node test/test-exercise-store.js && node test/test-routine-store.js && node test/test-active-session.js && node test/test-modals-contract.js && node test/test-runner-contract.js && node test/test-global-shell-contract.js && node test/test-bonus-and-videos.js && node test/test-canonical-db-sync.js && node test/test-cross-day-reps-sync.js",
     "smoke": "node test/smoke-test.js",
     "ci": "npm test && npm run build && npm run smoke",
     "pre-deploy": "npm run ci"

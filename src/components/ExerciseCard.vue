@@ -539,31 +539,33 @@ const hasAnyPrev = computed(() => {
 });
 
 const displayWarmWeight = computed(() => {
+  if (prevWarm.value > 0) return prevWarm.value;
   const cur = getWeight(0);
-  if (cur !== '' && Number(cur) > 0) return Number(cur);
-  return prevWarm.value;
+  return (cur !== '' && Number(cur) > 0) ? Number(cur) : 0;
 });
 
 const displayWarmReps = computed(() => {
+  if (prevWarmReps.value !== null) return prevWarmReps.value;
   const cur = getReps(0);
-  if (cur !== '' && Number(cur) > 0) return Number(cur);
-  return prevWarmReps.value;
+  return (cur !== '' && Number(cur) > 0) ? Number(cur) : null;
 });
 
 const displayWorkWeight = computed(() => {
+  if (prevWork.value > 0) return prevWork.value;
   for (let i = props.exercise.sets.length - 1; i >= 1; i--) {
     const cur = getWeight(i);
     if (cur !== '' && Number(cur) > 0) return Number(cur);
   }
-  return prevWork.value;
+  return 0;
 });
 
 const displayWorkReps = computed(() => {
+  if (prevWorkReps.value !== null) return prevWorkReps.value;
   for (let i = props.exercise.sets.length - 1; i >= 1; i--) {
     const cur = getReps(i);
     if (cur !== '' && Number(cur) > 0) return Number(cur);
   }
-  return prevWorkReps.value;
+  return null;
 });
 
 function getPrevWeight(sIdx) {
