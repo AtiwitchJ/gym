@@ -13,14 +13,14 @@ concurrency:
 
 jobs:
   # -------------------------------------------------------------
-  # Job 1: Automated Unit & Contract Test Suite (Node 20 & 22)
+  # Job 1: Automated Unit & Contract Test Suite (Node 22 LTS)
   # -------------------------------------------------------------
   test:
     name: Run Test Suite (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: ['22.x']
 
     steps:
       - name: Checkout repository
@@ -40,7 +40,7 @@ jobs:
           cd server
           npm ci
 
-      - name: Execute all 11 test suites
+      - name: Execute all 12 test suites
         run: npm test
 
   # -------------------------------------------------------------
@@ -150,7 +150,7 @@ jobs:
           # 🚀 CI/CD Quality Gate: PASSED
 
           All automated checks passed successfully before deployment:
-          - ✅ **11 Test Suites Passed** (Advisor, Synchronization, SQLite Schema, Routine Store, Video Contracts)
+          - ✅ **12 Test Suites Passed** (Advisor, Synchronization, SQLite Schema, Routine Store, Video Contracts, Cross-Day Reps Sync)
           - ✅ **Vite Frontend Production Build Passed** (`dist/` generated)
           - ✅ **API & Server Smoke Tests Passed** (`/api/health`, `/api/state`, `/api/history`)
           - ✅ **Docker Multi-Stage Container Verified** (Alpine + Node 22 + better-sqlite3)
