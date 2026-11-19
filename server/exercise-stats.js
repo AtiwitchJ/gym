@@ -1,7 +1,7 @@
 // Per-exercise personal records (PR). Pure function: no DB or clock access.
 // Uses the same e1RM formula as the frontend (src/composables/useRpeAdvisor.js).
 
-const { calculateEstimated1RM } = require('../src/composables/useRpeAdvisor.js');
+const { calculateEstimated1RM } = require('./estimate');
 
 // sessions: output of repo.getExerciseHistory() -> [{ sets: [{ weight, actualReps, rir, done }] }]
 // Only completed sets (done truthy) count.
