@@ -91,6 +91,17 @@ const calculation = computed(() => {
   return calculatePlates(targetWeight.value, selectedBar.value.weight);
 });
 
+/**
+ * Barbell-style exercise (plate calculator is offered only for these, step 6c).
+ * The exercise name decides: a dumbbell name is never barbell even if the alternate mentions Smith.
+ */
+export function isBarbellExercise(ex) {
+  const name = String(ex?.name || '');
+  const alt = String(ex?.altName || '');
+  if (/dumbbell|ดัมเบล/i.test(name)) return false;
+  return /barbell|บาร์เบล|smith|trap bar/i.test(`${name} ${alt}`);
+}
+
 export function usePlateCalculator() {
   function openPlateCalculator(initialWeight = 60, onApply = null) {
     const parsed = parseFloat(initialWeight);

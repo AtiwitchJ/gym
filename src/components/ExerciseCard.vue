@@ -52,6 +52,15 @@
             >
               📈 ประวัติ &amp; PR
             </button>
+            <button
+              v-if="isBarbell"
+              type="button"
+              class="mt-1 ml-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-gold hover:bg-gold-glow text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
+              title="คำนวณแผ่นน้ำหนักบาร์เบล"
+              @click="openPlatesForExercise"
+            >
+              🏋️ คำนวณแผ่น
+            </button>
           </div>
         </div>
 
@@ -488,6 +497,7 @@ import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { RIR_CHOICES, normalizeRir, nextRir } from '../composables/useRir.js';
 import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
+import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
 const showHistory = ref(false);
 
@@ -872,6 +882,19 @@ const isAllCompleted = computed(() => {
   if (!props.exercise.sets || props.exercise.sets.length === 0) return false;
   return props.exercise.sets.every((_, idx) => isSetDone(idx));
 });
+
+// Plate calculator (step 6c): offered from the card header for barbell-style exercises only.
+const { openPlateCalculator } = usePlateCalculator();
+const isBarbell = isBarbellExercise(props.exercise);
+
+function openPlatesForExercise() {
+  const firstOpen = props.exercise.sets.findIndex((_, i) => !isSetDone(i));
+  const idx = firstOpen >= 0 ? firstOpen : 0;
+  const start = Number(getWeight(idx)) || Number(getPrevWeight(idx)) || 60;
+  openPlateCalculator(start, (val) => {
+    updateWeight(currentDay.value, props.exercise.id, idx, String(val));
+  });
+}
 
 // PR badge (step 6): compare the ticked set with the stored PR for this exercise.
 function getPrFlag(sIdx) {

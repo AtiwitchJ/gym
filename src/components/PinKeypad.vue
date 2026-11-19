@@ -56,14 +56,6 @@
 
           <div class="flex items-center gap-2">
             <button
-              v-if="mode === 'weight'"
-              @click="openPlateCalc"
-              class="text-[11px] font-mono font-bold px-2 py-1 rounded border-2 border-plate text-ink hover:text-white bg-gold hover:bg-gold-glow transition-all flex items-center gap-1 shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
-              title="เปิดเครื่องคำนวณแผ่นน้ำหนักบาร์เบล"
-            >
-              <span>🏋️ แผ่นเหล็ก</span>
-            </button>
-            <button
               v-if="displayValue"
               @click="clear"
               class="text-[11px] font-mono font-bold px-2 py-1 rounded border border-plate/30 text-ink-muted hover:text-flame bg-paper-subtle hover:bg-flame-bg transition-colors"
@@ -196,7 +188,6 @@
 
 <script setup>
 import { usePinKeypad } from '../composables/usePinKeypad';
-import { usePlateCalculator } from '../composables/usePlateCalculator';
 
 const {
   isOpen,
@@ -222,12 +213,4 @@ const {
   confirm
 } = usePinKeypad();
 
-const { openPlateCalculator } = usePlateCalculator();
-
-function openPlateCalc() {
-  const currentVal = parseFloat(displayValue.value) || (prevHint.value ? parseFloat(prevHint.value) : 60);
-  openPlateCalculator(currentVal, (val) => {
-    setValue(val);
-  });
-}
 </script>
