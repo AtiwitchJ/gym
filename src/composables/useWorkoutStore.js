@@ -98,6 +98,37 @@ const userTodos = ref(JSON.parse(storage.getItem('atiwitch_gym_todos') || storag
 // Auto-save triggers
 let syncDebounceTimer = null;
 
+// Day session start (review fix: DURATION was 00:00 on the save path). Set at the first ticked set.
+const DAY_START_KEY = 'atiwitch_day_started';
+let dayStartMs = {};
+try {
+  dayStartMs = JSON.parse(storage.getItem(DAY_START_KEY) || '{}') || {};
+} catch (e) {
+  dayStartMs = {};
+}
+
+function persistDayStart() {
+  storage.setItem(DAY_START_KEY, JSON.stringify(dayStartMs));
+}
+
+export function markDayStarted(day, ms = Date.now()) {
+  if (!dayStartMs[day]) {
+    dayStartMs[day] = ms;
+    persistDayStart();
+  }
+}
+
+export function clearDayStarted(day) {
+  delete dayStartMs[day];
+  persistDayStart();
+}
+
+/** Whole seconds since the day session started (0 when it has not started). */
+export function dayDurationSec(day, nowMs = Date.now()) {
+  const started = dayStartMs[day];
+  return started ? Math.max(0, Math.round((nowMs - started) / 1000)) : 0;
+}
+
 function persistLocal() {
   storage.setItem('atiwitch_workout_state', JSON.stringify(userState));
   storage.setItem('atiwitch_last_weights', JSON.stringify(lastWeights));
@@ -639,11 +670,13 @@ function toggleSetDone(day, exId, setIdx) {
 
   const current = !!userState[day][exId][`set_${setIdx}`];
   userState[day][exId][`set_${setIdx}`] = !current;
+  if (!current) markDayStarted(day);
   triggerSave(day);
   return !current; // returns true if now checked
 }
 
 async function resetDayData(day = currentDay.value) {
+  clearDayStarted(day);
   const dayData = workoutData[day];
   const nextDayState = {};
 
@@ -785,6 +818,8 @@ async function finishAndSaveWorkout() {
 
   // Build the summary from the state before the reset (PR flags and set counts).
   lastSessionSummary.value = buildSessionSummary(dayData, dayState);
+  lastSessionSummary.value.durationSec = dayDurationSec(savedDayKey);
+  clearDayStarted(savedDayKey);
   userState[savedDayKey] = nextDayState;
   persistLocal();
 
