@@ -14,6 +14,12 @@ const presets = ref([]);
 const guardAcknowledged = ref(false);
 let onConfirmCallback = null;
 
+// Review fix: the first digit after opening replaces the pre-filled value (35 + 1 was 351, then 3510).
+let freshEntry = false;
+// Review fix: no entry can go above these limits, so a typo like 3510 kg cannot be typed or saved.
+export const MAX_WEIGHT_INPUT = 400;
+export const MAX_REPS_INPUT = 99;
+
 /**
  * Detects whether entered weight is an abnormal typo compared to previous record
  * e.g. entering 2 kg while previous was 20 kg (too low, missing zero)
@@ -106,6 +112,7 @@ function openKeypad(config) {
   suggestedLabel.value = config.suggestedLabel || '';
   presets.value = config.presets || (mode.value === 'weight' ? [1.25, 2.5, 5, -2.5] : [1, 2, -1]);
   guardAcknowledged.value = false;
+  freshEntry = true;
   onConfirmCallback = config.onConfirm || null;
   isOpen.value = true;
   triggerHaptic(30);
@@ -120,6 +127,12 @@ function closeKeypad() {
 function append(digit) {
   triggerHaptic(20);
   guardAcknowledged.value = false;
+
+  // The first digit after opening starts a new number (the pre-filled value is replaced).
+  if (freshEntry && !(digit === '.' && mode.value === 'reps')) {
+    freshEntry = false;
+    displayValue.value = '';
+  }
 
   if (digit === '.') {
     if (mode.value === 'reps') return; // no decimals for reps
@@ -139,12 +152,18 @@ function append(digit) {
   // Max length check (e.g. 6 chars max)
   if (displayValue.value.length >= 6) return;
 
-  displayValue.value += String(digit);
+  // Hard limit: an entry above the cap is refused, so it cannot be saved (review fix).
+  const limit = mode.value === 'reps' ? MAX_REPS_INPUT : MAX_WEIGHT_INPUT;
+  const candidate = displayValue.value + String(digit);
+  if (Number(candidate) > limit) return;
+
+  displayValue.value = candidate;
 }
 
 function backspace() {
   triggerHaptic(20);
   guardAcknowledged.value = false;
+  freshEntry = false;
   if (displayValue.value.length > 0) {
     displayValue.value = displayValue.value.slice(0, -1);
   }
@@ -153,12 +172,14 @@ function backspace() {
 function clear() {
   triggerHaptic(20);
   guardAcknowledged.value = false;
+  freshEntry = false;
   displayValue.value = '';
 }
 
 function adjust(delta) {
   triggerHaptic(25);
   guardAcknowledged.value = false;
+  freshEntry = false;
   const current = parseFloat(displayValue.value) || 0;
   const next = Math.max(0, current + delta);
   if (mode.value === 'reps') {
@@ -172,6 +193,7 @@ function adjust(delta) {
 function setValue(val) {
   triggerHaptic(25);
   guardAcknowledged.value = false;
+  freshEntry = false;
   displayValue.value = String(val);
 }
 

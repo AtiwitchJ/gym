@@ -56,9 +56,8 @@
 
           <div class="flex items-center gap-2">
             <button
-              v-if="displayValue"
               @click="clear"
-              class="text-[11px] font-mono font-bold px-2 py-1 rounded border border-plate/30 text-ink-muted hover:text-flame bg-paper-subtle hover:bg-flame-bg transition-colors"
+              class="min-h-[44px] min-w-[44px] text-[11px] font-mono font-bold px-2 py-1 rounded border border-plate/30 text-ink-muted hover:text-flame bg-paper-subtle hover:bg-flame-bg transition-colors"
             >
               ล้าง
             </button>
