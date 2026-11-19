@@ -23,10 +23,15 @@
       </div>
     </div>
 
-    <p v-if="error" class="text-xs font-body text-red-700 bg-red-50 border-2 border-red-600 rounded-xl p-3">
-      {{ error }}
-    </p>
-    <p v-else-if="loading" class="text-xs text-ink-muted font-body">กำลังโหลดข้อมูล...</p>
+    <div v-if="error" class="text-xs font-body text-red-700 bg-red-50 border-2 border-red-600 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
+      <span>{{ error }}</span>
+      <button
+        type="button"
+        class="min-h-[44px] min-w-[44px] px-3 rounded-xl border-2 border-plate bg-white text-ink font-heading font-bold text-xs touch-manipulation"
+        @click="retry"
+      >ลองอีกครั้ง</button>
+    </div>
+    <p v-else-if="loading" class="text-xs text-ink-muted font-body" role="status">{{ slow ? slowMessage : 'กำลังโหลดข้อมูล...' }}</p>
     <p v-else-if="!hasData" class="text-xs text-ink-muted font-body">
       {{ emptyMessage }}
     </p>
@@ -91,7 +96,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { useWeeklyVolume, rankKeys, buildSeries, hasAnyVolume, VOLUME_EMPTY_MESSAGE } from '../composables/useWeeklyVolume.js';
+import { useWeeklyVolume, rankKeys, buildSeries, hasAnyVolume, VOLUME_EMPTY_MESSAGE, VOLUME_SLOW_MESSAGE } from '../composables/useWeeklyVolume.js';
 
 const CHART_W = 320;
 const CHART_BASE = 150;
@@ -99,7 +104,8 @@ const CHART_MAX_H = 120;
 const BAR_W = 26;
 const BAR_GAP = 12;
 
-const { weeks, loading, error, load } = useWeeklyVolume();
+const { weeks, loading, slow, error, load, retry } = useWeeklyVolume();
+const slowMessage = VOLUME_SLOW_MESSAGE;
 
 const mode = ref('muscles');
 const selectedKey = ref('');

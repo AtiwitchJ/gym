@@ -71,17 +71,26 @@ export function setText(set) {
   return `${weight} ${reps}${rir}`.trim();
 }
 
-export function useExerciseHistory(fetchImpl = globalThis.fetch) {
+export const HISTORY_TIMEOUT_MESSAGE = 'การโหลดใช้เวลานานเกินไป — กดลองอีกครั้ง';
+export const HISTORY_LOAD_TIMEOUT_MS = 10000;
+
+export function useExerciseHistory(fetchImpl = globalThis.fetch, { timeoutMs = HISTORY_LOAD_TIMEOUT_MS } = {}) {
   const sessions = ref([]);
   const pr = ref(normalizePr(null));
   const loading = ref(false);
   const error = ref('');
+  let lastId = null;
 
   async function load(exerciseId) {
+    lastId = exerciseId;
     loading.value = true;
     error.value = '';
+    let timeoutTimer = null;
+    const timeout = new Promise((_, reject) => {
+      timeoutTimer = setTimeout(() => reject(new Error('timeout')), timeoutMs);
+    });
     try {
-      const res = await fetchImpl(`/api/exercises/${encodeURIComponent(exerciseId)}/history`);
+      const res = await Promise.race([fetchImpl(`/api/exercises/${encodeURIComponent(exerciseId)}/history`), timeout]);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
@@ -91,11 +100,17 @@ export function useExerciseHistory(fetchImpl = globalThis.fetch) {
     } catch (err) {
       sessions.value = [];
       pr.value = normalizePr(null);
-      error.value = HISTORY_ERROR_MESSAGE;
+      error.value = err && err.message === 'timeout' ? HISTORY_TIMEOUT_MESSAGE : HISTORY_ERROR_MESSAGE;
     } finally {
+      clearTimeout(timeoutTimer);
       loading.value = false;
     }
   }
 
-  return { sessions, pr, loading, error, load };
+  // Retry the same exercise after an error or a timeout.
+  function retry() {
+    return load(lastId);
+  }
+
+  return { sessions, pr, loading, error, load, retry };
 }

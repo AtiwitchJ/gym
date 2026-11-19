@@ -20,9 +20,10 @@
         >✕</button>
       </div>
 
-      <p v-if="error" class="text-xs font-body text-red-700 bg-red-50 border-2 border-red-600 rounded-xl p-3">
-        {{ error }}
-      </p>
+      <div v-if="error" class="text-xs font-body text-red-700 bg-red-50 border-2 border-red-600 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
+        <span>{{ error }}</span>
+        <button type="button" class="min-h-[44px] min-w-[44px] px-3 rounded-xl border-2 border-plate bg-white text-ink font-heading font-bold text-xs touch-manipulation" @click="retry">ลองอีกครั้ง</button>
+      </div>
       <p v-else-if="loading" class="text-xs text-ink-muted font-body">กำลังโหลดประวัติ...</p>
 
       <template v-else>
@@ -83,7 +84,7 @@ const props = defineProps({
 
 defineEmits(['close']);
 
-const { sessions, pr, loading, error, load } = useExerciseHistory();
+const { sessions, pr, loading, error, load, retry } = useExerciseHistory();
 
 const emptyMessage = HISTORY_EMPTY_MESSAGE;
 const prRows = computed(() => formatPr(pr.value));

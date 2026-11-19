@@ -7,6 +7,10 @@ import { ref } from 'vue';
 
 export const VOLUME_ERROR_MESSAGE = 'โหลดข้อมูลปริมาณการฝึกไม่ได้';
 export const VOLUME_EMPTY_MESSAGE = 'ยังไม่มีข้อมูลปริมาณการฝึกในช่วง 8 สัปดาห์นี้';
+export const VOLUME_TIMEOUT_MESSAGE = 'การโหลดใช้เวลานานเกินไป — กดลองอีกครั้ง';
+export const VOLUME_SLOW_MESSAGE = 'กำลังโหลดข้อมูล... (อาจใช้เวลาสักครู่)';
+export const DEFAULT_LOAD_TIMEOUT_MS = 10000;
+export const DEFAULT_SLOW_MS = 4000;
 
 const toNumber = (v) => {
   const n = Number(v);
@@ -65,27 +69,43 @@ export function hasAnyVolume(weeks) {
   return weeks.some((week) => week.muscles.some((m) => m.volume > 0) || week.exercises.some((e) => e.volume > 0));
 }
 
-export function useWeeklyVolume(fetchImpl = globalThis.fetch) {
+export function useWeeklyVolume(fetchImpl = globalThis.fetch, { timeoutMs = DEFAULT_LOAD_TIMEOUT_MS, slowMs = DEFAULT_SLOW_MS } = {}) {
   const weeks = ref([]);
   const loading = ref(false);
+  const slow = ref(false);
   const error = ref('');
 
   async function load() {
     loading.value = true;
+    slow.value = false;
     error.value = '';
+    // Accessibility item 3: say when it is slow, and stop with a message instead of waiting forever.
+    const slowTimer = setTimeout(() => { slow.value = true; }, slowMs);
+    let timeoutTimer = null;
+    const timeout = new Promise((_, reject) => {
+      timeoutTimer = setTimeout(() => reject(new Error('timeout')), timeoutMs);
+    });
     try {
-      const res = await fetchImpl('/api/volume/weekly');
+      const res = await Promise.race([fetchImpl('/api/volume/weekly'), timeout]);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
       weeks.value = normalizeWeeklyVolume(await res.json());
     } catch (err) {
       weeks.value = [];
-      error.value = VOLUME_ERROR_MESSAGE;
+      error.value = err && err.message === 'timeout' ? VOLUME_TIMEOUT_MESSAGE : VOLUME_ERROR_MESSAGE;
     } finally {
+      clearTimeout(slowTimer);
+      clearTimeout(timeoutTimer);
       loading.value = false;
+      slow.value = false;
     }
   }
 
-  return { weeks, loading, error, load };
+  // Retry after an error or a timeout (the same request again).
+  function retry() {
+    return load();
+  }
+
+  return { weeks, loading, slow, error, load, retry };
 }
