@@ -15,6 +15,11 @@ function loadStoredRoutines() {
       if (data) {
         const parsed = JSON.parse(data);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          defaultRoutines.forEach(dr => {
+            if (!parsed.some(r => r.id === dr.id)) {
+              parsed.push(JSON.parse(JSON.stringify(dr)));
+            }
+          });
           return parsed;
         }
       }
@@ -49,7 +54,15 @@ const activeRoutine = ref(null);
  */
 function getRoutineById(id) {
   if (!id) return null;
-  return routines.value.find(r => r.id === id) || null;
+  const match = routines.value.find(r => r.id === id);
+  if (match) return match;
+  if (id === 'atiwitch_prog_a' || id === 'program_a') {
+    return routines.value.find(r => r.id === 'atiwitch_prog_a' || r.id === 'atiwitch_ab_program_a') || null;
+  }
+  if (id === 'atiwitch_prog_b' || id === 'program_b') {
+    return routines.value.find(r => r.id === 'atiwitch_prog_b' || r.id === 'atiwitch_ab_program_b') || null;
+  }
+  return null;
 }
 
 /**

@@ -1,9 +1,51 @@
 <template>
   <nav
     ref="navContainer"
-    class="w-full bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-4px_20px_rgba(30,34,32,0.12)] px-2 sm:px-4 py-2 pb-[max(8px,env(safe-area-inset-bottom))] overflow-x-auto scrollbar-none select-none"
+    class="w-full bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-4px_20px_rgba(30,34,32,0.12)] px-2 sm:px-4 py-1.5 pb-[max(8px,env(safe-area-inset-bottom))] overflow-x-auto scrollbar-none select-none"
   >
-    <div class="max-w-3xl mx-auto flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 min-w-max px-1">
+    <!-- 3-Day A/B Program Quick Switcher Toggle -->
+    <div class="max-w-3xl mx-auto flex items-center justify-between gap-2 px-1 pb-1.5 border-b border-plate/10 text-xs">
+      <div class="flex items-center gap-1.5">
+        <span class="text-[10px] font-mono font-bold text-flame uppercase tracking-wider">
+          3-Day A/B Split:
+        </span>
+        <span class="text-[10px] font-body text-ink-muted hidden sm:inline">
+          (สลับ A-B-A / B-A-B)
+        </span>
+      </div>
+
+      <!-- Program A / B Toggle Pills -->
+      <div class="inline-flex rounded-lg p-0.5 bg-surface border-2 border-plate shadow-[1px_1px_0px_#1e2220]">
+        <button
+          type="button"
+          @click="selectProgram('prog_a')"
+          class="flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-heading font-bold transition-all touch-manipulation"
+          :class="(activeTabId === 'prog_a' || activeProgram === 'prog_a')
+            ? 'bg-flame text-white shadow-sm'
+            : 'text-ink-muted hover:text-ink'"
+          title="Program A: อก + หลัง + ท้อง (6 ท่า)"
+        >
+          <span>⚡ Program A</span>
+          <span class="text-[9px] font-mono opacity-80 hidden md:inline">(อก/หลัง/ท้อง)</span>
+        </button>
+
+        <button
+          type="button"
+          @click="selectProgram('prog_b')"
+          class="flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-heading font-bold transition-all touch-manipulation"
+          :class="(activeTabId === 'prog_b' || activeProgram === 'prog_b')
+            ? 'bg-flame text-white shadow-sm'
+            : 'text-ink-muted hover:text-ink'"
+          title="Program B: ขา + แขน + ไหล่/บ่า (7 ท่า)"
+        >
+          <span>⚡ Program B</span>
+          <span class="text-[9px] font-mono opacity-80 hidden md:inline">(ขา/แขน/ไหล่)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Tabs Row -->
+    <div class="max-w-3xl mx-auto flex items-center justify-start sm:justify-center gap-1.5 sm:gap-2 min-w-max px-1 pt-1.5">
       <button
         v-for="tab in tabs"
         :key="tab.id"
@@ -28,7 +70,7 @@
 
         <!-- Tab Icon or Short Badge -->
         <div class="w-4 h-4 flex items-center justify-center mb-0.5 transition-transform group-active:scale-90">
-          <!-- Mon: Legs -->
+          <!-- Mon: Legs / Program A -->
           <svg v-if="tab.id === 'mon'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
             <path d="M4 4v7a4 4 0 0 0 4 4h0a4 4 0 0 0 4-4V4M12 4v7a4 4 0 0 0 4 4h0a4 4 0 0 0 4-4V4" />
           </svg>
@@ -36,7 +78,7 @@
           <svg v-else-if="tab.id === 'tue'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
             <path d="M6 5v14M18 5v14M2 12h20M9 8h6M9 16h6" />
           </svg>
-          <!-- Wed: Back -->
+          <!-- Wed: Back / Program B -->
           <svg v-else-if="tab.id === 'wed'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
             <path d="M12 2v20M4 12h16M7 6l10 12M17 6L7 18" />
           </svg>
@@ -44,6 +86,10 @@
           <svg v-else-if="tab.id === 'thu'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="8" />
             <line x1="12" y1="4" x2="12" y2="20" />
+          </svg>
+          <!-- Fri: Program A/B -->
+          <svg v-else-if="tab.id === 'fri'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
           </svg>
           <!-- Rest -->
           <svg v-else-if="tab.id === 'rest'" class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
@@ -103,12 +149,14 @@ const emit = defineEmits(['update:currentTab', 'update:modelValue', 'switch-tab'
 const workoutStore = useWorkoutStore();
 const { isWorkoutActive } = useActiveSessionStore();
 const navContainer = ref(null);
+const activeProgram = ref(workoutStore.currentProgram?.value || 'prog_a');
 
 const tabs = [
-  { id: 'mon', label: 'จันทร์', sub: 'ขา + ก้น' },
+  { id: 'mon', label: 'จันทร์', sub: 'Program A/B' },
   { id: 'tue', label: 'อังคาร', sub: 'อก + หลังแขน' },
-  { id: 'wed', label: 'พุธ', sub: 'หลัง + หน้าแขน' },
+  { id: 'wed', label: 'พุธ', sub: 'Program B/A' },
   { id: 'thu', label: 'พฤหัส', sub: 'ไหล่ + ท้อง' },
+  { id: 'fri', label: 'ศุกร์', sub: 'Program A/B' },
   { id: 'rest', label: 'วันพัก', sub: 'ฟื้นฟู' },
   { id: 'exercises', label: 'ท่าฝึก', sub: '51 ท่า' },
   { id: 'history', label: 'ประวัติ', sub: 'Excel / DB' },
@@ -131,7 +179,7 @@ function scrollToActiveTab() {
 }
 
 function selectTab(id) {
-  if (['mon', 'tue', 'wed', 'thu', 'rest', 'todo'].includes(id)) {
+  if (['mon', 'tue', 'wed', 'thu', 'fri', 'prog_a', 'prog_b', 'rest', 'todo'].includes(id)) {
     if (workoutStore.switchDay) workoutStore.switchDay(id);
   }
   if (workoutStore.switchTab) {
@@ -141,6 +189,12 @@ function selectTab(id) {
   emit('update:modelValue', id);
   emit('switch-tab', id);
   emit('change', id);
+}
+
+function selectProgram(progId) {
+  activeProgram.value = progId;
+  if (workoutStore.switchProgram) workoutStore.switchProgram(progId);
+  selectTab(progId);
 }
 
 watch(activeTabId, () => {

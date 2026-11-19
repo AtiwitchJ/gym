@@ -297,5 +297,257 @@ export const defaultRoutines = [
         ]
       }
     ]
+  },
+  {
+    id: 'atiwitch_ab_program_a',
+    title: 'Program A: อก + หลัง + ท้อง (Chest, Back & Abs)',
+    subtitle: '3-Day A/B Split • วันจันทร์/ศุกร์ (6 ท่า)',
+    exercises: [
+      {
+        exerciseId: 'chest_press_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 30 },
+          { type: 'working', targetReps: 8, targetWeight: 60 },
+          { type: 'working', targetReps: 8, targetWeight: 60 },
+          { type: 'working', targetReps: 8, targetWeight: 60 }
+        ]
+      },
+      {
+        exerciseId: 'incline_dumbbell_press',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 14 },
+          { type: 'working', targetReps: 8, targetWeight: 22 },
+          { type: 'working', targetReps: 8, targetWeight: 22 },
+          { type: 'working', targetReps: 8, targetWeight: 22 }
+        ]
+      },
+      {
+        exerciseId: 'lat_pulldown_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 35 },
+          { type: 'working', targetReps: 8, targetWeight: 55 },
+          { type: 'working', targetReps: 8, targetWeight: 55 },
+          { type: 'working', targetReps: 8, targetWeight: 55 }
+        ]
+      },
+      {
+        exerciseId: 'seated_cable_row',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 30 },
+          { type: 'working', targetReps: 8, targetWeight: 50 },
+          { type: 'working', targetReps: 8, targetWeight: 50 },
+          { type: 'working', targetReps: 8, targetWeight: 50 }
+        ]
+      },
+      {
+        exerciseId: 'pec_fly_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 25 },
+          { type: 'working', targetReps: 8, targetWeight: 45 },
+          { type: 'working', targetReps: 8, targetWeight: 45 },
+          { type: 'working', targetReps: 8, targetWeight: 45 }
+        ]
+      },
+      {
+        exerciseId: 'abdominal_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 20 },
+          { type: 'working', targetReps: 12, targetWeight: 40 },
+          { type: 'working', targetReps: 12, targetWeight: 40 },
+          { type: 'working', targetReps: 12, targetWeight: 40 }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'atiwitch_ab_program_b',
+    title: 'Program B: ขา + แขน + คอ บ่า ไหล่ (Legs, Arms, Shoulders & Traps)',
+    subtitle: '3-Day A/B Split • วันพุธ/สลับสัปดาห์ (7 ท่า)',
+    exercises: [
+      {
+        exerciseId: 'seated_leg_press',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 50 },
+          { type: 'working', targetReps: 8, targetWeight: 90 },
+          { type: 'working', targetReps: 8, targetWeight: 90 },
+          { type: 'working', targetReps: 8, targetWeight: 90 }
+        ]
+      },
+      {
+        exerciseId: 'smith_hip_thrust',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 40 },
+          { type: 'working', targetReps: 8, targetWeight: 80 },
+          { type: 'working', targetReps: 8, targetWeight: 80 },
+          { type: 'working', targetReps: 8, targetWeight: 80 }
+        ]
+      },
+      {
+        exerciseId: 'shoulder_press_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 20 },
+          { type: 'working', targetReps: 8, targetWeight: 40 },
+          { type: 'working', targetReps: 8, targetWeight: 40 },
+          { type: 'working', targetReps: 8, targetWeight: 40 }
+        ]
+      },
+      {
+        exerciseId: 'dumbbell_lateral_raise',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 4 },
+          { type: 'working', targetReps: 8, targetWeight: 8 },
+          { type: 'working', targetReps: 8, targetWeight: 8 },
+          { type: 'working', targetReps: 8, targetWeight: 8 }
+        ]
+      },
+      {
+        exerciseId: 'dumbbell_shrug',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 14 },
+          { type: 'working', targetReps: 8, targetWeight: 22 },
+          { type: 'working', targetReps: 8, targetWeight: 22 },
+          { type: 'working', targetReps: 8, targetWeight: 22 }
+        ]
+      },
+      {
+        exerciseId: 'dumbbell_biceps_curl',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 6 },
+          { type: 'working', targetReps: 8, targetWeight: 12 },
+          { type: 'working', targetReps: 8, targetWeight: 12 },
+          { type: 'working', targetReps: 8, targetWeight: 12 }
+        ]
+      },
+      {
+        exerciseId: 'cable_triceps_pushdown',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 15 },
+          { type: 'working', targetReps: 8, targetWeight: 30 },
+          { type: 'working', targetReps: 8, targetWeight: 30 },
+          { type: 'working', targetReps: 8, targetWeight: 30 }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'atiwitch_prog_a',
+    title: 'Program A: อก + หลัง + ท้อง (Chest, Back & Abs)',
+    subtitle: '3-Day A/B Alternating Split (6 ท่าเน้นกล้ามเนื้อมวลรวมช่วงบนและแกนกลางลำตัว)',
+    exercises: [
+      {
+        exerciseId: 'flat_dumbbell_bench_press',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 14 },
+          { type: 'working', targetReps: 8, targetWeight: 24 },
+          { type: 'working', targetReps: 8, targetWeight: 24 },
+          { type: 'working', targetReps: 8, targetWeight: 24 }
+        ]
+      },
+      {
+        exerciseId: 'lat_pulldown_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 30 },
+          { type: 'working', targetReps: 10, targetWeight: 50 },
+          { type: 'working', targetReps: 10, targetWeight: 50 },
+          { type: 'working', targetReps: 10, targetWeight: 50 }
+        ]
+      },
+      {
+        exerciseId: 'incline_dumbbell_press',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 12 },
+          { type: 'working', targetReps: 10, targetWeight: 20 },
+          { type: 'working', targetReps: 10, targetWeight: 20 }
+        ]
+      },
+      {
+        exerciseId: 'seated_cable_row',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 30 },
+          { type: 'working', targetReps: 10, targetWeight: 50 },
+          { type: 'working', targetReps: 10, targetWeight: 50 }
+        ]
+      },
+      {
+        exerciseId: 'pec_fly_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 25 },
+          { type: 'working', targetReps: 12, targetWeight: 45 },
+          { type: 'working', targetReps: 12, targetWeight: 45 }
+        ]
+      },
+      {
+        exerciseId: 'hanging_leg_raise',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 0 },
+          { type: 'working', targetReps: 15, targetWeight: 0 },
+          { type: 'working', targetReps: 15, targetWeight: 0 }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'atiwitch_prog_b',
+    title: 'Program B: ขา + แขน + ไหล่/บ่า (Legs, Arms, Shoulders & Traps)',
+    subtitle: '3-Day A/B Alternating Split (7 ท่าเน้นช่วงล่าง แขนทั้งสองมัด และหัวไหล่/บ่า 3D)',
+    exercises: [
+      {
+        exerciseId: 'seated_leg_press',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 50 },
+          { type: 'working', targetReps: 10, targetWeight: 90 },
+          { type: 'working', targetReps: 10, targetWeight: 90 },
+          { type: 'working', targetReps: 10, targetWeight: 90 }
+        ]
+      },
+      {
+        exerciseId: 'smith_hip_thrust',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 40 },
+          { type: 'working', targetReps: 10, targetWeight: 80 },
+          { type: 'working', targetReps: 10, targetWeight: 80 }
+        ]
+      },
+      {
+        exerciseId: 'leg_extension_machine',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 25 },
+          { type: 'working', targetReps: 12, targetWeight: 45 },
+          { type: 'working', targetReps: 12, targetWeight: 45 }
+        ]
+      },
+      {
+        exerciseId: 'seated_dumbbell_shoulder_press',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 12 },
+          { type: 'working', targetReps: 10, targetWeight: 20 },
+          { type: 'working', targetReps: 10, targetWeight: 20 }
+        ]
+      },
+      {
+        exerciseId: 'dumbbell_shrug',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 16 },
+          { type: 'working', targetReps: 12, targetWeight: 26 },
+          { type: 'working', targetReps: 12, targetWeight: 26 }
+        ]
+      },
+      {
+        exerciseId: 'cable_triceps_pushdown',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 15 },
+          { type: 'working', targetReps: 10, targetWeight: 25 },
+          { type: 'working', targetReps: 10, targetWeight: 25 }
+        ]
+      },
+      {
+        exerciseId: 'dumbbell_hammer_curl',
+        sets: [
+          { type: 'warmup', targetReps: 15, targetWeight: 10 },
+          { type: 'working', targetReps: 10, targetWeight: 16 },
+          { type: 'working', targetReps: 10, targetWeight: 16 }
+        ]
+      }
+    ]
   }
 ];

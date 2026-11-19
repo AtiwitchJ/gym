@@ -1,28 +1,81 @@
 // Canonical Exercise Groups (shared across days between main lifts and bonus touch-ups)
 export const EXERCISE_CANONICAL_MAP = {
-  // Seated Leg Press Machine (Monday Main <-> Tue/Wed/Thu Bonus)
+  // Seated Leg Press Machine (Monday Main <-> Tue/Wed/Thu Bonus <-> Program B)
   m1: 'seated_leg_press',
+  b1: 'seated_leg_press',
+  b1_leg_press: 'seated_leg_press',
   b_t_leg: 'seated_leg_press',
   b_w_leg: 'seated_leg_press',
   b_th_leg: 'seated_leg_press',
 
-  // Chest Press Machine (Tuesday Main <-> Mon/Wed/Thu Bonus)
+  // Chest Press Machine / Flat DB (Tuesday Main <-> Mon/Wed/Thu Bonus <-> Program A)
   t1: 'chest_press',
+  a1: 'chest_press',
+  a1_chest_press: 'chest_press',
   b_m_chest: 'chest_press',
   b_w_chest: 'chest_press',
   b_th_chest: 'chest_press',
 
-  // Lat Pulldown Machine (Wednesday Main <-> Mon/Tue/Thu Bonus)
+  // Lat Pulldown Machine (Wednesday Main <-> Mon/Tue/Thu Bonus <-> Program A)
   w2: 'lat_pulldown',
+  a2: 'lat_pulldown',
+  a3_lat_pulldown: 'lat_pulldown',
   b_m_back: 'lat_pulldown',
   b_t_back: 'lat_pulldown',
   b_th_back: 'lat_pulldown',
 
-  // Shoulder Press Machine (Thursday Main <-> Mon/Tue/Wed Bonus)
+  // Shoulder Press Machine (Thursday Main <-> Mon/Tue/Wed Bonus <-> Program B)
   th1: 'shoulder_press',
+  b4: 'shoulder_press',
+  b3_shoulder_press: 'shoulder_press',
   b_m_shoulder: 'shoulder_press',
   b_t_shoulder: 'shoulder_press',
-  b_w_shoulder: 'shoulder_press'
+  b_w_shoulder: 'shoulder_press',
+
+  // Incline Chest (Tuesday Main <-> Program A)
+  t2: 'incline_chest',
+  a3: 'incline_chest',
+  a2_incline_chest: 'incline_chest',
+
+  // Row Back (Wednesday Main <-> Program A)
+  w1: 'row_back',
+  w3: 'row_back',
+  a4: 'row_back',
+  a4_seated_row: 'row_back',
+
+  // Chest Fly (Tuesday Main <-> Program A)
+  t3: 'chest_fly',
+  a5: 'chest_fly',
+  a5_pec_fly: 'chest_fly',
+
+  // Hanging Leg Raise / Abs (Thursday Main <-> Program A)
+  th7: 'hanging_leg_raise',
+  a6: 'hanging_leg_raise',
+  a6_abdominal: 'hanging_leg_raise',
+
+  // Hip Thrust (Monday Main <-> Program B)
+  m2: 'hip_thrust',
+  b2: 'hip_thrust',
+  b2_hip_thrust: 'hip_thrust',
+
+  // Leg Extension (Monday Main <-> Program B)
+  m3: 'leg_extension',
+  b3: 'leg_extension',
+
+  // Shrug (Thursday Main <-> Program B)
+  th4: 'shrug',
+  b5: 'shrug',
+  b5_shrug: 'shrug',
+
+  // Cable Triceps Pushdown (Tuesday Main <-> Program B)
+  t5: 'triceps_pushdown',
+  b6: 'triceps_pushdown',
+  b7_triceps_pushdown: 'triceps_pushdown',
+
+  // Dumbbell Hammer Curl (Wednesday Main <-> Program B)
+  w5: 'hammer_curl',
+  b7: 'hammer_curl',
+  b6_biceps_curl: 'hammer_curl'
 };
 
 export function getCanonicalExerciseId(exId) {
@@ -45,7 +98,9 @@ export const EXERCISE_DAY_MAP = {
   m1: 'mon', b_m_back: 'mon', b_m_chest: 'mon', b_m_shoulder: 'mon',
   t1: 'tue', b_t_shoulder: 'tue', b_t_back: 'tue', b_t_leg: 'tue',
   w2: 'wed', b_w_shoulder: 'wed', b_w_chest: 'wed', b_w_leg: 'wed',
-  th1: 'thu', b_th_back: 'thu', b_th_chest: 'thu', b_th_leg: 'thu'
+  th1: 'thu', b_th_back: 'thu', b_th_chest: 'thu', b_th_leg: 'thu',
+  a1: 'mon', a2: 'mon', a3: 'mon', a4: 'mon', a5: 'mon', a6: 'mon',
+  b1: 'wed', b2: 'wed', b3: 'wed', b4: 'wed', b5: 'wed', b6: 'wed', b7: 'wed'
 };
 
 export function getExerciseDay(exId) {
@@ -313,6 +368,86 @@ export const MACHINE_VIDEO_PRESETS = {
       shortName: "รอกเคเบิลคู่ดึงไขว้",
       equipment: "เคเบิลคู่ปรับระดับเสมอหน้า ดึงกางแขนไขว้ไปข้างหลัง",
       videoUrl: "https://www.youtube.com/watch?v=cGXBVOc5xIk"
+    }
+  ],
+  hanging_leg_raise: [
+    {
+      name: "เครื่องแบบที่ 1 (Captain's Chair / Power Tower)",
+      shortName: "เก้าอี้กัปตันยกเข่า",
+      equipment: "เครื่อง Captain's Chair มีเบาะรองศอก ยกเข่าหรือยกขาตรง",
+      videoUrl: "https://www.youtube.com/watch?v=hdng3Nm1x_E"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Hanging Bar / Pull-Up Bar)",
+      shortName: "โหนบาร์ม้วนสะโพก",
+      equipment: "โหนบาร์ดึงข้อ ยกเข่าม้วนสะโพกเข้าหาอก",
+      videoUrl: "https://www.youtube.com/watch?v=hdng3Nm1x_E"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Decline Ab Bench Crunch / Reverse Crunch)",
+      shortName: "ม้านั่งเอียง / ท้องราบ",
+      equipment: "ม้านั่งปรับเอียงนอนยกสะโพก หรือ Crunch บนเบาะ",
+      videoUrl: "https://www.youtube.com/watch?v=H1RkFIBeolk"
+    }
+  ],
+  shrug: [
+    {
+      name: "เครื่องแบบที่ 1 (Smith Machine Shrug)",
+      shortName: "Smith Machine ยักไหล่",
+      equipment: "เครื่อง Smith Machine ตั้งบาร์ระดับหน้าขา ยักไหล่บีบบ่า",
+      videoUrl: "https://www.youtube.com/watch?v=wTSt22ay31w"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Dumbbell Shrug)",
+      shortName: "ดัมเบลยักไหล่สองข้าง",
+      equipment: "ดัมเบลถือข้างลำตัว ยืนตรงยักไหล่ขึ้นตรง ๆ ไม่หมุนหัวไหล่",
+      videoUrl: "https://www.youtube.com/watch?v=g6qbzXzT5c8"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Trap Bar / Cable Dual Shrug)",
+      shortName: "Trap Bar / เคเบิลคู่",
+      equipment: "บาร์ Hex / Trap Bar หรือ ยืนตรงกลางเคเบิลคู่ปรับต่ำ",
+      videoUrl: "https://www.youtube.com/watch?v=d_k8w6Y7lfc"
+    }
+  ],
+  triceps_pushdown: [
+    {
+      name: "เครื่องแบบที่ 1 (Cable Rope Pushdown)",
+      shortName: "เคเบิลเชือกกดหลังแขน",
+      equipment: "เครื่องเคเบิลต่อหัวเชือก ดึงลงแล้วกางปลายเชือกออกบีบหลังแขน",
+      videoUrl: "https://www.youtube.com/watch?v=oz0gmMXpMAc"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Straight / V-Bar Pushdown)",
+      shortName: "บาร์ตรง / V-Bar พิน",
+      equipment: "เคเบิลบาร์ตรงหรือ V-Bar ล็อคข้อศอกข้างลำตัวกดลงสุด",
+      videoUrl: "https://www.youtube.com/watch?v=2-LAMcpzODU"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Seated Triceps Dip Machine)",
+      shortName: "เครื่องพินกดหลังแขน",
+      equipment: "เครื่องกดหลังแขนแบบนั่งเบาะพิน (Seated Dip Machine)",
+      videoUrl: "https://www.youtube.com/watch?v=0326dy_-CzM"
+    }
+  ],
+  hammer_curl: [
+    {
+      name: "เครื่องแบบที่ 1 (Standing / Seated DB Hammer Curl)",
+      shortName: "ดัมเบลแนวตั้ง",
+      equipment: "ดัมเบลพับแขนแนวตั้ง (สันมือหงายขึ้นด้านบน) ยืนหรือนั่ง",
+      videoUrl: "https://www.youtube.com/watch?v=YQAo_78-ruc"
+    },
+    {
+      name: "เครื่องแบบที่ 2 (Cable Rope Hammer Curl)",
+      shortName: "เคเบิลเชือกรอกต่ำ",
+      equipment: "เคเบิลรอกล่างต่อสายเชือก ยืนตรงดึงขึ้นด้วยการจับแบบค้อน",
+      videoUrl: "https://www.youtube.com/watch?v=7jqi2qWAUrs"
+    },
+    {
+      name: "เครื่องแบบที่ 3 (Preacher Hammer Curl Bench)",
+      shortName: "เบาะพิงแขน Preacher",
+      equipment: "ม้านั่ง Preacher วางแขนพับดัมเบลแนวตั้ง ล็อคท่อนแขนบนสนิท",
+      videoUrl: "https://www.youtube.com/watch?v=soxrZlIL35U"
     }
   ]
 };
@@ -938,5 +1073,328 @@ export const workoutData = {
         ]
       }
     ]
+  },
+  fri: {
+    title: "วันศุกร์: สลับ A/B (3-Day Alternating Split)",
+    subtitle: "สลับ Program A (อก+หลัง+ท้อง) หรือ Program B (ขา+แขน+ไหล่/บ่า) ตามรอบสัปดาห์ (Week 1: A-B-A, Week 2: B-A-B)",
+    exercises: [
+      {
+        id: "a1",
+        name: "Flat Dumbbell Bench Press",
+        isMain: true,
+        altName: "ดัมเบลนอนดันอกบนม้านั่งราบ (ใส่น้ำหนักต่อข้าง) หรือเครื่อง Chest Press",
+        mainMuscle: "อกส่วนกลาง (Mid Chest)",
+        subMuscle: "ไหล่หน้า (Front Delts), หลังแขน (Triceps)",
+        videoUrl: "https://www.youtube.com/watch?v=sqOw2Y68ecY",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_press,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (40-50%)" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "a2",
+        name: "Lat Pulldown Machine",
+        isMain: true,
+        altName: "ดึงบาร์ลงข้างหน้า หรือ Assisted Chin-up",
+        mainMuscle: "หลังส่วนกว้าง/ปีก (Latissimus Dorsi - V-Shape)",
+        subMuscle: "หน้าแขน (Biceps), สะบักและหลังบน",
+        videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        machineVideos: MACHINE_VIDEO_PRESETS.lat_pulldown,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (40-50%)" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "a3",
+        name: "Incline Dumbbell Press",
+        isMain: true,
+        altName: "ดันอกเบาะเอียง 30–45 องศา หรือ Incline Machine",
+        mainMuscle: "อกส่วนบน (Upper Chest / แนวไหปลาร้า)",
+        subMuscle: "ไหล่หน้า, หลังแขน",
+        videoUrl: "https://www.youtube.com/watch?v=0bnc96eUvG0",
+        machineVideos: MACHINE_VIDEO_PRESETS.incline_chest,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "a4",
+        name: "Seated Cable Row",
+        isMain: false,
+        altName: "เคเบิลดึงหลังท่านั่งจับแคบ (V-Bar) หรือ Chest-Supported Machine",
+        mainMuscle: "หลังส่วนกลางและปีกส่วนล่าง (Mid Back & Lower Lats)",
+        subMuscle: "หน้าแขน, หลังล่างช่วยพยุงตัว",
+        videoUrl: "https://www.youtube.com/watch?v=0U8VMBXPQco",
+        machineVideos: MACHINE_VIDEO_PRESETS.row_back,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "a5",
+        name: "Pec Fly Machine",
+        isMain: false,
+        altName: "เครื่องหนีบอก Matrix หรือ Cable Fly",
+        mainMuscle: "อกด้านใน/ร่องอก (Inner & Mid Chest)",
+        subMuscle: "ไหล่ด้านหน้า",
+        videoUrl: "https://www.youtube.com/watch?v=rTATwLKP548",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_fly,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง" }
+        ]
+      },
+      {
+        id: "a6",
+        name: "Hanging Leg Raise",
+        isMain: false,
+        altName: "โหนบาร์หรือเครื่อง Captain's Chair ยกเข่า/ยกขา",
+        mainMuscle: "หน้าท้องส่วนล่างและแกนกลางลำตัว (Lower Abs & Core)",
+        subMuscle: "แกนกลางลำตัว และกล้ามเนื้องอสะโพก (Hip Flexors)",
+        videoUrl: "https://www.youtube.com/watch?v=hdng3Nm1x_E",
+        machineVideos: MACHINE_VIDEO_PRESETS.hanging_leg_raise,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "12–15 ครั้ง" },
+          { type: "work", reps: "12–15 ครั้ง" }
+        ]
+      }
+    ],
+    bonusExercises: []
+  },
+  prog_a: {
+    id: "prog_a",
+    title: "Program A: อก + หลัง + ท้อง (Chest, Back & Abs)",
+    subtitle: "3-Day A/B Split - 6 ท่าหลักเน้นกล้ามเนื้อมวลรวมช่วงบนและแกนกลางลำตัว",
+    exercises: [
+      {
+        id: "a1",
+        name: "Flat Dumbbell Bench Press",
+        isMain: true,
+        altName: "ดัมเบลนอนดันอกบนม้านั่งราบ (ใส่น้ำหนักต่อข้าง) หรือเครื่อง Chest Press",
+        mainMuscle: "อกส่วนกลาง (Mid Chest)",
+        subMuscle: "ไหล่หน้า (Front Delts), หลังแขน (Triceps)",
+        videoUrl: "https://www.youtube.com/watch?v=sqOw2Y68ecY",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_press,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (40-50%)" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" },
+          { type: "work", reps: "6–8 ครั้ง" }
+        ]
+      },
+      {
+        id: "a2",
+        name: "Lat Pulldown Machine",
+        isMain: true,
+        altName: "ดึงบาร์ลงข้างหน้า หรือ Assisted Chin-up",
+        mainMuscle: "หลังส่วนกว้าง/ปีก (Latissimus Dorsi - V-Shape)",
+        subMuscle: "หน้าแขน (Biceps), สะบักและหลังบน",
+        videoUrl: "https://www.youtube.com/watch?v=BwV6jzYKiNY",
+        machineVideos: MACHINE_VIDEO_PRESETS.lat_pulldown,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (40-50%)" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "a3",
+        name: "Incline Dumbbell Press",
+        isMain: true,
+        altName: "ดันอกเบาะเอียง 30–45 องศา หรือ Incline Machine",
+        mainMuscle: "อกส่วนบน (Upper Chest / แนวไหปลาร้า)",
+        subMuscle: "ไหล่หน้า, หลังแขน",
+        videoUrl: "https://www.youtube.com/watch?v=0bnc96eUvG0",
+        machineVideos: MACHINE_VIDEO_PRESETS.incline_chest,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "a4",
+        name: "Seated Cable Row",
+        isMain: false,
+        altName: "เคเบิลดึงหลังท่านั่งจับแคบ (V-Bar) หรือ Chest-Supported Machine",
+        mainMuscle: "หลังส่วนกลางและปีกส่วนล่าง (Mid Back & Lower Lats)",
+        subMuscle: "หน้าแขน, หลังล่างช่วยพยุงตัว",
+        videoUrl: "https://www.youtube.com/watch?v=0U8VMBXPQco",
+        machineVideos: MACHINE_VIDEO_PRESETS.row_back,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "a5",
+        name: "Pec Fly Machine",
+        isMain: false,
+        altName: "เครื่องหนีบอก Matrix หรือ Cable Fly",
+        mainMuscle: "อกด้านใน/ร่องอก (Inner & Mid Chest)",
+        subMuscle: "ไหล่ด้านหน้า",
+        videoUrl: "https://www.youtube.com/watch?v=rTATwLKP548",
+        machineVideos: MACHINE_VIDEO_PRESETS.chest_fly,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง" }
+        ]
+      },
+      {
+        id: "a6",
+        name: "Hanging Leg Raise",
+        isMain: false,
+        altName: "โหนบาร์หรือเครื่อง Captain's Chair ยกเข่า/ยกขา",
+        mainMuscle: "หน้าท้องส่วนล่างและแกนกลางลำตัว (Lower Abs & Core)",
+        subMuscle: "แกนกลางลำตัว และกล้ามเนื้องอสะโพก (Hip Flexors)",
+        videoUrl: "https://www.youtube.com/watch?v=hdng3Nm1x_E",
+        machineVideos: MACHINE_VIDEO_PRESETS.hanging_leg_raise,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "12–15 ครั้ง" },
+          { type: "work", reps: "12–15 ครั้ง" }
+        ]
+      }
+    ],
+    bonusExercises: []
+  },
+  prog_b: {
+    id: "prog_b",
+    title: "Program B: ขา + แขน + ไหล่/บ่า (Legs, Arms, Shoulders & Traps)",
+    subtitle: "3-Day A/B Split - 7 ท่าหลักเน้นช่วงล่าง แขนทั้งสองมัด และหัวไหล่/บ่า 3D",
+    exercises: [
+      {
+        id: "b1",
+        name: "Seated Leg Press Machine",
+        isMain: true,
+        altName: "เครื่องถีบขา หรือ Squat",
+        mainMuscle: "ต้นขาด้านหน้า (Quads), ก้น (Glutes)",
+        subMuscle: "ต้นขาด้านหลัง, น่อง (วางเท้าสูงโดนก้นมากขึ้น)",
+        videoUrl: "https://www.youtube.com/watch?v=kTM85YKV7ls",
+        machineVideos: MACHINE_VIDEO_PRESETS.seated_leg_press,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง (40-50%)" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "b2",
+        name: "Smith Machine Hip Thrust",
+        isMain: true,
+        altName: "หรือ Glute Drive Machine / Barbell",
+        mainMuscle: "ก้นมัดใหญ่ (Gluteus Maximus เน้น ๆ)",
+        subMuscle: "ต้นขาด้านหลัง และแกนกลางลำตัว",
+        videoUrl: "https://www.youtube.com/watch?v=s1gUMRjpgqM",
+        machineVideos: MACHINE_VIDEO_PRESETS.hip_thrust,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "b3",
+        name: "Leg Extension Machine",
+        isMain: false,
+        altName: "เครื่องเตะขาหน้า",
+        mainMuscle: "ต้นขาด้านหน้า 4 มัดล้วน (Quadriceps)",
+        subMuscle: "กล้ามเนื้อพยุงรอบหัวเข่า",
+        videoUrl: "https://www.youtube.com/watch?v=dpn7z7nYRcQ",
+        machineVideos: MACHINE_VIDEO_PRESETS.leg_extension,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง" }
+        ]
+      },
+      {
+        id: "b4",
+        name: "Seated DB Shoulder Press",
+        isMain: true,
+        altName: "ดัมเบลนั่งดันไหล่ หรือ Shoulder Press Machine",
+        mainMuscle: "หัวไหล่ด้านหน้าและด้านข้าง (Front & Side Delts)",
+        subMuscle: "แขนด้านหลัง (Triceps), บ่าส่วนบน",
+        videoUrl: "https://www.youtube.com/watch?v=aMB82ZgfdJ8",
+        machineVideos: MACHINE_VIDEO_PRESETS.shoulder_press,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "b5",
+        name: "Dumbbell Shrug",
+        isMain: false,
+        altName: "ยักไหล่ถือดัมเบล หรือ Smith Machine Shrug",
+        mainMuscle: "กล้ามเนื้อบ่า/สะพานคอ (Upper Trapezius)",
+        subMuscle: "กำลังมือและท่อนแขน (Grip & Forearms)",
+        videoUrl: "https://www.youtube.com/watch?v=wTSt22ay31w",
+        machineVideos: MACHINE_VIDEO_PRESETS.shrug,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง" },
+          { type: "work", reps: "10–12 ครั้ง" }
+        ]
+      },
+      {
+        id: "b6",
+        name: "Cable Triceps Pushdown",
+        isMain: false,
+        altName: "เคเบิลกดเชือกหรือบาร์หลังแขน",
+        mainMuscle: "แขนด้านหลังทั้ง 3 หัว (Triceps เน้น ๆ)",
+        subMuscle: "ท่อนแขนส่วนปลาย (Forearms)",
+        videoUrl: "https://www.youtube.com/watch?v=oz0gmMXpMAc",
+        machineVideos: MACHINE_VIDEO_PRESETS.triceps_pushdown,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      },
+      {
+        id: "b7",
+        name: "Dumbbell Hammer Curl",
+        isMain: false,
+        altName: "พับแขนจับดัมเบลแนวตั้ง หรือเชือกเคเบิล",
+        mainMuscle: "กล้ามเนื้อแขนมัดลึกดันแขนหนา (Brachialis) + ท่อนแขน",
+        subMuscle: "หน้าแขน (Biceps)",
+        videoUrl: "https://www.youtube.com/watch?v=YQAo_78-ruc",
+        machineVideos: MACHINE_VIDEO_PRESETS.hammer_curl,
+        sets: [
+          { type: "warm", reps: "15 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" },
+          { type: "work", reps: "8–10 ครั้ง" }
+        ]
+      }
+    ],
+    bonusExercises: []
   }
 };
+
+export const programA = workoutData.prog_a;
+export const programB = workoutData.prog_b;
+
+export const PROGRAM_A = programA;
+export const PROGRAM_B = programB;
+export const AB_MACHINE_VIDEO_PRESETS = MACHINE_VIDEO_PRESETS;
+export const AB_SPLIT_CANONICAL_MAP = EXERCISE_CANONICAL_MAP;
+
+

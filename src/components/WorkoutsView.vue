@@ -58,6 +58,135 @@
       </button>
     </div>
 
+    <!-- 3-Day A/B Alternating Split Quick Chips (1-Click Launch) -->
+    <div class="archive-card p-3 sm:p-4 bg-gradient-to-br from-paper via-surface to-paper border-2 border-plate shadow-[3px_3px_0px_#1e2220]">
+      <div class="flex items-center justify-between mb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase">
+            3-DAY A/B ALTERNATING PROTOCOL
+          </span>
+          <span class="text-plate/30">•</span>
+          <span class="text-[11px] font-mono text-emerald font-bold">
+            1-Click Launch
+          </span>
+        </div>
+        <span class="text-[10px] font-body text-ink-muted">
+          จันทร์, พุธ, ศุกร์ (สลับ A-B-A / B-A-B)
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <!-- Program A 1-Click Launch Card -->
+        <div class="p-3 bg-surface rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] flex flex-col justify-between gap-2.5 hover:border-flame transition-all">
+          <div>
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <span class="text-xs font-bold font-heading text-ink">Program A</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-flame-bg text-flame font-bold">6 ท่า • อก+หลัง+ท้อง</span>
+            </div>
+            <p class="text-[11px] text-ink-muted line-clamp-1 font-body">
+              Flat DB, Lat Pulldown, Incline DB, Seated Row, Pec Fly, Leg Raise
+            </p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              @click="launchProgramA"
+              class="flex-1 py-1.5 px-2.5 bg-flame hover:bg-flame-glow text-white text-[11px] font-heading font-bold rounded-lg border border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all flex items-center justify-center gap-1"
+            >
+              <span>⚡ เริ่ม Program A (1-Click)</span>
+            </button>
+            <button
+              type="button"
+              @click="openDayProtocol('prog_a')"
+              class="py-1.5 px-2 bg-surface hover:bg-paper-subtle text-ink text-[11px] font-heading font-bold rounded-lg border border-plate/40 shadow-xs"
+              title="ดูตาราง Program A"
+            >
+              <span>📋 ตาราง</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Program B 1-Click Launch Card -->
+        <div class="p-3 bg-surface rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] flex flex-col justify-between gap-2.5 hover:border-flame transition-all">
+          <div>
+            <div class="flex items-center justify-between gap-1 mb-1">
+              <span class="text-xs font-bold font-heading text-ink">Program B</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-bg text-emerald font-bold">7 ท่า • ขา+แขน+ไหล่</span>
+            </div>
+            <p class="text-[11px] text-ink-muted line-clamp-1 font-body">
+              Leg Press, Hip Thrust, Leg Ext, DB Shoulder, Shrug, Triceps, Hammer
+            </p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              @click="launchProgramB"
+              class="flex-1 py-1.5 px-2.5 bg-emerald hover:bg-emerald/90 text-white text-[11px] font-heading font-bold rounded-lg border border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all flex items-center justify-center gap-1"
+            >
+              <span>⚡ เริ่ม Program B (1-Click)</span>
+            </button>
+            <button
+              type="button"
+              @click="openDayProtocol('prog_b')"
+              class="py-1.5 px-2 bg-surface hover:bg-paper-subtle text-ink text-[11px] font-heading font-bold rounded-lg border border-plate/40 shadow-xs"
+              title="ดูตาราง Program B"
+            >
+              <span>📋 ตาราง</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-Day A/B Alternating Split Quick Chips (Program A & Program B) -->
+    <div class="archive-card p-3 sm:p-4">
+      <div class="flex items-center justify-between mb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase">
+            3-DAY A/B ALTERNATING PROTOCOL
+          </span>
+          <span class="text-plate/30">•</span>
+          <span class="text-[11px] font-mono text-ink-muted">
+            จันทร์, พุธ, ศุกร์
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <button
+          type="button"
+          @click="launchProgramA"
+          class="flex items-center justify-between p-3 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] bg-surface hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation group text-left"
+        >
+          <div>
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="w-2 h-2 rounded-full bg-emerald"></span>
+              <span class="text-xs font-bold font-heading text-ink">Program A</span>
+              <span class="text-[10px] font-mono text-emerald font-bold">6 ท่า</span>
+            </div>
+            <p class="text-[11px] font-body text-ink-muted truncate">อก + หลัง + ท้อง (Chest, Back & Abs)</p>
+          </div>
+          <span class="text-xs font-mono font-bold text-emerald group-hover:translate-x-0.5 transition-transform">⚡ เริ่มฝึก</span>
+        </button>
+
+        <button
+          type="button"
+          @click="launchProgramB"
+          class="flex items-center justify-between p-3 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] bg-surface hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation group text-left"
+        >
+          <div>
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="w-2 h-2 rounded-full bg-flame"></span>
+              <span class="text-xs font-bold font-heading text-ink">Program B</span>
+              <span class="text-[10px] font-mono text-flame font-bold">7 ท่า</span>
+            </div>
+            <p class="text-[11px] font-body text-ink-muted truncate">ขา + แขน + ไหล่/บ่า (Legs, Arms & Shoulders)</p>
+          </div>
+          <span class="text-xs font-mono font-bold text-flame group-hover:translate-x-0.5 transition-transform">⚡ เริ่มฝึก</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Atiwitch's 4-Day Schedule Quick Chips (1-Click Launch) -->
     <div class="archive-card p-3 sm:p-4">
       <div class="flex items-center justify-between mb-2.5">
@@ -72,7 +201,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 sm:gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-6 gap-1.5 sm:gap-2">
         <button
           v-for="chip in scheduleChips"
           :key="chip.id"
@@ -261,9 +390,9 @@ function handleDeleteRoutine(routine) {
   }
 }
 
-// 4-Day Protocol Chips
+// 4-Day & 3-Day Protocol Chips
 const currentDayOfWeek = new Date().getDay(); // 0 = Sun, 1 = Mon...
-const dayMap = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu' };
+const dayMap = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri' };
 const todayChipId = dayMap[currentDayOfWeek] || 'rest';
 
 const scheduleChips = [
@@ -271,21 +400,45 @@ const scheduleChips = [
   { id: 'tue', routineId: 'atiwitch_tue_chest', dayName: 'อังคาร', targetMuscle: 'อก', sub: 'Chest', isRest: false },
   { id: 'wed', routineId: 'atiwitch_wed_back', dayName: 'พุธ', targetMuscle: 'หลัง', sub: 'Back', isRest: false },
   { id: 'thu', routineId: 'atiwitch_thu_shoulders', dayName: 'พฤหัส', targetMuscle: 'ไหล่', sub: 'Shoulders', isRest: false },
-  { id: 'rest', routineId: null, dayName: 'ศุกร์-อาทิตย์', targetMuscle: 'พัก', sub: 'Rest', isRest: true }
+  { id: 'fri', routineId: 'atiwitch_prog_a', dayName: 'ศุกร์', targetMuscle: 'A / B', sub: 'Split', isRest: false },
+  { id: 'rest', routineId: null, dayName: 'เสาร์-อาทิตย์', targetMuscle: 'พัก', sub: 'Rest', isRest: true }
 ];
 
 function getDayKeyForRoutine(routine) {
   if (!routine) return null;
+  if (routine.id?.includes('prog_a') || routine.id?.includes('program_a') || routine.title?.includes('Program A')) return 'prog_a';
+  if (routine.id?.includes('prog_b') || routine.id?.includes('program_b') || routine.title?.includes('Program B')) return 'prog_b';
   if (routine.id?.includes('mon') || routine.title?.includes('จันทร์')) return 'mon';
   if (routine.id?.includes('tue') || routine.title?.includes('อังคาร')) return 'tue';
   if (routine.id?.includes('wed') || routine.title?.includes('พุธ')) return 'wed';
   if (routine.id?.includes('thu') || routine.title?.includes('พฤหัส')) return 'thu';
+  if (routine.id?.includes('fri') || routine.title?.includes('ศุกร์')) return 'fri';
   return null;
 }
 
 function openDayProtocol(dayKey) {
   if (workoutStore.switchDay) workoutStore.switchDay(dayKey);
   if (workoutStore.switchTab) workoutStore.switchTab(dayKey);
+}
+
+function launchProgramA() {
+  const r = getRoutineById('atiwitch_prog_a') || getRoutineById('atiwitch_ab_program_a');
+  if (r) {
+    startSessionFromRoutine(r);
+    emit('open-runner');
+  } else {
+    openDayProtocol('prog_a');
+  }
+}
+
+function launchProgramB() {
+  const r = getRoutineById('atiwitch_prog_b') || getRoutineById('atiwitch_ab_program_b');
+  if (r) {
+    startSessionFromRoutine(r);
+    emit('open-runner');
+  } else {
+    openDayProtocol('prog_b');
+  }
 }
 
 function handleChipLaunch(chip) {

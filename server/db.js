@@ -87,31 +87,189 @@ try {
   db.exec("ALTER TABLE exercise_last_weights ADD COLUMN canonical_id TEXT;");
 } catch(e) {}
 
-// Canonical Exercise Mapping (shared across days between main lifts and bonus touch-ups)
+// Canonical Exercise Mapping (shared across 4-Day Split, 3-Day A/B Alternating Split, and custom routines)
 const CANONICAL_MAP = {
-  // Shoulder Press Machine (Thursday Main <-> Mon/Tue/Wed Bonus)
+  // 1. Shoulder Press Machine (Thursday Main <-> Mon/Tue/Wed Bonus, Program A/B)
   th1: 'shoulder_press',
   b_m_shoulder: 'shoulder_press',
   b_t_shoulder: 'shoulder_press',
   b_w_shoulder: 'shoulder_press',
+  shoulder_press: 'shoulder_press',
+  shoulder_press_machine: 'shoulder_press',
+  seated_dumbbell_shoulder_press: 'shoulder_press',
+  overhead_barbell_press: 'shoulder_press',
+  b4: 'shoulder_press',
+  b3_shoulder_press: 'shoulder_press',
+  pa_shoulder_press: 'shoulder_press',
+  pb_shoulder_press: 'shoulder_press',
+  pa_shoulder: 'shoulder_press',
+  pb_shoulder: 'shoulder_press',
+  a_shoulder_press: 'shoulder_press',
+  b_shoulder_press: 'shoulder_press',
+  a_shoulder: 'shoulder_press',
+  b_shoulder: 'shoulder_press',
+  program_a_shoulder_press: 'shoulder_press',
+  program_b_shoulder_press: 'shoulder_press',
 
-  // Chest Press Machine (Tuesday Main <-> Mon/Wed/Thu Bonus)
+  // 2. Chest Press Machine (Tuesday Main <-> Mon/Wed/Thu Bonus, Program A/B)
   t1: 'chest_press',
   b_m_chest: 'chest_press',
   b_w_chest: 'chest_press',
   b_th_chest: 'chest_press',
+  chest_press: 'chest_press',
+  chest_press_machine: 'chest_press',
+  barbell_bench_press: 'chest_press',
+  flat_dumbbell_bench_press: 'chest_press',
+  a1: 'chest_press',
+  a1_chest_press: 'chest_press',
+  pa_chest_press: 'chest_press',
+  pb_chest_press: 'chest_press',
+  pa_chest: 'chest_press',
+  pb_chest: 'chest_press',
+  a_chest_press: 'chest_press',
+  b_chest_press: 'chest_press',
+  a_chest: 'chest_press',
+  b_chest: 'chest_press',
+  program_a_chest_press: 'chest_press',
+  program_b_chest_press: 'chest_press',
 
-  // Lat Pulldown Machine (Wednesday Main <-> Mon/Tue/Thu Bonus)
+  // 3. Lat Pulldown Machine (Wednesday Main <-> Mon/Tue/Thu Bonus, Program A/B)
   w2: 'lat_pulldown',
   b_m_back: 'lat_pulldown',
   b_t_back: 'lat_pulldown',
   b_th_back: 'lat_pulldown',
+  lat_pulldown: 'lat_pulldown',
+  lat_pulldown_machine: 'lat_pulldown',
+  assisted_pull_up_machine: 'lat_pulldown',
+  pullups: 'lat_pulldown',
+  a2: 'lat_pulldown',
+  a3_lat_pulldown: 'lat_pulldown',
+  pa_lat_pulldown: 'lat_pulldown',
+  pb_lat_pulldown: 'lat_pulldown',
+  pa_back: 'lat_pulldown',
+  pb_back: 'lat_pulldown',
+  a_lat_pulldown: 'lat_pulldown',
+  b_lat_pulldown: 'lat_pulldown',
+  a_back: 'lat_pulldown',
+  b_back: 'lat_pulldown',
+  program_a_lat_pulldown: 'lat_pulldown',
+  program_b_lat_pulldown: 'lat_pulldown',
 
-  // Seated Leg Press Machine (Monday Main <-> Tue/Wed/Thu Bonus)
+  // 4. Seated Leg Press Machine (Monday Main <-> Tue/Wed/Thu Bonus, Program A/B)
   m1: 'seated_leg_press',
   b_t_leg: 'seated_leg_press',
   b_w_leg: 'seated_leg_press',
-  b_th_leg: 'seated_leg_press'
+  b_th_leg: 'seated_leg_press',
+  seated_leg_press: 'seated_leg_press',
+  hack_squat_machine: 'seated_leg_press',
+  barbell_back_squat: 'seated_leg_press',
+  b1: 'seated_leg_press',
+  b1_leg_press: 'seated_leg_press',
+  pa_leg_press: 'seated_leg_press',
+  pb_leg_press: 'seated_leg_press',
+  pa_leg: 'seated_leg_press',
+  pb_leg: 'seated_leg_press',
+  a_leg_press: 'seated_leg_press',
+  b_leg_press: 'seated_leg_press',
+  a_leg: 'seated_leg_press',
+  b_leg: 'seated_leg_press',
+  program_a_leg_press: 'seated_leg_press',
+  program_b_leg_press: 'seated_leg_press',
+
+  // 5. Incline Chest Press (Tuesday Main, Program A/B)
+  t2: 'incline_chest',
+  incline_chest: 'incline_chest',
+  incline_dumbbell_press: 'incline_chest',
+  incline_smith_press: 'incline_chest',
+  a3: 'incline_chest',
+  a2_incline_chest: 'incline_chest',
+  pa_incline_chest: 'incline_chest',
+  pb_incline_chest: 'incline_chest',
+  pa_incline_press: 'incline_chest',
+  pb_incline_press: 'incline_chest',
+  a_incline_chest: 'incline_chest',
+  b_incline_chest: 'incline_chest',
+  a_incline_press: 'incline_chest',
+  b_incline_press: 'incline_chest',
+  program_a_incline_chest: 'incline_chest',
+  program_b_incline_chest: 'incline_chest',
+
+  // 6. Seated Row / Row Back (Wednesday Main, Program A/B)
+  w1: 'row_back',
+  row_back: 'row_back',
+  seated_row: 'row_back',
+  seated_cable_row: 'row_back',
+  chest_supported_row: 'row_back',
+  barbell_bent_over_row: 'row_back',
+  t_bar_row: 'row_back',
+  a4: 'row_back',
+  a4_seated_row: 'row_back',
+  pa_row_back: 'row_back',
+  pb_row_back: 'row_back',
+  pa_seated_row: 'row_back',
+  pb_seated_row: 'row_back',
+  a_row_back: 'row_back',
+  b_row_back: 'row_back',
+  a_seated_row: 'row_back',
+  b_seated_row: 'row_back',
+  program_a_row_back: 'row_back',
+  program_b_row_back: 'row_back',
+
+  // 7. Pec Fly / Chest Fly (Tuesday Accessory, Program A/B)
+  t3: 'chest_fly',
+  chest_fly: 'chest_fly',
+  pec_fly: 'chest_fly',
+  pec_fly_machine: 'chest_fly',
+  cable_crossover: 'chest_fly',
+  cable_incline_fly: 'chest_fly',
+  a5: 'chest_fly',
+  a5_pec_fly: 'chest_fly',
+  pa_chest_fly: 'chest_fly',
+  pb_chest_fly: 'chest_fly',
+  a_chest_fly: 'chest_fly',
+  b_chest_fly: 'chest_fly',
+  program_a_chest_fly: 'chest_fly',
+  program_b_chest_fly: 'chest_fly',
+
+  // 8. Hip Thrust (Monday Main, Program A/B)
+  m2: 'hip_thrust',
+  hip_thrust: 'hip_thrust',
+  smith_hip_thrust: 'hip_thrust',
+  b2: 'hip_thrust',
+  b2_hip_thrust: 'hip_thrust',
+  pa_hip_thrust: 'hip_thrust',
+  pb_hip_thrust: 'hip_thrust',
+  a_hip_thrust: 'hip_thrust',
+  b_hip_thrust: 'hip_thrust',
+  program_a_hip_thrust: 'hip_thrust',
+  program_b_hip_thrust: 'hip_thrust',
+
+  // 9. Leg Extension (Monday Accessory, Program A/B)
+  m3: 'leg_extension',
+  leg_extension: 'leg_extension',
+  leg_extension_machine: 'leg_extension',
+  b3: 'leg_extension',
+  pa_leg_extension: 'leg_extension',
+  pb_leg_extension: 'leg_extension',
+  a_leg_extension: 'leg_extension',
+  b_leg_extension: 'leg_extension',
+  program_a_leg_extension: 'leg_extension',
+  program_b_leg_extension: 'leg_extension',
+
+  // 10. Secondary movements in Program A & B
+  a6: 'hanging_leg_raise',
+  hanging_leg_raise: 'hanging_leg_raise',
+  a6_abdominal: 'abdominal_core',
+  b4_lateral_raise: 'lateral_raise',
+  b5: 'shrug',
+  shrug: 'shrug',
+  b5_shrug: 'shrug_traps',
+  b6: 'triceps_pushdown',
+  triceps_pushdown: 'triceps_pushdown',
+  b6_biceps_curl: 'biceps_curl',
+  b7: 'hammer_curl',
+  hammer_curl: 'hammer_curl',
+  b7_triceps_pushdown: 'triceps_pushdown'
 };
 
 function getCanonicalExerciseId(exId) {
@@ -253,9 +411,16 @@ const repo = {
         // If target has multiple sets (not a single-set bonus touchup),
         // seed/sync sets 1, 2, and 3 so all working sets have this latest record!
         if (!targetId.startsWith('b_')) {
-          stmt.run(targetId, 1, wNum, rNum, dateStr, canon);
-          stmt.run(targetId, 2, wNum, rNum, dateStr, canon);
-          stmt.run(targetId, 3, wNum, rNum, dateStr, canon);
+          if (exerciseId.startsWith('b_')) {
+            // Source is a bonus touchup (which only performs set 1)
+            // Seed sets 1, 2, and 3 so all working sets on the main day have this latest record!
+            stmt.run(targetId, 1, wNum, rNum, dateStr, canon);
+            stmt.run(targetId, 2, wNum, rNum, dateStr, canon);
+            stmt.run(targetId, 3, wNum, rNum, dateStr, canon);
+          } else {
+            // Standard working set maps to the corresponding working set index
+            stmt.run(targetId, setIndex, wNum, rNum, dateStr, canon);
+          }
         } else {
           // Target is a bonus touchup exercise (which reads set_index = 1).
           // Only primary working set 1 (or single working set) propagates to bonus touchup set 1,
@@ -445,7 +610,17 @@ const repo = {
 
   // Heal all canonical records from true historical sessions
   healCanonicalRecords() {
-    const canons = ['shoulder_press', 'chest_press', 'lat_pulldown', 'seated_leg_press'];
+    const canons = [
+      'shoulder_press',
+      'chest_press',
+      'lat_pulldown',
+      'seated_leg_press',
+      'incline_chest',
+      'row_back',
+      'chest_fly',
+      'hip_thrust',
+      'leg_extension'
+    ];
     let healedCount = 0;
 
     for (const canon of canons) {
