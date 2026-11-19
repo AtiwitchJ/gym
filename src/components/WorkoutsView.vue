@@ -100,14 +100,14 @@
             <button
               type="button"
               @click="launchProgramA"
-              class="flex-1 py-1.5 px-2.5 bg-flame hover:bg-flame-glow text-white text-[11px] font-heading font-bold rounded-lg border border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all flex items-center justify-center gap-1"
+              class="min-h-[44px] min-w-[44px] flex-1 py-1.5 px-2.5 bg-flame hover:bg-flame-glow text-white text-[11px] font-heading font-bold rounded-lg border border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all flex items-center justify-center gap-1"
             >
               <span>⚡ เริ่ม Program A (1-Click)</span>
             </button>
             <button
               type="button"
               @click="openDayProtocol('prog_a')"
-              class="py-1.5 px-2 bg-surface hover:bg-paper-subtle text-ink text-[11px] font-heading font-bold rounded-lg border border-plate/40 shadow-xs"
+              class="min-h-[44px] min-w-[44px] py-1.5 px-2 bg-surface hover:bg-paper-subtle text-ink text-[11px] font-heading font-bold rounded-lg border border-plate/40 shadow-xs"
               title="ดูตาราง Program A"
             >
               <span>📋 ตาราง</span>
@@ -130,14 +130,14 @@
             <button
               type="button"
               @click="launchProgramB"
-              class="flex-1 py-1.5 px-2.5 bg-emerald hover:bg-emerald/90 text-white text-[11px] font-heading font-bold rounded-lg border border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all flex items-center justify-center gap-1"
+              class="min-h-[44px] min-w-[44px] flex-1 py-1.5 px-2.5 bg-emerald hover:bg-emerald/90 text-white text-[11px] font-heading font-bold rounded-lg border border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all flex items-center justify-center gap-1"
             >
               <span>⚡ เริ่ม Program B (1-Click)</span>
             </button>
             <button
               type="button"
               @click="openDayProtocol('prog_b')"
-              class="py-1.5 px-2 bg-surface hover:bg-paper-subtle text-ink text-[11px] font-heading font-bold rounded-lg border border-plate/40 shadow-xs"
+              class="min-h-[44px] min-w-[44px] py-1.5 px-2 bg-surface hover:bg-paper-subtle text-ink text-[11px] font-heading font-bold rounded-lg border border-plate/40 shadow-xs"
               title="ดูตาราง Program B"
             >
               <span>📋 ตาราง</span>
@@ -258,7 +258,7 @@
             <button
               type="button"
               @click="handleStartRoutine(routine)"
-              class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 py-2 px-3.5 bg-flame hover:bg-flame-glow text-white font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              class="min-h-[44px] min-w-[44px] flex-1 sm:flex-initial flex items-center justify-center gap-1.5 py-2 px-3.5 bg-flame hover:bg-flame-glow text-white font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
               title="เริ่มการฝึกซ้อมตาม Routine นี้"
             >
               <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -272,7 +272,7 @@
               v-if="getDayKeyForRoutine(routine)"
               type="button"
               @click="openDayProtocol(getDayKeyForRoutine(routine))"
-              class="flex items-center justify-center gap-1 py-2 px-2.5 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              class="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1 py-2 px-2.5 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
               title="เปิดดูตารางประจำวัน พร้อมเซ็ตเสริมและคลิปสาธิต"
             >
               <span>📋 ตารางวัน</span>
@@ -282,7 +282,7 @@
             <button
               type="button"
               @click="emit('edit-routine', routine)"
-              class="flex items-center justify-center gap-1 py-2 px-3 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              class="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1 py-2 px-3 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
               title="แก้ไข Routine นี้"
             >
               <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 text-ink-muted" viewBox="0 0 24 24">
@@ -296,7 +296,7 @@
             <button
               type="button"
               @click="handleDeleteRoutine(routine)"
-              class="p-2 bg-surface hover:bg-rose-50 text-ink-muted hover:text-rose-600 rounded-xl border-2 border-plate/40 hover:border-rose-600 shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              class="min-h-[44px] min-w-[44px] p-2 bg-surface hover:bg-rose-50 text-ink-muted hover:text-rose-600 rounded-xl border-2 border-plate/40 hover:border-rose-600 shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
               title="ลบ Routine นี้"
             >
               <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">

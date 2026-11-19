@@ -33,7 +33,7 @@
         <button
           v-if="isWorkoutDay"
           @click="toggleExerciseImages"
-          class="text-[10px] sm:text-[11px] font-mono font-bold px-2 py-1 rounded-full border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none touch-manipulation"
+          class="min-h-[44px] min-w-[44px] text-[10px] sm:text-[11px] font-mono font-bold px-2 py-1 rounded-full border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none touch-manipulation"
           :class="showExerciseImages ? 'bg-flame-bg text-flame border-flame' : 'bg-surface text-ink-muted opacity-80'"
           :title="showExerciseImages ? 'คลิกเพื่อซ่อนรูป (โหมดกระชับ)' : 'คลิกเพื่อแสดงภาพตัวอย่าง'"
         >
@@ -49,7 +49,7 @@
         <button
           v-if="isWorkoutDay"
           @click="confirmReset"
-          class="text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 border-plate bg-surface hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+          class="min-h-[44px] min-w-[44px] text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 border-plate bg-surface hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
           title="ล้างข้อมูลติ๊กของวันนี้"
         >
           RESET

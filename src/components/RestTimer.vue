@@ -28,7 +28,7 @@
             v-for="preset in [60, 90, 120, 180]"
             :key="preset"
             @click="setTimerDuration(preset)"
-            class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full border-2 border-plate transition-all select-none touch-manipulation whitespace-nowrap"
+            class="min-h-[44px] min-w-[44px] text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full border-2 border-plate transition-all select-none touch-manipulation whitespace-nowrap"
             :class="timerDuration === preset
               ? 'bg-flame text-white shadow-[1.5px_1.5px_0px_#1e2220] translate-x-[-1px] translate-y-[-1px]'
               : 'bg-surface hover:bg-paper-dim text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
@@ -71,7 +71,7 @@
         <!-- Play / Pause Button -->
         <button
           @click="toggleTimer"
-          class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-white transition-all select-none border-2 border-plate touch-manipulation"
+          class="min-h-[44px] min-w-[44px] w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-white transition-all select-none border-2 border-plate touch-manipulation"
           :class="isRunning
             ? 'bg-gold hover:bg-gold-glow text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
             : 'bg-flame hover:bg-flame-glow shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
@@ -88,7 +88,7 @@
         <!-- Reset Button -->
         <button
           @click="resetTimer"
-          class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-surface hover:bg-paper-subtle border-2 border-plate flex items-center justify-center text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+          class="min-h-[44px] min-w-[44px] w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-surface hover:bg-paper-subtle border-2 border-plate flex items-center justify-center text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
           title="รีเซ็ตเวลา"
         >
           <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">

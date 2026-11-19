@@ -46,7 +46,7 @@
             </p>
             <button
               type="button"
-              class="mt-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
+              class="min-h-[44px] min-w-[44px] mt-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
               title="ดูประวัติและ PR ของท่านี้"
               @click="showHistory = true"
             >
@@ -55,7 +55,7 @@
             <button
               v-if="isBarbell"
               type="button"
-              class="mt-1 ml-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-gold hover:bg-gold-glow text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
+              class="min-h-[44px] min-w-[44px] mt-1 ml-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-gold hover:bg-gold-glow text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
               title="คำนวณแผ่นน้ำหนักบาร์เบล"
               @click="openPlatesForExercise"
             >
@@ -107,7 +107,7 @@
             v-else
             type="button"
             @click="toggleVideo"
-            class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
+            class="min-h-[44px] min-w-[44px] flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
             :class="isPlayingVideo
               ? 'bg-flame text-white'
               : 'bg-surface hover:bg-paper-subtle text-ink'"
@@ -148,7 +148,7 @@
             v-if="hasAnyPrev"
             type="button"
             @click="applyAllPrev"
-            class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-flame-bg text-flame hover:bg-flame hover:text-white border border-flame/30 transition-all select-none shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
+            class="min-h-[44px] min-w-[44px] text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-flame-bg text-flame hover:bg-flame hover:text-white border border-flame/30 transition-all select-none shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
             title="ดึงสถิติล่าสุดทั้งน้ำหนักและจำนวนครั้งมาใส่ทุกเซ็ต"
           >
             ดึงสถิติเดิมทั้งหมด
@@ -466,7 +466,7 @@
             :key="opt.value"
             type="button"
             @click="pickRir(sIdx, opt.value)"
-            class="min-h-[40px] px-3 rounded-xl border-2 border-plate text-xs font-heading font-bold transition-all touch-manipulation"
+            class="min-h-[44px] min-w-[44px] px-3 rounded-xl border-2 border-plate text-xs font-heading font-bold transition-all touch-manipulation"
             :class="getRir(sIdx) === opt.value
               ? 'bg-flame text-white shadow-[1.5px_1.5px_0px_#1e2220]'
               : 'bg-surface text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"

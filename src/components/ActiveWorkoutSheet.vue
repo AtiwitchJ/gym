@@ -33,7 +33,7 @@
           <button
             type="button"
             @click="emit('minimize')"
-            class="px-2 py-1.5 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
+            class="min-h-[44px] min-w-[44px] px-2 py-1.5 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
             title="ย่อหน้าต่างออกกำลังกาย (Minimize)"
           >
             <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 text-ink-muted" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@
           <button
             type="button"
             @click="isPickerOpen = true"
-            class="px-2 sm:px-2.5 py-1.5 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
+            class="min-h-[44px] min-w-[44px] px-2 sm:px-2.5 py-1.5 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
             title="เพิ่มท่าฝึก (Add Exercise)"
           >
             <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 text-flame" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@
           <button
             type="button"
             @click="handleDiscard"
-            class="px-2.5 sm:px-3 py-1.5 rounded-xl border-2 border-plate/40 hover:border-rose-600 bg-surface hover:bg-rose-50 text-ink-muted hover:text-rose-600 font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
+            class="min-h-[44px] min-w-[44px] px-2.5 sm:px-3 py-1.5 rounded-xl border-2 border-plate/40 hover:border-rose-600 bg-surface hover:bg-rose-50 text-ink-muted hover:text-rose-600 font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
             title="ยกเลิกการออกกำลังกายนี้"
           >
             <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
@@ -74,7 +74,7 @@
           <button
             type="button"
             @click="handleFinish"
-            class="px-3.5 sm:px-4 py-1.5 rounded-xl border-2 border-plate bg-emerald hover:bg-emerald-600 text-white font-heading font-bold text-xs sm:text-sm shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1.5"
+            class="min-h-[44px] min-w-[44px] px-3.5 sm:px-4 py-1.5 rounded-xl border-2 border-plate bg-emerald hover:bg-emerald-600 text-white font-heading font-bold text-xs sm:text-sm shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1.5"
             title="เสร็จสิ้นและบันทึกประวัติการออกกำลังกาย"
           >
             <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
@@ -167,7 +167,7 @@
                 v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).videoId || getExerciseVideoInfo(exercise.exerciseId, exIdx).machineOptions.length > 0"
                 type="button"
                 @click="toggleExerciseVideo(exIdx)"
-                class="px-2 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none"
+                class="min-h-[44px] min-w-[44px] px-2 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none"
                 :class="activeVideos[exIdx] ? 'bg-flame text-white' : 'bg-paper hover:bg-paper-dim text-ink'"
                 :title="activeVideos[exIdx] ? 'ปิดคลิป' : 'ดูคลิปสาธิต YouTube'"
               >
@@ -177,7 +177,7 @@
               <button
                 type="button"
                 @click="addSet(exIdx)"
-                class="px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate bg-paper hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
+                class="min-h-[44px] min-w-[44px] px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate bg-paper hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
                 title="เพิ่มเซ็ตใหม่สำหรับท่านี้"
               >
                 <span class="text-flame font-bold">+</span>
@@ -187,7 +187,7 @@
               <button
                 type="button"
                 @click="handleRemoveExercise(exIdx, exercise.name)"
-                class="w-7 h-7 rounded-lg border-2 border-rose-300 hover:border-rose-600 bg-rose-50 text-rose-600 flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                class="min-h-[44px] min-w-[44px] w-7 h-7 rounded-lg border-2 border-rose-300 hover:border-rose-600 bg-rose-50 text-rose-600 flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
                 title="ลบท่านี้ออกจากรอบฝึก"
               >
                 <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
@@ -228,7 +228,7 @@
                 <button
                   type="button"
                   @click="activeVideos[exIdx] = false"
-                  class="text-[10px] font-mono font-bold text-ink-muted hover:text-ink px-1.5 py-0.5 bg-surface rounded border border-plate/20"
+                  class="min-h-[44px] min-w-[44px] text-[10px] font-mono font-bold text-ink-muted hover:text-ink px-1.5 py-0.5 bg-surface rounded border border-plate/20"
                 >
                   ✕ ปิดคลิป
                 </button>
@@ -307,85 +307,80 @@
             <div
               v-for="(set, setIdx) in exercise.sets"
               :key="setIdx"
-              class="grid grid-cols-12 gap-1.5 items-center p-1.5 rounded-xl border transition-all"
+              class="rounded-xl border p-2 transition-all"
               :class="set.completed
                 ? 'bg-emerald-bg/40 border-emerald/50'
                 : 'bg-paper-subtle border-plate/25 hover:border-plate/60'"
             >
-              <!-- SET Column: Number + Type Badge -->
-              <div class="col-span-2 flex items-center gap-1 min-w-0 pl-1">
-                <span class="font-mono font-bold text-xs tabular-nums text-ink">
-                  {{ setIdx + 1 }}
-                </span>
-                <!-- Segmented Set Type Pill Button -->
-                <button
-                  type="button"
-                  @click="cycleSetType(exIdx, setIdx)"
-                  class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase border leading-none transition-colors"
-                  :class="getSetTypeBadgeClass(set.type)"
-                  :title="`ประเภทเซ็ต: ${set.type} (แตะเพื่อสลับ W/R/D/F)`"
-                >
-                  {{ getSetTypeShort(set.type) }}
-                </button>
-              </div>
-
-              <!-- PREV Column: Past Session Weight x Reps -->
-              <div class="col-span-3 text-center text-[11px] font-mono font-medium text-ink-muted truncate">
-                {{ getPreviousPerformanceText(exercise.exerciseId, setIdx) }}
-              </div>
-
-              <!-- KG Column: Interactive Tap Target for Weight -->
-              <div class="col-span-3">
-                <button
-                  type="button"
-                  @click="openWeightKeypad(exercise, exIdx, set, setIdx)"
-                  class="w-full py-1.5 px-2 bg-white hover:bg-paper-dim border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none text-xs font-mono font-bold text-ink flex items-center justify-center gap-0.5 transition-all touch-manipulation"
-                  :class="set.completed ? 'opacity-85' : ''"
-                  :title="`ใส่น้ำหนักเซ็ตที่ ${setIdx + 1}`"
-                >
-                  <span class="tabular-nums">{{ formatWeight(set.weight ?? set.targetWeight) }}</span>
-                  <span class="text-[9px] text-ink-muted font-normal">kg</span>
-                </button>
-              </div>
-
-              <!-- REPS Column: Interactive Tap Target for Reps -->
-              <div class="col-span-2">
-                <button
-                  type="button"
-                  @click="openRepsKeypad(exercise, exIdx, set, setIdx)"
-                  class="w-full py-1.5 px-1 bg-white hover:bg-paper-dim border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none text-xs font-mono font-bold text-ink flex items-center justify-center gap-0.5 transition-all touch-manipulation"
-                  :class="set.completed ? 'opacity-85' : ''"
-                  :title="`ใส่จำนวนครั้งเซ็ตที่ ${setIdx + 1}`"
-                >
-                  <span class="tabular-nums">{{ set.reps ?? set.targetReps ?? 8 }}</span>
-                </button>
-              </div>
-
-              <!-- ✓ Column: Tactile Checkmark Button -->
-              <div class="col-span-2 flex items-center justify-center gap-1">
+              <!-- Line 1: set number, type, previous record, Done (56 px) -->
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                  <span class="font-mono font-bold text-xs tabular-nums text-ink">{{ setIdx + 1 }}</span>
+                  <button
+                    type="button"
+                    @click="cycleSetType(exIdx, setIdx)"
+                    class="min-h-[44px] min-w-[44px] px-2 rounded text-[10px] font-mono font-bold uppercase border leading-none transition-colors"
+                    :class="getSetTypeBadgeClass(set.type)"
+                    :title="`ประเภทเซ็ต: ${set.type} (แตะเพื่อสลับ W/R/D/F)`"
+                  >
+                    {{ getSetTypeShort(set.type) }}
+                  </button>
+                  <span class="text-[11px] font-mono font-medium text-ink-muted truncate">{{ getPreviousPerformanceText(exercise.exerciseId, setIdx) }}</span>
+                </div>
                 <button
                   type="button"
                   @click="handleToggleSet(exIdx, setIdx)"
-                  class="w-8 h-8 rounded-lg border-2 border-plate flex items-center justify-center transition-all select-none touch-manipulation"
+                  class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate flex items-center justify-center transition-all select-none touch-manipulation"
                   :class="set.completed
-                    ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669] scale-100'
+                    ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669]'
                     : 'bg-white hover:bg-paper-dim text-ink-muted/40 shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
                   :title="set.completed ? 'ทำเครื่องหมายว่ายังไม่เสร็จ' : 'ทำเครื่องหมายว่าเสร็จแล้ว (เริ่มนับเวลาพัก)'"
                 >
-                  <svg class="w-4 h-4 stroke-current fill-none stroke-[2.5]" viewBox="0 0 24 24">
+                  <svg class="w-5 h-5 stroke-current fill-none stroke-[2.5]" viewBox="0 0 24 24">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </button>
+              </div>
 
-                <!-- Remove Set Button (Visible when > 1 set) -->
+              <!-- Line 2: ± steppers for weight and reps (tap the value to type it) -->
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                <div class="flex items-center gap-1 min-w-0">
+                  <button type="button" @click="stepSheetWeight(exIdx, setIdx, -1, set)" class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation" aria-label="ลดน้ำหนัก">−</button>
+                  <button
+                    type="button"
+                    @click="openWeightKeypad(exercise, exIdx, set, setIdx)"
+                    class="flex-1 min-w-0 h-14 rounded-xl border-2 border-plate bg-white flex flex-col items-center justify-center touch-manipulation"
+                    :title="`ใส่น้ำหนักเซ็ตที่ ${setIdx + 1}`"
+                  >
+                    <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ formatWeight(set.weight ?? set.targetWeight) }}</span>
+                    <span class="text-[10px] text-flame font-bold leading-none mt-0.5">kg</span>
+                  </button>
+                  <button type="button" @click="stepSheetWeight(exIdx, setIdx, 1, set)" class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation" aria-label="เพิ่มน้ำหนัก">+</button>
+                </div>
+                <div class="flex items-center gap-1 min-w-0">
+                  <button type="button" @click="stepSheetReps(exIdx, setIdx, -1, set)" class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation" aria-label="ลดจำนวนครั้ง">−</button>
+                  <button
+                    type="button"
+                    @click="openRepsKeypad(exercise, exIdx, set, setIdx)"
+                    class="flex-1 min-w-0 h-14 rounded-xl border-2 border-plate bg-white flex flex-col items-center justify-center touch-manipulation"
+                    :title="`ใส่จำนวนครั้งเซ็ตที่ ${setIdx + 1}`"
+                  >
+                    <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ set.reps ?? set.targetReps ?? 8 }}</span>
+                    <span class="text-[10px] text-sky font-bold leading-none mt-0.5">ครั้ง</span>
+                  </button>
+                  <button type="button" @click="stepSheetReps(exIdx, setIdx, 1, set)" class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation" aria-label="เพิ่มจำนวนครั้ง">+</button>
+                </div>
+              </div>
+
+              <!-- Remove set (only when there is more than one set) -->
+              <div v-if="exercise.sets.length > 1" class="flex justify-end mt-1">
                 <button
-                  v-if="exercise.sets.length > 1"
                   type="button"
                   @click="removeSet(exIdx, setIdx)"
-                  class="w-5 h-5 rounded text-ink-faint hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-[10px] font-bold"
+                  class="min-h-[44px] px-3 rounded-lg text-xs font-bold text-ink-faint hover:text-rose-600 hover:bg-rose-50"
                   title="ลบเซ็ตนี้"
                 >
-                  ✕
+                  ลบเซ็ต ✕
                 </button>
               </div>
             </div>
@@ -431,6 +426,7 @@ import { useExerciseStore } from '../composables/useExerciseStore.js';
 import { usePinKeypad } from '../composables/usePinKeypad.js';
 import { useWeightAdvisor } from '../composables/useWeightAdvisor.js';
 import { getYoutubeId } from '../utils/youtube.js';
+import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 
@@ -667,6 +663,17 @@ function openWeightKeypad(exercise, exIdx, set, setIdx) {
       updateSetMetric(exIdx, setIdx, 'weight', isNaN(num) ? 0 : num);
     }
   });
+}
+
+// ± steppers on the recording sheet (same step rules as the set rows, step 3)
+function stepSheetWeight(exIdx, setIdx, dir, set) {
+  const next = stepFrom(set.weight ?? set.targetWeight ?? '', '', dir, WEIGHT_STEP_KG);
+  updateSetMetric(exIdx, setIdx, 'weight', next);
+}
+
+function stepSheetReps(exIdx, setIdx, dir, set) {
+  const next = stepFrom(set.reps ?? set.targetReps ?? '', '', dir, REPS_STEP);
+  updateSetMetric(exIdx, setIdx, 'reps', next);
 }
 
 function openRepsKeypad(exercise, exIdx, set, setIdx) {
