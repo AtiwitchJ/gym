@@ -35,7 +35,7 @@
               <div class="text-[10px] font-body text-ink-muted leading-tight">{{ row.label }}</div>
             </div>
           </div>
-          <p v-if="!hasAnyPr" class="text-[11px] text-ink-muted font-body mt-2">ยังไม่มีเซ็ตที่ทำเสร็จสำหรับท่านี้</p>
+          <p v-if="!hasAnyPr" class="text-[11px] text-ink-muted font-body mt-2">ยังไม่มี PR: เซ็ตวอร์มไม่นับเป็น PR และ PR จะอัปเดตหลังบันทึกเซสชัน</p>
         </div>
 
         <!-- History rows -->
