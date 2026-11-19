@@ -85,7 +85,7 @@
             {{ formatNumber(totalVolumeLifted) }}
           </span>
           <span class="text-[10px] font-body text-ink-muted block mt-0.5">
-            {{ weightUnit.toUpperCase() }} สะสม
+            {{ weightUnit.toUpperCase() }} สะสม · ไม่รวมวอร์ม
           </span>
         </div>
 
@@ -261,6 +261,7 @@ import { useRoutineStore } from '../composables/useRoutineStore.js';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
 import { useExerciseStore } from '../composables/useExerciseStore.js';
 import { useWorkoutStore } from '../composables/useWorkoutStore.js';
+import { totalWorkingVolume } from '../composables/workingVolume.js';
 import { useExcelExport } from '../composables/useExcelExport.js';
 import { useTimer } from '../composables/useTimer.js';
 import { useOneRmCalculator } from '../composables/useOneRm.js';
@@ -296,13 +297,8 @@ const totalWorkoutsCount = computed(() => {
   return (sessionHistory.value?.length || 0) + (workoutHistory.value?.length || 0);
 });
 
-const totalVolumeLifted = computed(() => {
-  let vol = 0;
-  if (Array.isArray(sessionHistory.value)) {
-    vol += sessionHistory.value.reduce((sum, s) => sum + (s.totalVolumeKg || 0), 0);
-  }
-  return Math.round(vol);
-});
+// Same rule as the weekly chart: completed working sets only (warm-ups excluded), weight × reps.
+const totalVolumeLifted = computed(() => totalWorkingVolume(workoutHistory.value));
 
 const customExercisesCount = computed(() => {
   return exercises.value.filter(e => e.isCustom).length;

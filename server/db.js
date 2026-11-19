@@ -626,7 +626,7 @@ const repo = {
   getCompletedSetVolumeRows() {
     return db.prepare(`
       SELECT se.exercise_id AS exerciseId, se.exercise_name AS exerciseName, ws.date AS date,
-             ss.done AS done, ss.weight AS weight, ss.actual_reps AS actualReps
+             ss.done AS done, ss.type AS type, ss.weight AS weight, ss.actual_reps AS actualReps
       FROM session_sets ss
       JOIN session_exercises se ON se.id = ss.session_exercise_id
       JOIN workout_sessions ws ON ws.id = se.session_id

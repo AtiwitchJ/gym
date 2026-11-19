@@ -78,6 +78,22 @@ const dec = buildWeeklyVolume(
 assert.strictEqual(dec.weeks[7].exercises[0].volume, 7.5);
 console.log('✓ 2.5 kg × 3 = 7.5.');
 
+// 4b. Warm-up sets are excluded (same rule as exercise PR)
+console.log('▶ [4b] Warm-up sets excluded...');
+const warmOnly = buildWeeklyVolume([
+  { exerciseId: 'ex_bench', exerciseName: 'Bench', date: '2026-11-17', done: 1, type: 'warm', weight: 60, actualReps: 15 },
+  { exerciseId: 'ex_bench', exerciseName: 'Bench', date: '2026-11-17', done: 1, type: 'วอร์ม', weight: 35, actualReps: 15 },
+  { exerciseId: 'ex_bench', exerciseName: 'Bench', date: '2026-11-17', done: 1, type: 'warmup', weight: 35, actualReps: 15 }
+], NOW, { muscleById: testMap });
+assert.deepStrictEqual(warmOnly.weeks[7].muscles, []);
+assert.deepStrictEqual(warmOnly.weeks[7].exercises, []);
+const mixed = buildWeeklyVolume([
+  { exerciseId: 'ex_bench', exerciseName: 'Bench', date: '2026-11-17', done: 1, type: 'วอร์ม', weight: 35, actualReps: 15 },
+  { exerciseId: 'ex_bench', exerciseName: 'Bench', date: '2026-11-17', done: 1, type: 'เล่นจริง', weight: 70, actualReps: 8 }
+], NOW, { muscleById: testMap });
+assert.strictEqual(mixed.weeks[7].exercises[0].volume, 560);
+console.log('✓ Warm-up rows (warm / warmup / วอร์ม) excluded; working set 70×8 = 560.');
+
 // 5. Route contract (real DB, read-only GET)
 console.log('▶ [5] GET /api/volume/weekly contract...');
 const server = app.listen(0, '127.0.0.1');

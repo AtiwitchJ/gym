@@ -83,7 +83,7 @@
       </svg>
 
       <p class="text-[11px] text-ink-muted font-body">
-        {{ selectedLabel }}: รวม {{ selectedTotal }} (ปริมาณ) ใน 8 สัปดาห์ · เซ็ตที่ทำเสร็จเท่านั้น
+        {{ selectedLabel }}: รวม {{ selectedTotal }} (ปริมาณ) ใน 8 สัปดาห์ · เฉพาะเซ็ตทำงานที่ทำเสร็จ (ไม่รวมวอร์ม)
       </p>
     </template>
   </div>

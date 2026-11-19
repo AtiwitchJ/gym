@@ -1,7 +1,8 @@
-// Weekly training volume per muscle and per exercise (last 8 weeks, completed sets only).
+// Weekly training volume per muscle and per exercise (last 8 weeks, completed working sets only; warm-ups excluded).
 // Pure functions: no DB or clock access inside. volume = weight × actual reps per set.
 
 const { MUSCLE_BY_EXERCISE_ID } = require('./recovery');
+const { isWarmupSet } = require('./exercise-stats');
 
 const WEEKS = 8;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -44,7 +45,7 @@ function buildWeeklyVolume(rows, nowMs = Date.now(), { weeks = WEEKS, muscleById
   const buckets = new Map(starts.map((s) => [s, { muscles: new Map(), exercises: new Map() }]));
 
   for (const row of Array.isArray(rows) ? rows : []) {
-    if (!row || !row.done) continue;
+    if (!row || !row.done || isWarmupSet({ type: row.type })) continue; // warm-ups excluded, same rule as exercise PR
     const weekStart = weekStartOf(row.date);
     if (!weekStart || !buckets.has(weekStart)) continue;
 
