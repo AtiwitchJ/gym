@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { rirLabel } from './useRir.js';
 
 /**
  * Per-exercise history with PR (GET /api/exercises/:id/history).
@@ -41,7 +42,8 @@ export function normalizeExerciseHistory(payload) {
       weight: num(set?.weight),
       actualReps: num(set?.actualReps),
       done: !!set?.done,
-      rir: Number.isFinite(Number(set?.rir)) && set?.rir !== null ? Number(set.rir) : null
+      rir: Number.isFinite(Number(set?.rir)) && set?.rir !== null ? Number(set.rir) : null,
+      rirPlus: !!set?.rirPlus
     }))
   }));
   // The server puts the same PR on every session; read it from the first one.
@@ -63,7 +65,7 @@ export function setText(set) {
   if (!set.done) return 'ข้าม';
   const weight = set.weight !== null ? `${set.weight} kg` : '—';
   const reps = set.actualReps !== null ? `× ${set.actualReps}` : '';
-  const rir = set.rir !== null ? ` · RIR ${set.rir}` : '';
+  const rir = set.rir !== null ? ` · RIR ${rirLabel(set.rir, set.rirPlus)}` : '';
   return `${weight} ${reps}${rir}`.trim();
 }
 

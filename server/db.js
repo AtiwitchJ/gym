@@ -99,6 +99,11 @@ try {
   db.exec("ALTER TABLE exercise_last_weights ADD COLUMN rir INTEGER;");
 } catch(e) {}
 
+// RIR "เหลือ 2+" is stored as rir 2 with rir_plus 1, so the "2 or more" meaning is kept (review fix).
+try {
+  db.exec("ALTER TABLE session_sets ADD COLUMN rir_plus INTEGER DEFAULT 0;");
+} catch(e) {}
+
 // Canonical Exercise Mapping (shared across 4-Day Split, 3-Day A/B Alternating Split, and custom routines)
 const CANONICAL_MAP = {
   // 1. Shoulder Press Machine (Thursday Main <-> Mon/Tue/Wed Bonus, Program A/B)
@@ -469,7 +474,8 @@ const repo = {
           weight: set.weight,
           actualReps: set.actual_reps,
           done: Boolean(set.done),
-          rir: set.rir !== undefined ? set.rir : null
+          rir: set.rir !== undefined ? set.rir : null,
+          rirPlus: Boolean(set.rir_plus)
         }));
         return {
           id: ex.exercise_id,
@@ -527,7 +533,8 @@ const repo = {
         weight: s.weight,
         actualReps: s.actual_reps,
         done: Boolean(s.done),
-        rir: s.rir !== undefined ? s.rir : null
+        rir: s.rir !== undefined ? s.rir : null,
+        rirPlus: Boolean(s.rir_plus)
       }))
     }));
   },
@@ -545,8 +552,8 @@ const repo = {
     `);
 
     const insertSet = db.prepare(`
-      INSERT INTO session_sets (session_exercise_id, set_index, type, target, weight, actual_reps, done, rir)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO session_sets (session_exercise_id, set_index, type, target, weight, actual_reps, done, rir, rir_plus)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const transaction = db.transaction(() => {
@@ -582,7 +589,8 @@ const repo = {
                 wt,
                 reps,
                 set.done ? 1 : 0,
-                rir
+                rir,
+                (rir !== null && set.rirPlus) ? 1 : 0
               );
 
               // Persist to last record with bidirectional cross-day propagation

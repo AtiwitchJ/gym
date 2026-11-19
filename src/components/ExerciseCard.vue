@@ -465,9 +465,9 @@
             v-for="opt in RIR_CHOICES"
             :key="opt.value"
             type="button"
-            @click="pickRir(sIdx, opt.value)"
+            @click="pickRir(sIdx, opt)"
             class="min-h-[44px] min-w-[44px] px-3 rounded-xl border-2 border-plate text-xs font-heading font-bold transition-all touch-manipulation"
-            :class="getRir(sIdx) === opt.value
+            :class="isRirSelected(sIdx, opt)
               ? 'bg-flame text-white shadow-[1.5px_1.5px_0px_#1e2220]'
               : 'bg-surface text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
             :title="opt.title"
@@ -495,7 +495,7 @@ import { useTimer } from '../composables/useTimer';
 import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
-import { RIR_CHOICES, normalizeRir, nextRir } from '../composables/useRir.js';
+import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';
 import { nextUndoneSet } from '../composables/useRestPanel.js';
 import { getCustomRest } from '../composables/useCustomRest.js';
 import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
@@ -683,8 +683,17 @@ function getRir(sIdx) {
   return normalizeRir(exState.value[`rir_${sIdx}`]);
 }
 
-function pickRir(sIdx, value) {
-  updateRir(currentDay.value, props.exercise.id, sIdx, nextRir(getRir(sIdx), value));
+function getRirPlus(sIdx) {
+  return !!exState.value[`rirPlus_${sIdx}`];
+}
+
+function isRirSelected(sIdx, opt) {
+  return isRirChoiceSelected(getRir(sIdx), getRirPlus(sIdx), opt);
+}
+
+function pickRir(sIdx, opt) {
+  const next = nextRirSelection(getRir(sIdx), getRirPlus(sIdx), opt);
+  updateRir(currentDay.value, props.exercise.id, sIdx, next.rir, next.rirPlus);
 }
 
 function getWeight(sIdx) {

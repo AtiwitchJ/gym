@@ -36,7 +36,8 @@ function buildExercise(ex, exState, lastForEx, { category, workLabel }) {
       weight: isDone ? weight : '',
       actualReps: isDone ? reps : '',
       done: isDone,
-      rir: isDone ? normalizeRir(exState[`rir_${sIdx}`]) : null
+      rir: isDone ? normalizeRir(exState[`rir_${sIdx}`]) : null,
+      rirPlus: isDone && normalizeRir(exState[`rir_${sIdx}`]) === 2 && !!exState[`rirPlus_${sIdx}`]
     });
   });
 

@@ -60,9 +60,9 @@ console.log('✓ Store and history wiring verified.');
 console.log('▶ [5] ExerciseCard wiring: buttons appear only after Done...');
 const card = fs.readFileSync(path.join(root, 'src/components/ExerciseCard.vue'), 'utf8');
 assert.ok(card.includes('v-for="opt in RIR_CHOICES"'), 'RIR buttons are rendered from the choices');
-assert.ok(card.includes('@click="pickRir(sIdx, opt.value)"'), 'tapping a RIR button calls pickRir');
+assert.ok(card.includes('@click="pickRir(sIdx, opt)"'), 'tapping a RIR button calls pickRir with the choice');
 assert.ok(card.includes('<div v-if="isSetDone(sIdx)" class="mt-2 flex items-center gap-1.5 flex-wrap">'), 'RIR row only shows after Done');
-assert.ok(card.includes("import { RIR_CHOICES, normalizeRir, nextRir } from '../composables/useRir.js';"), 'ExerciseCard imports the RIR helpers');
+assert.ok(card.includes("import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';"), 'ExerciseCard imports the RIR helpers');
 assert.ok(card.includes('  updateRir,'), 'ExerciseCard gets updateRir from the store');
 console.log('✓ ExerciseCard wiring verified.');
 

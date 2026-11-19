@@ -549,10 +549,12 @@ function closeSessionSummary() {
 }
 
 // RIR (0, 1, 2 = "2+") chosen after a set is done. null clears it. Saved with the day state.
-function updateRir(day, exId, setIdx, val) {
+function updateRir(day, exId, setIdx, val, plus = false) {
   if (!userState[day]) userState[day] = {};
   if (!userState[day][exId]) userState[day][exId] = {};
-  userState[day][exId][`rir_${setIdx}`] = normalizeRir(val);
+  const rir = normalizeRir(val);
+  userState[day][exId][`rir_${setIdx}`] = rir;
+  userState[day][exId][`rirPlus_${setIdx}`] = rir === 2 && !!plus;
   triggerSave(day);
 }
 

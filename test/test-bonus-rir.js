@@ -13,10 +13,10 @@ console.log('====================================================\n');
 console.log('▶ [1] BonusCard shows the same RIR row as ExerciseCard, only after Done...');
 const bonus = fs.readFileSync(path.join(root, 'src/components/BonusCard.vue'), 'utf8');
 assert.ok(bonus.includes('<div v-if="isSetDone(sIdx)" class="col-span-full mt-1 flex items-center gap-1.5 flex-wrap">'), 'RIR row only after Done, full width');
-assert.ok(bonus.includes('v-for="opt in RIR_CHOICES"') && bonus.includes('@click="pickRir(sIdx, opt.value)"'), 'three choices, tap to pick');
+assert.ok(bonus.includes('v-for="opt in RIR_CHOICES"') && bonus.includes('@click="pickRir(sIdx, opt)"'), 'three choices, tap to pick');
 assert.ok(bonus.includes('min-h-[44px] min-w-[44px] px-3 rounded-xl border-2 border-plate text-xs font-heading font-bold'), 'choice buttons are 44 px');
-assert.ok(bonus.includes("import { RIR_CHOICES, normalizeRir, nextRir } from '../composables/useRir.js';"), 'same helpers as ExerciseCard');
-assert.ok(bonus.includes('updateRir(currentDay.value, props.bonus.id, sIdx, nextRir(getRir(sIdx), value));'), 'stored on the bonus exercise');
+assert.ok(bonus.includes("import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';"), 'same helpers as ExerciseCard');
+assert.ok(bonus.includes('updateRir(currentDay.value, props.bonus.id, sIdx, next.rir, next.rirPlus);'), 'stored on the bonus exercise');
 console.log('✓ BonusCard row verified.');
 
 console.log('▶ [2] A bonus set RIR is saved with the session history...');
