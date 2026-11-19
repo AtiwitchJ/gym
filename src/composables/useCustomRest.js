@@ -5,7 +5,21 @@ import { REST_MIN_SECONDS, REST_MAX_SECONDS } from './useTimer.js';
  * The value is kept in localStorage only (no data-schema change), keyed by exercise id.
  */
 
+import { ref } from 'vue';
+
 export const CUSTOM_REST_STORAGE_KEY = 'atiwitch_rest_by_exercise';
+
+// Bumped on every save so a card that shows the rest time updates at once.
+export const restRevision = ref(0);
+
+/** Text for a rest time: "1:30 (ที่ตั้งไว้)" when saved, otherwise the default wording. */
+export function formatRestLabel(seconds) {
+  const n = Number(seconds);
+  if (!Number.isFinite(n) || n <= 0) return 'ค่าเริ่มต้น';
+  const m = Math.floor(n / 60);
+  const s = Math.round(n % 60);
+  return `${m}:${String(s).padStart(2, '0')} (ที่ตั้งไว้)`;
+}
 export const CUSTOM_REST_ERROR = `ระบุ ${REST_MIN_SECONDS}–${REST_MAX_SECONDS} วินาที (จำนวนเต็ม)`;
 
 /**
@@ -53,5 +67,6 @@ export function saveCustomRest(exerciseId, raw, storage = defaultStorage()) {
   const map = readRestMap(storage);
   map[String(exerciseId)] = parsed.seconds;
   if (storage) storage.setItem(CUSTOM_REST_STORAGE_KEY, JSON.stringify(map));
+  restRevision.value += 1;
   return parsed;
 }

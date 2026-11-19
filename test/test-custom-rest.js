@@ -90,7 +90,7 @@ assert.ok(rest.includes('min-h-[44px] min-w-[44px] px-2.5 rounded-xl'), 'save bu
 assert.ok(rest.includes("import { getCustomRest, saveCustomRest } from '../composables/useCustomRest.js';"), 'RestTimer uses the storage helpers');
 assert.ok(rest.includes('{{ preset }}s') && rest.includes('[60, 90, 120, 180]'), 'presets are unchanged');
 const card = fs.readFileSync(path.join(root, 'src/components/ExerciseCard.vue'), 'utf8');
-assert.ok(card.includes('const saved = getCustomRest(nextSet ? nextSet.exerciseId : null);') && card.includes('if (saved) setTimerDuration(saved);'), 'Done applies the saved rest');
+assert.ok(card.includes('const saved = getCustomRest(props.exercise.id);') && card.includes('if (saved) setTimerDuration(saved);'), 'Done applies this exercise\'s saved rest');
 console.log('✓ Wiring verified.');
 
 console.log('\n====================================================');

@@ -325,6 +325,11 @@
       </div>
     </transition>
 
+    <!-- Rest time for this exercise, shown before the user ticks a set -->
+    <div class="px-2.5 sm:px-4 py-1 text-[11px] font-mono text-ink-muted select-none">
+      เวลาพักหลังเซ็ตของท่านี้: <span class="font-bold text-ink">{{ restLabel }}</span>
+    </div>
+
     <!-- Sets Table Header -->
     <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[9px] sm:text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center justify-between gap-2 select-none">
       <span>เซ็ต · แนะนำ · เสร็จ</span>
@@ -497,8 +502,7 @@ import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';
-import { nextUndoneSet } from '../composables/useRestPanel.js';
-import { getCustomRest } from '../composables/useCustomRest.js';
+import { getCustomRest, formatRestLabel, restRevision } from '../composables/useCustomRest.js';
 import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
@@ -906,6 +910,12 @@ const isAllCompleted = computed(() => {
 const { openPlateCalculator } = usePlateCalculator();
 const isBarbell = isBarbellExercise(props.exercise);
 
+// Saved rest for this exercise (re-reads after any save, via restRevision).
+const restLabel = computed(() => {
+  void restRevision.value;
+  return formatRestLabel(getCustomRest(props.exercise.id));
+});
+
 function openPlatesForExercise() {
   const firstOpen = props.exercise.sets.findIndex((_, i) => !isSetDone(i));
   const idx = firstOpen >= 0 ? firstOpen : 0;
@@ -939,8 +949,8 @@ function onToggle(sIdx) {
   if (isNowChecked) {
     triggerHaptic([35]);
     // Custom rest (gap item 5): the rest before the next undone set uses that exercise's saved value
-    const nextSet = nextUndoneSet(workoutData[currentDay.value], userState[currentDay.value]);
-    const saved = getCustomRest(nextSet ? nextSet.exerciseId : null);
+    // The rest after this exercise's set is the exercise's own saved rest, the same value shown on the card.
+    const saved = getCustomRest(props.exercise.id);
     if (saved) setTimerDuration(saved);
     startTimer();
     evaluatePrOnTick(sIdx);
