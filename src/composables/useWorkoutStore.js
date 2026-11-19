@@ -1,6 +1,15 @@
 import { ref, reactive, watch } from 'vue';
 import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay } from '../data/workouts.js';
 import { defaultTodos } from '../data/defaultTodos.js';
+import { parseRepTarget } from './useWeightAdvisor.js';
+
+export function isMultiSetExercise(exId) {
+  if (!exId) return false;
+  const idStr = String(exId);
+  // Bonus touch-up exercises (e.g. b_m_chest, b_t_leg) only have 1 working set (set 1)
+  if (idStr.startsWith('b_')) return false;
+  return true;
+}
 
 // Safe localStorage helper for both browser and SSR / unit tests
 const storage = {
@@ -163,8 +172,8 @@ function syncLinkedExerciseRecords(sourceExId, setIdx, weightVal, repsVal) {
       if (weightVal !== undefined && weightVal !== '') {
         if (setIdx === 1) targetObj.wt_1 = weightVal;
 
-        // If target is a main lift (e.g. m1, t1, w2, th1), propagate working weight across all working sets (1, 2, 3)
-        if (['m1', 't1', 'w2', 'th1'].includes(targetId)) {
+        // If target has multiple working sets (e.g. main/assistance lifts), propagate working weight across all working sets (1, 2, 3)
+        if (isMultiSetExercise(targetId)) {
           if (setIdx === 1) {
             targetObj.wt_1 = weightVal;
             targetObj.wt_2 = weightVal;
@@ -181,7 +190,7 @@ function syncLinkedExerciseRecords(sourceExId, setIdx, weightVal, repsVal) {
       if (repsVal !== undefined && repsVal !== '') {
         if (setIdx === 1) targetObj.reps_1 = repsVal;
 
-        if (['m1', 't1', 'w2', 'th1'].includes(targetId)) {
+        if (isMultiSetExercise(targetId)) {
           if (setIdx === 1) {
             targetObj.reps_1 = repsVal;
             targetObj.reps_2 = repsVal;
@@ -208,7 +217,7 @@ function syncLinkedExerciseRecords(sourceExId, setIdx, weightVal, repsVal) {
         if (weightVal !== undefined && weightVal !== '') tState.wt_0 = weightVal;
         if (repsVal !== undefined && repsVal !== '') tState.reps_0 = repsVal;
       } else {
-        if (['m1', 't1', 'w2', 'th1'].includes(targetId)) {
+        if (isMultiSetExercise(targetId)) {
           if (setIdx === 1) {
             if (weightVal !== undefined && weightVal !== '') {
               tState.wt_1 = weightVal;
@@ -413,14 +422,14 @@ function healCrossDayExerciseRecords() {
       if (r0 !== undefined && r0 !== '') lastWeights[lId].reps_0 = r0;
       if (wt1 !== undefined && wt1 !== '') {
         lastWeights[lId].wt_1 = wt1;
-        if (['th1', 't1', 'w2', 'm1'].includes(lId)) {
+        if (isMultiSetExercise(lId)) {
           lastWeights[lId].wt_2 = wt1;
           lastWeights[lId].wt_3 = wt1;
         }
       }
       if (r1 !== undefined && r1 !== '') {
         lastWeights[lId].reps_1 = r1;
-        if (['th1', 't1', 'w2', 'm1'].includes(lId)) {
+        if (isMultiSetExercise(lId)) {
           lastWeights[lId].reps_2 = r1;
           lastWeights[lId].reps_3 = r1;
         }
@@ -437,14 +446,14 @@ function healCrossDayExerciseRecords() {
         if (r0 !== undefined && r0 !== '') tState.reps_0 = r0;
         if (wt1 !== undefined && wt1 !== '') {
           tState.wt_1 = wt1;
-          if (['th1', 't1', 'w2', 'm1'].includes(lId)) {
+          if (isMultiSetExercise(lId)) {
             tState.wt_2 = wt1;
             tState.wt_3 = wt1;
           }
         }
         if (r1 !== undefined && r1 !== '') {
           tState.reps_1 = r1;
-          if (['th1', 't1', 'w2', 'm1'].includes(lId)) {
+          if (isMultiSetExercise(lId)) {
             tState.reps_2 = r1;
             tState.reps_3 = r1;
           }
@@ -660,7 +669,22 @@ async function finishAndSaveWorkout() {
 
   await recordSessionToHistory(session);
 
-  // Sync latest weights and draft state to SQLite backend
+  // Auto-reset checkmarks and draft entries for current day so the user is ready for the next round
+  if (userState[currentDay.value]) {
+    const daySt = userState[currentDay.value];
+    for (const exId of Object.keys(daySt)) {
+      if (daySt[exId] && typeof daySt[exId] === 'object') {
+        for (const k of Object.keys(daySt[exId])) {
+          if (k.startsWith('set_') || k.startsWith('wt_') || k.startsWith('reps_')) {
+            delete daySt[exId][k];
+          }
+        }
+      }
+    }
+  }
+  persistLocal();
+
+  // Sync latest weights and reset state to SQLite backend
   if (typeof fetch === 'function') {
     try {
       await fetch('/api/state', {
@@ -675,7 +699,7 @@ async function finishAndSaveWorkout() {
     } catch (e) {}
   }
 
-  showToast(`บันทึกประวัติสำเร็จ (${totalSetsDone} เซ็ต)`);
+  showToast(`บันทึกประวัติสำเร็จ (${totalSetsDone} เซ็ต) — รีเซ็ตพร้อมสำหรับรอบถัดไป`);
 }
 
 async function recordSessionToHistory(session) {

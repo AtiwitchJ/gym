@@ -13,3 +13,5 @@ data/*.db-shm
 *.log
 .env
 .env.local
+
+agent-*

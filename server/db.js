@@ -165,6 +165,7 @@ const repo = {
 
   clearDraft(dayKey) {
     db.prepare('DELETE FROM daily_draft_state WHERE day_key = ?').run(dayKey);
+    this.healAllRecordsFromHistory();
   },
 
   // Last Weights & Reps
@@ -202,21 +203,33 @@ const repo = {
     return result;
   },
 
-  saveLastRecord(exerciseId, setIndex, weight, reps, updatedAt = null) {
+  saveLastRecord(exerciseId, setIndex, weight, reps, updatedAt = null, force = false) {
     const dateStr = updatedAt || new Date().toISOString();
     const canon = getCanonicalExerciseId(exerciseId);
     const linkedIds = getLinkedExerciseIds(exerciseId);
 
-    const stmt = db.prepare(`
-      INSERT INTO exercise_last_weights (exercise_id, set_index, weight, reps, updated_at, canonical_id)
-      VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(exercise_id, set_index) DO UPDATE SET
-        weight = excluded.weight,
-        reps = COALESCE(excluded.reps, exercise_last_weights.reps),
-        updated_at = excluded.updated_at,
-        canonical_id = excluded.canonical_id
-      WHERE excluded.updated_at >= exercise_last_weights.updated_at OR exercise_last_weights.updated_at IS NULL
-    `);
+    const sql = force
+      ? `
+        INSERT INTO exercise_last_weights (exercise_id, set_index, weight, reps, updated_at, canonical_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(exercise_id, set_index) DO UPDATE SET
+          weight = excluded.weight,
+          reps = excluded.reps,
+          updated_at = excluded.updated_at,
+          canonical_id = excluded.canonical_id
+      `
+      : `
+        INSERT INTO exercise_last_weights (exercise_id, set_index, weight, reps, updated_at, canonical_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(exercise_id, set_index) DO UPDATE SET
+          weight = excluded.weight,
+          reps = COALESCE(excluded.reps, exercise_last_weights.reps),
+          updated_at = excluded.updated_at,
+          canonical_id = excluded.canonical_id
+        WHERE excluded.updated_at >= exercise_last_weights.updated_at OR exercise_last_weights.updated_at IS NULL
+      `;
+
+    const stmt = db.prepare(sql);
 
     const wNum = Number(weight) || 0;
     const rNum = reps !== undefined && reps !== '' && reps !== null ? Number(reps) : null;
@@ -381,7 +394,9 @@ const repo = {
               );
 
               // Persist to last record with bidirectional cross-day propagation
-              if (wt !== null || reps !== null) {
+              // Only record when set is completed (done) or if done is undefined (implied completed session)
+              const isSetDone = set.done === undefined || set.done === null || Boolean(set.done);
+              if ((wt !== null || reps !== null) && isSetDone) {
                 const sessionDateStr = session.date && session.time
                   ? `${session.date}T${session.time}:00.000Z`
                   : (session.date || new Date().toISOString());
@@ -447,13 +462,41 @@ const repo = {
 
       // Save each set
       newestSession.sets.forEach((set, sIdx) => {
-        if (set.weight !== null && set.weight !== undefined) {
-          this.saveLastRecord(newestSession.exerciseId, sIdx, set.weight, set.actualReps, dateStr);
+        if (set.weight !== null && set.weight !== undefined && (set.done === undefined || set.done === true)) {
+          const setIndexToSave = (set.setIndex !== undefined && set.setIndex !== null) ? (set.setIndex - 1) : sIdx;
+          this.saveLastRecord(newestSession.exerciseId, setIndexToSave, set.weight, set.actualReps, dateStr, true);
         }
       });
       healedCount++;
     }
 
+    return { success: true, healedCount };
+  },
+
+  // Heal and restore all exercises from true historical workout sessions
+  healAllRecordsFromHistory() {
+    this.healCanonicalRecords();
+    const sessions = this.getHistory();
+    if (!sessions || sessions.length === 0) return { success: true, healedCount: 0 };
+
+    let healedCount = 0;
+    const seen = new Set();
+    for (const s of sessions) {
+      if (!Array.isArray(s.exercises)) continue;
+      const dateStr = s.date && s.time ? `${s.date}T${s.time}:00.000Z` : (s.date || new Date().toISOString());
+      for (const ex of s.exercises) {
+        if (!Array.isArray(ex.sets)) continue;
+        for (const set of ex.sets) {
+          const sIdx = (set.setIndex !== undefined && set.setIndex !== null) ? (set.setIndex - 1) : 0;
+          const key = `${ex.id}_${sIdx}`;
+          if (!seen.has(key) && (set.done === undefined || set.done === true) && set.weight !== null && set.weight !== undefined) {
+            this.saveLastRecord(ex.id, sIdx, set.weight, set.actualReps, dateStr, true);
+            seen.add(key);
+            healedCount++;
+          }
+        }
+      }
+    }
     return { success: true, healedCount };
   }
 };

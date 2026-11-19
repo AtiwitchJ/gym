@@ -155,12 +155,28 @@
           </button>
         </div>
 
+        <!-- Abnormal Weight Warning Guard Banner -->
+        <div
+          v-if="isAbnormal"
+          class="mb-3 p-2.5 bg-amber-50 border-2 border-amber-500 rounded-xl flex items-start gap-2 shadow-[2px_2px_0px_#b45309] text-xs font-mono text-amber-950"
+        >
+          <span class="text-base leading-none">⚠️</span>
+          <div class="flex-1">
+            <span class="font-bold text-amber-900 block">ตรวจพบค่าน้ำหนักผิดปกติ</span>
+            <span class="text-[11px] leading-tight block text-amber-800">{{ anomalyWarning }}</span>
+            <span v-if="guardAcknowledged" class="text-[11px] font-bold text-flame block mt-0.5">
+              ⚠️ กด "ยืนยันค่าน้ำหนักนี้" อีกครั้งหากต้องการใช้ค่านี้จริง
+            </span>
+          </div>
+        </div>
+
         <!-- Big Confirmation Button -->
         <button
           @click="confirm"
-          class="w-full h-12 sm:h-14 rounded-xl bg-flame hover:bg-flame-glow text-white font-heading font-extrabold text-base tracking-wide border-2 border-plate shadow-[3px_3px_0px_#1e2220] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center gap-2 transition-all select-none"
+          class="w-full h-12 sm:h-14 rounded-xl text-white font-heading font-extrabold text-base tracking-wide border-2 border-plate shadow-[3px_3px_0px_#1e2220] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center gap-2 transition-all select-none"
+          :class="isAbnormal ? (guardAcknowledged ? 'bg-amber-600 hover:bg-amber-500' : 'bg-amber-500 hover:bg-amber-600') : 'bg-flame hover:bg-flame-glow'"
         >
-          <span>ตกลง (DONE)</span>
+          <span>{{ guardAcknowledged ? 'ยืนยันค่าน้ำหนักนี้ (Confirm Anyway)' : 'ตกลง (DONE)' }}</span>
           <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
           </svg>
@@ -185,6 +201,9 @@ const {
   suggestedHint,
   suggestedLabel,
   presets,
+  isAbnormal,
+  anomalyWarning,
+  guardAcknowledged,
   closeKeypad,
   append,
   backspace,

@@ -31,19 +31,29 @@ app.get('/api/state', (req, res) => {
 // Save draft & weights
 app.post('/api/state', (req, res) => {
   try {
-    const { dayKey, state, weights } = req.body;
+    const { dayKey, state } = req.body;
     if (dayKey && state) {
+      // 1. Separate daily_draft_state strictly for draft storage
       repo.saveDraft(dayKey, state);
-    }
-    if (weights && typeof weights === 'object') {
-      for (const [exId, wObj] of Object.entries(weights)) {
-        const objUpdatedAt = wObj.updatedAt || null;
-        for (const [k, v] of Object.entries(wObj)) {
-          if (k.startsWith('wt_') && v !== '' && v !== undefined) {
-            const setIdx = parseInt(k.replace('wt_', ''), 10);
-            if (!isNaN(setIdx)) {
-              const repsVal = wObj[`reps_${setIdx}`];
-              repo.saveLastRecord(exId, setIdx, v, repsVal, objUpdatedAt);
+
+      // 2. Only record to exercise_last_weights if that specific set is completed (toggled done)
+      // Strictly forbid updating exercise_last_weights from draft weights typed in-progress
+      if (typeof state === 'object') {
+        const nowIso = new Date().toISOString();
+        for (const [exId, sObj] of Object.entries(state)) {
+          if (!sObj || typeof sObj !== 'object') continue;
+          for (const [k, isDone] of Object.entries(sObj)) {
+            // Check if set is marked as completed (e.g. set_0: true, set_1: true)
+            if (k.startsWith('set_') && Boolean(isDone)) {
+              const setIdx = parseInt(k.replace('set_', ''), 10);
+              if (!isNaN(setIdx)) {
+                const v = sObj[`wt_${setIdx}`];
+                const repsVal = sObj[`reps_${setIdx}`];
+                if (v !== '' && v !== undefined && v !== null) {
+                  const objUpdatedAt = sObj.updatedAt || nowIso;
+                  repo.saveLastRecord(exId, setIdx, v, repsVal, objUpdatedAt);
+                }
+              }
             }
           }
         }

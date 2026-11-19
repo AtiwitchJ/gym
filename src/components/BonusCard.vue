@@ -676,8 +676,22 @@ function applySetAdvice(sIdx) {
 
 const exerciseAdvice = computed(() => {
   const setsData = props.bonus.sets.map((set, sIdx) => {
-    const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
-    const reps = getReps(sIdx) !== '' ? getReps(sIdx) : getPrevReps(sIdx);
+    const curWeight = getWeight(sIdx);
+    const curReps = getReps(sIdx);
+
+    // Draft weight guard: if user typed a draft weight but has not completed reps for this session,
+    // do NOT combine new draft weight with previous reps to prevent premature advance calculation!
+    if (curWeight !== '' && (curReps === '' || Number(curReps) <= 0)) {
+      return {
+        type: set.type,
+        weight: curWeight,
+        reps: null,
+        targetReps: set.reps
+      };
+    }
+
+    const wt = curWeight !== '' ? curWeight : getPrevWeight(sIdx);
+    const reps = curReps !== '' ? curReps : getPrevReps(sIdx);
     return {
       type: set.type,
       weight: wt,
