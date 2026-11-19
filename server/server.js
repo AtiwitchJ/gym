@@ -6,6 +6,7 @@ const repo = require('./db');
 const recovery = require('./recovery');
 const { withPr } = require('./exercise-stats');
 const volume = require('./volume');
+const advice = require('./advice');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -132,6 +133,19 @@ app.get('/api/exercises/:id/history', (req, res) => {
     res.json(withPr(history));
   } catch (err) {
     console.error('Error fetching exercise history:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// History-based weight advice for the next working set (read-only). Rule: server/advice.js
+app.get('/api/exercises/:id/advice', (req, res) => {
+  try {
+    const parsed = Number.parseInt(req.query.n, 10);
+    const lastN = Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, advice.MAX_LAST_N) : advice.DEFAULT_LAST_N;
+    const history = repo.getExerciseHistory(req.params.id);
+    res.json({ exerciseId: req.params.id, ...advice.buildAdvice(history, { lastN }) });
+  } catch (err) {
+    console.error('Error computing exercise advice:', err);
     res.status(500).json({ error: err.message });
   }
 });
