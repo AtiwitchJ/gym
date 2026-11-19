@@ -24,3 +24,12 @@ export function totalWorkingVolume(sessions) {
   const total = list.reduce((sum, s) => sum + sessionWorkingVolume(s), 0);
   return Math.round(total * 10) / 10;
 }
+
+/**
+ * Account page totals. Input is the saved-session list the history page shows (workoutHistory), nothing else:
+ * draft or legacy summary lists are not counted. Volume uses the same rule as the weekly chart.
+ */
+export function accountTotals(savedSessions) {
+  const list = Array.isArray(savedSessions) ? savedSessions : [];
+  return { workouts: list.length, volumeKg: totalWorkingVolume(list) };
+}

@@ -261,7 +261,7 @@ import { useRoutineStore } from '../composables/useRoutineStore.js';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
 import { useExerciseStore } from '../composables/useExerciseStore.js';
 import { useWorkoutStore } from '../composables/useWorkoutStore.js';
-import { totalWorkingVolume } from '../composables/workingVolume.js';
+import { accountTotals } from '../composables/workingVolume.js';
 import { useExcelExport } from '../composables/useExcelExport.js';
 import { useTimer } from '../composables/useTimer.js';
 import { useOneRmCalculator } from '../composables/useOneRm.js';
@@ -293,12 +293,12 @@ function setRestTime(sec) {
 }
 
 // Stats Calculations
-const totalWorkoutsCount = computed(() => {
-  return (sessionHistory.value?.length || 0) + (workoutHistory.value?.length || 0);
-});
+// Same saved sessions as the history page (workoutHistory). Not added to sessionHistory: that double-counted.
+const accountSummary = computed(() => accountTotals(workoutHistory.value));
+const totalWorkoutsCount = computed(() => accountSummary.value.workouts);
 
 // Same rule as the weekly chart: completed working sets only (warm-ups excluded), weight × reps.
-const totalVolumeLifted = computed(() => totalWorkingVolume(workoutHistory.value));
+const totalVolumeLifted = computed(() => accountSummary.value.volumeKg);
 
 const customExercisesCount = computed(() => {
   return exercises.value.filter(e => e.isCustom).length;
