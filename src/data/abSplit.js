@@ -2,7 +2,7 @@
  * 3-Day A/B Split Workout Program (จันทร์, พุธ, ศุกร์)
  *
  * Program A (อก + หลัง + ท้อง - 6 ท่า)
- * Program B (ขา + แขน + คอ บ่า ไหล่ - 7 ท่า)
+ * Program B (ขา + แขน + ไหล่/บ่า - 7 ท่า)
  *
  * All exercises configured with:
  * - 4 sets per exercise (1 warmup 15 reps + 3 working sets 6-8 reps / 8-12 reps)
@@ -218,11 +218,11 @@ export const PROGRAM_A = {
 };
 
 /**
- * Program B (ขา + แขน + คอ บ่า ไหล่ - 7 ท่า)
+ * Program B (ขา + แขน + ไหล่/บ่า - 7 ท่า)
  */
 export const PROGRAM_B = {
   id: 'program_b',
-  title: 'Program B: ขา + แขน + คอ บ่า ไหล่ (Legs, Arms, Shoulders & Traps)',
+  title: 'Program B: ขา + แขน + ไหล่/บ่า (Legs, Arms, Shoulders & Traps)',
   subtitle: 'โปรแกรมสร้างกล้ามเนื้อช่วงล่าง แขน และหัวไหล่รอบทิศ (7 ท่า)',
   splitName: '3-Day A/B Split (วันพุธ / สัปดาห์สลับ)',
   exercises: [

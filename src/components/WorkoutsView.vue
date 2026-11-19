@@ -120,7 +120,7 @@
           <div>
             <div class="flex items-center justify-between gap-1 mb-1">
               <span class="text-xs font-bold font-heading text-ink">Program B</span>
-              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-bg text-emerald font-bold">7 ท่า • {{ programSetTotal('prog_b') }} เซ็ต • ขา+แขน+ไหล่</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-bg text-emerald font-bold">7 ท่า • {{ programSetTotal('prog_b') }} เซ็ต • ขา + แขน + ไหล่/บ่า</span>
             </div>
             <p class="text-[11px] text-ink-muted line-clamp-1 font-body">
               Leg Press, Hip Thrust, Leg Ext, DB Shoulder, Shrug, Triceps, Hammer

@@ -361,7 +361,7 @@ const allDefaultRoutines = [
   },
   {
     id: 'atiwitch_ab_program_b',
-    title: 'Program B: ขา + แขน + คอ บ่า ไหล่ (Legs, Arms, Shoulders & Traps)',
+    title: 'Program B: ขา + แขน + ไหล่/บ่า (Legs, Arms, Shoulders & Traps)',
     subtitle: '3-Day A/B Split • วันพุธ/สลับสัปดาห์ (7 ท่า)',
     exercises: [
       {

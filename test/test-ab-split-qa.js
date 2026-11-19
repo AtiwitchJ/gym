@@ -41,7 +41,7 @@ for (const ex of PROGRAM_A.exercises) {
 }
 console.log('✓ Program A verified: 6 exercises (อก + หลัง + ท้อง) with 4 sets each (1 warm + 3 work)');
 
-// 1.2 Program B: ขา + แขน + คอ บ่า ไหล่ (7 ท่า)
+// 1.2 Program B: ขา + แขน + ไหล่/บ่า (7 ท่า)
 assert(PROGRAM_B, 'PROGRAM_B definition must exist');
 assert.strictEqual(PROGRAM_B.exercises.length, 7, 'Program B MUST contain exactly 7 exercises');
 assert(PROGRAM_B.title.includes('Program B'), 'Program B title must be clear');
@@ -61,7 +61,7 @@ for (const ex of PROGRAM_B.exercises) {
   assert.strictEqual(ex.sets[2].type, 'work', `${ex.name} set 3 must be working set`);
   assert.strictEqual(ex.sets[3].type, 'work', `${ex.name} set 4 must be working set`);
 }
-console.log('✓ Program B verified: 7 exercises (ขา + แขน + คอ บ่า ไหล่) with 4 sets each (1 warm + 3 work)\n');
+console.log('✓ Program B verified: 7 exercises (ขา + แขน + ไหล่/บ่า) with 4 sets each (1 warm + 3 work)\n');
 
 // ------------------------------------------------------------------
 // 2. YouTube Machine Video Alternatives (3 Distinct Machines Per Exercise)
