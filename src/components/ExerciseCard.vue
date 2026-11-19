@@ -347,6 +347,11 @@
               <span class="text-xs sm:text-sm font-mono font-bold text-ink select-none truncate">
                 {{ getCleanTargetReps(set.reps) }}
               </span>
+              <span
+                v-if="getPrFlag(sIdx)"
+                class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none flex-shrink-0"
+                title="ทำสถิติใหม่ (PR) เมื่อเทียบกับสถิติที่บันทึกไว้"
+              >🏆 PR</span>
             </div>
             <span
               v-if="hasPrevForSet(sIdx)"
@@ -482,6 +487,7 @@ import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { RIR_CHOICES, normalizeRir, nextRir } from '../composables/useRir.js';
+import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
 
 const showHistory = ref(false);
 
@@ -500,6 +506,8 @@ const {
   updateWeight,
   updateReps,
   updateRir,
+  setPrFlag,
+  showToast,
   applyPrevRecord,
   toggleSetDone,
   showExerciseImages
@@ -865,11 +873,33 @@ const isAllCompleted = computed(() => {
   return props.exercise.sets.every((_, idx) => isSetDone(idx));
 });
 
+// PR badge (step 6): compare the ticked set with the stored PR for this exercise.
+function getPrFlag(sIdx) {
+  return !!exState.value[`pr_${sIdx}`];
+}
+
+async function evaluatePrOnTick(sIdx) {
+  const set = props.exercise.sets[sIdx];
+  const baseline = await getBaselineE1rm(props.exercise.id);
+  if (!isSetDone(sIdx)) return; // unticked while the check was running
+  const { isPr, e1rm } = isNewPr(
+    { weight: getWeight(sIdx), reps: getReps(sIdx), rir: getRir(sIdx), isWarm: !!set && set.type === 'warm' },
+    baseline
+  );
+  setPrFlag(currentDay.value, props.exercise.id, sIdx, isPr);
+  if (isPr) {
+    showToast(`🏆 PR ใหม่: ${props.exercise.name} ${getWeight(sIdx)} kg × ${getReps(sIdx)} (e1RM ≈ ${e1rm.toFixed(1)} kg)`);
+  }
+}
+
 function onToggle(sIdx) {
   const isNowChecked = toggleSetDone(currentDay.value, props.exercise.id, sIdx);
   if (isNowChecked) {
     triggerHaptic([35]);
     startTimer();
+    evaluatePrOnTick(sIdx);
+  } else {
+    setPrFlag(currentDay.value, props.exercise.id, sIdx, false);
   }
 }
 </script>

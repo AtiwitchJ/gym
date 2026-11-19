@@ -3,6 +3,7 @@ import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExer
 import { defaultTodos } from '../data/defaultTodos.js';
 import { parseRepTarget } from './useWeightAdvisor.js';
 import { normalizeRir } from './useRir.js';
+import { clearPrCache } from './usePersonalRecords.js';
 
 export function isMultiSetExercise(exId) {
   if (!exId) return false;
@@ -541,6 +542,14 @@ function updateWeight(day, exId, setIdx, val) {
   triggerSave(day);
 }
 
+// PR badge flag for a set (step 6): true when the set beat the stored PR at tick time.
+function setPrFlag(day, exId, setIdx, isPr) {
+  if (!userState[day]) userState[day] = {};
+  if (!userState[day][exId]) userState[day][exId] = {};
+  userState[day][exId][`pr_${setIdx}`] = !!isPr;
+  triggerSave(day);
+}
+
 // RIR (0, 1, 2 = "2+") chosen after a set is done. null clears it. Saved with the day state.
 function updateRir(day, exId, setIdx, val) {
   if (!userState[day]) userState[day] = {};
@@ -835,7 +844,8 @@ async function finishAndSaveWorkout() {
     } catch (e) {}
   }
 
-  // Save is complete: วันนี้ now points at the next program.
+  // Save is complete: วันนี้ now points at the next program, and PR baselines are stale.
+  clearPrCache();
   refreshTodayDay();
   showToast(`บันทึกประวัติสำเร็จ (${totalSetsDone} เซ็ต) — รีเซ็ตพร้อมสำหรับรอบถัดไป`);
 }
@@ -932,6 +942,7 @@ export function useWorkoutStore() {
     updateWeight,
     updateReps,
     updateRir,
+    setPrFlag,
     applyPrevWeight,
     applyPrevRecord,
     toggleSetDone,
