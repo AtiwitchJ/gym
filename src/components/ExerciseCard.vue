@@ -29,7 +29,7 @@
                   ? 'bg-flame-bg text-flame border-flame'
                   : 'bg-surface text-ink-muted border-plate/30'"
               >
-                {{ exercise.isMain ? 'MAIN LIFT' : 'ASSISTANCE' }}
+                {{ exercise.isMain ? 'ท่าหลัก' : 'ท่าช่วย' }}
               </span>
               <span
                 v-if="isDumbbell"
@@ -351,7 +351,7 @@
                   ? 'bg-sky-bg text-sky border-sky/40'
                   : 'bg-surface-card text-ink border-plate/30'"
               >
-                {{ set.type === 'warm' ? 'W1' : `S${sIdx}` }}
+                {{ set.type === 'warm' ? 'วอร์ม' : `เซ็ต ${sIdx}` }}
               </span>
               <span class="text-xs sm:text-sm font-mono font-bold text-ink select-none truncate">
                 {{ getCleanTargetReps(set.reps) }}
@@ -460,7 +460,7 @@
 
         <!-- RIR after Done (optional): 3 buttons -->
         <div v-if="isSetDone(sIdx)" class="mt-2 flex items-center gap-1.5 flex-wrap">
-          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none">ความเหนื่อย (ไม่บังคับ):</span>
+          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none" title="RIR = จำนวนครั้งที่ยังเหลือแรงยกต่อได้ (ไม่บังคับ)">ความเหนื่อย RIR (ไม่บังคับ):</span>
           <button
             v-for="opt in RIR_CHOICES"
             :key="opt.value"
@@ -472,6 +472,7 @@
               : 'bg-surface text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
             :title="opt.title"
           >{{ opt.label }}</button>
+          <p class="w-full text-[10px] font-body text-ink-muted leading-snug">เหลือ 2+ = ยังเหลือแรงอีก 2 ครั้งขึ้นไป · เหลือ 1 = อีก 1 ครั้ง · ล้ม = ยกต่อไม่ได้</p>
         </div>
       </div>
     </div>
@@ -848,7 +849,7 @@ function openWeightKeypad(sIdx) {
     }
   }
 
-  const setLabel = isWarm ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`;
+  const setLabel = isWarm ? 'วอร์ม' : `เซ็ต ${sIdx}`;
   const subtitle = isDumbbell.value
     ? `เซ็ต ${setLabel} • ใส่น้ำหนักต่อข้าง (เช่น ถือข้างละ 18 ให้ใส่ 18)`
     : `เซ็ต ${setLabel} • น้ำหนักยก`;
@@ -875,7 +876,7 @@ function openRepsKeypad(sIdx, targetStr) {
   const isWarm = isWarmupType(set?.type);
   const prevVal = getPrevReps(sIdx);
   const targetNum = targetRepNumber(targetStr);
-  const setLabel = isWarm ? 'วอร์ม (W1)' : `เล่นจริง (S${sIdx})`;
+  const setLabel = isWarm ? 'วอร์ม' : `เซ็ต ${sIdx}`;
   openKeypad({
     mode: 'reps',
     unit: 'ครั้ง',

@@ -294,12 +294,12 @@
 
           <!-- Sets Table -->
           <div class="space-y-1.5">
-            <!-- Table Header: SET | PREV | KG | REPS | ✓ -->
+            <!-- Table Header: เซ็ต | ครั้งก่อน | น้ำหนัก | ครั้ง | เสร็จ -->
             <div class="grid grid-cols-12 gap-1.5 text-center text-[10px] font-mono font-bold text-ink-muted uppercase py-1 px-1 border-b border-plate/15">
-              <div class="col-span-2 text-left pl-1">SET</div>
-              <div class="col-span-3 text-center">PREV</div>
-              <div class="col-span-3 text-center">KG (นน.)</div>
-              <div class="col-span-2 text-center">REPS (ครั้ง)</div>
+              <div class="col-span-2 text-left pl-1">เซ็ต</div>
+              <div class="col-span-3 text-center">ครั้งก่อน</div>
+              <div class="col-span-3 text-center">น้ำหนัก (กก.)</div>
+              <div class="col-span-2 text-center">จำนวนครั้ง</div>
               <div class="col-span-2 text-center">✓</div>
             </div>
 
@@ -321,7 +321,7 @@
                     @click="cycleSetType(exIdx, setIdx)"
                     class="min-h-[44px] min-w-[44px] px-2 rounded text-[10px] font-mono font-bold uppercase border leading-none transition-colors"
                     :class="getSetTypeBadgeClass(set.type)"
-                    :title="`ประเภทเซ็ต: ${set.type} (แตะเพื่อสลับ W/R/D/F)`"
+                    :title="`ประเภทเซ็ต: ${getSetTypeShort(set.type)} (แตะเพื่อสลับ วอร์ม / ทำจริง / ดรอป / ล้มเหลว)`"
                   >
                     {{ getSetTypeShort(set.type) }}
                   </button>
@@ -607,14 +607,14 @@ function getSetTypeShort(type) {
   switch (type) {
     case 'warm':
     case 'warmup':
-      return 'W';
+      return 'วอร์ม';
     case 'dropset':
-      return 'D';
+      return 'ดรอป';
     case 'failure':
-      return 'F';
+      return 'ล้มเหลว';
     case 'working':
     default:
-      return 'R';
+      return 'ทำจริง';
   }
 }
 

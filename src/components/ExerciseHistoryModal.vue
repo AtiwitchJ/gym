@@ -28,7 +28,8 @@
       <template v-else>
         <!-- PR card -->
         <div class="bg-white border-2 border-plate rounded-2xl p-4 shadow-[3px_3px_0px_#1e2220]">
-          <div class="text-[11px] font-mono font-bold text-ink-muted mb-2">🏆 PR (สถิติสูงสุดของท่านี้)</div>
+          <div class="text-[11px] font-mono font-bold text-ink-muted mb-1">🏆 PR (สถิติสูงสุดของท่านี้)</div>
+          <p class="text-[10px] font-body text-ink-muted mb-2">PR คือการยกที่ดีที่สุดเท่าที่บันทึกไว้ ประเมินจาก 1RM (น้ำหนักที่ยกได้ 1 ครั้ง)</p>
           <div class="grid grid-cols-3 gap-2">
             <div v-for="row in prRows" :key="row.label" class="text-center">
               <div class="text-base sm:text-lg font-mono font-extrabold text-ink tabular-nums">{{ row.value }}</div>

@@ -19,10 +19,10 @@ const logged = [
   { setIndex: 4, type: 'เล่นจริง', weight: '', actualReps: '', done: false }
 ];
 
-console.log('▶ [1] Warm-up is W1; working sets are S1 and S2 (not S2 and S3)...');
+console.log('▶ [1] Warm-up is วอร์ม; working sets are เซ็ต 1 and เซ็ต 2 (not 2 and 3)...');
 const rows = labelSets(logged);
-assert.deepStrictEqual(rows.map((r) => r.label), ['W1', 'S1', 'S2'], 'labels count warm-up and working sets separately');
-assert.ok(!rows.some((r) => r.label.startsWith('S') && r.set.type === 'วอร์ม'), 'warm-up is never an S-number');
+assert.deepStrictEqual(rows.map((r) => r.label), ['วอร์ม', 'เซ็ต 1', 'เซ็ต 2'], 'labels count warm-up and working sets separately');
+assert.ok(!rows.some((r) => r.label.startsWith('เซ็ต') && r.set.type === 'วอร์ม'), 'warm-up is never a เซ็ต number');
 console.log('✓ Labels verified.');
 
 console.log('▶ [2] An empty set that was never ticked is not shown (no "S4 ข้าม")...');
@@ -35,12 +35,12 @@ const typed = labelSets([
   { setIndex: 1, type: 'เล่นจริง', weight: 70, actualReps: 8, done: true },
   { setIndex: 2, type: 'เล่นจริง', weight: 12, actualReps: '', done: false }
 ]);
-assert.deepStrictEqual(typed.map((r) => [r.label, r.status]), [['S1', 'done'], ['S2', 'unticked']]);
+assert.deepStrictEqual(typed.map((r) => [r.label, r.status]), [['เซ็ต 1', 'done'], ['เซ็ต 2', 'unticked']]);
 console.log('✓ Unticked status verified.');
 
 console.log('▶ [4] Labels for Excel match the rows...');
-assert.strictEqual(labelFor(logged, 0), 'W1');
-assert.strictEqual(labelFor(logged, 2), 'S2');
+assert.strictEqual(labelFor(logged, 0), 'วอร์ม');
+assert.strictEqual(labelFor(logged, 2), 'เซ็ต 2');
 assert.strictEqual(labelFor(logged, 3), '', 'a hidden set has no label');
 console.log('✓ Excel labels verified.');
 

@@ -1,7 +1,7 @@
 /**
  * Set labels for history (review fix: numbering drift and "S4 ข้าม").
- * - Warm-up sets are W1, W2, ... (never S-numbers).
- * - Working sets are S1, S2, ... counted among working sets only (not the raw set index).
+ * - Warm-up sets are "วอร์ม" ("วอร์ม 2" for a second one); working sets are "เซ็ต 1", "เซ็ต 2" ...
+ * - Working sets count among working sets only (not the raw set index).
  * - A set that was not ticked is shown only if it has a value typed; it is "ยังไม่ได้ติ๊ก",
  *   never "ข้าม" (the app has no skip action, so nothing is recorded as skipped).
  * - A set with no ticks and no values is not shown.
@@ -31,7 +31,7 @@ export function labelSets(sets) {
     } else {
       working += 1;
     }
-    const label = isWarm(set) ? `W${warm}` : `S${working}`;
+    const label = isWarm(set) ? (warm > 1 ? `วอร์ม ${warm}` : 'วอร์ม') : `เซ็ต ${working}`;
     if (set.done) {
       rows.push({ key: `${i}`, label, set, status: 'done' });
     } else if (hasValue(set)) {

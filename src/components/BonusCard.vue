@@ -325,7 +325,7 @@
                 ? 'bg-sky-bg text-sky border-sky/40'
                 : 'bg-flame-bg text-flame border-flame/40'"
             >
-              {{ set.type === 'warm' ? 'W1' : 'T1' }}
+              {{ set.type === 'warm' ? 'วอร์ม' : 'เสริม' }}
             </span>
             <span class="text-xs sm:text-sm font-mono font-bold text-ink select-none truncate">
               {{ getCleanTargetReps(set.reps) }}
@@ -424,6 +424,7 @@
               : 'bg-surface text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
             :title="opt.title"
           >{{ opt.label }}</button>
+          <p class="w-full text-[10px] font-body text-ink-muted leading-snug">เหลือ 2+ = ยังเหลือแรงอีก 2 ครั้งขึ้นไป · เหลือ 1 = อีก 1 ครั้ง · ล้ม = ยกต่อไม่ได้</p>
         </div>
       </div>
     </div>
@@ -763,7 +764,7 @@ function openWeightKeypad(sIdx) {
     }
   }
 
-  const setLabel = isWarm ? 'วอร์ม (W1)' : `เล่นเสริม (T1)`;
+  const setLabel = isWarm ? 'วอร์ม' : 'เล่นเสริม';
   const subtitle = isDumbbell.value
     ? `เซ็ต ${setLabel} • ใส่น้ำหนักต่อข้าง (เช่น ถือข้างละ 18 ให้ใส่ 18)`
     : `เซ็ต ${setLabel} • น้ำหนักยก`;
@@ -793,7 +794,7 @@ function openRepsKeypad(sIdx, targetStr) {
     mode: 'reps',
     unit: 'ครั้ง',
     title: props.bonus.name,
-    subtitle: `เซ็ต ${isWarm ? 'วอร์ม (W1)' : `เล่นเสริม (T1)`} • จำนวนครั้งที่ยกจริง`,
+    subtitle: `เซ็ต ${isWarm ? 'วอร์ม' : 'เล่นเสริม'} • จำนวนครั้งที่ยกจริง`,
     currentValue: '',
     targetHint: targetNum ? `${targetNum}` : '',
     prevHint: prevVal ? `${prevVal}` : '',

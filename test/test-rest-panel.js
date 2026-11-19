@@ -20,16 +20,16 @@ const dayData = {
   bonusExercises: [{ id: 'b1', name: 'Curl', sets: [{ type: 'working' }] }]
 };
 
-console.log('▶ [1] Set labels: warm-up is W1, working sets are S<index>...');
-assert.strictEqual(setLabel({ type: 'warm' }, 0), 'W1');
-assert.strictEqual(setLabel({ type: 'working' }, 2), 'S2');
+console.log('▶ [1] Set labels: warm-up is วอร์ม, working sets are เซ็ต <index>...');
+assert.strictEqual(setLabel({ type: 'warm' }, 0), 'วอร์ม');
+assert.strictEqual(setLabel({ type: 'working' }, 2), 'เซ็ต 2');
 console.log('✓ Labels verified.');
 
 console.log('▶ [2] Next undone set walks in order, then bonus, then null...');
 let state = {};
-assert.deepStrictEqual(nextUndoneSet(dayData, state), { exerciseId: 'e1', exerciseName: 'Bench', setIndex: 0, label: 'W1' });
+assert.deepStrictEqual(nextUndoneSet(dayData, state), { exerciseId: 'e1', exerciseName: 'Bench', setIndex: 0, label: 'วอร์ม' });
 state = { e1: { set_0: true } };
-assert.strictEqual(nextUndoneSet(dayData, state).label, 'S1', 'after the warm-up, next is S1');
+assert.strictEqual(nextUndoneSet(dayData, state).label, 'เซ็ต 1', 'after the warm-up, next is เซ็ต 1');
 state = { e1: { set_0: true, set_1: true, set_2: true } };
 assert.deepStrictEqual(nextUndoneSet(dayData, state).exerciseId, 'e2', 'next exercise after all of Bench');
 state = { e1: { set_0: true, set_1: true, set_2: true }, e2: { set_0: true, set_1: true } };
@@ -41,7 +41,7 @@ console.log('✓ Next-set order verified.');
 
 console.log('▶ [3] Hint text...');
 assert.strictEqual(restHint(null), 'จบทุกท่าแล้ว — ข้ามพักได้เลย');
-assert.strictEqual(restHint({ exerciseName: 'Row', label: 'S1' }), 'ต่อไป: Row · S1');
+assert.strictEqual(restHint({ exerciseName: 'Row', label: 'เซ็ต 1' }), 'ต่อไป: Row · เซ็ต 1');
 console.log('✓ Hint verified.');
 
 console.log('▶ [4] Skip stops the countdown and sets it to 0...');

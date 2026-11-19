@@ -2,9 +2,9 @@
  * Rest panel helpers (step 4 of the set-screen plan). Pure functions: no store, no DOM.
  */
 
-/** Label used on set rows: warm-up is W1, working sets are S<index>. */
+/** Label used on set rows: warm-up is "วอร์ม", working sets are "เซ็ต <number>". */
 export function setLabel(set, sIdx) {
-  return set && set.type === 'warm' ? 'W1' : `S${sIdx}`;
+  return set && set.type === 'warm' ? 'วอร์ม' : `เซ็ต ${sIdx}`;
 }
 
 /**
