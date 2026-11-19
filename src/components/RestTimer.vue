@@ -37,6 +37,32 @@
           </button>
         </div>
 
+        <!-- Custom rest for this exercise (10–600 s, whole seconds) -->
+        <div class="flex flex-col gap-0.5 flex-shrink-0">
+          <div class="flex items-center gap-1">
+            <input
+              v-model="restInput"
+              type="text"
+              inputmode="numeric"
+              maxlength="3"
+              placeholder="10–600"
+              :disabled="!exerciseKey"
+              aria-label="เวลาพักเอง (วินาที)"
+              class="min-h-[44px] w-20 px-2 rounded-xl border-2 border-plate bg-white text-xs sm:text-sm font-mono font-bold text-ink disabled:opacity-50"
+              @keyup.enter="saveRest"
+            />
+            <button
+              type="button"
+              :disabled="!exerciseKey"
+              class="min-h-[44px] min-w-[44px] px-2.5 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-xs font-bold text-ink disabled:opacity-50 touch-manipulation"
+              title="บันทึกเวลาพักของท่านี้"
+              @click="saveRest"
+            >บันทึก</button>
+          </div>
+          <span v-if="restError" class="text-[10px] font-mono text-red-700 leading-tight max-w-[12rem]">{{ restError }}</span>
+          <span v-else-if="restOk" class="text-[10px] font-mono text-emerald leading-tight max-w-[12rem]">{{ restOk }}</span>
+        </div>
+
         <!-- Dynamic Steppers (+30s / -15s) -->
         <div class="flex items-center gap-1 flex-shrink-0">
           <button
@@ -105,7 +131,9 @@
 import { computed } from 'vue';
 import { useTimer } from '../composables/useTimer';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
+import { ref, watch } from 'vue';
 import { nextUndoneSet, restHint } from '../composables/useRestPanel.js';
+import { getCustomRest, saveCustomRest } from '../composables/useCustomRest.js';
 
 const { currentDay, workoutData, userState } = useWorkoutStore();
 const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(currentDay.value));
@@ -114,6 +142,9 @@ const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(currentDay.val
 const next = computed(() => nextUndoneSet(workoutData[currentDay.value], userState[currentDay.value]));
 const nextHint = computed(() => restHint(next.value));
 const allDone = computed(() => next.value === null);
+
+// The custom rest belongs to the exercise of the next set (the rest happens before that set).
+const exerciseKey = computed(() => (next.value ? next.value.exerciseId : null));
 
 const {
   timerDuration,
@@ -126,4 +157,34 @@ const {
   adjustRemaining,
   skipTimer
 } = useTimer();
+
+const restInput = ref('');
+const restError = ref('');
+const restOk = ref('');
+
+// When the next exercise changes and no timer is running, use its saved rest.
+watch(
+  exerciseKey,
+  (key) => {
+    if (isRunning.value) return;
+    const saved = getCustomRest(key);
+    if (saved) setTimerDuration(saved);
+  },
+  { immediate: true }
+);
+
+function saveRest() {
+  const result = saveCustomRest(exerciseKey.value, restInput.value);
+  if (!result.ok) {
+    restError.value = result.error;
+    restOk.value = '';
+    return;
+  }
+  restError.value = '';
+  restOk.value = isRunning.value
+    ? `บันทึก ${result.seconds} วินาที (ใช้กับการพักครั้งถัดไป)`
+    : `บันทึก ${result.seconds} วินาที`;
+  restInput.value = '';
+  if (!isRunning.value) setTimerDuration(result.seconds);
+}
 </script>

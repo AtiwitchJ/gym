@@ -1,7 +1,21 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 
-const timerDuration = ref(90);
-const timerRemaining = ref(90);
+export const REST_MIN_SECONDS = 10;
+export const REST_MAX_SECONDS = 600;
+const DEFAULT_REST_SECONDS = 90;
+
+/**
+ * Clamp a rest duration to 10–600 seconds (whole seconds). Not a number -> the default (90).
+ * Used by useTimer so no code path can set a duration outside the allowed range.
+ */
+export function clampRestSeconds(seconds) {
+  const n = Number(seconds);
+  if (!Number.isFinite(n)) return DEFAULT_REST_SECONDS;
+  return Math.min(REST_MAX_SECONDS, Math.max(REST_MIN_SECONDS, Math.round(n)));
+}
+
+const timerDuration = ref(DEFAULT_REST_SECONDS);
+const timerRemaining = ref(DEFAULT_REST_SECONDS);
 const isRunning = ref(false);
 let timerEndTime = null;
 let intervalId = null;
@@ -140,8 +154,10 @@ function skipTimer() {
 }
 
 function setTimerDuration(seconds) {
-  timerDuration.value = seconds;
-  timerRemaining.value = seconds;
+  // Custom rest per exercise (gap item 5): every duration is kept within 10–600 seconds.
+  const clamped = clampRestSeconds(seconds);
+  timerDuration.value = clamped;
+  timerRemaining.value = clamped;
   timerEndTime = null;
   lastBeepSecond = null;
   clearInterval(intervalId);

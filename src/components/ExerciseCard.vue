@@ -496,6 +496,8 @@ import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { RIR_CHOICES, normalizeRir, nextRir } from '../composables/useRir.js';
+import { nextUndoneSet } from '../composables/useRestPanel.js';
+import { getCustomRest } from '../composables/useCustomRest.js';
 import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
@@ -510,6 +512,7 @@ const isPlayingVideo = ref(false);
 
 const {
   currentDay,
+  workoutData,
   userState,
   lastWeights,
   getExerciseLastRecord,
@@ -524,7 +527,7 @@ const {
 } = useWorkoutStore();
 
 const { openKeypad } = usePinKeypad();
-const { startTimer, triggerHaptic } = useTimer();
+const { startTimer, triggerHaptic, setTimerDuration } = useTimer();
 
 const activeMachineIndex = ref(0);
 
@@ -919,6 +922,10 @@ function onToggle(sIdx) {
   const isNowChecked = toggleSetDone(currentDay.value, props.exercise.id, sIdx);
   if (isNowChecked) {
     triggerHaptic([35]);
+    // Custom rest (gap item 5): the rest before the next undone set uses that exercise's saved value
+    const nextSet = nextUndoneSet(workoutData[currentDay.value], userState[currentDay.value]);
+    const saved = getCustomRest(nextSet ? nextSet.exerciseId : null);
+    if (saved) setTimerDuration(saved);
     startTimer();
     evaluatePrOnTick(sIdx);
   } else {
