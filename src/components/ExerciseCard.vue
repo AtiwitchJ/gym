@@ -408,7 +408,7 @@
         </div>
 
         <!-- Bottom line: ± steppers for weight and reps (tap the value to type it) -->
-        <div class="grid grid-cols-2 gap-2 mt-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
           <div class="flex items-center gap-1 min-w-0">
             <button
               type="button"

@@ -62,7 +62,7 @@
     <button
       type="button"
       @click="workoutStore.switchTab('exercises')"
-      class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs sm:text-sm rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] transition-all touch-manipulation"
+      class="w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs sm:text-sm rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] transition-all touch-manipulation"
     >
       <span>🔎 คลังท่าฝึก (ค้นหา / ดูคลิป)</span>
     </button>

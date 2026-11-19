@@ -343,7 +343,7 @@
               </div>
 
               <!-- Line 2: ± steppers for weight and reps (tap the value to type it) -->
-              <div class="grid grid-cols-2 gap-2 mt-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                 <div class="flex items-center gap-1 min-w-0">
                   <button type="button" @click="stepSheetWeight(exIdx, setIdx, -1, set)" class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation" aria-label="ลดน้ำหนัก">−</button>
                   <button
