@@ -34,6 +34,24 @@ assert.strictEqual(normalWeight.isAnomaly, false, 'Normal weight 22.5 kg should 
 const extremeWithoutPrev = detectWeightAnomaly(500, null);
 assert.strictEqual(extremeWithoutPrev.isAnomaly, true, 'Extreme 500 kg should be flagged as anomaly even without prev');
 
+// Case E: Abnormally low weight (< 5 kg) for machine / cable exercise
+const lowMachineWeight = detectWeightAnomaly(2, null, 'Lat Pulldown Machine');
+assert.strictEqual(lowMachineWeight.isAnomaly, true, 'Weight < 5 kg on machine must be flagged as anomaly');
+assert.strictEqual(lowMachineWeight.type, 'too_low');
+assert(lowMachineWeight.reason.includes('< 5 กก.'), 'Warning should mention < 5 kg');
+
+// Case F: Dumbbell exercise with small weight (e.g. 4 kg / hand) is valid
+const validDumbbellWeight = detectWeightAnomaly(4, null, 'Dumbbell Lateral Raise', '', 'กก./ข้าง');
+assert.strictEqual(validDumbbellWeight.isAnomaly, false, '4 kg per hand for dumbbell is valid');
+
+// Case G: Deviation > 50% (e.g. previous 20 kg, user entered 9 kg or 35 kg)
+const dropOver50 = detectWeightAnomaly(9, 20);
+assert.strictEqual(dropOver50.isAnomaly, true, 'Drop of > 50% must be flagged as anomaly');
+const spikeOver50 = detectWeightAnomaly(35, 20);
+assert.strictEqual(spikeOver50.isAnomaly, true, 'Spike of > 50% must be flagged as anomaly');
+const normalDiff = detectWeightAnomaly(18, 20);
+assert.strictEqual(normalDiff.isAnomaly, false, 'Diff of 10% (18 kg vs 20 kg) must not be flagged');
+
 // 1.2 Composable reactive state and confirm guard
 const keypad = usePinKeypad();
 
@@ -185,6 +203,10 @@ const lastRecord = getExerciseLastRecord('m1');
 assert.strictEqual(lastRecord.wt_1, 60, 'Last weight for working set 1 must be 60 kg');
 assert.strictEqual(lastRecord.reps_1, 8, 'Last reps for working set 1 must be 8');
 
+// 3.4 Verify smart pre-fill of weights and reps for next round in draft state
+assert.strictEqual(monStateAfter['wt_1'], 60, 'Working set 1 weight should be pre-filled with 60 kg');
+assert.strictEqual(monStateAfter['reps_1'], 8, 'Working set 1 reps should be pre-filled with 8 reps');
+
 // Target recommendation for next round:
 // Since 60 kg x 8 reps was optimal/high in 6-8 target range, next session recommended weight should be 62 kg (+2 kg)!
 const adviceNextRound = getExerciseOverallAdvice([
@@ -194,6 +216,20 @@ assert(adviceNextRound && adviceNextRound.workAdvice, 'Advice for next round sho
 assert.strictEqual(adviceNextRound.workAdvice.suggestedWeight, 62, 'Next round target weight should be 62 kg (+2 kg overload)');
 
 console.log('✓ TEST 3 Passed: Session lifecycle resets checkmarks and pulls correct target weights for new round!\n');
+
+// ------------------------------------------------------------------
+// TEST 4: Multi-Set Synchronization across Sets 1-3
+// ------------------------------------------------------------------
+console.log('▶ [TEST 4] Multi-Set Synchronization across Sets 1-3...');
+workoutStore.lastWeights['w3'] = { wt_1: 22.5, wt_2: 22.5, wt_3: 22.5 };
+workoutStore.syncLinkedExerciseRecords('w3', 1, 20, 10);
+assert.strictEqual(workoutStore.lastWeights['w3'].wt_1, 20, 'w3 set 1 weight must sync to 20 kg');
+assert.strictEqual(workoutStore.lastWeights['w3'].wt_2, 20, 'w3 set 2 weight must sync to 20 kg');
+assert.strictEqual(workoutStore.lastWeights['w3'].wt_3, 20, 'w3 set 3 weight must sync to 20 kg');
+assert.strictEqual(workoutStore.lastWeights['w3'].reps_1, 10, 'w3 set 1 reps must sync to 10');
+assert.strictEqual(workoutStore.lastWeights['w3'].reps_2, 10, 'w3 set 2 reps must sync to 10');
+assert.strictEqual(workoutStore.lastWeights['w3'].reps_3, 10, 'w3 set 3 reps must sync to 10');
+console.log('✓ TEST 4 Passed: Multi-set synchronization across sets 1-3 verified for all exercises!\n');
 
 console.log('====================================================');
 console.log('🎉 ALL SPRINT QA & AUTOMATION TESTS PASSED!');

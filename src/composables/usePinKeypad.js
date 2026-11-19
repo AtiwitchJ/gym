@@ -18,8 +18,9 @@ let onConfirmCallback = null;
  * Detects whether entered weight is an abnormal typo compared to previous record
  * e.g. entering 2 kg while previous was 20 kg (too low, missing zero)
  * or entering 200 kg while previous was 20 kg (too high, extra zero)
+ * or < 5 kg on a machine/cable exercise
  */
-export function detectWeightAnomaly(currentWeight, prevWeight) {
+export function detectWeightAnomaly(currentWeight, prevWeight, exerciseTitle = '', exerciseSubtitle = '', unitStr = 'กก.') {
   const curr = parseFloat(currentWeight);
   const prev = parseFloat(prevWeight);
 
@@ -27,35 +28,42 @@ export function detectWeightAnomaly(currentWeight, prevWeight) {
     return { isAnomaly: false, reason: null, type: null };
   }
 
-  // Without previous record, flag extreme absolute weight (> 400 kg)
-  if (isNaN(prev) || prev <= 0) {
-    if (curr > 400) {
+  // Check if machine or cable exercise
+  const combined = `${exerciseTitle || ''} ${exerciseSubtitle || ''}`.toLowerCase();
+  const isDumbbellOnly = (unitStr && unitStr.includes('ข้าง')) || (combined.includes('dumbbell') && !combined.includes('cable') && !combined.includes('machine'));
+  const isMachineOrCable = !isDumbbellOnly;
+
+  // 1. Differ from previous record by > 50% (either drop > 50% or spike > 50%)
+  if (!isNaN(prev) && prev > 0) {
+    const diff = Math.abs(curr - prev) / prev;
+    if (diff > 0.5) {
+      const percentStr = Math.round(diff * 100);
       return {
         isAnomaly: true,
-        type: 'extreme_high',
-        reason: `น้ำหนัก ${curr} กก. สูงผิดปกติ กรุณาตรวจสอบอีกครั้ง`
+        type: curr < prev ? 'too_low' : 'too_high',
+        ratio: Math.round((curr / prev) * 100),
+        reason: curr < prev
+          ? `ค่าน้ำหนัก ${curr} ${unitStr || 'กก.'} น้อยกว่าครั้งก่อน (${prev} ${unitStr || 'กก.'}) มากผิดปกติ (${percentStr}% ต่างกันเกิน 50% อาจลืมพิมพ์เลข 0)`
+          : `ค่าน้ำหนัก ${curr} ${unitStr || 'กก.'} มากกว่าครั้งก่อน (${prev} ${unitStr || 'กก.'}) มากผิดปกติ (${percentStr}% ต่างกันเกิน 50% อาจพิมพ์เลข 0 เกิน)`
       };
     }
-    return { isAnomaly: false, reason: null, type: null };
   }
 
-  // Significant drop: <= 40% of previous weight (e.g. 2 kg vs 20 kg, or 5 kg vs 50 kg)
-  if (curr <= prev * 0.4) {
+  // 2. Abnormally low weight (< 5 kg) for machine / cable
+  if (isMachineOrCable && curr < 5) {
     return {
       isAnomaly: true,
       type: 'too_low',
-      ratio: Math.round((curr / prev) * 100),
-      reason: `ค่าน้ำหนัก ${curr} กก. น้อยกว่าครั้งก่อน (${prev} กก.) มากผิดปกติ (อาจลืมพิมพ์เลข 0)`
+      reason: `ค่าน้ำหนัก ${curr} ${unitStr || 'กก.'} ต่ำผิดปกติสำหรับท่าแมชชีน/เคเบิล (< 5 กก.)`
     };
   }
 
-  // Significant spike: >= 2.5x of previous weight (e.g. 200 kg vs 20 kg)
-  if (curr >= prev * 2.5) {
+  // 3. Absolute extreme weight (> 400 kg)
+  if (curr > 400) {
     return {
       isAnomaly: true,
       type: 'too_high',
-      ratio: Math.round((curr / prev) * 100),
-      reason: `ค่าน้ำหนัก ${curr} กก. มากกว่าครั้งก่อน (${prev} กก.) มากผิดปกติ (อาจพิมพ์เลข 0 เกิน)`
+      reason: `น้ำหนัก ${curr} ${unitStr || 'กก.'} สูงผิดปกติ กรุณาตรวจสอบอีกครั้ง`
     };
   }
 
@@ -66,11 +74,17 @@ const anomalyInfo = computed(() => {
   if (mode.value !== 'weight') {
     return { isAnomaly: false, reason: null, type: null };
   }
-  return detectWeightAnomaly(displayValue.value, prevHint.value);
+  return detectWeightAnomaly(displayValue.value, prevHint.value, title.value, subtitle.value, unit.value);
 });
 
 const isAbnormal = computed(() => anomalyInfo.value.isAnomaly);
 const anomalyWarning = computed(() => anomalyInfo.value.reason || '');
+
+let confirmPromptHandler = null;
+
+export function setConfirmPromptHandler(handler) {
+  confirmPromptHandler = handler;
+}
 
 function triggerHaptic(duration = 25) {
   if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -166,8 +180,20 @@ function confirm(force = false) {
 
   // Guard against abnormal weight entry
   if (mode.value === 'weight' && isAbnormal.value && !guardAcknowledged.value && !force) {
-    guardAcknowledged.value = true;
-    return false;
+    if (confirmPromptHandler) {
+      const ok = confirmPromptHandler(anomalyWarning.value);
+      if (!ok) return false;
+      // If confirmed through handler, proceed with saving
+    } else if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+      const ok = window.confirm(`[แจ้งเตือนตรวจสอบน้ำหนัก]\n${anomalyWarning.value}\n\nคุณแน่ใจหรือไม่ว่าต้องการใช้ค่าน้ำหนักนี้?`);
+      if (!ok) {
+        guardAcknowledged.value = false;
+        return false;
+      }
+    } else {
+      guardAcknowledged.value = true;
+      return false;
+    }
   }
 
   if (onConfirmCallback) {
@@ -200,6 +226,8 @@ export function usePinKeypad() {
     clear,
     adjust,
     setValue,
-    confirm
+    confirm,
+    detectWeightAnomaly,
+    setConfirmPromptHandler
   };
 }

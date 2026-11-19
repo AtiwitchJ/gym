@@ -250,9 +250,9 @@ const repo = {
         stmt.run(targetId, 0, wNum, rNum, dateStr, canon);
       } else {
         // Working set / touchup set
-        // If target is a main lift (e.g. th1, t1, w2, m1) and source is a bonus touchup (set 1),
-        // seed/sync sets 1, 2, and 3 so all working sets on the main day have this latest record!
-        if (['th1', 't1', 'w2', 'm1'].includes(targetId)) {
+        // If target has multiple sets (not a single-set bonus touchup),
+        // seed/sync sets 1, 2, and 3 so all working sets have this latest record!
+        if (!targetId.startsWith('b_')) {
           stmt.run(targetId, 1, wNum, rNum, dateStr, canon);
           stmt.run(targetId, 2, wNum, rNum, dateStr, canon);
           stmt.run(targetId, 3, wNum, rNum, dateStr, canon);

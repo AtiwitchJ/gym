@@ -675,31 +675,26 @@ function applySetAdvice(sIdx) {
 }
 
 const exerciseAdvice = computed(() => {
-  const setsData = props.bonus.sets.map((set, sIdx) => {
-    const curWeight = getWeight(sIdx);
-    const curReps = getReps(sIdx);
-
-    // Draft weight guard: if user typed a draft weight but has not completed reps for this session,
-    // do NOT combine new draft weight with previous reps to prevent premature advance calculation!
-    if (curWeight !== '' && (curReps === '' || Number(curReps) <= 0)) {
-      return {
-        type: set.type,
-        weight: curWeight,
-        reps: null,
-        targetReps: set.reps
-      };
+  // คำนวณคำแนะนำและเป้าหมายรอบหน้าเฉพาะเซ็ตที่เล่นเสร็จจริง (completed) และมีจำนวนครั้งของรอบปัจจุบันเท่านั้น
+  // ห้ามนำน้ำหนักร่าง (draft) ไปจับคู่กับจำนวนครั้งเดิมของสัปดาห์ก่อน
+  const completedSets = [];
+  props.bonus.sets.forEach((set, sIdx) => {
+    if (isSetDone(sIdx)) {
+      const curReps = getReps(sIdx);
+      if (curReps !== '' && Number(curReps) > 0) {
+        const curWeight = getWeight(sIdx);
+        completedSets.push({
+          type: set.type,
+          weight: curWeight !== '' ? curWeight : getPrevWeight(sIdx),
+          reps: curReps,
+          targetReps: set.reps
+        });
+      }
     }
-
-    const wt = curWeight !== '' ? curWeight : getPrevWeight(sIdx);
-    const reps = curReps !== '' ? curReps : getPrevReps(sIdx);
-    return {
-      type: set.type,
-      weight: wt,
-      reps,
-      targetReps: set.reps
-    };
   });
-  return getExerciseOverallAdvice(setsData);
+
+  if (completedSets.length === 0) return null;
+  return getExerciseOverallAdvice(completedSets);
 });
 
 function applyRecommendedWeightAll() {

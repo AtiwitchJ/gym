@@ -82,4 +82,20 @@ assert.strictEqual(store.userState.tue.b_t_leg.wt_1, 86);
 assert.strictEqual(store.userState.tue.b_t_leg.reps_1, 8);
 console.log('✓ applyPrevRecord correctly populates draft state with synced weights');
 
+// 6. Test multi-set sync for non-canonical exercises (e.g. w3, w4)
+store.lastWeights['w3'] = { wt_1: 22.5, wt_2: 22.5, wt_3: 22.5 };
+store.syncLinkedExerciseRecords('w3', 1, 20, 10);
+assert.strictEqual(store.lastWeights['w3'].wt_1, 20, 'w3 set 1 should sync to 20 kg');
+assert.strictEqual(store.lastWeights['w3'].wt_2, 20, 'w3 set 2 should sync to 20 kg');
+assert.strictEqual(store.lastWeights['w3'].wt_3, 20, 'w3 set 3 should sync to 20 kg');
+assert.strictEqual(store.lastWeights['w3'].reps_1, 10, 'w3 set 1 reps should sync to 10');
+assert.strictEqual(store.lastWeights['w3'].reps_2, 10, 'w3 set 2 reps should sync to 10');
+assert.strictEqual(store.lastWeights['w3'].reps_3, 10, 'w3 set 3 reps should sync to 10');
+
+store.updateWeight('wed', 'w4', 1, 20);
+assert.strictEqual(store.lastWeights['w4'].wt_1, 20, 'w4 set 1 in lastWeights should be 20 kg');
+assert.strictEqual(store.lastWeights['w4'].wt_2, 20, 'w4 set 2 in lastWeights should be 20 kg');
+assert.strictEqual(store.lastWeights['w4'].wt_3, 20, 'w4 set 3 in lastWeights should be 20 kg');
+console.log('✓ Multi-set synchronization across sets 1-3 verified for all exercises (e.g. w3, w4)');
+
 console.log('All Cross-Day Synchronization tests passed successfully!');
