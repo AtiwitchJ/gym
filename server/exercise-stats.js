@@ -3,8 +3,15 @@
 
 const { calculateEstimated1RM } = require('./estimate');
 
-// sessions: output of repo.getExerciseHistory() -> [{ sets: [{ weight, actualReps, rir, done }] }]
-// Only completed sets (done truthy) count.
+// Warm-up detection matches src/composables/useWeightAdvisor.js (isWarmupType).
+// The app stores the set type on every saved set: 'warm' (W1 in the UI), 'warmup', or the Thai label 'วอร์ม'.
+const WARMUP_TYPES = new Set(['warm', 'warmup', 'วอร์ม']);
+function isWarmupSet(set) {
+  return Boolean(set) && WARMUP_TYPES.has(set.type);
+}
+
+// sessions: output of repo.getExerciseHistory() -> [{ sets: [{ type, weight, actualReps, rir, done }] }]
+// Only completed working sets count: skipped sets (done falsy) and warm-up sets are excluded.
 // Returns { bestWeight, bestReps, estimated1RM }; each is null when no qualifying set exists.
 function computePr(sessions) {
   let bestWeight = null;
@@ -13,7 +20,7 @@ function computePr(sessions) {
 
   for (const session of Array.isArray(sessions) ? sessions : []) {
     for (const set of Array.isArray(session && session.sets) ? session.sets : []) {
-      if (!set || !set.done) continue;
+      if (!set || !set.done || isWarmupSet(set)) continue;
       const weight = Number(set.weight);
       const reps = Number(set.actualReps);
       const hasWeight = Number.isFinite(weight) && weight > 0;
@@ -37,4 +44,4 @@ function withPr(sessions) {
   return (Array.isArray(sessions) ? sessions : []).map((s) => ({ ...s, pr }));
 }
 
-module.exports = { computePr, withPr };
+module.exports = { computePr, withPr, isWarmupSet };

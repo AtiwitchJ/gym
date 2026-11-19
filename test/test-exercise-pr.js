@@ -6,7 +6,7 @@ import { calculateEstimated1RM } from '../src/composables/useRpeAdvisor.js';
  * PR (personal record) per exercise. Pure function tests + the route contract on GET /api/exercises/:id/history.
  */
 
-const { computePr, withPr } = stats;
+const { computePr, withPr, isWarmupSet } = stats;
 
 console.log('====================================================');
 console.log('🧪 Test: Exercise PR (best weight, best reps, e1RM)');
@@ -68,6 +68,27 @@ assert.deepStrictEqual(wrapped[0].pr, pr);
 assert.deepStrictEqual(wrapped[1].pr, pr);
 assert.strictEqual(wrapped[0].date, '2026-11-10');
 console.log('✓ Array preserved; each item carries pr.');
+
+// 5b. Warm-up sets never affect the PR (even when they have more reps or more weight than working sets)
+console.log('▶ [5b] Warm-up sets excluded from PR...');
+const workingOnly = [{ sets: [
+  { type: 'work', weight: 40, actualReps: 8, rir: 2, done: true },
+] }];
+const withWarmups = [{ sets: [
+  { type: 'warm', weight: 60, actualReps: 15, rir: null, done: true },   // W1: heavier and more reps, must be ignored
+  { type: 'warmup', weight: 30, actualReps: 20, rir: null, done: true }, // alt type name, must be ignored
+  { type: 'วอร์ม', weight: 90, actualReps: 25, rir: null, done: true },  // Thai label, must be ignored
+  { type: 'work', weight: 40, actualReps: 8, rir: 2, done: true },
+] }];
+assert.deepStrictEqual(computePr(withWarmups), computePr(workingOnly), 'warm-up sets must not change the PR');
+assert.strictEqual(computePr(withWarmups).bestReps, 8);
+assert.strictEqual(computePr(withWarmups).bestWeight, 40);
+assert.strictEqual(isWarmupSet({ type: 'warm' }), true);
+assert.strictEqual(isWarmupSet({ type: 'work' }), false);
+assert.strictEqual(isWarmupSet({ type: 'dropset' }), false);
+assert.deepStrictEqual(computePr([{ sets: [{ type: 'warm', weight: 60, actualReps: 15, done: true }] }]),
+  { bestWeight: null, bestReps: null, estimated1RM: null }, 'warm-up only history has no PR');
+console.log('✓ Warm-up sets (warm / warmup / วอร์ม) ignored; working PR unchanged.');
 
 // 6. Route contract (real DB, read-only GET)
 console.log('▶ [6] GET /api/exercises/:id/history contract...');
