@@ -767,7 +767,8 @@ async function finishAndSaveWorkout() {
           target: set.reps,
           weight: wt,
           actualReps: reps,
-          done: isDone
+          done: isDone,
+          rir: normalizeRir(bState[`rir_${sIdx}`])
         };
       });
 

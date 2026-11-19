@@ -410,12 +410,28 @@
           </svg>
           <span v-else class="text-[11px] sm:text-xs font-mono opacity-50 font-bold">✓</span>
         </button>
+        <!-- RIR after Done (optional): 3 buttons, same as ExerciseCard -->
+        <div v-if="isSetDone(sIdx)" class="col-span-full mt-1 flex items-center gap-1.5 flex-wrap">
+          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none">ความเหนื่อย (ไม่บังคับ):</span>
+          <button
+            v-for="opt in RIR_CHOICES"
+            :key="opt.value"
+            type="button"
+            @click="pickRir(sIdx, opt.value)"
+            class="min-h-[44px] min-w-[44px] px-3 rounded-xl border-2 border-plate text-xs font-heading font-bold transition-all touch-manipulation"
+            :class="getRir(sIdx) === opt.value
+              ? 'bg-flame text-white shadow-[1.5px_1.5px_0px_#1e2220]'
+              : 'bg-surface text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
+            :title="opt.title"
+          >{{ opt.label }}</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { RIR_CHOICES, normalizeRir, nextRir } from '../composables/useRir.js';
 import { ref, computed } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { usePinKeypad } from '../composables/usePinKeypad';
@@ -436,6 +452,7 @@ const {
   lastWeights,
   updateWeight,
   updateReps,
+  updateRir,
   applyPrevRecord,
   toggleSetDone,
   showExerciseImages,
@@ -444,6 +461,7 @@ const {
 
 const { openKeypad } = usePinKeypad();
 const { startTimer, triggerHaptic } = useTimer();
+
 
 const activeMachineIndex = ref(0);
 
@@ -784,6 +802,15 @@ function openRepsKeypad(sIdx, targetStr) {
       updateReps(currentDay.value, props.bonus.id, sIdx, val);
     }
   });
+}
+
+// RIR after Done (review item 2): tap the chosen button again to clear it.
+function getRir(sIdx) {
+  return normalizeRir(exState.value[`rir_${sIdx}`]);
+}
+
+function pickRir(sIdx, value) {
+  updateRir(currentDay.value, props.bonus.id, sIdx, nextRir(getRir(sIdx), value));
 }
 
 function isSetDone(sIdx) {
