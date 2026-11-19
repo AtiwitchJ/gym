@@ -3,9 +3,9 @@
     v-if="isWorkoutDay || isRunning"
     class="w-full bg-paper/95 backdrop-blur-md border-t-2 border-plate px-2.5 sm:px-4 py-1.5 sm:py-2 shadow-[0_-4px_16px_rgba(30,34,32,0.08)] select-none"
   >
-    <div class="max-w-3xl mx-auto flex items-center justify-between gap-1.5 sm:gap-3">
+    <div class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 sm:gap-3">
       <!-- Digital Stopwatch Readout -->
-      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
         <div class="flex flex-col flex-shrink-0">
           <span class="text-[8px] sm:text-[9px] font-mono font-bold tracking-widest text-ink-muted uppercase leading-none">
             REST INTERVAL
@@ -23,7 +23,7 @@
         </div>
 
         <!-- Presets -->
-        <div class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none">
+        <div class="flex flex-wrap items-center gap-1 sm:gap-1.5">
           <button
             v-for="preset in [60, 90, 120, 180]"
             :key="preset"
@@ -64,7 +64,7 @@
         </div>
 
         <!-- Dynamic Steppers (+30s / -15s) -->
-        <div class="flex items-center gap-1 flex-shrink-0">
+        <div class="flex flex-wrap items-center gap-1 flex-shrink-0">
           <button
             @click="adjustRemaining(30)"
             class="min-h-[44px] px-2.5 sm:px-3 text-xs sm:text-sm font-mono font-bold rounded-xl border-2 border-plate bg-paper-subtle hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap touch-manipulation"
@@ -83,7 +83,7 @@
       </div>
 
       <!-- Controls -->
-      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 flex-shrink-0">
         <!-- Skip rest; after the last set it is the main action -->
         <button
           type="button"
