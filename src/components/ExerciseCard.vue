@@ -671,11 +671,13 @@ function hasPrevForSet(sIdx) {
 function stepWeight(sIdx, dir) {
   const next = stepFrom(getWeight(sIdx), getPrevWeight(sIdx), dir, WEIGHT_STEP_KG);
   updateWeight(currentDay.value, props.exercise.id, sIdx, String(next));
+  if (isSetDone(sIdx)) evaluatePrOnTick(sIdx); // PR depends on the values now, not only at Done
 }
 
 function stepReps(sIdx, dir) {
   const next = stepFrom(getReps(sIdx), getPrevReps(sIdx), dir, REPS_STEP);
   updateReps(currentDay.value, props.exercise.id, sIdx, String(next));
+  if (isSetDone(sIdx)) evaluatePrOnTick(sIdx);
 }
 
 // RIR after Done (step 5): tap the chosen button again to clear it.
@@ -694,6 +696,8 @@ function isRirSelected(sIdx, opt) {
 function pickRir(sIdx, opt) {
   const next = nextRirSelection(getRir(sIdx), getRirPlus(sIdx), opt);
   updateRir(currentDay.value, props.exercise.id, sIdx, next.rir, next.rirPlus);
+  // RIR is chosen after Done; without it the estimate is lower and a real PR can be missed (review fix).
+  if (isSetDone(sIdx)) evaluatePrOnTick(sIdx);
 }
 
 function getWeight(sIdx) {
