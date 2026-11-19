@@ -39,8 +39,8 @@ assert(workoutsViewContent.includes('กำลังฝึกซ้อมอย�
 assert(workoutsViewContent.includes('เริ่มฝึก (Start)'), 'WorkoutsView routine card has Start button');
 assert(workoutsViewContent.includes('แก้ไข (Edit)'), 'WorkoutsView routine card has Edit button');
 assert(workoutsViewContent.includes('deleteRoutine') || workoutsViewContent.includes('handleDeleteRoutine'), 'WorkoutsView routine card has Delete action');
-assert(workoutsViewContent.includes('scheduleChips'), 'WorkoutsView includes Atiwitch 4-Day protocol quick chips');
-assert(workoutsViewContent.includes('จันทร์') && workoutsViewContent.includes('อังคาร') && workoutsViewContent.includes('พุธ') && workoutsViewContent.includes('พฤหัส'), 'WorkoutsView chips include 4 workout days');
+assert(!workoutsViewContent.includes('ATIWITCH 4-DAY PROTOCOL') && !workoutsViewContent.includes('scheduleChips'), 'WorkoutsView no longer shows the retired 4-day quick chips');
+assert(workoutsViewContent.includes('launchProgramA') && workoutsViewContent.includes('launchProgramB'), 'WorkoutsView keeps the Program A/B 1-click launch');
 
 // 3. ProfileView.vue Contract Checks
 assert(profileViewContent.includes('Atiwitch') || profileViewContent.includes('AJ'), 'ProfileView displays user account info');

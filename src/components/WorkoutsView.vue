@@ -187,47 +187,6 @@
       </div>
     </div>
 
-    <!-- Atiwitch's 4-Day Schedule Quick Chips (1-Click Launch) -->
-    <div class="archive-card p-3 sm:p-4">
-      <div class="flex items-center justify-between mb-2.5">
-        <div class="flex items-center gap-2">
-          <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase">
-            ATIWITCH 4-DAY PROTOCOL
-          </span>
-          <span class="text-plate/30">•</span>
-          <span class="text-[11px] font-mono text-ink-muted">
-            1-Click Launch
-          </span>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 sm:grid-cols-6 gap-1.5 sm:gap-2">
-        <button
-          v-for="chip in scheduleChips"
-          :key="chip.id"
-          type="button"
-          @click="handleChipLaunch(chip)"
-          class="flex flex-col items-center justify-center p-2 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] text-center transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation group"
-          :class="chip.isRest
-            ? 'bg-surface hover:bg-paper-subtle text-ink-muted hover:text-ink col-span-2 sm:col-span-1'
-            : todayChipId === chip.id
-              ? 'bg-flame-bg hover:bg-flame/15 border-flame text-ink'
-              : 'bg-surface hover:bg-paper-subtle text-ink'"
-        >
-          <div class="flex items-center gap-1 mb-0.5">
-            <span class="text-xs font-bold font-heading truncate">{{ chip.dayName }}</span>
-            <span
-              v-if="todayChipId === chip.id"
-              class="w-1.5 h-1.5 rounded-full bg-flame"
-              title="ตารางประจำวันนี้"
-            ></span>
-          </div>
-          <span class="text-[10px] font-mono text-flame font-bold truncate">{{ chip.targetMuscle }}</span>
-          <span class="text-[9px] text-ink-muted mt-0.5 truncate">{{ chip.sub }}</span>
-        </button>
-      </div>
-    </div>
-
     <!-- Routines List Section Header -->
     <div class="flex items-center justify-between pt-1 px-1">
       <div class="flex items-center gap-2">
@@ -390,20 +349,6 @@ function handleDeleteRoutine(routine) {
   }
 }
 
-// 4-Day & 3-Day Protocol Chips
-const currentDayOfWeek = new Date().getDay(); // 0 = Sun, 1 = Mon...
-const dayMap = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri' };
-const todayChipId = dayMap[currentDayOfWeek] || 'rest';
-
-const scheduleChips = [
-  { id: 'mon', routineId: 'atiwitch_mon_legs', dayName: 'จันทร์', targetMuscle: 'ขา', sub: 'Legs', isRest: false },
-  { id: 'tue', routineId: 'atiwitch_tue_chest', dayName: 'อังคาร', targetMuscle: 'อก', sub: 'Chest', isRest: false },
-  { id: 'wed', routineId: 'atiwitch_wed_back', dayName: 'พุธ', targetMuscle: 'หลัง', sub: 'Back', isRest: false },
-  { id: 'thu', routineId: 'atiwitch_thu_shoulders', dayName: 'พฤหัส', targetMuscle: 'ไหล่', sub: 'Shoulders', isRest: false },
-  { id: 'fri', routineId: 'atiwitch_prog_a', dayName: 'ศุกร์', targetMuscle: 'A / B', sub: 'Split', isRest: false },
-  { id: 'rest', routineId: null, dayName: 'เสาร์-อาทิตย์', targetMuscle: 'พัก', sub: 'Rest', isRest: true }
-];
-
 function getDayKeyForRoutine(routine) {
   if (!routine) return null;
   if (routine.id?.includes('prog_a') || routine.id?.includes('program_a') || routine.title?.includes('Program A')) return 'prog_a';
@@ -441,13 +386,4 @@ function launchProgramB() {
   }
 }
 
-function handleChipLaunch(chip) {
-  if (chip.isRest) {
-    if (workoutStore.switchDay) workoutStore.switchDay('rest');
-    if (workoutStore.switchTab) workoutStore.switchTab('rest');
-    return;
-  }
-  if (workoutStore.switchDay) workoutStore.switchDay(chip.id);
-  if (workoutStore.switchTab) workoutStore.switchTab(chip.id);
-}
 </script>

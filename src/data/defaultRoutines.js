@@ -17,7 +17,7 @@
  * }
  */
 
-export const defaultRoutines = [
+const allDefaultRoutines = [
   {
     id: 'atiwitch_mon_legs',
     title: 'วันจันทร์: ขา + ก้น ครบทุกมิติ (Legs & Glutes)',
@@ -551,3 +551,15 @@ export const defaultRoutines = [
     ]
   }
 ];
+
+// Retired routines: the old 4-day split (Mon–Thu).
+// Hidden from the Routines list and dropped from saved localStorage data.
+// The A/B program templates (atiwitch_ab_program_a/b, atiwitch_prog_a/b) are kept.
+export const RETIRED_ROUTINE_IDS = [
+  'atiwitch_mon_legs',
+  'atiwitch_tue_chest',
+  'atiwitch_wed_back',
+  'atiwitch_thu_shoulders'
+];
+
+export const defaultRoutines = allDefaultRoutines.filter(r => !RETIRED_ROUTINE_IDS.includes(r.id));

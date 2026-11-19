@@ -6,13 +6,14 @@ console.log('Testing Routine Store...');
 const store = useRoutineStore();
 const exerciseStore = useExerciseStore();
 
-// Test 1: Has default routines (Atiwitch 4-Day protocol)
-assert(store.routines.value.length >= 4, 'Should load 4 default daily routines');
+// Test 1: Has default routines (3-Day A/B split: Program A and Program B only)
+assert(store.routines.value.length >= 2, 'Should load Program A and Program B routines');
 const defaultIds = store.routines.value.map(r => r.id);
-assert(defaultIds.includes('atiwitch_mon_legs'), 'Should have Monday legs routine');
-assert(defaultIds.includes('atiwitch_tue_chest'), 'Should have Tuesday chest routine');
-assert(defaultIds.includes('atiwitch_wed_back'), 'Should have Wednesday back routine');
-assert(defaultIds.includes('atiwitch_thu_shoulders'), 'Should have Thursday shoulders routine');
+assert(defaultIds.includes('atiwitch_prog_a'), 'Should have Program A routine');
+assert(defaultIds.includes('atiwitch_prog_b'), 'Should have Program B routine');
+for (const retired of ['atiwitch_mon_legs', 'atiwitch_tue_chest', 'atiwitch_wed_back', 'atiwitch_thu_shoulders']) {
+  assert(!defaultIds.includes(retired), `Retired routine ${retired} must not be listed`);
+}
 
 // Test 2: Create a custom routine
 const newRoutine = store.createRoutine({
@@ -60,12 +61,12 @@ assert(store.activeRoutine.value === null, 'Active routine should be cleared if 
 
 // Test 7: Clone default routines
 const cloned = store.cloneDefaultRoutines();
-assert(Array.isArray(cloned) && cloned.length >= 4, 'cloneDefaultRoutines should return default routines array');
+assert(Array.isArray(cloned) && cloned.length >= 2, 'cloneDefaultRoutines should return default routines array');
 assert(cloned !== store.routines.value, 'Cloned routines should be a new array reference');
 
 // Test 8: Integration with exercise store
-const monLegs = store.getRoutineById('atiwitch_mon_legs');
-assert(monLegs !== null, 'Should get Monday routine');
+const monLegs = store.getRoutineById('atiwitch_prog_a');
+assert(monLegs !== null, 'Should get Program A routine');
 assert(monLegs.exercises.length > 0, 'Monday routine should have exercises');
 for (const ex of monLegs.exercises) {
   const resolved = exerciseStore.getExerciseById(ex.exerciseId);

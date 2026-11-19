@@ -174,8 +174,7 @@ assert(dayTabsContent.includes('workouts') && dayTabsContent.includes('exercises
 // WorkoutsView contract
 assert(workoutsViewContent.includes('Program A') || workoutsViewContent.includes('atiwitch_prog_a'), 'WorkoutsView includes Program A Quick Chip / 1-Click Launch');
 assert(workoutsViewContent.includes('Program B') || workoutsViewContent.includes('atiwitch_prog_b'), 'WorkoutsView includes Program B Quick Chip / 1-Click Launch');
-assert(workoutsViewContent.includes('scheduleChips'), 'WorkoutsView preserves scheduleChips');
-assert(workoutsViewContent.includes('จันทร์') && workoutsViewContent.includes('อังคาร') && workoutsViewContent.includes('พุธ') && workoutsViewContent.includes('พฤหัส'), 'WorkoutsView preserves 4-day chips contract');
+assert(!workoutsViewContent.includes('scheduleChips') && !workoutsViewContent.includes('ATIWITCH 4-DAY PROTOCOL'), 'WorkoutsView has no retired 4-day chips');
 
 console.log('✓ DayTabs.vue and WorkoutsView.vue contract checks passed successfully');
 

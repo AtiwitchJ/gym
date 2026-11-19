@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { defaultRoutines } from '../data/defaultRoutines.js';
+import { defaultRoutines, RETIRED_ROUTINE_IDS } from '../data/defaultRoutines.js';
 import { useExerciseStore } from './useExerciseStore.js';
 
 const STORAGE_KEY = 'atiwitch_workout_routines';
@@ -13,7 +13,8 @@ function loadStoredRoutines() {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
-        const parsed = JSON.parse(data);
+        const parsed = JSON.parse(data)
+          .filter(r => r && !RETIRED_ROUTINE_IDS.includes(r.id));
         if (Array.isArray(parsed) && parsed.length > 0) {
           defaultRoutines.forEach(dr => {
             if (!parsed.some(r => r.id === dr.id)) {
