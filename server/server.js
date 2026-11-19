@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const repo = require('./db');
 const recovery = require('./recovery');
+const { withPr } = require('./exercise-stats');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -127,7 +128,7 @@ app.delete('/api/history/:id', (req, res) => {
 app.get('/api/exercises/:id/history', (req, res) => {
   try {
     const history = repo.getExerciseHistory(req.params.id);
-    res.json(history);
+    res.json(withPr(history));
   } catch (err) {
     console.error('Error fetching exercise history:', err);
     res.status(500).json({ error: err.message });
