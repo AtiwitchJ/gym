@@ -4,6 +4,7 @@ import { defaultTodos } from '../data/defaultTodos.js';
 import { parseRepTarget } from './useWeightAdvisor.js';
 import { normalizeRir } from './useRir.js';
 import { clearPrCache } from './usePersonalRecords.js';
+import { buildSessionSummary } from './useSessionSummary.js';
 
 export function isMultiSetExercise(exId) {
   if (!exId) return false;
@@ -65,6 +66,8 @@ const savedGlobalTab = storage.getItem('atiwitch_active_global_tab');
 const currentTab = ref(!savedGlobalTab || LEGACY_TODAY_TAB_KEYS.includes(savedGlobalTab) ? 'today' : savedGlobalTab);
 const saveStatus = ref('saved'); // 'saved', 'saving', 'error'
 const toastMessage = ref('');
+// Summary of the session just saved (step 6b); null when no summary is open.
+const lastSessionSummary = ref(null);
 let toastTimer = null;
 
 const showExerciseImages = ref(storage.getItem('atiwitch_show_images') !== 'false');
@@ -550,6 +553,10 @@ function setPrFlag(day, exId, setIdx, isPr) {
   triggerSave(day);
 }
 
+function closeSessionSummary() {
+  lastSessionSummary.value = null;
+}
+
 // RIR (0, 1, 2 = "2+") chosen after a set is done. null clears it. Saved with the day state.
 function updateRir(day, exId, setIdx, val) {
   if (!userState[day]) userState[day] = {};
@@ -826,6 +833,8 @@ async function finishAndSaveWorkout() {
     dayData.bonusExercises.forEach(setupNextRoundExercise);
   }
 
+  // Build the summary from the state before the reset (PR flags and set counts).
+  lastSessionSummary.value = buildSessionSummary(dayData, dayState);
   userState[savedDayKey] = nextDayState;
   persistLocal();
 
@@ -943,6 +952,8 @@ export function useWorkoutStore() {
     updateReps,
     updateRir,
     setPrFlag,
+    lastSessionSummary,
+    closeSessionSummary,
     applyPrevWeight,
     applyPrevRecord,
     toggleSetDone,

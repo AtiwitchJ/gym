@@ -208,6 +208,12 @@
       :summary="lastWorkoutSummary"
       @close="isSummaryModalOpen = false"
     />
+
+    <!-- Session summary after Save Session (step 6b): sets done and PRs -->
+    <SessionSummaryModal
+      :summary="lastSessionSummary"
+      @close="closeSessionSummary"
+    />
   </div>
 </template>
 
@@ -231,6 +237,7 @@ import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
 import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
 import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
 import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
+import SessionSummaryModal from './components/SessionSummaryModal.vue';
 import WorkoutsView from './components/WorkoutsView.vue';
 import ProfileView from './components/ProfileView.vue';
 import { isRestWeekday } from './data/workouts.js';
@@ -244,7 +251,9 @@ const {
   toastMessage,
   showToast,
   finishAndSaveWorkout,
-  fetchServerState
+  fetchServerState,
+  lastSessionSummary,
+  closeSessionSummary
 } = useWorkoutStore();
 
 const { isRunning: isTimerRunning } = useTimer();
