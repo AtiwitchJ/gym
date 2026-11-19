@@ -598,6 +598,17 @@ const repo = {
     return { success: true, id: session.id };
   },
 
+  // Completed sets only (done = 1) with their exercise id and session date/time. Read-only; feeds /api/recovery.
+  getCompletedSetRows() {
+    return db.prepare(`
+      SELECT se.exercise_id AS exerciseId, ws.date AS date, ws.time AS time, ss.done AS done
+      FROM session_sets ss
+      JOIN session_exercises se ON se.id = ss.session_exercise_id
+      JOIN workout_sessions ws ON ws.id = se.session_id
+      WHERE ss.done = 1
+    `).all();
+  },
+
   deleteSession(sessionId) {
     const result = db.prepare('DELETE FROM workout_sessions WHERE id = ?').run(sessionId);
     return { success: result.changes > 0 };

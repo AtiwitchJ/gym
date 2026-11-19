@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const repo = require('./db');
+const recovery = require('./recovery');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -129,6 +130,16 @@ app.get('/api/exercises/:id/history', (req, res) => {
     res.json(history);
   } catch (err) {
     console.error('Error fetching exercise history:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Muscle fatigue & recovery (SPEC §2.3). Derived from completed sets; no new tables.
+app.get('/api/recovery', (req, res) => {
+  try {
+    res.json(recovery.buildRecovery(repo.getCompletedSetRows(), Date.now()));
+  } catch (err) {
+    console.error('Error computing recovery:', err);
     res.status(500).json({ error: err.message });
   }
 });
