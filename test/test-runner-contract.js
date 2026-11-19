@@ -54,7 +54,7 @@ assert(summaryContent.includes('emit(\'close\')') || summaryContent.includes('em
 assert(summaryContent.includes('totalVolumeKg') || summaryContent.includes('Volume'), 'WorkoutSummaryModal displays total volume lifted');
 assert(summaryContent.includes('durationSec') || summaryContent.includes('Duration'), 'WorkoutSummaryModal displays duration');
 assert(summaryContent.includes('completedSets') || summaryContent.includes('totalSets'), 'WorkoutSummaryModal displays completed sets');
-assert(summaryContent.includes('บันทึกและกลับสู่หน้าหลัก') || summaryContent.includes('Save & Close'), 'WorkoutSummaryModal has save & close button');
+assert(summaryContent.includes('ปิดและกลับสู่หน้าหลัก') && summaryContent.includes('ปิดหน้าสรุป'), 'WorkoutSummaryModal has a close button (no save) and a header close');
 
 // 4. App.vue Wiring Checks
 assert(appContent.includes('ActiveWorkoutSheet'), 'App.vue includes ActiveWorkoutSheet');

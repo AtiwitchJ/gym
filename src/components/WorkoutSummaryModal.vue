@@ -26,6 +26,14 @@
             <span>⚡ WORKOUT COMPLETE</span>
           </div>
 
+          <button
+            type="button"
+            @click="emit('close')"
+            class="absolute top-2 right-2 min-h-[44px] min-w-[44px] rounded-full border-2 border-plate bg-white text-ink font-bold flex items-center justify-center"
+            title="ปิดหน้าสรุป (ไม่บันทึกซ้ำ)"
+            aria-label="ปิด"
+          >✕</button>
+
           <h2 class="text-xl sm:text-2xl font-extrabold font-heading text-ink tracking-tight">
             สุดยอดมาก! ฝึกสำเร็จแล้ว
           </h2>
@@ -122,13 +130,13 @@
             </div>
           </div>
 
-          <!-- Action Button: Save & Close -->
+          <!-- Action Button: close (no save) -->
           <button
             type="button"
             @click="emit('close')"
             class="w-full py-3.5 px-4 rounded-xl border-2 border-plate bg-flame hover:bg-flame-glow text-white font-heading font-extrabold text-sm sm:text-base tracking-wide shadow-[3px_3px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all flex items-center justify-center gap-2"
           >
-            <span>บันทึกและกลับสู่หน้าหลัก (Save & Close)</span>
+            <span>ปิดและกลับสู่หน้าหลัก (ไม่บันทึกซ้ำ)</span>
             <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
             </svg>
