@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import fs from 'node:fs';
 import { scheduledProgramForDay, resolveDayKey, AB_SCHEDULE_ANCHOR_MONDAY } from '../src/data/workouts.js';
 import { useWorkoutStore } from '../src/composables/useWorkoutStore.js';
 
@@ -56,6 +57,14 @@ assert.strictEqual(store.currentTab.value, 'prog_b');
 store.switchTab('rest');
 assert.strictEqual(store.currentDay.value, 'rest');
 console.log('✓ Store switchTab/switchDay routing verified.');
+
+
+console.log('▶ [6] No component still gates on the old 4-day keys...');
+for (const rel of ['src/components/RestTimer.vue', 'src/components/HeaderBar.vue', 'src/App.vue']) {
+  const src = fs.readFileSync(new URL('../' + rel, import.meta.url), 'utf8');
+  assert.ok(!src.includes("['mon', 'tue', 'wed', 'thu'"), rel + ' still uses the legacy mon/tue/wed/thu list');
+}
+console.log('✓ Components gate on prog_a/prog_b.');
 
 console.log('\n====================================================');
 console.log('🎉 ALL SCHEDULE ROUTING TESTS PASSED!');

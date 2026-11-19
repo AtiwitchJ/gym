@@ -27,8 +27,8 @@
 
     <ul v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
       <li
-        v-for="item in items"
-        :key="item.muscle"
+        v-for="(item, idx) in items"
+        :key="idx"
         class="border-2 border-plate rounded-2xl p-3 bg-paper-subtle flex flex-col gap-2"
       >
         <div class="flex items-center justify-between gap-2">

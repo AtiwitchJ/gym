@@ -71,7 +71,7 @@ const {
   toggleExerciseImages
 } = useWorkoutStore();
 
-const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu'].includes(currentDay.value));
+const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(currentDay.value));
 
 function confirmReset() {
   if (confirm('คุณต้องการรีเซ็ตการติ๊กของวันนี้ใช่หรือไม่? (น้ำหนักสถิติล่าสุดจะยังคงจำไว้)')) {
