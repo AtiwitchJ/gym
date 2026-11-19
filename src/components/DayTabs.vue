@@ -31,6 +31,7 @@
 import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore.js';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
+import { isRestWeekday } from '../data/workouts.js';
 
 const props = defineProps({
   currentTab: {
@@ -69,6 +70,7 @@ const activeTabId = computed(() => {
 // Subtitle: "วันนี้" shows the next program after the last completed session; others keep their text.
 function tabSub(tab) {
   if (tab.id === 'today') {
+    if (isRestWeekday()) return 'วันพัก';
     return workoutStore.todayProgramKey?.value === 'prog_b' ? 'Program B' : 'Program A';
   }
   return tab.sub;

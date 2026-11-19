@@ -53,7 +53,7 @@
       <ProfileView v-else-if="currentTab === 'profile'" />
 
       <!-- Fallback / Legacy Day View (if currentDay or currentTab is mon/tue/wed/thu) -->
-      <div v-else-if="isWorkoutDay && currentDayData">
+      <div v-else-if="isWorkoutDay && currentDayData && !showRestToday">
         <!-- Routine Banner -->
         <div class="archive-card p-4 mb-4">
           <div class="flex items-center gap-2 mb-1">
@@ -149,7 +149,7 @@
       </div>
 
       <!-- Rest Day View Fallback -->
-      <RestDayView v-else-if="currentDay === 'rest' || currentTab === 'rest'" />
+      <RestDayView v-else-if="currentDay === 'rest' || currentTab === 'rest' || showRestToday" />
 
       <!-- Todo View Fallback -->
       <TodoView v-else-if="currentDay === 'todo' || currentTab === 'todo'" />
@@ -233,6 +233,7 @@ import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
 import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
 import WorkoutsView from './components/WorkoutsView.vue';
 import ProfileView from './components/ProfileView.vue';
+import { isRestWeekday } from './data/workouts.js';
 
 const {
   currentDay,
@@ -315,6 +316,8 @@ onMounted(() => {
 // currentDay is always a resolved key: prog_a | prog_b | rest | todo | history (store resolves mon/wed/fri/tue/thu)
 const activeDayKey = computed(() => currentDay.value);
 const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(activeDayKey.value));
+// วันนี้ on a rest weekday (Tue/Thu/Sat/Sun) shows the rest view; the program is still reachable from โปรแกรม.
+const showRestToday = computed(() => currentTab.value === 'today' && isRestWeekday());
 const currentDayData = computed(() => workoutData[activeDayKey.value]);
 
 // Progress calculation

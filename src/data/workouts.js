@@ -1437,6 +1437,11 @@ export function resolveDayKey(key, date = new Date()) {
   return key;
 }
 
+/** Rest weekdays of the 3-day plan: Tue, Thu, Sat, Sun. The วันนี้ tab shows the rest view on these days. */
+export function isRestWeekday(date = new Date()) {
+  return [0, 2, 4, 6].includes(date.getDay());
+}
+
 /**
  * Most recent completed A/B session in `sessions` (newest by date, then time).
  * Only prog_a / prog_b count; rest or legacy day-keyed sessions are ignored.
