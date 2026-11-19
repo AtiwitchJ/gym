@@ -32,6 +32,24 @@
             {{ preset }}s
           </button>
         </div>
+
+        <!-- Dynamic Steppers (+30s / -15s) -->
+        <div class="hidden xs:flex items-center gap-1 flex-shrink-0">
+          <button
+            @click="adjustRemaining(30)"
+            class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full border-2 border-plate bg-paper-subtle hover:bg-paper-dim text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap"
+            title="เพิ่มเวลาพักอีก 30 วินาที"
+          >
+            +30s
+          </button>
+          <button
+            @click="adjustRemaining(-15)"
+            class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full border-2 border-plate bg-paper-subtle hover:bg-paper-dim text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap"
+            title="ลดเวลาพัก 15 วินาที"
+          >
+            -15s
+          </button>
+        </div>
       </div>
 
       <!-- Controls -->
@@ -75,7 +93,7 @@ import { useTimer } from '../composables/useTimer';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 
 const { currentDay } = useWorkoutStore();
-const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu'].includes(currentDay.value));
+const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu', 'fri'].includes(currentDay.value));
 
 const {
   timerDuration,
@@ -84,6 +102,7 @@ const {
   formatTime,
   toggleTimer,
   resetTimer,
-  setTimerDuration
+  setTimerDuration,
+  adjustRemaining
 } = useTimer();
 </script>

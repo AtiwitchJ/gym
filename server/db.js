@@ -87,6 +87,14 @@ try {
   db.exec("ALTER TABLE exercise_last_weights ADD COLUMN canonical_id TEXT;");
 } catch(e) {}
 
+try {
+  db.exec("ALTER TABLE session_sets ADD COLUMN rir INTEGER;");
+} catch(e) {}
+
+try {
+  db.exec("ALTER TABLE exercise_last_weights ADD COLUMN rir INTEGER;");
+} catch(e) {}
+
 // Canonical Exercise Mapping (shared across 4-Day Split, 3-Day A/B Alternating Split, and custom routines)
 const CANONICAL_MAP = {
   // 1. Shoulder Press Machine (Thursday Main <-> Mon/Tue/Wed Bonus, Program A/B)
@@ -337,6 +345,9 @@ const repo = {
         if (r.reps !== null && r.reps !== undefined) {
           res[`reps_${r.set_index}`] = r.reps;
         }
+        if (r.rir !== null && r.rir !== undefined) {
+          res[`rir_${r.set_index}`] = r.rir;
+        }
         res.updatedAt = r.updated_at;
         if (r.canonical_id) {
           res.canonicalId = r.canonical_id;
@@ -353,6 +364,9 @@ const repo = {
       if (r.reps !== null && r.reps !== undefined) {
         result[r.exercise_id][`reps_${r.set_index}`] = r.reps;
       }
+      if (r.rir !== null && r.rir !== undefined) {
+        result[r.exercise_id][`rir_${r.set_index}`] = r.rir;
+      }
       result[r.exercise_id].updatedAt = r.updated_at;
       if (r.canonical_id) {
         result[r.exercise_id].canonicalId = r.canonical_id;
@@ -361,29 +375,32 @@ const repo = {
     return result;
   },
 
-  saveLastRecord(exerciseId, setIndex, weight, reps, updatedAt = null, force = false) {
+  saveLastRecord(exerciseId, setIndex, weight, reps, updatedAt = null, force = false, rir = null) {
     const dateStr = updatedAt || new Date().toISOString();
     const canon = getCanonicalExerciseId(exerciseId);
     const linkedIds = getLinkedExerciseIds(exerciseId);
+    const rirNum = (rir !== null && rir !== undefined && rir !== '') ? Number(rir) : null;
 
     const sql = force
       ? `
-        INSERT INTO exercise_last_weights (exercise_id, set_index, weight, reps, updated_at, canonical_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO exercise_last_weights (exercise_id, set_index, weight, reps, updated_at, canonical_id, rir)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(exercise_id, set_index) DO UPDATE SET
           weight = excluded.weight,
           reps = excluded.reps,
           updated_at = excluded.updated_at,
-          canonical_id = excluded.canonical_id
+          canonical_id = excluded.canonical_id,
+          rir = excluded.rir
       `
       : `
-        INSERT INTO exercise_last_weights (exercise_id, set_index, weight, reps, updated_at, canonical_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO exercise_last_weights (exercise_id, set_index, weight, reps, updated_at, canonical_id, rir)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(exercise_id, set_index) DO UPDATE SET
           weight = excluded.weight,
           reps = COALESCE(excluded.reps, exercise_last_weights.reps),
           updated_at = excluded.updated_at,
-          canonical_id = excluded.canonical_id
+          canonical_id = excluded.canonical_id,
+          rir = COALESCE(excluded.rir, exercise_last_weights.rir)
         WHERE excluded.updated_at >= exercise_last_weights.updated_at OR exercise_last_weights.updated_at IS NULL
       `;
 
@@ -393,10 +410,10 @@ const repo = {
     const rNum = reps !== undefined && reps !== '' && reps !== null ? Number(reps) : null;
 
     // 1. Save directly for the exercise
-    stmt.run(exerciseId, setIndex, wNum, rNum, dateStr, canon);
+    stmt.run(exerciseId, setIndex, wNum, rNum, dateStr, canon, rirNum);
 
     // 2. Save directly under the canonical ID for centralized queries
-    stmt.run(canon, setIndex, wNum, rNum, dateStr, canon);
+    stmt.run(canon, setIndex, wNum, rNum, dateStr, canon, rirNum);
 
     // 3. Atomically propagate to all linked peer exercises across days
     // e.g., b_m_shoulder (Monday Bonus) <-> th1 (Thursday Main)
@@ -405,7 +422,7 @@ const repo = {
 
       if (setIndex === 0) {
         // Warmup set links to warmup set (set_index = 0)
-        stmt.run(targetId, 0, wNum, rNum, dateStr, canon);
+        stmt.run(targetId, 0, wNum, rNum, dateStr, canon, rirNum);
       } else {
         // Working set / touchup set
         // If target has multiple sets (not a single-set bonus touchup),
@@ -414,19 +431,19 @@ const repo = {
           if (exerciseId.startsWith('b_')) {
             // Source is a bonus touchup (which only performs set 1)
             // Seed sets 1, 2, and 3 so all working sets on the main day have this latest record!
-            stmt.run(targetId, 1, wNum, rNum, dateStr, canon);
-            stmt.run(targetId, 2, wNum, rNum, dateStr, canon);
-            stmt.run(targetId, 3, wNum, rNum, dateStr, canon);
+            stmt.run(targetId, 1, wNum, rNum, dateStr, canon, rirNum);
+            stmt.run(targetId, 2, wNum, rNum, dateStr, canon, rirNum);
+            stmt.run(targetId, 3, wNum, rNum, dateStr, canon, rirNum);
           } else {
             // Standard working set maps to the corresponding working set index
-            stmt.run(targetId, setIndex, wNum, rNum, dateStr, canon);
+            stmt.run(targetId, setIndex, wNum, rNum, dateStr, canon, rirNum);
           }
         } else {
           // Target is a bonus touchup exercise (which reads set_index = 1).
           // Only primary working set 1 (or single working set) propagates to bonus touchup set 1,
           // so drop/variation sets (sets 2, 3) don't overwrite the primary lift weight/reps!
           if (setIndex === 1) {
-            stmt.run(targetId, 1, wNum, rNum, dateStr, canon);
+            stmt.run(targetId, 1, wNum, rNum, dateStr, canon, rirNum);
           }
         }
       }
@@ -447,7 +464,8 @@ const repo = {
           target: set.target,
           weight: set.weight,
           actualReps: set.actual_reps,
-          done: Boolean(set.done)
+          done: Boolean(set.done),
+          rir: set.rir !== undefined ? set.rir : null
         }));
         return {
           id: ex.exercise_id,
@@ -504,7 +522,8 @@ const repo = {
         target: s.target,
         weight: s.weight,
         actualReps: s.actual_reps,
-        done: Boolean(s.done)
+        done: Boolean(s.done),
+        rir: s.rir !== undefined ? s.rir : null
       }))
     }));
   },
@@ -522,8 +541,8 @@ const repo = {
     `);
 
     const insertSet = db.prepare(`
-      INSERT INTO session_sets (session_exercise_id, set_index, type, target, weight, actual_reps, done)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO session_sets (session_exercise_id, set_index, type, target, weight, actual_reps, done, rir)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const transaction = db.transaction(() => {
@@ -547,6 +566,7 @@ const repo = {
             for (const set of ex.sets) {
               const wt = (set.weight !== undefined && set.weight !== '') ? Number(set.weight) : null;
               const reps = (set.actualReps !== undefined && set.actualReps !== '') ? Number(set.actualReps) : null;
+              const rir = (set.rir !== undefined && set.rir !== '' && set.rir !== null) ? Number(set.rir) : null;
 
               insertSet.run(
                 exerciseRowId,
@@ -555,7 +575,8 @@ const repo = {
                 set.target,
                 wt,
                 reps,
-                set.done ? 1 : 0
+                set.done ? 1 : 0,
+                rir
               );
 
               // Persist to last record with bidirectional cross-day propagation
@@ -565,7 +586,7 @@ const repo = {
                 const sessionDateStr = session.date && session.time
                   ? `${session.date}T${session.time}:00.000Z`
                   : (session.date || new Date().toISOString());
-                this.saveLastRecord(ex.id, set.setIndex - 1, wt || 0, reps, sessionDateStr);
+                this.saveLastRecord(ex.id, set.setIndex - 1, wt || 0, reps, sessionDateStr, false, rir);
               }
             }
           }

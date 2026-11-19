@@ -176,6 +176,9 @@
     <!-- In-App Numeric PIN Keypad Bottom Sheet (z-50) -->
     <PinKeypad />
 
+    <!-- Barbell Plate Calculator Modal (z-50) -->
+    <PlateCalculatorModal />
+
     <!-- Exercise Library Modal (Browse / Search / Create Custom) -->
     <ExerciseLibraryModal
       :is-open="showExerciseLibrary"
@@ -223,6 +226,7 @@ import HistoryView from './components/HistoryView.vue';
 import TodoView from './components/TodoView.vue';
 import RestDayView from './components/RestDayView.vue';
 import PinKeypad from './components/PinKeypad.vue';
+import PlateCalculatorModal from './components/PlateCalculatorModal.vue';
 import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
 import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
 import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
@@ -309,10 +313,10 @@ onMounted(() => {
 });
 
 const activeDayKey = computed(() => {
-  if (['mon', 'tue', 'wed', 'thu'].includes(currentTab.value)) return currentTab.value;
+  if (['mon', 'tue', 'wed', 'thu', 'fri'].includes(currentTab.value)) return currentTab.value;
   return currentDay.value;
 });
-const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu'].includes(activeDayKey.value));
+const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu', 'fri'].includes(activeDayKey.value));
 const currentDayData = computed(() => workoutData[activeDayKey.value]);
 
 // Progress calculation

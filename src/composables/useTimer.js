@@ -5,8 +5,12 @@ const timerRemaining = ref(90);
 const isRunning = ref(false);
 let timerEndTime = null;
 let intervalId = null;
+let lastBeepSecond = null;
 
-function playBeep() {
+/**
+ * Pre-warning short beep at 3, 2, 1 seconds (660Hz E5)
+ */
+function playPreWarningBeep() {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
@@ -14,16 +18,37 @@ function playBeep() {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
-    gain.gain.setValueAtTime(0.2, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.frequency.setValueAtTime(660, ctx.currentTime);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.6);
-  } catch (e) {
-    // Audio context may be blocked by autoplay policies
-  }
+    osc.stop(ctx.currentTime + 0.08);
+  } catch (e) {}
+}
+
+/**
+ * Completion chord (880Hz A5 + 1046Hz C6)
+ */
+function playCompletionChord() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    [880, 1046.5].forEach(freq => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
+    });
+  } catch (e) {}
 }
 
 function triggerHaptic(pattern = [200, 100, 200]) {
@@ -43,13 +68,22 @@ function formatTime(sec) {
 function checkTimerTick() {
   if (!isRunning.value || !timerEndTime) return;
   const now = Date.now();
-  timerRemaining.value = Math.max(0, Math.ceil((timerEndTime - now) / 1000));
+  const remaining = Math.max(0, Math.ceil((timerEndTime - now) / 1000));
+  timerRemaining.value = remaining;
+
+  // 3, 2, 1 Pre-warning Countdown
+  if (remaining >= 1 && remaining <= 3 && lastBeepSecond !== remaining) {
+    lastBeepSecond = remaining;
+    playPreWarningBeep();
+    triggerHaptic(40);
+  }
 
   if (timerRemaining.value <= 0) {
     clearInterval(intervalId);
     isRunning.value = false;
     timerEndTime = null;
-    playBeep();
+    lastBeepSecond = null;
+    playCompletionChord();
     triggerHaptic([250, 120, 250]);
   }
 }
@@ -60,6 +94,7 @@ function startTimer() {
     timerRemaining.value = timerDuration.value;
   }
   isRunning.value = true;
+  lastBeepSecond = null;
   timerEndTime = Date.now() + (timerRemaining.value * 1000);
 
   clearInterval(intervalId);
@@ -77,6 +112,7 @@ function pauseTimer() {
   }
   isRunning.value = false;
   timerEndTime = null;
+  lastBeepSecond = null;
   clearInterval(intervalId);
 }
 
@@ -92,17 +128,35 @@ function resetTimer() {
   pauseTimer();
   timerRemaining.value = timerDuration.value;
   timerEndTime = null;
+  lastBeepSecond = null;
 }
 
 function setTimerDuration(seconds) {
   timerDuration.value = seconds;
   timerRemaining.value = seconds;
   timerEndTime = null;
+  lastBeepSecond = null;
   clearInterval(intervalId);
   isRunning.value = false;
 }
 
-// Background sync on visibility change
+/**
+ * Adjust remaining seconds dynamically (+30s, -15s)
+ */
+function adjustRemaining(delta) {
+  triggerHaptic(20);
+  const current = timerRemaining.value;
+  const next = Math.max(0, current + delta);
+  timerRemaining.value = next;
+  if (isRunning.value && timerEndTime) {
+    timerEndTime += delta * 1000;
+  }
+  if (next <= 0 && isRunning.value) {
+    checkTimerTick();
+  }
+}
+
+// Background sync on visibility change & tab focus
 if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && isRunning.value) {
@@ -125,6 +179,7 @@ export function useTimer() {
     toggleTimer,
     resetTimer,
     setTimerDuration,
+    adjustRemaining,
     triggerHaptic
   };
 }
