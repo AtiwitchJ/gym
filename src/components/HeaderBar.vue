@@ -26,7 +26,7 @@
             : 'bg-emerald-bg border-emerald text-emerald shadow-[1.5px_1.5px_0px_#059669]'"
         >
           <span class="w-1.5 h-1.5 rounded-full" :class="saveStatus === 'saving' ? 'bg-flame' : 'bg-emerald'"></span>
-          <span>{{ saveStatus === 'saving' ? 'SYNCING...' : 'SAVED' }}</span>
+          <span>{{ saveStatus === 'saving' ? 'กำลังบันทึก...' : 'บันทึกในเครื่องแล้ว' }}</span>
         </span>
 
         <!-- Image Preview Toggle -->
@@ -50,9 +50,9 @@
           v-if="isWorkoutDay"
           @click="confirmReset"
           class="min-h-[44px] min-w-[44px] text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 border-plate bg-surface hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
-          title="ล้างข้อมูลติ๊กของวันนี้"
+          title="ล้างการติ๊กของวันนี้ (ไม่ลบประวัติ)"
         >
-          RESET
+          ล้างการติ๊ก
         </button>
       </div>
     </div>
@@ -74,7 +74,7 @@ const {
 const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(currentDay.value));
 
 function confirmReset() {
-  if (confirm('คุณต้องการรีเซ็ตการติ๊กของวันนี้ใช่หรือไม่? (น้ำหนักสถิติล่าสุดจะยังคงจำไว้)')) {
+  if (confirm('ล้างการติ๊กของวันนี้ใช่หรือไม่? (ประวัติและน้ำหนักล่าสุดจะยังคงอยู่)')) {
     resetDayData(currentDay.value);
   }
 }

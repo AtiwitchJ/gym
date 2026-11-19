@@ -849,7 +849,7 @@ async function finishAndSaveWorkout() {
   // Save is complete: วันนี้ now points at the next program, and PR baselines are stale.
   clearPrCache();
   refreshTodayDay();
-  showToast(`บันทึกประวัติสำเร็จ (${totalSetsDone} เซ็ต) — รีเซ็ตพร้อมสำหรับรอบถัดไป`);
+  showToast(`บันทึกแล้ว (${totalSetsDone} เซ็ต)`);
 }
 
 async function recordSessionToHistory(session) {

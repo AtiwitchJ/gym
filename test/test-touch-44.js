@@ -10,8 +10,8 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
 const CONTROLS = {
   'src/components/ExerciseCard.vue': ['ดูประวัติและ PR', 'คำนวณแผ่น', 'ดึงสถิติ', '3 เครื่อง', 'opt.label'],
   'src/components/RestTimer.vue': ['{{ preset }}s', 'เริ่มจับเวลา', 'รีเซ็ตเวลา', '+30s', '-15s', 'ข้ามพัก'],
-  'src/components/HeaderBar.vue': ['ซ่อนรูป', 'RESET'],
-  'src/components/ActiveWorkoutSheet.vue': ['ย่อ', '+ ท่า', 'ยกเลิกการออกกำลังกายนี้', 'เสร็จสิ้น', 'ปิด', 'ลบเซ็ต', 'ประเภทเซ็ต', 'เพิ่มเซ็ต'],
+  'src/components/HeaderBar.vue': ['ซ่อนรูป', 'ล้างการติ๊ก'],
+  'src/components/ActiveWorkoutSheet.vue': ['ย่อ', '+ ท่า', 'ยกเลิกการออกกำลังกายนี้', 'บันทึกการฝึก', 'ปิด', 'ลบเซ็ต', 'ประเภทเซ็ต', 'เพิ่มเซ็ต'],
   'src/components/WorkoutsView.vue': ['เริ่มฝึก (Start)', '📋 ตาราง', 'แก้ไข (Edit)', '⚡ เริ่มฝึก']
 };
 

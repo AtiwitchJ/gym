@@ -143,7 +143,7 @@
               <polyline points="17 21 17 13 7 13 7 21" />
               <polyline points="7 3 7 8 15 8" />
             </svg>
-            <span>บันทึกประวัติและจำน้ำหนักวันนี้ (Save Session)</span>
+            <span>บันทึกการฝึกวันนี้</span>
           </button>
         </div>
       </div>
@@ -205,7 +205,7 @@
       @minimize="isRunnerMinimized = true"
     />
 
-    <!-- The one summary modal: runner finish (lastWorkoutSummary) or Save Session (lastSessionSummary) -->
+    <!-- The one summary modal: runner finish (lastWorkoutSummary) or the day-view save (lastSessionSummary) -->
     <WorkoutSummaryModal
       :is-open="isSummaryModalOpen || !!lastSessionSummary"
       :summary="lastSessionSummary || lastWorkoutSummary"

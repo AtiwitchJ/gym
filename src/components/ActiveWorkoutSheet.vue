@@ -75,12 +75,12 @@
             type="button"
             @click="handleFinish"
             class="min-h-[44px] min-w-[44px] px-3.5 sm:px-4 py-1.5 rounded-xl border-2 border-plate bg-emerald hover:bg-emerald-600 text-white font-heading font-bold text-xs sm:text-sm shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1.5"
-            title="เสร็จสิ้นและบันทึกประวัติการออกกำลังกาย"
+            title="บันทึกการฝึกและจบรอบนี้"
           >
             <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>เสร็จสิ้น</span>
+            <span>บันทึกการฝึก</span>
           </button>
         </div>
       </div>
