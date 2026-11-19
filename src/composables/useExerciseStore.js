@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue';
 import { defaultExercises } from '../data/defaultExercises.js';
+import { matchesQuery } from '../data/thaiSearch.js';
 
 const STORAGE_KEY = 'atiwitch_custom_exercises';
 
@@ -61,19 +62,9 @@ const filteredExercises = computed(() => {
       }
     }
 
-    // Free text search matching name, muscle group, equipment, or notes
-    if (query) {
-      const name = (exercise.name || '').toLowerCase();
-      const muscle = (exercise.muscleGroup || '').toLowerCase();
-      const equipment = (exercise.equipment || '').toLowerCase();
-      const notes = (exercise.notes || '').toLowerCase();
-      const matches = name.includes(query) ||
-                      muscle.includes(query) ||
-                      equipment.includes(query) ||
-                      notes.includes(query);
-      if (!matches) {
-        return false;
-      }
+    // Free text search: English or Thai (name, muscle, equipment, notes, Thai terms)
+    if (query && !matchesQuery(exercise, query)) {
+      return false;
     }
 
     return true;
