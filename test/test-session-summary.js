@@ -63,14 +63,23 @@ store.closeSessionSummary();
 assert.strictEqual(store.lastSessionSummary.value, null, 'closing clears the summary');
 console.log('✓ Store path verified.');
 
-console.log('▶ [4] App and modal wiring...');
+console.log('▶ [4] One summary modal: both flows use WorkoutSummaryModal...');
+assert.ok(!fs.existsSync(path.join(root, 'src/components/SessionSummaryModal.vue')), 'the second summary modal is removed');
 const app = fs.readFileSync(path.join(root, 'src/App.vue'), 'utf8');
-assert.ok(app.includes('<SessionSummaryModal') && app.includes(':summary="lastSessionSummary"'), 'App shows the session summary');
-assert.ok(app.includes('closeSessionSummary'), 'App closes the summary');
-const modal = fs.readFileSync(path.join(root, 'src/components/SessionSummaryModal.vue'), 'utf8');
-assert.ok(modal.includes('เซ็ตที่ทำเสร็จ') && modal.includes('🏆 PR ในรอบนี้'), 'modal shows sets done and PRs');
+assert.ok(!app.includes('SessionSummaryModal'), 'App no longer mounts SessionSummaryModal');
+assert.ok(app.includes('<WorkoutSummaryModal') && app.includes(':summary="lastSessionSummary || lastWorkoutSummary"'), 'App shows the shared summary for both flows');
+assert.ok(app.includes('@close="onSummaryClose"') && app.includes('closeSessionSummary()'), 'closing clears the open summary');
+const modal = fs.readFileSync(path.join(root, 'src/components/WorkoutSummaryModal.vue'), 'utf8');
+assert.ok(modal.includes('🏆 PR ในรอบนี้') && modal.includes('prRows'), 'the shared modal lists the session PRs');
 assert.ok(modal.includes("defineEmits(['close'])"), 'modal emits close');
-console.log('✓ Wiring verified.');
+// the builder feeds the shared modal the same fields the runner summary uses
+const built = buildSessionSummary(dayData, { e1: { set_1: true, wt_1: '40', reps_1: '9' } });
+assert.strictEqual(built.totalVolumeKg, 360, 'volume is weight × reps for done sets');
+assert.strictEqual(built.completedSetsCount, 1);
+assert.strictEqual(built.totalSetsCount, 6);
+assert.deepStrictEqual(built.exercises[0].sets.map((x) => x.completed), [false, true, false], 'exercise rows use completed flags');
+console.log('✓ Shared summary wiring verified.');
+
 
 console.log('\n====================================================');
 console.log('🎉 ALL SESSION-SUMMARY TESTS PASSED!');

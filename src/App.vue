@@ -205,17 +205,11 @@
       @minimize="isRunnerMinimized = true"
     />
 
-    <!-- Workout Summary Celebration Modal -->
+    <!-- The one summary modal: runner finish (lastWorkoutSummary) or Save Session (lastSessionSummary) -->
     <WorkoutSummaryModal
-      :is-open="isSummaryModalOpen"
-      :summary="lastWorkoutSummary"
-      @close="isSummaryModalOpen = false"
-    />
-
-    <!-- Session summary after Save Session (step 6b): sets done and PRs -->
-    <SessionSummaryModal
-      :summary="lastSessionSummary"
-      @close="closeSessionSummary"
+      :is-open="isSummaryModalOpen || !!lastSessionSummary"
+      :summary="lastSessionSummary || lastWorkoutSummary"
+      @close="onSummaryClose"
     />
   </div>
 </template>
@@ -241,7 +235,6 @@ import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
 import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
 import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
 import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
-import SessionSummaryModal from './components/SessionSummaryModal.vue';
 import WorkoutsView from './components/WorkoutsView.vue';
 import ProfileView from './components/ProfileView.vue';
 import { isRestWeekday } from './data/workouts.js';
@@ -276,6 +269,12 @@ function handleWorkoutFinished(summary) {
   isSummaryModalOpen.value = true;
   isRunnerMinimized.value = false;
   showToast('ยินดีด้วย! บันทึกรอบฝึกเรียบร้อย');
+}
+
+// Closing the shared summary clears whichever summary was open.
+function onSummaryClose() {
+  if (lastSessionSummary.value) closeSessionSummary();
+  isSummaryModalOpen.value = false;
 }
 
 function startTodayLiveWorkout() {

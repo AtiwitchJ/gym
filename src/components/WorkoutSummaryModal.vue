@@ -103,6 +103,16 @@
             </div>
           </div>
 
+          <!-- PR list for this session (set when a set beat the stored PR; step 6b) -->
+          <div v-if="summary?.prs && summary.prs.length > 0" class="bg-white border-2 border-plate rounded-xl p-3 shadow-[2px_2px_0px_#1e2220]">
+            <div class="text-xs font-mono font-bold text-ink mb-1.5">🏆 PR ในรอบนี้</div>
+            <ul class="space-y-1">
+              <li v-for="pr in prRows" :key="`${pr.exerciseId}-${pr.setIndex}`" class="text-xs font-body text-ink">
+                {{ pr.label }}
+              </li>
+            </ul>
+          </div>
+
           <!-- Motivational Encouragement Banner -->
           <div class="p-3 bg-emerald-bg/50 border-2 border-emerald rounded-xl flex items-center gap-2.5">
             <span class="text-xl">💪</span>
@@ -131,6 +141,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { prLabel } from '../composables/useSessionSummary.js';
 
 const props = defineProps({
   isOpen: {
@@ -179,6 +190,8 @@ const setsRatioText = computed(() => {
   }
   return String(completed);
 });
+
+const prRows = computed(() => (props.summary?.prs || []).map((pr) => ({ ...pr, label: prLabel(pr) })));
 
 function countExerciseCompletedSets(exercise) {
   if (!exercise || !Array.isArray(exercise.sets)) return 0;
