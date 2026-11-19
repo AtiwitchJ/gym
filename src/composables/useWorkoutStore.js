@@ -105,23 +105,56 @@ function persistLocal() {
   storage.setItem('atiwitch_gym_todos', JSON.stringify(userTodos.value));
 }
 
+// Day whose server copy is still waiting for the 400 ms debounce (review fix: flushed on close).
+let pendingSyncDayKey = null;
+
+function postDayState(dayKey, fetchImpl, options = {}) {
+  const payload = {
+    dayKey,
+    state: userState[dayKey] || {},
+    weights: lastWeights
+  };
+  return fetchImpl('/api/state', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    ...options
+  });
+}
+
+/**
+ * Write the local copy now and send any pending server copy immediately (keepalive, so it
+ * completes while the page closes). Safe to call often; nothing is sent twice.
+ */
+export function flushPendingSave(fetchImpl = globalThis.fetch) {
+  persistLocal();
+  if (pendingSyncDayKey === null) return Promise.resolve(false);
+  const dayKey = pendingSyncDayKey;
+  pendingSyncDayKey = null;
+  clearTimeout(syncDebounceTimer);
+  if (typeof fetchImpl !== 'function') return Promise.resolve(false);
+  return Promise.resolve(postDayState(dayKey, fetchImpl, { keepalive: true }))
+    .then(() => true)
+    .catch(() => false);
+}
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  window.addEventListener('pagehide', () => { flushPendingSave(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPendingSave();
+  });
+}
+
 function triggerSave(dayKey = currentDay.value) {
   saveStatus.value = 'saving';
   persistLocal();
 
   clearTimeout(syncDebounceTimer);
+  pendingSyncDayKey = dayKey;
   syncDebounceTimer = setTimeout(async () => {
+    pendingSyncDayKey = null;
     try {
-      const payload = {
-        dayKey,
-        state: userState[dayKey] || {},
-        weights: lastWeights
-      };
-      const res = await fetch('/api/state', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const res = await postDayState(dayKey, fetch);
       if (res.ok) {
         saveStatus.value = 'saved';
       } else {
