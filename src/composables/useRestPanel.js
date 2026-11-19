@@ -39,3 +39,13 @@ export function restHint(next) {
   if (!next) return 'จบทุกท่าแล้ว — ข้ามพักได้เลย';
   return `ต่อไป: ${next.exerciseName} · ${next.label}`;
 }
+
+/** Short name of a program key: prog_b -> "Program B", anything else -> "Program A". */
+export function programLabel(key) {
+  return key === 'prog_b' ? 'Program B' : 'Program A';
+}
+
+/** Line shown on the rest view: the program that comes next after the last completed session. */
+export function nextProgramHint(key) {
+  return `ต่อไป: ${programLabel(key)} · ต่อจากครั้งล่าสุดที่ทำเสร็จ`;
+}

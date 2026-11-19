@@ -12,7 +12,7 @@ const CONTROLS = {
   'src/components/RestTimer.vue': ['{{ preset }}s', 'เริ่มจับเวลา', 'รีเซ็ตเวลา', '+30s', '-15s', 'ข้ามพัก'],
   'src/components/HeaderBar.vue': ['ซ่อนรูป', 'RESET'],
   'src/components/ActiveWorkoutSheet.vue': ['ย่อ', '+ ท่า', 'ยกเลิกการออกกำลังกายนี้', 'เสร็จสิ้น', 'ปิด', 'ลบเซ็ต', 'ประเภทเซ็ต', 'เพิ่มเซ็ต'],
-  'src/components/WorkoutsView.vue': ['เริ่มฝึก (Start)', '📋 ตาราง', 'แก้ไข (Edit)', '⚡ เริ่ม Program']
+  'src/components/WorkoutsView.vue': ['เริ่มฝึก (Start)', '📋 ตาราง', 'แก้ไข (Edit)', '⚡ เริ่มฝึก']
 };
 
 // End of the opening tag, skipping > inside quoted attribute values (e.g. v-if="a > 0").

@@ -13,6 +13,22 @@
       </p>
     </div>
 
+    <!-- Next session (step 4 of the 3-day A/B rule): shows the program after the last completed session -->
+    <div class="archive-card p-4 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="min-w-0">
+        <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase block">NEXT SESSION</span>
+        <p class="text-sm font-bold font-heading text-ink">{{ nextHint }}</p>
+      </div>
+      <button
+        type="button"
+        @click="openNext"
+        class="min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl border-2 border-plate bg-flame hover:bg-flame-glow text-white font-heading font-bold text-sm shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+        :title="`เปิด ${nextLabel} (ไม่ต้องรอวัน)`"
+      >
+        เปิด {{ nextLabel }} ›
+      </button>
+    </div>
+
     <!-- Muscle Recovery Indicator (SPEC 2.3) -->
     <RecoveryPanel />
 
@@ -58,5 +74,18 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import RecoveryPanel from './RecoveryPanel.vue';
+import { useWorkoutStore } from '../composables/useWorkoutStore.js';
+import { programLabel, nextProgramHint } from '../composables/useRestPanel.js';
+
+const { todayProgramKey, switchDay } = useWorkoutStore();
+
+const nextLabel = computed(() => programLabel(todayProgramKey.value));
+const nextHint = computed(() => nextProgramHint(todayProgramKey.value));
+
+// Open the next program's day view directly (the rest view is only shown on วันนี้ on rest weekdays).
+function openNext() {
+  switchDay(todayProgramKey.value);
+}
 </script>

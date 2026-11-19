@@ -102,12 +102,12 @@
               @click="launchProgramA"
               class="min-h-[44px] min-w-[44px] flex-1 py-1.5 px-2.5 bg-flame hover:bg-flame-glow text-white text-[11px] font-heading font-bold rounded-lg border border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all flex items-center justify-center gap-1"
             >
-              <span>⚡ เริ่ม Program A (1-Click)</span>
+              <span>⚡ เริ่มฝึก</span>
             </button>
             <button
               type="button"
               @click="openDayProtocol('prog_a')"
-              class="min-h-[44px] min-w-[44px] py-1.5 px-2 bg-surface hover:bg-paper-subtle text-ink text-[11px] font-heading font-bold rounded-lg border border-plate/40 shadow-xs"
+              class="min-h-[44px] min-w-[44px] px-2 text-[11px] font-heading font-semibold text-ink-muted underline underline-offset-2 hover:text-ink transition-colors"
               title="ดูตาราง Program A"
             >
               <span>📋 ตาราง</span>
@@ -132,12 +132,12 @@
               @click="launchProgramB"
               class="min-h-[44px] min-w-[44px] flex-1 py-1.5 px-2.5 bg-emerald hover:bg-emerald/90 text-white text-[11px] font-heading font-bold rounded-lg border border-plate shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all flex items-center justify-center gap-1"
             >
-              <span>⚡ เริ่ม Program B (1-Click)</span>
+              <span>⚡ เริ่มฝึก</span>
             </button>
             <button
               type="button"
               @click="openDayProtocol('prog_b')"
-              class="min-h-[44px] min-w-[44px] py-1.5 px-2 bg-surface hover:bg-paper-subtle text-ink text-[11px] font-heading font-bold rounded-lg border border-plate/40 shadow-xs"
+              class="min-h-[44px] min-w-[44px] px-2 text-[11px] font-heading font-semibold text-ink-muted underline underline-offset-2 hover:text-ink transition-colors"
               title="ดูตาราง Program B"
             >
               <span>📋 ตาราง</span>
@@ -165,7 +165,7 @@
         <button
           type="button"
           @click="launchProgramA"
-          class="flex items-center justify-between p-3 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] bg-surface hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation group text-left"
+          class="min-h-[44px] min-w-[44px] flex items-center justify-between p-3 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] bg-surface hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation group text-left"
         >
           <div>
             <div class="flex items-center gap-1.5 mb-0.5">
@@ -181,7 +181,7 @@
         <button
           type="button"
           @click="launchProgramB"
-          class="flex items-center justify-between p-3 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] bg-surface hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation group text-left"
+          class="min-h-[44px] min-w-[44px] flex items-center justify-between p-3 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] bg-surface hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation group text-left"
         >
           <div>
             <div class="flex items-center gap-1.5 mb-0.5">
