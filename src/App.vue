@@ -27,7 +27,7 @@
     <!-- Main Container -->
     <main
       class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden"
-      :class="isWorkoutDay ? 'pb-36 sm:pb-40' : 'pb-24 sm:pb-28'"
+      :style="{ paddingBottom: dockPadding }"
     >
       <!-- 1. Workouts View (Global Tab) -->
       <WorkoutsView
@@ -156,7 +156,7 @@
     </main>
 
     <!-- Fixed Bottom Mobile Navigation & Timer Dock -->
-    <div class="fixed bottom-0 left-0 right-0 z-40 bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-6px_25px_rgba(30,34,32,0.12)]">
+    <div ref="dockEl" class="fixed bottom-0 left-0 right-0 z-40 bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-6px_25px_rgba(30,34,32,0.12)]">
       <!-- Rest Timer Bar (Workout days or whenever timer is actively running) -->
       <transition
         enter-active-class="transition duration-200 ease-out"
@@ -238,6 +238,11 @@ import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
 import WorkoutsView from './components/WorkoutsView.vue';
 import ProfileView from './components/ProfileView.vue';
 import { isRestWeekday } from './data/workouts.js';
+import { useDockPadding } from './composables/useDockPadding.js';
+
+// The page keeps clear of the fixed bottom dock, whatever its height is (regular tester item 2).
+const dockEl = ref(null);
+const dockPadding = useDockPadding(dockEl);
 
 const {
   currentDay,
