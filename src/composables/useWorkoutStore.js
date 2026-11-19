@@ -3,6 +3,7 @@ import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExer
 import { defaultTodos } from '../data/defaultTodos.js';
 import { parseRepTarget } from './useWeightAdvisor.js';
 import { normalizeRir } from './useRir.js';
+import { readKeypadDraft, clearKeypadDraft, applyKeypadDraft } from './usePinKeypad.js';
 import { buildSessionExercises, recordValuesFromSets } from './sessionPayload.js';
 import { clearPrCache } from './usePersonalRecords.js';
 import { buildSessionSummary } from './useSessionSummary.js';
@@ -539,6 +540,13 @@ function healCrossDayExerciseRecords() {
     });
   }
 }
+
+// Restore a value that was being typed when the app closed or reloaded (data-integrity fix).
+// It only fills the set row; history is never written here.
+if (applyKeypadDraft(userState, readKeypadDraft())) {
+  persistLocal();
+}
+clearKeypadDraft();
 
 // Initial heal pass on store startup
 healCrossDayExerciseRecords();

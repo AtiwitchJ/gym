@@ -1,4 +1,44 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+
+// Entry draft (data-integrity fix): the value being typed is kept until OK, so a reload restores it.
+export const KEYPAD_DRAFT_KEY = 'atiwitch_keypad_draft';
+let currentDraftKey = null;
+
+function defaultStorage() {
+  return typeof localStorage !== 'undefined' ? localStorage : null;
+}
+
+export function saveKeypadDraft(draft, storage = defaultStorage()) {
+  if (storage) storage.setItem(KEYPAD_DRAFT_KEY, JSON.stringify(draft));
+}
+
+export function readKeypadDraft(storage = defaultStorage()) {
+  try {
+    const raw = storage ? storage.getItem(KEYPAD_DRAFT_KEY) : null;
+    return raw ? JSON.parse(raw) : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+export function clearKeypadDraft(storage = defaultStorage()) {
+  if (storage) storage.removeItem(KEYPAD_DRAFT_KEY);
+}
+
+/**
+ * Put a saved entry draft back into the day state (weight or reps of one set).
+ * It only sets the typed value; it never writes history. Returns true when something was restored.
+ */
+export function applyKeypadDraft(state, draft) {
+  if (!draft || !draft.draftKey) return false;
+  const { dayKey, exId, field, setIdx } = draft.draftKey;
+  if (!dayKey || !exId || (field !== 'wt' && field !== 'reps') || setIdx === undefined || setIdx === null) return false;
+  if (draft.value === undefined || draft.value === null || draft.value === '') return false;
+  state[dayKey] = state[dayKey] || {};
+  state[dayKey][exId] = state[dayKey][exId] || {};
+  state[dayKey][exId][`${field}_${setIdx}`] = String(draft.value);
+  return true;
+}
 
 const isOpen = ref(false);
 const title = ref('');
@@ -13,6 +53,13 @@ const suggestedLabel = ref('');
 const presets = ref([]);
 const guardAcknowledged = ref(false);
 let onConfirmCallback = null;
+
+// Keep the draft in step with what is typed while the keypad is open.
+watch(displayValue, (value) => {
+  if (isOpen.value && currentDraftKey) {
+    saveKeypadDraft({ draftKey: currentDraftKey, mode: mode.value, value });
+  }
+});
 
 // Review fix: the first digit after opening replaces the pre-filled value (35 + 1 was 351, then 3510).
 let freshEntry = false;
@@ -113,6 +160,7 @@ function openKeypad(config) {
   presets.value = config.presets || (mode.value === 'weight' ? [1.25, 2.5, 5, -2.5] : [1, 2, -1]);
   guardAcknowledged.value = false;
   freshEntry = true;
+  currentDraftKey = config.draftKey || null;
   onConfirmCallback = config.onConfirm || null;
   isOpen.value = true;
   triggerHaptic(30);
@@ -120,6 +168,8 @@ function openKeypad(config) {
 
 function closeKeypad() {
   isOpen.value = false;
+  currentDraftKey = null;
+  clearKeypadDraft();
   guardAcknowledged.value = false;
   onConfirmCallback = null;
 }
