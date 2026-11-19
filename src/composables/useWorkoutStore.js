@@ -1,5 +1,5 @@
-import { ref, reactive, watch } from 'vue';
-import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay, resolveDayKey, resolveTodayKey } from '../data/workouts.js';
+import { ref, reactive, watch, computed } from 'vue';
+import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay, resolveDayKey, nextProgramKey } from '../data/workouts.js';
 import { defaultTodos } from '../data/defaultTodos.js';
 import { parseRepTarget } from './useWeightAdvisor.js';
 
@@ -34,17 +34,28 @@ const storage = {
 // Old per-day tab keys: opening the app with one of these saved means "วันนี้" (today) now.
 const LEGACY_TODAY_TAB_KEYS = ['today', 'mon', 'tue', 'wed', 'thu', 'fri', 'prog_a', 'prog_b', 'rest', 'todo'];
 
-// Active Day restoration
+// Stored session history, read before the reactive store exists (used for the startup day).
+function readStoredHistory() {
+  try {
+    const raw = storage.getItem('atiwitch_workout_history') || storage.getItem('jetts_workout_history') || '[]';
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// Active Day restoration. วันนี้ = next program after the last completed session (not the weekday).
 function getInitialDay() {
   const savedTab = storage.getItem('atiwitch_active_global_tab');
   if (!savedTab || LEGACY_TODAY_TAB_KEYS.includes(savedTab)) {
-    return resolveTodayKey();
+    return nextProgramKey(readStoredHistory());
   }
   const saved = storage.getItem('atiwitch_active_tab') || storage.getItem('jetts_active_tab');
   if (saved && (workoutData[saved] || saved === 'rest' || saved === 'history' || saved === 'todo')) {
     return resolveDayKey(saved);
   }
-  return resolveTodayKey();
+  return nextProgramKey(readStoredHistory());
 }
 
 const currentDay = ref(getInitialDay());
@@ -74,6 +85,8 @@ function showToast(msg) {
 const userState = reactive(JSON.parse(storage.getItem('atiwitch_workout_state') || storage.getItem('jetts_workout_state') || '{}'));
 const lastWeights = reactive(JSON.parse(storage.getItem('atiwitch_last_weights') || storage.getItem('jetts_last_weights') || '{}'));
 const workoutHistory = ref(JSON.parse(storage.getItem('atiwitch_workout_history') || storage.getItem('jetts_workout_history') || '[]'));
+// วันนี้ program: next after the last completed A/B session (weekday does not matter)
+const todayProgramKey = computed(() => nextProgramKey(workoutHistory.value));
 const userTodos = ref(JSON.parse(storage.getItem('atiwitch_gym_todos') || storage.getItem('jetts_gym_todos') || JSON.stringify(defaultTodos)));
 
 // Auto-save triggers
@@ -146,6 +159,7 @@ async function fetchServerState() {
     if (historyRes && Array.isArray(historyRes)) {
       workoutHistory.value = historyRes;
       storage.setItem('jetts_workout_history', JSON.stringify(historyRes));
+      refreshTodayDay();
     }
   } catch (err) {
     console.log('Running in local/offline mode (SQLite server unreachable)');
@@ -470,9 +484,17 @@ function healCrossDayExerciseRecords() {
 healCrossDayExerciseRecords();
 
 // Actions
-// 'today' = วันนี้ tab (weekday schedule). Mon/Wed/Fri resolve to Program A/B; Tue/Thu to rest.
+// 'today' = วันนี้ tab: the next program after the last completed session (see todayProgramKey).
 function dayKeyFor(key) {
-  return key === 'today' ? resolveTodayKey() : resolveDayKey(key);
+  return key === 'today' ? todayProgramKey.value : resolveDayKey(key);
+}
+
+// Keep the วันนี้ day in step with history: call after a session is saved or history is loaded.
+function refreshTodayDay() {
+  if (currentTab.value === 'today') {
+    currentDay.value = todayProgramKey.value;
+    storage.setItem('atiwitch_active_tab', currentDay.value);
+  }
 }
 
 function switchDay(dayKey) {
@@ -631,7 +653,9 @@ async function resetDayData(day = currentDay.value) {
 }
 
 async function finishAndSaveWorkout() {
-  const dayData = workoutData[currentDay.value];
+  // Capture the day being saved: recording the session may move วันนี้ to the other program.
+  const savedDayKey = currentDay.value;
+  const dayData = workoutData[savedDayKey];
   if (!dayData) return;
 
   const now = new Date();
@@ -783,7 +807,7 @@ async function finishAndSaveWorkout() {
     dayData.bonusExercises.forEach(setupNextRoundExercise);
   }
 
-  userState[currentDay.value] = nextDayState;
+  userState[savedDayKey] = nextDayState;
   persistLocal();
 
   // Sync latest weights and reset state to SQLite backend
@@ -793,14 +817,16 @@ async function finishAndSaveWorkout() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          dayKey: currentDay.value,
-          state: userState[currentDay.value] || {},
+          dayKey: savedDayKey,
+          state: userState[savedDayKey] || {},
           weights: lastWeights
         })
       });
     } catch (e) {}
   }
 
+  // Save is complete: วันนี้ now points at the next program.
+  refreshTodayDay();
   showToast(`บันทึกประวัติสำเร็จ (${totalSetsDone} เซ็ต) — รีเซ็ตพร้อมสำหรับรอบถัดไป`);
 }
 
@@ -824,6 +850,7 @@ async function recordSessionToHistory(session) {
 
 async function deleteSession(id) {
   workoutHistory.value = workoutHistory.value.filter(s => s.id !== id);
+  refreshTodayDay();
   persistLocal();
   try {
     await fetch(`/api/history/${id}`, { method: 'DELETE' });
@@ -882,6 +909,8 @@ export function useWorkoutStore() {
     workoutData,
     currentDay,
     currentTab,
+    todayProgramKey,
+    refreshTodayDay,
     saveStatus,
     toastMessage,
     userState,

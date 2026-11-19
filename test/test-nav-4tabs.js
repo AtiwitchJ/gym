@@ -2,40 +2,39 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { resolveTodayKey, scheduledProgramForDay } from '../src/data/workouts.js';
+import { nextProgramKey } from '../src/data/workouts.js';
 import { useWorkoutStore } from '../src/composables/useWorkoutStore.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 console.log('====================================================');
-console.log('🧪 QA Test: Step 1 navigation cleanup (4 tabs, one วันนี้ tab)');
+console.log('🧪 QA Test: Nav (4 tabs, one วันนี้ tab) — steps 1–2');
 console.log('====================================================\n');
 
-// 1. Today's program follows the weekday schedule (week 1 = A-B-A, anchor Mon 2026-11-16)
-console.log('▶ [1] resolveTodayKey follows the weekday schedule...');
-const d = (day) => new Date(2026, 10, day, 9, 0, 0); // November 2026, local 09:00
-assert.strictEqual(resolveTodayKey(d(16)), 'prog_a', 'Mon week 1 = A');
-assert.strictEqual(resolveTodayKey(d(17)), 'rest', 'Tue = rest');
-assert.strictEqual(resolveTodayKey(d(18)), 'prog_b', 'Wed week 1 = B');
-assert.strictEqual(resolveTodayKey(d(19)), 'rest', 'Thu = rest');
-assert.strictEqual(resolveTodayKey(d(20)), 'prog_a', 'Fri week 1 = A');
-assert.strictEqual(resolveTodayKey(d(21)), 'rest', 'Sat = rest');
-assert.strictEqual(resolveTodayKey(d(22)), 'rest', 'Sun = rest');
-assert.strictEqual(resolveTodayKey(d(23)), scheduledProgramForDay('mon', d(23)), 'week 2 Monday matches the Mon schedule');
-console.log('✓ Weekday mapping verified.');
-
-// 2. The store's 'today' tab resolves to today's key
-console.log('▶ [2] Store switchTab/switchDay("today") resolve today...');
+// 1. วันนี้ follows the last completed session, not the weekday
+console.log('▶ [1] วันนี้ program follows the last completed session...');
 const store = useWorkoutStore();
-const expected = resolveTodayKey();
+assert.strictEqual(store.todayProgramKey.value, 'prog_a', 'no history yet -> Program A');
 store.switchTab('today');
-assert.strictEqual(store.currentDay.value, expected, 'switchTab(today) must set currentDay to today');
+assert.strictEqual(store.currentDay.value, 'prog_a', 'switchTab(today) -> Program A with empty history');
 assert.strictEqual(store.currentTab.value, 'today');
 store.switchDay('today');
-assert.strictEqual(store.currentDay.value, expected, 'switchDay(today) must set currentDay to today');
+assert.strictEqual(store.currentDay.value, 'prog_a', 'switchDay(today) follows the same rule');
+console.log('✓ วันนี้ resolves from history (not weekday).');
+
+// 2. Recording a completed session moves วันนี้ to the other program
+console.log('▶ [2] Saving a session moves วันนี้ to the other program...');
+store.workoutHistory.value.unshift({ id: 'verify_a', date: '2026-11-16', time: '18:00', dayKey: 'prog_a', exercises: [] });
+store.refreshTodayDay();
+assert.strictEqual(store.todayProgramKey.value, 'prog_b', 'after Program A, วันนี้ is Program B');
+assert.strictEqual(store.currentDay.value, 'prog_b', 'open วันนี้ tab now shows Program B');
 store.switchTab('workouts');
-assert.strictEqual(store.currentTab.value, 'workouts', 'workouts tab keeps its id');
-console.log('✓ Store routing verified.');
+store.workoutHistory.value.unshift({ id: 'verify_b', date: '2026-11-18', time: '18:00', dayKey: 'prog_b', exercises: [] });
+store.refreshTodayDay();
+assert.strictEqual(store.todayProgramKey.value, 'prog_a', 'after B, วันนี้ is A again');
+assert.strictEqual(store.currentDay.value, 'prog_b', 'refresh does not change the day while another tab is open');
+assert.strictEqual(store.currentTab.value, 'workouts', 'other tabs keep their id');
+console.log('✓ Session save moves วันนี้ (refresh applies on the วันนี้ tab only).');
 
 // 3. Bottom bar: exactly 4 tabs, in order วันนี้ · โปรแกรม · ประวัติ · บัญชี
 console.log('▶ [3] DayTabs has exactly 4 tabs, no program pills...');
@@ -54,5 +53,5 @@ assert.ok(workouts.includes("switchTab('exercises')"), 'WorkoutsView must open t
 console.log('✓ Library entry point verified.');
 
 console.log('\n====================================================');
-console.log('🎉 ALL STEP 1 NAV TESTS PASSED!');
+console.log('🎉 ALL NAV TESTS PASSED (steps 1–2)!');
 console.log('====================================================');

@@ -1437,10 +1437,27 @@ export function resolveDayKey(key, date = new Date()) {
   return key;
 }
 
-/** Today's program key ('prog_a' | 'prog_b' | 'rest') from the weekday schedule. */
-export function resolveTodayKey(date = new Date()) {
-  const weekday = ['rest', 'mon', 'tue', 'wed', 'thu', 'fri', 'rest'][date.getDay()];
-  return resolveDayKey(weekday, date);
+/**
+ * Most recent completed A/B session in `sessions` (newest by date, then time).
+ * Only prog_a / prog_b count; rest or legacy day-keyed sessions are ignored.
+ * Returns the session object or null.
+ */
+export function latestProgramSession(sessions) {
+  const list = Array.isArray(sessions) ? sessions : [];
+  const programs = list.filter((s) => s && (s.dayKey === 'prog_a' || s.dayKey === 'prog_b'));
+  if (programs.length === 0) return null;
+  const stamp = (s) => `${s.date || ''} ${s.time || ''}`;
+  return programs.reduce((best, s) => (stamp(s) > stamp(best) ? s : best));
+}
+
+/**
+ * Program for วันนี้: the opposite of the last completed A/B session.
+ * No completed program yet -> Program A. The weekday does not matter.
+ */
+export function nextProgramKey(sessions) {
+  const last = latestProgramSession(sessions);
+  if (!last) return 'prog_a';
+  return last.dayKey === 'prog_a' ? 'prog_b' : 'prog_a';
 }
 
 
