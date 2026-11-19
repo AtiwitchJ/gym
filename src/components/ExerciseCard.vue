@@ -44,6 +44,14 @@
             <p class="text-[11px] sm:text-xs text-ink-muted mt-0.5 font-body">
               {{ exercise.altName }}
             </p>
+            <button
+              type="button"
+              class="mt-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
+              title="ดูประวัติและ PR ของท่านี้"
+              @click="showHistory = true"
+            >
+              📈 ประวัติ &amp; PR
+            </button>
           </div>
         </div>
 
@@ -423,6 +431,14 @@
         </button>
       </div>
     </div>
+
+    <!-- Exercise history & PR (opened from the header; set rows are unchanged) -->
+    <ExerciseHistoryModal
+      :is-open="showHistory"
+      :exercise-id="exercise.id"
+      :exercise-name="exercise.name"
+      @close="showHistory = false"
+    />
   </div>
 </template>
 
@@ -433,6 +449,9 @@ import { usePinKeypad } from '../composables/usePinKeypad';
 import { useWeightAdvisor } from '../composables/useWeightAdvisor';
 import { useTimer } from '../composables/useTimer';
 import { getYoutubeId } from '../utils/youtube';
+import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
+
+const showHistory = ref(false);
 
 const props = defineProps({
   exercise: { type: Object, required: true },
