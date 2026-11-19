@@ -13,6 +13,9 @@
       </p>
     </div>
 
+    <!-- Muscle Recovery Indicator (SPEC 2.3) -->
+    <RecoveryPanel />
+
     <!-- Pillars of Recovery -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
       <!-- Nutrition -->
@@ -55,4 +58,5 @@
 </template>
 
 <script setup>
+import RecoveryPanel from './RecoveryPanel.vue';
 </script>
