@@ -1,5 +1,5 @@
 import { ref, reactive, watch } from 'vue';
-import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay } from '../data/workouts.js';
+import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay, resolveDayKey } from '../data/workouts.js';
 import { defaultTodos } from '../data/defaultTodos.js';
 import { parseRepTarget } from './useWeightAdvisor.js';
 
@@ -35,13 +35,14 @@ const storage = {
 function getInitialDay() {
   const saved = storage.getItem('atiwitch_active_tab') || storage.getItem('jetts_active_tab');
   if (saved && (workoutData[saved] || saved === 'rest' || saved === 'history' || saved === 'todo')) {
-    return saved;
+    return resolveDayKey(saved);
   }
   const day = new Date().getDay();
-  if (day === 1) return 'mon';
-  if (day === 2) return 'tue';
-  if (day === 3) return 'wed';
-  if (day === 4) return 'thu';
+  if (day === 1) return resolveDayKey('mon');
+  if (day === 2) return resolveDayKey('tue');
+  if (day === 3) return resolveDayKey('wed');
+  if (day === 4) return resolveDayKey('thu');
+  if (day === 5) return resolveDayKey('fri');
   return 'rest';
 }
 
@@ -468,17 +469,18 @@ healCrossDayExerciseRecords();
 
 // Actions
 function switchDay(dayKey) {
-  currentDay.value = dayKey;
+  // Mon/Wed/Fri tabs resolve to Program A/B for the current week; Tue/Thu resolve to rest
+  currentDay.value = resolveDayKey(dayKey);
   currentTab.value = dayKey;
-  storage.setItem('atiwitch_active_tab', dayKey);
+  storage.setItem('atiwitch_active_tab', currentDay.value);
   storage.setItem('atiwitch_active_global_tab', dayKey);
 }
 
 function switchTab(tabKey) {
   currentTab.value = tabKey;
-  if (['mon', 'tue', 'wed', 'thu', 'rest', 'todo', 'history'].includes(tabKey)) {
-    currentDay.value = tabKey;
-    storage.setItem('atiwitch_active_tab', tabKey);
+  if (['mon', 'tue', 'wed', 'thu', 'fri', 'prog_a', 'prog_b', 'rest', 'todo', 'history'].includes(tabKey)) {
+    currentDay.value = resolveDayKey(tabKey);
+    storage.setItem('atiwitch_active_tab', currentDay.value);
   }
   storage.setItem('atiwitch_active_global_tab', tabKey);
 }

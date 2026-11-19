@@ -312,11 +312,9 @@ onMounted(() => {
   fetchServerState();
 });
 
-const activeDayKey = computed(() => {
-  if (['mon', 'tue', 'wed', 'thu', 'fri'].includes(currentTab.value)) return currentTab.value;
-  return currentDay.value;
-});
-const isWorkoutDay = computed(() => ['mon', 'tue', 'wed', 'thu', 'fri'].includes(activeDayKey.value));
+// currentDay is always a resolved key: prog_a | prog_b | rest | todo | history (store resolves mon/wed/fri/tue/thu)
+const activeDayKey = computed(() => currentDay.value);
+const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(activeDayKey.value));
 const currentDayData = computed(() => workoutData[activeDayKey.value]);
 
 // Progress calculation

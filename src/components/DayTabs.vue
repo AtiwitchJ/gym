@@ -20,7 +20,7 @@
           type="button"
           @click="selectProgram('prog_a')"
           class="flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-heading font-bold transition-all touch-manipulation"
-          :class="(activeTabId === 'prog_a' || activeProgram === 'prog_a')
+          :class="isProgramActive('prog_a')
             ? 'bg-flame text-white shadow-sm'
             : 'text-ink-muted hover:text-ink'"
           title="Program A: อก + หลัง + ท้อง (6 ท่า)"
@@ -33,7 +33,7 @@
           type="button"
           @click="selectProgram('prog_b')"
           class="flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-heading font-bold transition-all touch-manipulation"
-          :class="(activeTabId === 'prog_b' || activeProgram === 'prog_b')
+          :class="isProgramActive('prog_b')
             ? 'bg-flame text-white shadow-sm'
             : 'text-ink-muted hover:text-ink'"
           title="Program B: ขา + แขน + ไหล่/บ่า (7 ท่า)"
@@ -121,7 +121,7 @@
           {{ tab.label }}
         </span>
         <span class="text-[9px] opacity-80 tracking-normal font-body font-normal truncate mt-0.5">
-          {{ tab.sub }}
+          {{ tabSub(tab) }}
         </span>
       </button>
     </div>
@@ -132,6 +132,8 @@
 import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore.js';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
+import { useExerciseStore } from '../composables/useExerciseStore.js';
+import { scheduledProgramForDay } from '../data/workouts.js';
 
 const props = defineProps({
   currentTab: {
@@ -148,21 +150,37 @@ const emit = defineEmits(['update:currentTab', 'update:modelValue', 'switch-tab'
 
 const workoutStore = useWorkoutStore();
 const { isWorkoutActive } = useActiveSessionStore();
+const { exercises } = useExerciseStore();
 const navContainer = ref(null);
-const activeProgram = ref(workoutStore.currentProgram?.value || 'prog_a');
 
 const tabs = [
-  { id: 'mon', label: 'จันทร์', sub: 'Program A/B' },
-  { id: 'tue', label: 'อังคาร', sub: 'อก + หลังแขน' },
-  { id: 'wed', label: 'พุธ', sub: 'Program B/A' },
-  { id: 'thu', label: 'พฤหัส', sub: 'ไหล่ + ท้อง' },
-  { id: 'fri', label: 'ศุกร์', sub: 'Program A/B' },
+  { id: 'mon', label: 'จันทร์' },
+  { id: 'tue', label: 'อังคาร' },
+  { id: 'wed', label: 'พุธ' },
+  { id: 'thu', label: 'พฤหัส' },
+  { id: 'fri', label: 'ศุกร์' },
   { id: 'rest', label: 'วันพัก', sub: 'ฟื้นฟู' },
-  { id: 'exercises', label: 'ท่าฝึก', sub: '51 ท่า' },
+  { id: 'exercises', label: 'ท่าฝึก' },
   { id: 'history', label: 'ประวัติ', sub: 'Excel / DB' },
   { id: 'profile', label: 'บัญชี', sub: 'สถิติ / ตั้งค่า' },
   { id: 'workouts', label: 'โปรแกรม', sub: 'Routines' }
 ];
+
+// Subtitle per tab: Mon/Wed/Fri show this week's program, Tue/Thu are rest,
+// and the exercise tab shows the live library count (same source as the library view).
+function tabSub(tab) {
+  if (tab.id === 'exercises') return `${exercises.value.length} ท่า`;
+  if (['mon', 'wed', 'fri'].includes(tab.id)) {
+    const prog = scheduledProgramForDay(tab.id);
+    return prog === 'prog_a' ? 'Program A' : 'Program B';
+  }
+  if (['tue', 'thu'].includes(tab.id)) return 'วันพัก';
+  return tab.sub;
+}
+
+function isProgramActive(progId) {
+  return activeTabId.value === progId || workoutStore.currentDay?.value === progId;
+}
 
 const activeTabId = computed(() => {
   return props.currentTab || props.modelValue || workoutStore.currentTab?.value || workoutStore.currentDay?.value || 'mon';
@@ -192,8 +210,6 @@ function selectTab(id) {
 }
 
 function selectProgram(progId) {
-  activeProgram.value = progId;
-  if (workoutStore.switchProgram) workoutStore.switchProgram(progId);
   selectTab(progId);
 }
 

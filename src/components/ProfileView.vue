@@ -18,7 +18,7 @@
               </span>
             </div>
             <p class="text-xs text-ink-muted font-body mt-0.5">
-              Atiwitch 4-Day Hypertrophy Protocol
+              Atiwitch 3-Day A/B Split Protocol (จันทร์ • พุธ • ศุกร์)
             </p>
             <div class="flex items-center gap-2 mt-1.5 flex-wrap">
               <!-- Local Mode / PocketBase Status -->

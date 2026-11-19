@@ -1397,4 +1397,44 @@ export const PROGRAM_B = programB;
 export const AB_MACHINE_VIDEO_PRESETS = MACHINE_VIDEO_PRESETS;
 export const AB_SPLIT_CANONICAL_MAP = EXERCISE_CANONICAL_MAP;
 
+// ---------------------------------------------------------------------------
+// 3-Day A/B schedule routing
+// Mon / Wed / Fri tabs open Program A or B; Tue / Thu are rest days.
+// Week 1 (anchor week) = A-B-A, next calendar week = B-A-B, and so on.
+// ASSUMPTION: anchor = Monday 2026-11-16 (week 1 = A-B-A). Change this to re-phase.
+// ---------------------------------------------------------------------------
+export const AB_SCHEDULE_ANCHOR_MONDAY = '2026-11-16';
+const AB_WEEK_PATTERN = {
+  even: { mon: 'prog_a', wed: 'prog_b', fri: 'prog_a' }, // A-B-A
+  odd: { mon: 'prog_b', wed: 'prog_a', fri: 'prog_b' }   // B-A-B
+};
+const AB_TAB_KEYS = ['mon', 'wed', 'fri'];
+const REST_TAB_KEYS = ['tue', 'thu'];
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Which program a Mon/Wed/Fri tab uses in the week containing `date` (local time).
+ * Returns 'prog_a' | 'prog_b', or null when dayKey is not a program day.
+ */
+export function scheduledProgramForDay(dayKey, date = new Date()) {
+  if (!AB_TAB_KEYS.includes(dayKey)) return null;
+  const dow = (date.getDay() + 6) % 7; // Monday = 0
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate() - dow);
+  const [y, m, d] = AB_SCHEDULE_ANCHOR_MONDAY.split('-').map(Number);
+  const anchor = new Date(y, m - 1, d);
+  const weeks = Math.round((monday - anchor) / (7 * MS_PER_DAY));
+  const pattern = weeks % 2 === 0 ? AB_WEEK_PATTERN.even : AB_WEEK_PATTERN.odd;
+  return pattern[dayKey];
+}
+
+/**
+ * Map a tab/day key to the key the app should render and save under.
+ * mon/wed/fri -> prog_a|prog_b (per week), tue/thu -> 'rest', anything else unchanged.
+ */
+export function resolveDayKey(key, date = new Date()) {
+  if (AB_TAB_KEYS.includes(key)) return scheduledProgramForDay(key, date);
+  if (REST_TAB_KEYS.includes(key)) return 'rest';
+  return key;
+}
+
 
