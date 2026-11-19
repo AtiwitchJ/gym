@@ -18,7 +18,7 @@
         <!-- Modal Header -->
         <header class="p-3.5 sm:p-4 bg-surface border-b-2 border-plate flex items-center justify-between gap-3 flex-shrink-0">
           <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-lg bg-emerald-bg border-2 border-plate shadow-[1.5px_1.5px_0px_#059669] flex items-center justify-center text-emerald flex-shrink-0">
+            <div class="w-8 h-8 rounded-lg bg-emerald-bg border-2 border-plate shadow-[1.5px_1.5px_0px_#059669] flex items-center justify-center text-emerald-text flex-shrink-0">
               <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
@@ -69,13 +69,13 @@
           <div class="bg-surface border-2 border-plate rounded-xl p-3 sm:p-4 shadow-[2px_2px_0px_#1e2220] space-y-3">
             <div>
               <label class="block text-xs font-mono font-bold text-ink mb-1">
-                ชื่อตารางฝึก (Routine Title) <span class="text-flame">*</span>
+                ชื่อตารางฝึก (Routine Title) <span class="text-flame-text">*</span>
               </label>
               <input
                 v-model="routineForm.title"
                 type="text"
                 placeholder="เช่น Upper Body Power & Hypertrophy"
-                class="w-full px-3 py-2 text-xs sm:text-sm bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus:outline-none focus:border-flame font-heading font-bold"
+                class="w-full px-3 py-2 text-xs sm:text-sm bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame font-heading font-bold"
               />
             </div>
 
@@ -87,7 +87,7 @@
                 v-model="routineForm.subtitle"
                 type="text"
                 placeholder="เช่น เน้นอกบนและหลังปีก พักระหว่างเซ็ต 90 วินาที"
-                class="w-full px-3 py-2 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus:outline-none focus:border-flame font-body"
+                class="w-full px-3 py-2 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame font-body"
               />
             </div>
           </div>
@@ -121,7 +121,7 @@
               v-if="routineForm.exercises.length === 0"
               class="text-center py-10 px-4 bg-surface border-2 border-dashed border-plate/30 rounded-xl"
             >
-              <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-paper-dim border-2 border-plate/20 flex items-center justify-center text-ink-faint">
+              <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-paper-dim border-2 border-plate/20 flex items-center justify-center text-ink-muted">
                 <svg class="w-5 h-5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
                   <path d="M4 6h16M4 18h16M9 6v12M15 6v12M2 9h2v6H2zM20 9h2v6h-2z" />
                 </svg>
@@ -151,16 +151,16 @@
               <div class="flex items-start justify-between gap-2 pb-2 border-b border-plate/15">
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-1.5 flex-wrap mb-1">
-                    <span class="w-5 h-5 rounded-md bg-plate text-white text-[10px] font-mono font-bold flex items-center justify-center">
+                    <span class="w-5 h-5 rounded-md bg-plate text-white text-[11px] font-mono font-bold flex items-center justify-center">
                       #{{ exIdx + 1 }}
                     </span>
                     <span
-                      class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full uppercase border"
+                      class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full uppercase border"
                       :class="getMuscleBadgeClass(getExerciseInfo(exItem.exerciseId)?.muscleGroup)"
                     >
                       {{ getMuscleLabel(getExerciseInfo(exItem.exerciseId)?.muscleGroup) }}
                     </span>
-                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded-full capitalize bg-surface-card border border-plate/20 text-ink-muted">
+                    <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full capitalize bg-surface-card border border-plate/20 text-ink-muted">
                       {{ getExerciseInfo(exItem.exerciseId)?.equipment || 'อุปกรณ์' }}
                     </span>
                   </div>
@@ -176,7 +176,7 @@
                     v-if="exIdx > 0"
                     type="button"
                     @click="moveExerciseUp(exIdx)"
-                    class="w-6 h-6 rounded border border-plate/40 hover:border-plate bg-surface text-ink flex items-center justify-center text-[10px]"
+                    class="w-6 h-6 rounded border border-plate/40 hover:border-plate bg-surface text-ink flex items-center justify-center text-[11px]"
                     title="เลื่อนขึ้น"
                   >
                     ▲
@@ -185,7 +185,7 @@
                     v-if="exIdx < routineForm.exercises.length - 1"
                     type="button"
                     @click="moveExerciseDown(exIdx)"
-                    class="w-6 h-6 rounded border border-plate/40 hover:border-plate bg-surface text-ink flex items-center justify-center text-[10px]"
+                    class="w-6 h-6 rounded border border-plate/40 hover:border-plate bg-surface text-ink flex items-center justify-center text-[11px]"
                     title="เลื่อนลง"
                   >
                     ▼
@@ -203,7 +203,7 @@
 
               <!-- Sets Table -->
               <div class="space-y-1.5">
-                <div class="grid grid-cols-12 gap-1.5 text-[10px] font-mono font-bold text-ink-muted px-1">
+                <div class="grid grid-cols-12 gap-1.5 text-[11px] font-mono font-bold text-ink-muted px-1">
                   <div class="col-span-1 text-center">เซ็ต</div>
                   <div class="col-span-5 text-center">ประเภท (Type)</div>
                   <div class="col-span-3 text-center">เป้าครั้ง</div>
@@ -227,7 +227,7 @@
                     <button
                       type="button"
                       @click="set.type = 'warmup'"
-                      class="py-0.5 text-[9px] font-bold rounded transition-colors text-center"
+                      class="py-0.5 text-[11px] font-bold rounded transition-colors text-center"
                       :class="set.type === 'warmup' ? 'bg-gold text-ink font-extrabold shadow-sm' : 'text-ink-muted hover:text-ink'"
                       title="วอร์ม (Warm-up)"
                     >
@@ -236,7 +236,7 @@
                     <button
                       type="button"
                       @click="set.type = 'working'"
-                      class="py-0.5 text-[9px] font-bold rounded transition-colors text-center"
+                      class="py-0.5 text-[11px] font-bold rounded transition-colors text-center"
                       :class="set.type === 'working' ? 'bg-flame text-white font-extrabold shadow-sm' : 'text-ink-muted hover:text-ink'"
                       title="เล่นจริง (Working)"
                     >
@@ -245,7 +245,7 @@
                     <button
                       type="button"
                       @click="set.type = 'dropset'"
-                      class="py-0.5 text-[9px] font-bold rounded transition-colors text-center"
+                      class="py-0.5 text-[11px] font-bold rounded transition-colors text-center"
                       :class="set.type === 'dropset' ? 'bg-sky text-white font-extrabold shadow-sm' : 'text-ink-muted hover:text-ink'"
                       title="ดรอปเซ็ต (Dropset)"
                     >
@@ -254,7 +254,7 @@
                     <button
                       type="button"
                       @click="set.type = 'failure'"
-                      class="py-0.5 text-[9px] font-bold rounded transition-colors text-center"
+                      class="py-0.5 text-[11px] font-bold rounded transition-colors text-center"
                       :class="set.type === 'failure' ? 'bg-rose-600 text-white font-extrabold shadow-sm' : 'text-ink-muted hover:text-ink'"
                       title="จนหมดแรง (Failure)"
                     >
@@ -269,7 +269,7 @@
                       type="number"
                       min="1"
                       max="100"
-                      class="w-full px-1.5 py-1 text-center text-xs font-mono font-bold bg-white border border-plate/40 rounded focus:outline-none focus:border-flame tabular-nums"
+                      class="w-full px-1.5 py-1 text-center text-xs font-mono font-bold bg-white border border-plate/40 rounded focus-visible:outline-none focus:border-flame tabular-nums"
                       placeholder="8"
                     />
                   </div>
@@ -281,7 +281,7 @@
                       type="number"
                       min="0"
                       step="0.5"
-                      class="w-full px-1 py-1 text-center text-xs font-mono bg-white border border-plate/40 rounded focus:outline-none focus:border-flame tabular-nums"
+                      class="w-full px-1 py-1 text-center text-xs font-mono bg-white border border-plate/40 rounded focus-visible:outline-none focus:border-flame tabular-nums"
                       placeholder="0"
                     />
                   </div>
@@ -292,7 +292,7 @@
                       type="button"
                       @click="removeSet(exIdx, setIdx)"
                       :disabled="exItem.sets.length <= 1"
-                      class="w-5 h-5 inline-flex items-center justify-center rounded text-ink-faint hover:text-rose-600 hover:bg-rose-50 disabled:opacity-30 disabled:hover:text-ink-faint disabled:hover:bg-transparent"
+                      class="w-5 h-5 inline-flex items-center justify-center rounded text-ink-muted hover:text-rose-600 hover:bg-rose-50 disabled:opacity-30 disabled:hover:text-ink-muted disabled:hover:bg-transparent"
                       title="ลบเซ็ตนี้"
                     >
                       ✕
@@ -307,7 +307,7 @@
                     @click="addSet(exIdx)"
                     class="px-2.5 py-1 text-[11px] font-mono font-bold rounded-md border border-plate/40 hover:border-plate bg-surface hover:bg-paper text-ink flex items-center gap-1 transition-all"
                   >
-                    <span class="text-flame font-extrabold">+</span>
+                    <span class="text-flame-text font-extrabold">+</span>
                     <span>เพิ่มเซ็ต</span>
                   </button>
                 </div>
@@ -534,12 +534,12 @@ function getMuscleLabel(group) {
 function getMuscleBadgeClass(group) {
   switch (group) {
     case 'chest':
-      return 'bg-flame-bg text-flame border-flame';
+      return 'bg-flame-bg text-flame-text border-flame';
     case 'back':
-      return 'bg-sky-bg text-sky border-sky';
+      return 'bg-sky-bg text-sky-text border-sky';
     case 'quads':
     case 'hamstrings':
-      return 'bg-emerald-bg text-emerald border-emerald';
+      return 'bg-emerald-bg text-emerald-text border-emerald';
     case 'delts':
       return 'bg-gold-bg text-gold border-gold';
     case 'arms':

@@ -2,7 +2,7 @@
   <div class="archive-card p-4 sm:p-5 space-y-3">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <div>
-        <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase block">
+        <span class="text-[11px] font-mono font-bold tracking-widest text-emerald-text uppercase block">
           WEEKLY VOLUME · 8 สัปดาห์
         </span>
         <h3 class="text-sm font-bold font-heading text-ink">ปริมาณการฝึกต่อสัปดาห์ (น้ำหนัก × ครั้ง)</h3>

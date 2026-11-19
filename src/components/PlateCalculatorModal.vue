@@ -19,11 +19,11 @@
         <!-- Modal Header -->
         <div class="flex items-center justify-between border-b-2 border-plate/20 pb-3">
           <div class="flex items-center gap-2.5">
-            <div class="w-10 h-10 rounded-2xl bg-flame-bg border-2 border-plate flex items-center justify-center text-flame text-xl shadow-[2px_2px_0px_#1e2220]">
+            <div class="w-10 h-10 rounded-2xl bg-flame-bg border-2 border-plate flex items-center justify-center text-flame-text text-xl shadow-[2px_2px_0px_#1e2220]">
               🏋️
             </div>
             <div>
-              <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase block">
+              <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase block">
                 BARBELL UTILITY
               </span>
               <h3 class="text-lg font-heading font-extrabold text-ink leading-tight">
@@ -45,7 +45,7 @@
         <div class="bg-white border-2 border-plate shadow-[3px_3px_0px_#1e2220] rounded-2xl p-4 flex flex-col gap-3">
           <div class="flex items-baseline justify-between">
             <span class="text-xs font-mono font-bold text-ink-muted">น้ำหนักเป้าหมายรวมบาร์</span>
-            <span class="text-xs font-mono font-bold text-flame">
+            <span class="text-xs font-mono font-bold text-flame-text">
               ข้างละ {{ calculation.perSideWeight }} กก.
             </span>
           </div>
@@ -55,7 +55,7 @@
               <span class="font-mono tabular-nums text-4xl sm:text-5xl font-extrabold text-ink tracking-tight">
                 {{ targetWeight }}
               </span>
-              <span class="font-mono text-base font-bold text-flame">กก.</span>
+              <span class="font-mono text-base font-bold text-flame-text">กก.</span>
             </div>
 
             <!-- Stepper Buttons -->
@@ -65,7 +65,7 @@
                 :key="delta"
                 @click="adjustWeight(delta)"
                 class="px-2.5 py-1.5 rounded-xl border-2 border-plate text-xs font-mono font-bold shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
-                :class="delta < 0 ? 'bg-paper-subtle hover:bg-paper-dim text-ink' : 'bg-flame-bg hover:bg-flame hover:text-white text-flame'"
+                :class="delta < 0 ? 'bg-paper-subtle hover:bg-paper-dim text-ink' : 'bg-flame-bg hover:bg-flame hover:text-white text-flame-text'"
               >
                 {{ delta > 0 ? `+${delta}` : delta }}
               </button>
@@ -125,11 +125,11 @@
                 :class="[p.widthClass, p.heightClass]"
                 :title="`${p.name}`"
               >
-                <span class="text-[8px] sm:text-[9px] font-mono font-bold leading-none opacity-80">KG</span>
+                <span class="text-[11px] sm:text-[11px] font-mono font-bold leading-none opacity-80">KG</span>
                 <span class="text-xs sm:text-sm font-mono font-extrabold leading-none tracking-tight">
                   {{ p.weight }}
                 </span>
-                <span class="text-[8px] sm:text-[9px] font-mono font-bold leading-none opacity-80">KG</span>
+                <span class="text-[11px] sm:text-[11px] font-mono font-bold leading-none opacity-80">KG</span>
               </div>
 
               <!-- Empty Bar Sleeve Indicator if 0 plates -->
@@ -152,7 +152,7 @@
               class="px-2.5 py-1 rounded-lg border border-plate text-xs font-mono font-bold shadow-[1px_1px_0px_#1e2220] flex items-center gap-1.5"
             >
               <span>{{ item.weight }} kg</span>
-              <span class="bg-black/20 px-1.5 py-0.2 rounded-full text-[10px]">x{{ item.count }}</span>
+              <span class="bg-black/20 px-1.5 py-0.2 rounded-full text-[11px]">x{{ item.count }}</span>
             </div>
 
             <div

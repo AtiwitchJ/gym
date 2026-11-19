@@ -7,7 +7,7 @@
     <div class="w-full max-w-lg bg-paper border-4 border-plate rounded-t-3xl sm:rounded-3xl shadow-[0_12px_40px_rgba(30,34,32,0.35)] p-4 sm:p-6 max-h-[90vh] overflow-y-auto flex flex-col gap-4">
       <div class="flex items-start justify-between gap-3">
         <div>
-          <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase block">
+          <span class="text-[11px] font-mono font-bold tracking-widest text-emerald-text uppercase block">
             EXERCISE HISTORY · PR
           </span>
           <h3 class="text-lg font-extrabold font-heading text-ink leading-tight">{{ exerciseName }}</h3>
@@ -29,11 +29,11 @@
         <!-- PR card -->
         <div class="bg-white border-2 border-plate rounded-2xl p-4 shadow-[3px_3px_0px_#1e2220]">
           <div class="text-[11px] font-mono font-bold text-ink-muted mb-1">🏆 PR (สถิติสูงสุดของท่านี้)</div>
-          <p class="text-[10px] font-body text-ink-muted mb-2">PR คือการยกที่ดีที่สุดเท่าที่บันทึกไว้ ประเมินจาก 1RM (น้ำหนักที่ยกได้ 1 ครั้ง)</p>
+          <p class="text-[11px] font-body text-ink-muted mb-2">PR คือการยกที่ดีที่สุดเท่าที่บันทึกไว้ ประเมินจาก 1RM (น้ำหนักที่ยกได้ 1 ครั้ง)</p>
           <div class="grid grid-cols-3 gap-2">
             <div v-for="row in prRows" :key="row.label" class="text-center">
               <div class="text-base sm:text-lg font-mono font-extrabold text-ink tabular-nums">{{ row.value }}</div>
-              <div class="text-[10px] font-body text-ink-muted leading-tight">{{ row.label }}</div>
+              <div class="text-[11px] font-body text-ink-muted leading-tight">{{ row.label }}</div>
             </div>
           </div>
           <p v-if="!hasAnyPr" class="text-[11px] text-ink-muted font-body mt-2">ยังไม่มี PR: เซ็ตวอร์มไม่นับเป็น PR และ PR จะอัปเดตหลังบันทึกเซสชัน</p>
@@ -51,7 +51,7 @@
           >
             <div class="flex items-center justify-between gap-2 mb-1.5">
               <span class="text-xs font-bold font-heading text-ink">{{ formatDate(session.date) }}</span>
-              <span class="text-[10px] font-mono text-ink-muted truncate">{{ session.dayTitle }}</span>
+              <span class="text-[11px] font-mono text-ink-muted truncate">{{ session.dayTitle }}</span>
             </div>
             <div class="flex flex-wrap gap-1.5">
               <span

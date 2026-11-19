@@ -84,7 +84,7 @@ export function calculateWeightAdvice({ weight, reps, type = 'work', targetReps 
       suggestedWeight: numWeight,
       reps: numReps,
       badgeText: 'วอร์มพอดี ✓',
-      badgeClass: 'bg-sky-bg text-sky border-sky/40',
+      badgeClass: 'bg-sky-bg text-sky-text border-sky/40',
       reasonText: `วอร์ม ${numReps} ครั้ง (15–20) — พอดี`,
       shortText: 'วอร์มพอดี',
       actionLabel: `${numWeight} กก.`

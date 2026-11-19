@@ -81,3 +81,9 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #1e2220;
 }
+
+/* Keyboard focus ring (accessibility item 2): 2 px, dark ink, about 16:1 on white */
+:focus-visible {
+  outline: 2px solid #1e2220;
+  outline-offset: 2px;
+}

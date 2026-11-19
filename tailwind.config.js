@@ -43,6 +43,10 @@ export default {
           DEFAULT: '#0284c7',
           bg: '#f0f9ff',
         },
+        // Text variants with >= 4.5:1 contrast on white (accessibility item 1)
+        'emerald-text': '#047857',
+        'flame-text': '#c2410c',
+        'sky-text': '#0369a1',
         emerald: {
           DEFAULT: '#059669',
           bg: '#f0fdf4',

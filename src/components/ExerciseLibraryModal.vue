@@ -18,7 +18,7 @@
         <!-- Modal Header -->
         <header class="p-3.5 sm:p-4 bg-surface border-b-2 border-plate flex items-center justify-between gap-3 flex-shrink-0">
           <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-lg bg-flame-bg border-2 border-plate shadow-[1.5px_1.5px_0px_#ea580c] flex items-center justify-center text-flame flex-shrink-0">
+            <div class="w-8 h-8 rounded-lg bg-flame-bg border-2 border-plate shadow-[1.5px_1.5px_0px_#ea580c] flex items-center justify-center text-flame-text flex-shrink-0">
               <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
@@ -29,7 +29,7 @@
                 <h3 class="text-sm sm:text-base font-bold font-heading text-ink tracking-tight truncate">
                   {{ mode === 'picker' ? 'เลือกท่าออกกำลังกาย' : 'คลังท่าออกกำลังกาย' }}
                 </h3>
-                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-paper-subtle border border-plate/30 text-ink-muted">
+                <span class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-paper-subtle border border-plate/30 text-ink-muted">
                   {{ filteredExercises.length }} / {{ exercises.length }}
                 </span>
               </div>
@@ -67,12 +67,12 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="ค้นหาชื่อท่า, กลุ่มกล้ามเนื้อ, หรืออุปกรณ์..."
-                class="w-full pl-9 pr-8 py-2 bg-white text-ink text-xs sm:text-sm font-body border-2 border-plate rounded-xl shadow-[2px_2px_0px_#1e2220] focus:outline-none focus:border-flame transition-all placeholder:text-ink-faint"
+                class="w-full pl-9 pr-8 py-2 bg-white text-ink text-xs sm:text-sm font-body border-2 border-plate rounded-xl shadow-[2px_2px_0px_#1e2220] focus-visible:outline-none focus:border-flame transition-all placeholder:text-ink-muted"
               />
               <button
                 v-if="searchQuery"
                 @click="searchQuery = ''"
-                class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-ink-faint hover:text-ink"
+                class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-ink-muted hover:text-ink"
                 title="ล้างข้อความค้นหา"
               >
                 <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@
                   <span class="w-2 h-2 rounded-full bg-flame"></span>
                   <span>สร้างท่าออกกำลังกายใหม่ (Custom Exercise)</span>
                 </h4>
-                <span class="text-[10px] font-mono text-ink-muted">บันทึกเก็บในเครื่องอัตโนมัติ</span>
+                <span class="text-[11px] font-mono text-ink-muted">บันทึกเก็บในเครื่องอัตโนมัติ</span>
               </div>
 
               <!-- Form Fields -->
@@ -141,13 +141,13 @@
                 <!-- Name -->
                 <div class="sm:col-span-2">
                   <label class="block text-[11px] font-mono font-bold text-ink mb-1">
-                    ชื่อท่าออกกำลังกาย (Name) <span class="text-flame">*</span>
+                    ชื่อท่าออกกำลังกาย (Name) <span class="text-flame-text">*</span>
                   </label>
                   <input
                     v-model="customForm.name"
                     type="text"
                     placeholder="เช่น Incline Hammer Dumbbell Curl"
-                    class="w-full px-2.5 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus:outline-none focus:border-flame"
+                    class="w-full px-2.5 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame"
                   />
                 </div>
 
@@ -158,7 +158,7 @@
                   </label>
                   <select
                     v-model="customForm.muscleGroup"
-                    class="w-full px-2 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus:outline-none focus:border-flame"
+                    class="w-full px-2 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame"
                   >
                     <option value="chest">อก (Chest)</option>
                     <option value="back">หลัง (Back)</option>
@@ -179,7 +179,7 @@
                   </label>
                   <select
                     v-model="customForm.equipment"
-                    class="w-full px-2 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus:outline-none focus:border-flame"
+                    class="w-full px-2 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame"
                   >
                     <option value="barbell">บาร์เบล (Barbell)</option>
                     <option value="dumbbell">ดัมเบล (Dumbbell)</option>
@@ -200,7 +200,7 @@
                     v-model="customForm.notes"
                     type="text"
                     placeholder="เช่น ปรับม้านั่ง 45 องศา, โฟกัสช่วงบีบสุด 1 วินาที"
-                    class="w-full px-2.5 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus:outline-none focus:border-flame"
+                    class="w-full px-2.5 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame"
                   />
                 </div>
               </div>
@@ -233,7 +233,7 @@
             v-if="filteredExercises.length === 0"
             class="text-center py-12 px-4 bg-surface border-2 border-dashed border-plate/30 rounded-xl"
           >
-            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-paper-dim border-2 border-plate/20 flex items-center justify-center text-ink-faint">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-paper-dim border-2 border-plate/20 flex items-center justify-center text-ink-muted">
               <svg class="w-6 h-6 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -273,19 +273,19 @@
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2 flex-wrap mb-1">
                   <!-- Muscle Group Tag -->
-                  <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border" :class="getMuscleBadgeClass(exercise.muscleGroup)">
+                  <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border" :class="getMuscleBadgeClass(exercise.muscleGroup)">
                     {{ getMuscleLabel(exercise.muscleGroup) }}
                   </span>
 
                   <!-- Equipment Tag -->
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded-full capitalize bg-surface-card border border-plate/20 text-ink-muted">
+                  <span class="text-[11px] font-mono px-2 py-0.5 rounded-full capitalize bg-surface-card border border-plate/20 text-ink-muted">
                     {{ exercise.equipment || 'อุปกรณ์ทั่วไป' }}
                   </span>
 
                   <!-- Custom Badge -->
                   <span
                     v-if="exercise.isCustom"
-                    class="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded-full bg-gold-bg text-gold border border-gold uppercase"
+                    class="text-[11px] font-mono font-extrabold px-1.5 py-0.5 rounded-full bg-gold-bg text-gold border border-gold uppercase"
                   >
                     CUSTOM
                   </span>
@@ -293,14 +293,14 @@
                   <!-- Video Available Badge -->
                   <span
                     v-if="exercise.videoUrl || (exercise.machineVideos && exercise.machineVideos.length > 0)"
-                    class="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded-full bg-flame-bg text-flame border border-flame/40 uppercase"
+                    class="text-[11px] font-mono font-extrabold px-1.5 py-0.5 rounded-full bg-flame-bg text-flame-text border border-flame/40 uppercase"
                   >
                     🎬 {{ (exercise.machineVideos && exercise.machineVideos.length > 1) ? '3 คลิปเครื่อง' : 'YouTube' }}
                   </span>
                 </div>
 
                 <!-- Exercise Name -->
-                <h4 class="text-xs sm:text-sm font-bold font-heading text-ink group-hover:text-flame transition-colors leading-tight">
+                <h4 class="text-xs sm:text-sm font-bold font-heading text-ink group-hover:text-flame-text transition-colors leading-tight">
                   {{ exercise.name }}
                 </h4>
               </div>
@@ -311,7 +311,7 @@
                 <button
                   v-if="exercise.notes || exercise.videoUrl || (exercise.machineVideos && exercise.machineVideos.length > 0)"
                   @click="toggleInfo(exercise.id)"
-                  class="px-2 py-1 rounded-lg border-2 border-plate/40 hover:border-plate bg-surface text-ink font-mono text-[10px] font-bold flex items-center gap-1 transition-all"
+                  class="px-2 py-1 rounded-lg border-2 border-plate/40 hover:border-plate bg-surface text-ink font-mono text-[11px] font-bold flex items-center gap-1 transition-all"
                   :class="expandedInfo[exercise.id] ? 'bg-paper-dim border-plate text-ink shadow-[1px_1px_0px_#1e2220]' : ''"
                   title="ดูรายละเอียดและคลิปสาธิต"
                 >
@@ -511,12 +511,12 @@ function getMuscleLabel(group) {
 function getMuscleBadgeClass(group) {
   switch (group) {
     case 'chest':
-      return 'bg-flame-bg text-flame border-flame';
+      return 'bg-flame-bg text-flame-text border-flame';
     case 'back':
-      return 'bg-sky-bg text-sky border-sky';
+      return 'bg-sky-bg text-sky-text border-sky';
     case 'quads':
     case 'hamstrings':
-      return 'bg-emerald-bg text-emerald border-emerald';
+      return 'bg-emerald-bg text-emerald-text border-emerald';
     case 'delts':
       return 'bg-gold-bg text-gold border-gold';
     case 'arms':

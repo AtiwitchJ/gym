@@ -20,7 +20,7 @@
         <!-- Top Handle & Header -->
         <div class="flex items-center justify-between mb-3">
           <div class="flex flex-col">
-            <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase">
+            <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase">
               {{ mode === 'weight' ? 'WEIGHT INPUT' : 'REPS INPUT' }}
             </span>
             <h3 class="text-base font-bold font-heading text-ink leading-tight">
@@ -45,11 +45,11 @@
           <div class="flex items-baseline gap-2 overflow-hidden">
             <span
               class="font-mono tabular-nums text-3xl sm:text-4xl font-extrabold tracking-tight truncate"
-              :class="displayValue ? 'text-ink' : 'text-ink-muted/30'"
+              :class="displayValue ? 'text-ink' : 'text-ink-muted'"
             >
               {{ displayValue || '—' }}
             </span>
-            <span class="font-mono text-sm font-bold text-flame">
+            <span class="font-mono text-sm font-bold text-flame-text">
               {{ unit }}
             </span>
           </div>
@@ -57,7 +57,7 @@
           <div class="flex items-center gap-2">
             <button
               @click="clear"
-              class="min-h-[44px] min-w-[44px] text-[11px] font-mono font-bold px-2 py-1 rounded border border-plate/30 text-ink-muted hover:text-flame bg-paper-subtle hover:bg-flame-bg transition-colors"
+              class="min-h-[44px] min-w-[44px] text-[11px] font-mono font-bold px-2 py-1 rounded border border-plate/30 text-ink-muted hover:text-flame-text bg-paper-subtle hover:bg-flame-bg transition-colors"
             >
               ล้าง
             </button>
@@ -80,7 +80,7 @@
           <button
             v-if="prevHint"
             @click="setValue(prevHint)"
-            class="px-2.5 py-1 rounded-full border-2 border-plate bg-flame-bg hover:bg-flame hover:text-white text-flame text-xs font-mono font-bold shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none whitespace-nowrap transition-all"
+            class="px-2.5 py-1 rounded-full border-2 border-plate bg-flame-bg hover:bg-flame hover:text-white text-flame-text text-xs font-mono font-bold shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none whitespace-nowrap transition-all"
           >
             ครั้งก่อน: {{ prevHint }}
           </button>
@@ -89,7 +89,7 @@
           <button
             v-if="targetHint"
             @click="setValue(targetHint)"
-            class="px-2.5 py-1 rounded-full border-2 border-plate bg-sky-bg hover:bg-sky hover:text-white text-sky text-xs font-mono font-bold shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none whitespace-nowrap transition-all"
+            class="px-2.5 py-1 rounded-full border-2 border-plate bg-sky-bg hover:bg-sky hover:text-white text-sky-text text-xs font-mono font-bold shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none whitespace-nowrap transition-all"
           >
             เป้าหมาย: {{ targetHint }}
           </button>
@@ -163,7 +163,7 @@
           <div class="flex-1">
             <span class="font-bold text-amber-900 block">ตรวจพบค่าน้ำหนักผิดปกติ</span>
             <span class="text-[11px] leading-tight block text-amber-800">{{ anomalyWarning }}</span>
-            <span v-if="guardAcknowledged" class="text-[11px] font-bold text-flame block mt-0.5">
+            <span v-if="guardAcknowledged" class="text-[11px] font-bold text-flame-text block mt-0.5">
               ⚠️ กด "ยืนยันค่าน้ำหนักนี้" อีกครั้งหากต้องการใช้ค่านี้จริง
             </span>
           </div>

@@ -57,7 +57,7 @@
         <!-- Routine Banner -->
         <div class="archive-card p-4 mb-4">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase">
+            <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase">
               DAILY PROTOCOL
             </span>
             <span class="text-plate/30">•</span>
@@ -79,7 +79,7 @@
                 ความคืบหน้าท่าประจำวัน:
                 <strong class="text-ink tabular-nums">{{ completedSetsCount }}</strong> / {{ totalSetsCount }} เซ็ต
               </span>
-              <span class="text-flame font-bold tabular-nums">{{ progressPercent }}%</span>
+              <span class="text-flame-text font-bold tabular-nums">{{ progressPercent }}%</span>
             </div>
             <div class="w-full h-2.5 bg-surface-card border-2 border-plate rounded-full overflow-hidden p-[1px]">
               <div
@@ -113,7 +113,7 @@
           <div class="flex items-center gap-2.5 mb-3 px-1">
             <span class="w-2.5 h-2.5 rounded-full bg-flame"></span>
             <div>
-              <h3 class="text-sm font-bold font-heading text-flame tracking-tight">
+              <h3 class="text-sm font-bold font-heading text-flame-text tracking-tight">
                 ซ้อมเสริมท่าหลักส่วนที่เหลือท้ายคาบ (Bonus Touch-Up)
               </h3>
               <p class="text-[11px] text-ink-muted font-body">

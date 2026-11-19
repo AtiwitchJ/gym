@@ -73,7 +73,7 @@ assert.ok(sheet.includes('@click="stepSheetReps(exIdx, setIdx, -1, set)"') && sh
 assert.ok(sheet.includes('w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate flex items-center justify-center transition-all select-none touch-manipulation'), 'sheet Done is 56 px');
 assert.ok(sheet.includes("import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';"), 'sheet uses the shared stepper math');
 assert.ok(!sheet.includes('w-8 h-8 rounded-lg border-2 border-plate flex items-center justify-center transition-all select-none touch-manipulation'), 'old 32 px check is gone');
-assert.ok(sheet.includes('min-h-[44px] min-w-[44px] px-2 rounded text-[10px]'), 'W/R set-type toggle is 44 px wide and tall');
+assert.ok(sheet.includes('min-h-[44px] min-w-[44px] px-2 rounded text-[11px]'), 'W/R set-type toggle is 44 px wide and tall');
 console.log('✓ Sheet steppers, Done, and W/R toggle verified.');
 
 console.log('\n====================================================');

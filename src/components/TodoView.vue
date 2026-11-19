@@ -2,7 +2,7 @@
   <div class="py-2">
     <!-- Header Card -->
     <div class="archive-card p-5 mb-5">
-      <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase">
+      <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase">
         DAILY DISCIPLINE
       </span>
       <h2 class="text-xl font-bold font-heading text-ink tracking-tight">
@@ -42,7 +42,7 @@
             type="checkbox"
             :checked="todo.done"
             @change="toggleTodo(todo.id)"
-            class="w-5 h-5 rounded-md border-2 border-plate text-flame focus:ring-0 focus:ring-offset-0 bg-surface-low cursor-pointer accent-flame"
+            class="w-5 h-5 rounded-md border-2 border-plate text-flame-text focus:ring-0 focus:ring-offset-0 bg-surface-low cursor-pointer accent-flame"
           />
           <span
             class="text-xs transition-colors font-body"
@@ -55,7 +55,7 @@
         <!-- Delete button -->
         <button
           @click="deleteTodo(todo.id)"
-          class="text-ink-muted hover:text-flame p-1.5 rounded transition-colors"
+          class="text-ink-muted hover:text-flame-text p-1.5 rounded transition-colors"
           title="ลบรายการนี้"
         >
           <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">

@@ -4,7 +4,7 @@
     <div class="archive-card p-5 mb-5 overflow-hidden">
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase">
+          <span class="text-[11px] font-mono font-bold tracking-widest text-emerald-text uppercase">
             DATA ARCHIVE & BACKUP
           </span>
           <h2 class="text-xl font-bold font-heading text-ink tracking-tight">
@@ -88,18 +88,18 @@
               <span class="text-[11px] font-mono text-ink-muted tabular-nums">
                 {{ session.time }} น.
               </span>
-              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-bg text-emerald border border-emerald">
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-bg text-emerald-text border border-emerald">
                 สำเร็จ {{ session.totalSetsDone }} เซ็ต
               </span>
               <span
                 v-if="session.totalVolumeKg"
-                class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-surface text-ink border border-plate/30"
+                class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-surface text-ink border border-plate/30"
               >
                 Volume: {{ Number(session.totalVolumeKg).toLocaleString() }} kg
               </span>
               <span
                 v-if="session.durationSec"
-                class="text-[10px] font-mono text-ink-muted"
+                class="text-[11px] font-mono text-ink-muted"
               >
                 ⏱ {{ Math.round(session.durationSec / 60) }} นาที
               </span>
@@ -112,7 +112,7 @@
           <!-- Delete Session Button -->
           <button
             @click="confirmDelete(session.id)"
-            class="p-2 text-ink-muted hover:text-flame hover:bg-flame-bg rounded-lg transition-colors border border-transparent hover:border-flame/30"
+            class="p-2 text-ink-muted hover:text-flame-text hover:bg-flame-bg rounded-lg transition-colors border border-transparent hover:border-flame/30"
             title="ลบประวัตินี้"
           >
             <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
@@ -131,7 +131,7 @@
           >
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-xs font-bold text-ink font-heading">{{ ex.name }}</span>
-              <span class="text-[10px] font-mono text-ink-muted">{{ ex.category }}</span>
+              <span class="text-[11px] font-mono text-ink-muted">{{ ex.category }}</span>
             </div>
 
             <!-- Sets Chips -->
@@ -139,9 +139,9 @@
               <span
                 v-for="row in labelSets(ex.sets)"
                 :key="row.key"
-                class="text-[10px] font-mono font-bold px-2 py-1 rounded-md border tabular-nums"
+                class="text-[11px] font-mono font-bold px-2 py-1 rounded-md border tabular-nums"
                 :class="row.status === 'done'
-                  ? 'bg-emerald-bg text-emerald border-emerald'
+                  ? 'bg-emerald-bg text-emerald-text border-emerald'
                   : 'bg-surface-low text-ink-muted border-plate/20'"
               >
                 {{ row.label }}: {{ weightText(row.set) }}

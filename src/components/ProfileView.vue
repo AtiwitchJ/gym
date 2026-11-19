@@ -13,7 +13,7 @@
               <h2 class="text-base sm:text-lg font-bold font-heading text-ink tracking-tight">
                 Atiwitch J.
               </h2>
-              <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-flame-bg text-flame border border-flame/40">
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-flame-bg text-flame-text border border-flame/40">
                 PRO
               </span>
             </div>
@@ -22,11 +22,11 @@
             </p>
             <div class="flex items-center gap-2 mt-1.5 flex-wrap">
               <!-- Local Mode / PocketBase Status -->
-              <span class="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-bg border border-emerald text-emerald">
+              <span class="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-bg border border-emerald text-emerald-text">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse"></span>
                 <span>Local Mode (ออฟไลน์ / บันทึกในเครื่อง)</span>
               </span>
-              <span class="inline-flex items-center gap-1 text-[10px] font-mono text-ink-muted bg-paper-subtle px-2 py-0.5 rounded-full border border-plate/20">
+              <span class="inline-flex items-center gap-1 text-[11px] font-mono text-ink-muted bg-paper-subtle px-2 py-0.5 rounded-full border border-plate/20">
                 <span>PocketBase:</span>
                 <span class="font-bold text-ink">Ready</span>
               </span>
@@ -39,7 +39,7 @@
     <!-- 1RM Calculator (standalone; no session needed) -->
     <div class="archive-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase block">1RM CALCULATOR</span>
+        <span class="text-[11px] font-mono font-bold tracking-widest text-emerald-text uppercase block">1RM CALCULATOR</span>
         <p class="text-xs text-ink-muted font-body">ประเมิน 1RM จากเซ็ตย่อย โดยไม่ต้องบันทึกเซสชัน</p>
       </div>
       <button
@@ -54,7 +54,7 @@
     <!-- All-Time Stats Overview -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
-        <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase">
+        <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase">
           LIFETIME STATS OVERVIEW
         </span>
         <span class="text-[11px] font-mono text-ink-muted">
@@ -65,52 +65,52 @@
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <!-- Workouts Completed -->
         <div class="p-3 bg-surface-card rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220]">
-          <span class="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+          <span class="text-[11px] font-mono text-ink-muted uppercase block mb-1">
             รอบฝึกทั้งหมด
           </span>
           <span class="text-lg sm:text-xl font-mono font-bold text-ink tabular-nums">
             {{ totalWorkoutsCount }}
           </span>
-          <span class="text-[10px] font-body text-ink-muted block mt-0.5">
+          <span class="text-[11px] font-body text-ink-muted block mt-0.5">
             รอบที่บันทึกแล้ว
           </span>
         </div>
 
         <!-- Total Volume Lifted -->
         <div class="p-3 bg-surface-card rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220]">
-          <span class="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+          <span class="text-[11px] font-mono text-ink-muted uppercase block mb-1">
             ปริมาณรวม (Volume)
           </span>
-          <span class="text-lg sm:text-xl font-mono font-bold text-flame tabular-nums">
+          <span class="text-lg sm:text-xl font-mono font-bold text-flame-text tabular-nums">
             {{ formatNumber(totalVolumeLifted) }}
           </span>
-          <span class="text-[10px] font-body text-ink-muted block mt-0.5">
+          <span class="text-[11px] font-body text-ink-muted block mt-0.5">
             {{ weightUnit.toUpperCase() }} สะสม · ไม่รวมวอร์ม
           </span>
         </div>
 
         <!-- Custom Routines Count -->
         <div class="p-3 bg-surface-card rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220]">
-          <span class="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+          <span class="text-[11px] font-mono text-ink-muted uppercase block mb-1">
             ตาราง Routine
           </span>
           <span class="text-lg sm:text-xl font-mono font-bold text-ink tabular-nums">
             {{ routines.length }}
           </span>
-          <span class="text-[10px] font-body text-ink-muted block mt-0.5">
+          <span class="text-[11px] font-body text-ink-muted block mt-0.5">
             ตารางฝึกที่พร้อมใช้
           </span>
         </div>
 
         <!-- Custom Exercises Count -->
         <div class="p-3 bg-surface-card rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220]">
-          <span class="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+          <span class="text-[11px] font-mono text-ink-muted uppercase block mb-1">
             ท่า Custom
           </span>
-          <span class="text-lg sm:text-xl font-mono font-bold text-emerald tabular-nums">
+          <span class="text-lg sm:text-xl font-mono font-bold text-emerald-text tabular-nums">
             {{ customExercisesCount }}
           </span>
-          <span class="text-[10px] font-body text-ink-muted block mt-0.5">
+          <span class="text-[11px] font-body text-ink-muted block mt-0.5">
             ท่าที่สร้างขึ้นเอง
           </span>
         </div>
@@ -120,7 +120,7 @@
     <!-- User Preferences & Settings Card -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
-        <span class="text-[10px] font-mono font-bold tracking-widest text-ink-muted uppercase">
+        <span class="text-[11px] font-mono font-bold tracking-widest text-ink-muted uppercase">
           PREFERENCES & APP SETTINGS
         </span>
         <span class="text-[11px] font-mono text-ink-muted">
@@ -171,7 +171,7 @@
                 นับถอยหลังอัตโนมัติเมื่อกดติ๊กถูกเซ็ต
               </span>
             </div>
-            <span class="text-xs font-mono font-bold text-flame px-2 py-0.5 rounded-md bg-flame-bg border border-flame/30">
+            <span class="text-xs font-mono font-bold text-flame-text px-2 py-0.5 rounded-md bg-flame-bg border border-flame/30">
               {{ defaultRestSec }} วินาที
             </span>
           </div>
@@ -188,7 +188,7 @@
                 : 'bg-paper text-ink shadow-[1.5px_1.5px_0px_#1e2220] hover:bg-paper-subtle'"
             >
               {{ sec >= 60 ? `${sec / 60}m` : `${sec}s` }}
-              <span class="text-[9px] block opacity-70">({{ sec }}s)</span>
+              <span class="text-[11px] block opacity-70">({{ sec }}s)</span>
             </button>
           </div>
         </div>
@@ -198,7 +198,7 @@
     <!-- Data Management (Backup, Export, Reset) -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
-        <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase">
+        <span class="text-[11px] font-mono font-bold tracking-widest text-emerald-text uppercase">
           DATA MANAGEMENT & BACKUP
         </span>
         <span class="text-[11px] font-mono text-ink-muted">
@@ -213,7 +213,7 @@
           @click="exportJsonBackup"
           class="flex items-center justify-center gap-2 py-2.5 px-3 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
         >
-          <svg class="w-4 h-4 fill-none stroke-current stroke-2 text-flame" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 fill-none stroke-current stroke-2 text-flame-text" viewBox="0 0 24 24">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />

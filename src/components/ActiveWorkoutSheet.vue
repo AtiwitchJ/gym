@@ -9,12 +9,12 @@
         <!-- Title & Live Stopwatch Readout -->
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2 mb-0.5">
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-bg border border-emerald text-emerald text-[10px] font-mono font-bold">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-bg border border-emerald text-emerald-text text-[11px] font-mono font-bold">
               <span class="w-2 h-2 rounded-full bg-emerald animate-pulse"></span>
               <span>LIVE WORKOUT</span>
             </span>
             <!-- Live Stopwatch Timer -->
-            <span class="font-mono tabular-nums text-xs sm:text-sm font-bold text-flame bg-flame-bg px-2 py-0.5 rounded-md border border-flame/30">
+            <span class="font-mono tabular-nums text-xs sm:text-sm font-bold text-flame-text bg-flame-bg px-2 py-0.5 rounded-md border border-flame/30">
               ⏱ {{ formattedStopwatch }}
             </span>
           </div>
@@ -49,7 +49,7 @@
             class="min-h-[44px] min-w-[44px] px-2 sm:px-2.5 py-1.5 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
             title="เพิ่มท่าฝึก (Add Exercise)"
           >
-            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 text-flame" viewBox="0 0 24 24">
+            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2 text-flame-text" viewBox="0 0 24 24">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
@@ -91,7 +91,7 @@
           <span>ความคืบหน้า:</span>
           <strong class="text-ink font-bold">{{ completedSetsTotal }} / {{ totalSetsTotal }} เซ็ต</strong>
           <span class="text-plate/30">•</span>
-          <span class="text-flame font-bold">{{ sessionProgressPercent }}%</span>
+          <span class="text-flame-text font-bold">{{ sessionProgressPercent }}%</span>
         </div>
         <div class="flex items-center gap-1">
           <span>ปริมาณสะสม:</span>
@@ -108,7 +108,7 @@
           v-if="!activeSession.exercises || activeSession.exercises.length === 0"
           class="text-center py-12 px-4 bg-surface border-2 border-dashed border-plate/30 rounded-2xl"
         >
-          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-paper-dim border-2 border-plate/20 flex items-center justify-center text-ink-faint">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-paper-dim border-2 border-plate/20 flex items-center justify-center text-ink-muted">
             <svg class="w-6 h-6 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
               <path d="M4 6h16M4 18h16M9 6v12M15 6v12M2 9h2v6H2zM20 9h2v6h-2z" />
             </svg>
@@ -138,19 +138,19 @@
           <div class="flex items-start justify-between gap-2 pb-2 border-b-2 border-plate/15">
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1.5 flex-wrap mb-1">
-                <span class="w-5 h-5 rounded-md bg-plate text-white text-[10px] font-mono font-bold flex items-center justify-center">
+                <span class="w-5 h-5 rounded-md bg-plate text-white text-[11px] font-mono font-bold flex items-center justify-center">
                   #{{ exIdx + 1 }}
                 </span>
                 <span
-                  class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border"
+                  class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border"
                   :class="getMuscleBadgeClass(exercise.muscleGroup)"
                 >
                   {{ getMuscleLabel(exercise.muscleGroup) }}
                 </span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full capitalize bg-surface-card border border-plate/20 text-ink-muted">
+                <span class="text-[11px] font-mono px-2 py-0.5 rounded-full capitalize bg-surface-card border border-plate/20 text-ink-muted">
                   {{ exercise.equipment || 'อุปกรณ์' }}
                 </span>
-                <span v-if="exercise.restSec" class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-paper-subtle text-ink-muted">
+                <span v-if="exercise.restSec" class="text-[11px] font-mono px-1.5 py-0.5 rounded-full bg-paper-subtle text-ink-muted">
                   พัก {{ exercise.restSec }}s
                 </span>
               </div>
@@ -180,7 +180,7 @@
                 class="min-h-[44px] min-w-[44px] px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate bg-paper hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
                 title="เพิ่มเซ็ตใหม่สำหรับท่านี้"
               >
-                <span class="text-flame font-bold">+</span>
+                <span class="text-flame-text font-bold">+</span>
                 <span>เพิ่มเซ็ต</span>
               </button>
 
@@ -205,12 +205,12 @@
             <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="text-xs font-mono font-bold text-ink flex items-center gap-1">
-                  <span class="text-flame">🔴</span>
+                  <span class="text-flame-text">🔴</span>
                   <span>YouTube สอนเล่น</span>
                 </span>
                 <span
                   v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).hasMultiMachine"
-                  class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-flame-bg text-flame border border-flame/30"
+                  class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-flame-bg text-flame-text border border-flame/30"
                 >
                   3 เครื่องทางเลือก
                 </span>
@@ -221,14 +221,14 @@
                   :href="getExerciseVideoInfo(exercise.exerciseId, exIdx).videoUrl"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-[10px] font-mono font-bold text-flame hover:underline"
+                  class="text-[11px] font-mono font-bold text-flame-text hover:underline"
                 >
                   เปิด YouTube ↗
                 </a>
                 <button
                   type="button"
                   @click="activeVideos[exIdx] = false"
-                  class="min-h-[44px] min-w-[44px] text-[10px] font-mono font-bold text-ink-muted hover:text-ink px-1.5 py-0.5 bg-surface rounded border border-plate/20"
+                  class="min-h-[44px] min-w-[44px] text-[11px] font-mono font-bold text-ink-muted hover:text-ink px-1.5 py-0.5 bg-surface rounded border border-plate/20"
                 >
                   ✕ ปิดคลิป
                 </button>
@@ -240,9 +240,9 @@
               v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).hasMultiMachine"
               class="mb-2 p-1.5 bg-surface rounded-lg border border-plate/30"
             >
-              <div class="text-[9px] font-mono text-ink-muted mb-1 flex items-center justify-between">
+              <div class="text-[11px] font-mono text-ink-muted mb-1 flex items-center justify-between">
                 <span>เลือกเครื่องที่ยิมมี (เผื่อยิมไม่มีเครื่องหลัก):</span>
-                <span class="text-flame font-bold">แบบ {{ getExerciseVideoInfo(exercise.exerciseId, exIdx).selectedIdx + 1 }}/{{ getExerciseVideoInfo(exercise.exerciseId, exIdx).machineOptions.length }}</span>
+                <span class="text-flame-text font-bold">แบบ {{ getExerciseVideoInfo(exercise.exerciseId, exIdx).selectedIdx + 1 }}/{{ getExerciseVideoInfo(exercise.exerciseId, exIdx).machineOptions.length }}</span>
               </div>
               <div class="grid grid-cols-3 gap-1">
                 <button
@@ -250,7 +250,7 @@
                   :key="mIdx"
                   type="button"
                   @click="selectExerciseMachine(exIdx, mIdx)"
-                  class="p-1 rounded text-left border transition-all text-[9px] flex flex-col justify-between"
+                  class="p-1 rounded text-left border transition-all text-[11px] flex flex-col justify-between"
                   :class="getExerciseVideoInfo(exercise.exerciseId, exIdx).selectedIdx === mIdx
                     ? 'bg-flame text-white border-plate shadow-xs font-bold'
                     : 'bg-paper-subtle text-ink border-plate/30'"
@@ -279,13 +279,13 @@
             class="p-2 rounded-xl bg-flame-bg/70 border border-flame/40 flex items-center justify-between gap-2 text-xs font-mono"
           >
             <div class="flex items-center gap-1.5 min-w-0">
-              <span class="text-flame font-bold flex-shrink-0">⚡ คำแนะนำ:</span>
+              <span class="text-flame-text font-bold flex-shrink-0">⚡ คำแนะนำ:</span>
               <span class="text-ink font-bold truncate">
                 {{ getOverloadAdvice(exercise.exerciseId).headline }}
               </span>
             </div>
             <span
-              class="px-2 py-0.5 rounded-full text-[10px] font-bold border border-plate flex-shrink-0"
+              class="px-2 py-0.5 rounded-full text-[11px] font-bold border border-plate flex-shrink-0"
               :class="getOverloadAdvice(exercise.exerciseId).badgeClass"
             >
               {{ getOverloadAdvice(exercise.exerciseId).badgeText }}
@@ -295,7 +295,7 @@
           <!-- Sets Table -->
           <div class="space-y-1.5">
             <!-- Table Header: เซ็ต | ครั้งก่อน | น้ำหนัก | ครั้ง | เสร็จ -->
-            <div class="grid grid-cols-12 gap-1.5 text-center text-[10px] font-mono font-bold text-ink-muted uppercase py-1 px-1 border-b border-plate/15">
+            <div class="grid grid-cols-12 gap-1.5 text-center text-[11px] font-mono font-bold text-ink-muted uppercase py-1 px-1 border-b border-plate/15">
               <div class="col-span-2 text-left pl-1">เซ็ต</div>
               <div class="col-span-3 text-center">ครั้งก่อน</div>
               <div class="col-span-3 text-center">น้ำหนัก (กก.)</div>
@@ -319,7 +319,7 @@
                   <button
                     type="button"
                     @click="cycleSetType(exIdx, setIdx)"
-                    class="min-h-[44px] min-w-[44px] px-2 rounded text-[10px] font-mono font-bold uppercase border leading-none transition-colors"
+                    class="min-h-[44px] min-w-[44px] px-2 rounded text-[11px] font-mono font-bold uppercase border leading-none transition-colors"
                     :class="getSetTypeBadgeClass(set.type)"
                     :title="`ประเภทเซ็ต: ${getSetTypeShort(set.type)} (แตะเพื่อสลับ วอร์ม / ทำจริง / ดรอป / ล้มเหลว)`"
                   >
@@ -333,7 +333,7 @@
                   class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate flex items-center justify-center transition-all select-none touch-manipulation"
                   :class="set.completed
                     ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669]'
-                    : 'bg-white hover:bg-paper-dim text-ink-muted/40 shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
+                    : 'bg-white hover:bg-paper-dim text-ink-muted shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
                   :title="set.completed ? 'ทำเครื่องหมายว่ายังไม่เสร็จ' : 'ทำเครื่องหมายว่าเสร็จแล้ว (เริ่มนับเวลาพัก)'"
                 >
                   <svg class="w-5 h-5 stroke-current fill-none stroke-[2.5]" viewBox="0 0 24 24">
@@ -353,7 +353,7 @@
                     :title="`ใส่น้ำหนักเซ็ตที่ ${setIdx + 1}`"
                   >
                     <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ formatWeight(set.weight ?? set.targetWeight) }}</span>
-                    <span class="text-[10px] text-flame font-bold leading-none mt-0.5">kg</span>
+                    <span class="text-[11px] text-flame-text font-bold leading-none mt-0.5">kg</span>
                   </button>
                   <button type="button" @click="stepSheetWeight(exIdx, setIdx, 1, set)" class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation" aria-label="เพิ่มน้ำหนัก">+</button>
                 </div>
@@ -366,7 +366,7 @@
                     :title="`ใส่จำนวนครั้งเซ็ตที่ ${setIdx + 1}`"
                   >
                     <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ set.reps ?? set.targetReps ?? 8 }}</span>
-                    <span class="text-[10px] text-sky font-bold leading-none mt-0.5">ครั้ง</span>
+                    <span class="text-[11px] text-sky-text font-bold leading-none mt-0.5">ครั้ง</span>
                   </button>
                   <button type="button" @click="stepSheetReps(exIdx, setIdx, 1, set)" class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation" aria-label="เพิ่มจำนวนครั้ง">+</button>
                 </div>
@@ -377,7 +377,7 @@
                 <button
                   type="button"
                   @click="removeSet(exIdx, setIdx)"
-                  class="min-h-[44px] px-3 rounded-lg text-xs font-bold text-ink-faint hover:text-rose-600 hover:bg-rose-50"
+                  class="min-h-[44px] px-3 rounded-lg text-xs font-bold text-ink-muted hover:text-rose-600 hover:bg-rose-50"
                   title="ลบเซ็ตนี้"
                 >
                   ลบเซ็ต ✕
@@ -394,7 +394,7 @@
             @click="isPickerOpen = true"
             class="w-full py-3 px-4 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs sm:text-sm rounded-2xl border-2 border-plate shadow-[2.5px_2.5px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all flex items-center justify-center gap-2 touch-manipulation"
           >
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 text-flame" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 stroke-current fill-none stroke-2 text-flame-text" viewBox="0 0 24 24">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
@@ -624,12 +624,12 @@ function getSetTypeBadgeClass(type) {
     case 'warmup':
       return 'bg-gold-bg text-gold border-gold';
     case 'dropset':
-      return 'bg-sky-bg text-sky border-sky';
+      return 'bg-sky-bg text-sky-text border-sky';
     case 'failure':
       return 'bg-rose-50 text-rose-600 border-rose-400';
     case 'working':
     default:
-      return 'bg-flame-bg text-flame border-flame';
+      return 'bg-flame-bg text-flame-text border-flame';
   }
 }
 
@@ -763,12 +763,12 @@ function getMuscleLabel(group) {
 function getMuscleBadgeClass(group) {
   switch (group) {
     case 'chest':
-      return 'bg-flame-bg text-flame border-flame';
+      return 'bg-flame-bg text-flame-text border-flame';
     case 'back':
-      return 'bg-sky-bg text-sky border-sky';
+      return 'bg-sky-bg text-sky-text border-sky';
     case 'quads':
     case 'hamstrings':
-      return 'bg-emerald-bg text-emerald border-emerald';
+      return 'bg-emerald-bg text-emerald-text border-emerald';
     case 'delts':
       return 'bg-gold-bg text-gold border-gold';
     case 'arms':

@@ -3,14 +3,14 @@
     <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
       <!-- Brand Seal Chop -->
       <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
-        <span class="seal-chop text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 flex-shrink-0">
+        <span class="seal-chop text-[11px] sm:text-xs px-2 sm:px-2.5 py-0.5 flex-shrink-0">
           ATIWITCH
         </span>
         <div class="flex flex-col min-w-0">
           <span class="text-xs sm:text-sm font-bold font-heading tracking-tight text-ink leading-tight truncate">
             WORKOUT LOG
           </span>
-          <span class="hidden sm:inline text-[9px] font-mono tracking-wider text-ink-muted uppercase truncate">
+          <span class="hidden sm:inline text-[11px] font-mono tracking-wider text-ink-muted uppercase truncate">
             Personal Strength Protocol
           </span>
         </div>
@@ -20,10 +20,10 @@
       <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
         <!-- Auto-save Pill -->
         <span
-          class="text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 transition-all flex items-center gap-1 select-none"
+          class="text-[11px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 transition-all flex items-center gap-1 select-none"
           :class="saveStatus === 'saving'
-            ? 'bg-flame-bg border-flame text-flame shadow-[1.5px_1.5px_0px_#ea580c] animate-pulse'
-            : 'bg-emerald-bg border-emerald text-emerald shadow-[1.5px_1.5px_0px_#059669]'"
+            ? 'bg-flame-bg border-flame text-flame-text shadow-[1.5px_1.5px_0px_#ea580c] animate-pulse'
+            : 'bg-emerald-bg border-emerald text-emerald-text shadow-[1.5px_1.5px_0px_#059669]'"
         >
           <span class="w-1.5 h-1.5 rounded-full" :class="saveStatus === 'saving' ? 'bg-flame' : 'bg-emerald'"></span>
           <span>{{ saveStatus === 'saving' ? 'กำลังบันทึก...' : 'บันทึกในเครื่องแล้ว' }}</span>
@@ -33,8 +33,8 @@
         <button
           v-if="isWorkoutDay"
           @click="toggleExerciseImages"
-          class="min-h-[44px] min-w-[44px] text-[10px] sm:text-[11px] font-mono font-bold px-2 py-1 rounded-full border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none touch-manipulation"
-          :class="showExerciseImages ? 'bg-flame-bg text-flame border-flame' : 'bg-surface text-ink-muted opacity-80'"
+          class="min-h-[44px] min-w-[44px] text-[11px] sm:text-[11px] font-mono font-bold px-2 py-1 rounded-full border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none touch-manipulation"
+          :class="showExerciseImages ? 'bg-flame-bg text-flame-text border-flame' : 'bg-surface text-ink-muted opacity-80'"
           :title="showExerciseImages ? 'คลิกเพื่อซ่อนรูป (โหมดกระชับ)' : 'คลิกเพื่อแสดงภาพตัวอย่าง'"
         >
           <svg class="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@
         <button
           v-if="isWorkoutDay"
           @click="confirmReset"
-          class="min-h-[44px] min-w-[44px] text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 border-plate bg-surface hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+          class="min-h-[44px] min-w-[44px] text-[11px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 border-plate bg-surface hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
           title="ล้างการติ๊กของวันนี้ (ไม่ลบประวัติ)"
         >
           ล้างการติ๊ก

@@ -12,10 +12,10 @@
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2 mb-0.5">
-            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald text-white uppercase tracking-wider">
+            <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald text-white uppercase tracking-wider">
               กำลังฝึกซ้อมอยู่
             </span>
-            <span class="text-xs font-mono font-bold text-emerald tabular-nums">
+            <span class="text-xs font-mono font-bold text-emerald-text tabular-nums">
               ⏱ {{ formattedDuration }}
             </span>
           </div>
@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <div class="w-8 h-8 rounded-lg bg-emerald/20 text-emerald flex items-center justify-center flex-shrink-0 group-hover:translate-x-0.5 transition-transform">
+      <div class="w-8 h-8 rounded-lg bg-emerald/20 text-emerald-text flex items-center justify-center flex-shrink-0 group-hover:translate-x-0.5 transition-transform">
         <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
           <polyline points="9 18 15 12 9 6" />
         </svg>
@@ -50,7 +50,7 @@
         @click="emit('create-routine')"
         class="flex items-center justify-center gap-2 py-3 px-4 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs sm:text-sm rounded-xl border-2 border-plate shadow-[3px_3px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
       >
-        <svg class="w-4 h-4 stroke-current fill-none stroke-2 text-emerald" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 stroke-current fill-none stroke-2 text-emerald-text" viewBox="0 0 24 24">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
@@ -71,15 +71,15 @@
     <div class="archive-card p-3 sm:p-4 bg-gradient-to-br from-paper via-surface to-paper border-2 border-plate shadow-[3px_3px_0px_#1e2220]">
       <div class="flex items-center justify-between mb-2.5">
         <div class="flex items-center gap-2">
-          <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase">
+          <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase">
             3-DAY A/B ALTERNATING PROTOCOL
           </span>
           <span class="text-plate/30">•</span>
-          <span class="text-[11px] font-mono text-emerald font-bold">
+          <span class="text-[11px] font-mono text-emerald-text font-bold">
             1-Click Launch
           </span>
         </div>
-        <span class="text-[10px] font-body text-ink-muted">
+        <span class="text-[11px] font-body text-ink-muted">
           จันทร์, พุธ, ศุกร์ (สลับ A-B-A / B-A-B)
         </span>
       </div>
@@ -90,7 +90,7 @@
           <div>
             <div class="flex items-center justify-between gap-1 mb-1">
               <span class="text-xs font-bold font-heading text-ink">Program A</span>
-              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-flame-bg text-flame font-bold">6 ท่า • {{ programSetTotal('prog_a') }} เซ็ต • อก+หลัง+ท้อง</span>
+              <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-flame-bg text-flame-text font-bold">6 ท่า • {{ programSetTotal('prog_a') }} เซ็ต • อก+หลัง+ท้อง</span>
             </div>
             <p class="text-[11px] text-ink-muted line-clamp-1 font-body">
               Flat DB, Lat Pulldown, Incline DB, Seated Row, Pec Fly, Leg Raise
@@ -120,7 +120,7 @@
           <div>
             <div class="flex items-center justify-between gap-1 mb-1">
               <span class="text-xs font-bold font-heading text-ink">Program B</span>
-              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-bg text-emerald font-bold">7 ท่า • {{ programSetTotal('prog_b') }} เซ็ต • ขา + แขน + ไหล่/บ่า</span>
+              <span class="text-[11px] font-mono px-1.5 py-0.5 rounded bg-emerald-bg text-emerald-text font-bold">7 ท่า • {{ programSetTotal('prog_b') }} เซ็ต • ขา + แขน + ไหล่/บ่า</span>
             </div>
             <p class="text-[11px] text-ink-muted line-clamp-1 font-body">
               Leg Press, Hip Thrust, Leg Ext, DB Shoulder, Shrug, Triceps, Hammer
@@ -153,7 +153,7 @@
         <h3 class="text-sm sm:text-base font-bold font-heading text-ink tracking-tight">
           ตารางออกกำลังกายทั้งหมด (Routines)
         </h3>
-        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-paper-subtle border border-plate/30 text-ink-muted">
+        <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-paper-subtle border border-plate/30 text-ink-muted">
           {{ displayRoutines.length }}
         </span>
       </div>
@@ -170,10 +170,10 @@
           <!-- Routine Info -->
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 mb-1 flex-wrap">
-              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-paper-subtle border border-plate/30 text-ink-muted">
+              <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-paper-subtle border border-plate/30 text-ink-muted">
                 {{ routine.exercises?.length || 0 }} ท่า
               </span>
-              <span v-if="getTotalSets(routine)" class="text-[10px] font-mono text-ink-muted">
+              <span v-if="getTotalSets(routine)" class="text-[11px] font-mono text-ink-muted">
                 • รวม {{ getTotalSets(routine) }} เซ็ต
               </span>
             </div>
@@ -190,13 +190,13 @@
               <span
                 v-for="(ex, exIdx) in routine.exercises.slice(0, 4)"
                 :key="exIdx"
-                class="text-[10px] font-body px-2 py-0.5 bg-surface-card rounded-md border border-plate/20 text-ink-muted truncate max-w-[140px]"
+                class="text-[11px] font-body px-2 py-0.5 bg-surface-card rounded-md border border-plate/20 text-ink-muted truncate max-w-[140px]"
               >
                 {{ getExerciseName(ex.exerciseId) }}
               </span>
               <span
                 v-if="routine.exercises.length > 4"
-                class="text-[10px] font-mono px-1.5 py-0.5 text-ink-muted"
+                class="text-[11px] font-mono px-1.5 py-0.5 text-ink-muted"
               >
                 +{{ routine.exercises.length - 4 }} ท่า
               </span>

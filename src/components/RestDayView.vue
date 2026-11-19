@@ -2,7 +2,7 @@
   <div class="py-2 space-y-4">
     <!-- Header -->
     <div class="archive-card p-5">
-      <span class="text-[10px] font-mono font-bold tracking-widest text-sky uppercase">
+      <span class="text-[11px] font-mono font-bold tracking-widest text-sky-text uppercase">
         วันพัก
       </span>
       <h2 class="text-xl font-bold font-heading text-ink tracking-tight">
@@ -16,7 +16,7 @@
     <!-- Next session (step 4 of the 3-day A/B rule): shows the program after the last completed session -->
     <div class="archive-card p-4 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="min-w-0">
-        <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase block">NEXT SESSION</span>
+        <span class="text-[11px] font-mono font-bold tracking-widest text-emerald-text uppercase block">NEXT SESSION</span>
         <p class="text-sm font-bold font-heading text-ink">{{ nextHint }}</p>
       </div>
       <button
@@ -36,7 +36,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
       <!-- Nutrition -->
       <div class="archive-card p-4 bg-white">
-        <div class="text-xs font-mono text-flame font-bold mb-1.5 uppercase flex items-center gap-1.5">
+        <div class="text-xs font-mono text-flame-text font-bold mb-1.5 uppercase flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-flame"></span>
           01 • PROTEIN & WATER
         </div>
@@ -48,7 +48,7 @@
 
       <!-- Sleep -->
       <div class="archive-card p-4 bg-white">
-        <div class="text-xs font-mono text-sky font-bold mb-1.5 uppercase flex items-center gap-1.5">
+        <div class="text-xs font-mono text-sky-text font-bold mb-1.5 uppercase flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-sky"></span>
           02 • DEEP SLEEP (7-8 HRS)
         </div>

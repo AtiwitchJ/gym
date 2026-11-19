@@ -18,22 +18,22 @@
       <div class="flex items-start justify-between gap-2.5 sm:gap-3">
         <!-- Number & Titles -->
         <div class="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
-          <span class="font-mono text-xs sm:text-sm font-bold text-flame mt-0.5 select-none bg-flame-bg px-1.5 py-0.5 rounded border border-flame/30 flex-shrink-0">
+          <span class="font-mono text-xs sm:text-sm font-bold text-flame-text mt-0.5 select-none bg-flame-bg px-1.5 py-0.5 rounded border border-flame/30 flex-shrink-0">
             {{ String(index + 1).padStart(2, '0') }}
           </span>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5 mb-1 flex-wrap">
               <span
-                class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full tracking-wide uppercase border select-none"
+                class="text-[11px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full tracking-wide uppercase border select-none"
                 :class="exercise.isMain
-                  ? 'bg-flame-bg text-flame border-flame'
+                  ? 'bg-flame-bg text-flame-text border-flame'
                   : 'bg-surface text-ink-muted border-plate/30'"
               >
                 {{ exercise.isMain ? 'ท่าหลัก' : 'ท่าช่วย' }}
               </span>
               <span
                 v-if="isDumbbell"
-                class="text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-paper-subtle text-ink border border-plate/40 select-none inline-flex items-center gap-1"
+                class="text-[11px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-paper-subtle text-ink border border-plate/40 select-none inline-flex items-center gap-1"
               >
                 ใส่น้ำหนักต่อข้าง (Per Dumbbell)
               </span>
@@ -46,7 +46,7 @@
             </p>
             <button
               type="button"
-              class="min-h-[44px] min-w-[44px] mt-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
+              class="min-h-[44px] min-w-[44px] mt-1 text-[11px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
               title="ดูประวัติและ PR ของท่านี้"
               @click="showHistory = true"
             >
@@ -55,7 +55,7 @@
             <button
               v-if="isBarbell"
               type="button"
-              class="min-h-[44px] min-w-[44px] mt-1 ml-1 text-[10px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-gold hover:bg-gold-glow text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
+              class="min-h-[44px] min-w-[44px] mt-1 ml-1 text-[11px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-gold hover:bg-gold-glow text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
               title="คำนวณแผ่นน้ำหนักบาร์เบล"
               @click="openPlatesForExercise"
             >
@@ -84,8 +84,8 @@
               v-else
               class="w-full h-full bg-plate flex flex-col items-center justify-center p-1 text-center"
             >
-              <span class="text-[10px] font-mono text-emerald font-bold">🎬 ในเครื่อง</span>
-              <span class="text-[8px] font-mono text-white/70 truncate max-w-full">เล่นออฟไลน์</span>
+              <span class="text-[11px] font-mono text-emerald-text font-bold">🎬 ในเครื่อง</span>
+              <span class="text-[11px] font-mono text-white/70 truncate max-w-full">เล่นออฟไลน์</span>
             </div>
             <!-- Play Overlay -->
             <div class="absolute inset-0 bg-plate/25 group-hover:bg-plate/10 transition-colors flex items-center justify-center">
@@ -96,7 +96,7 @@
               </div>
             </div>
             <span
-              class="absolute bottom-1 right-1 text-[8px] sm:text-[9px] font-mono font-bold text-white px-1 sm:px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none bg-plate/85"
+              class="absolute bottom-1 right-1 text-[11px] sm:text-[11px] font-mono font-bold text-white px-1 sm:px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/20 select-none bg-plate/85"
             >
               {{ hasMultiMachineVideos ? '🎬 3 เครื่อง' : 'YouTube' }}
             </span>
@@ -107,7 +107,7 @@
             v-else
             type="button"
             @click="toggleVideo"
-            class="min-h-[44px] min-w-[44px] flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
+            class="min-h-[44px] min-w-[44px] flex items-center gap-1.5 text-[11px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap"
             :class="isPlayingVideo
               ? 'bg-flame text-white'
               : 'bg-surface hover:bg-paper-subtle text-ink'"
@@ -128,17 +128,17 @@
       <!-- Muscles & Guidance -->
       <div class="mt-2 text-[11px] sm:text-xs text-ink-muted flex flex-wrap gap-x-2.5 gap-y-0.5">
         <span><strong class="text-ink font-semibold">เป้าหมาย:</strong> {{ exercise.mainMuscle }}</span>
-        <span v-if="exercise.subMuscle" class="text-ink-muted/80">• {{ exercise.subMuscle }}</span>
+        <span v-if="exercise.subMuscle" class="text-ink-muted">• {{ exercise.subMuscle }}</span>
       </div>
 
       <!-- Progressive Overload Plan & Target Table (Directly in Card) -->
       <div class="mt-2.5 rounded-lg border-2 border-plate bg-white overflow-hidden shadow-[1.5px_1.5px_0px_#1e2220] font-mono">
         <div class="px-2.5 py-1.5 bg-paper-subtle border-b-2 border-plate flex items-center justify-between gap-1 flex-wrap">
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-[10px] font-bold text-ink uppercase tracking-wider">แผนและเป้าหมายรอบหน้า</span>
+            <span class="text-[11px] font-bold text-ink uppercase tracking-wider">แผนและเป้าหมายรอบหน้า</span>
             <span
               v-if="linkedSourceBadge"
-              class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-sky-bg text-sky border border-sky/30 inline-flex items-center gap-1 select-none"
+              class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-sky-bg text-sky-text border border-sky/30 inline-flex items-center gap-1 select-none"
               :title="`สถิตินี้เชื่อมโยงอัตโนมัติมาจาก ${linkedSourceBadge}`"
             >
               🔗 ซิงค์จาก {{ linkedSourceBadge }}
@@ -148,16 +148,16 @@
             v-if="hasAnyPrev"
             type="button"
             @click="applyAllPrev"
-            class="min-h-[44px] min-w-[44px] text-[9px] sm:text-[10px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-flame-bg text-flame hover:bg-flame hover:text-white border border-flame/30 transition-all select-none shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
+            class="min-h-[44px] min-w-[44px] text-[11px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded bg-flame-bg text-flame-text hover:bg-flame hover:text-white border border-flame/30 transition-all select-none shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none"
             title="ดึงสถิติล่าสุดทั้งน้ำหนักและจำนวนครั้งมาใส่ทุกเซ็ต"
           >
             ดึงสถิติเดิมทั้งหมด
           </button>
         </div>
 
-        <table class="w-full text-left border-collapse text-[10px] sm:text-[11px]">
+        <table class="w-full text-left border-collapse text-[11px] sm:text-[11px]">
           <thead>
-            <tr class="bg-paper-subtle/50 text-ink-muted border-b border-plate/20 text-[9px] sm:text-[10px]">
+            <tr class="bg-paper-subtle/50 text-ink-muted border-b border-plate/20 text-[11px] sm:text-[11px]">
               <th class="py-1 px-2.5 font-bold">ประเภท</th>
               <th class="py-1 px-2 text-center font-bold">สถิติล่าสุด</th>
               <th class="py-1 px-2 text-center font-bold">เป้าหมายรอบหน้า</th>
@@ -188,7 +188,7 @@
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span
                   v-if="exerciseAdvice?.warmAdvice && (displayWarmWeight !== 0 || displayWarmReps !== null)"
-                  class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
+                  class="inline-block px-1.5 py-0.5 rounded text-[11px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
                   :class="exerciseAdvice.warmAdvice.badgeClass"
                 >
                   {{ exerciseAdvice.warmAdvice.delta > 0 ? '+2 kg' : exerciseAdvice.warmAdvice.delta < 0 ? '-2 kg' : '0 kg' }}
@@ -220,7 +220,7 @@
               <td class="py-1.5 px-2 text-center whitespace-nowrap">
                 <span
                   v-if="exerciseAdvice?.workAdvice && (displayWorkWeight !== 0 || displayWorkReps !== null)"
-                  class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
+                  class="inline-block px-1.5 py-0.5 rounded text-[11px] font-bold border border-plate shadow-[0.5px_0.5px_0px_#1e2220]"
                   :class="exerciseAdvice.workAdvice.badgeClass"
                 >
                   {{ exerciseAdvice.workAdvice.delta > 0 ? '+2 kg' : exerciseAdvice.workAdvice.delta < 0 ? '-2 kg' : '0 kg' }}
@@ -247,12 +247,12 @@
         <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-xs font-mono font-bold text-ink flex items-center gap-1">
-              <span class="text-flame">🔴</span>
+              <span class="text-flame-text">🔴</span>
               <span>YouTube สอนเล่น</span>
             </span>
             <span
               v-if="hasMultiMachineVideos"
-              class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-flame-bg text-flame border border-flame/30"
+              class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-flame-bg text-flame-text border border-flame/30"
             >
               3 เครื่องทางเลือก
             </span>
@@ -264,7 +264,7 @@
               :href="activeVideoUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-[10px] font-mono font-bold text-flame hover:underline flex items-center gap-1"
+              class="text-[11px] font-mono font-bold text-flame-text hover:underline flex items-center gap-1"
               title="เปิดดูในแอป YouTube"
             >
               <span>เปิด YouTube ↗</span>
@@ -280,9 +280,9 @@
 
         <!-- 3-Machine Selector (When exercise has alternative machines in gym) -->
         <div v-if="hasMultiMachineVideos" class="mb-2.5 p-2 bg-surface rounded-xl border-2 border-plate shadow-xs">
-          <div class="text-[10px] font-mono font-bold text-ink-muted mb-1.5 flex items-center justify-between">
+          <div class="text-[11px] font-mono font-bold text-ink-muted mb-1.5 flex items-center justify-between">
             <span>🏋️ เผื่อยิมไม่มีเครื่องหลัก เลือกดูคลิปเครื่องที่มีแทนได้:</span>
-            <span class="text-flame font-bold text-[9px] tabular-nums">แบบ {{ activeMachineIndex + 1 }}/{{ machineOptions.length }}</span>
+            <span class="text-flame-text font-bold text-[11px] tabular-nums">แบบ {{ activeMachineIndex + 1 }}/{{ machineOptions.length }}</span>
           </div>
 
           <div class="grid grid-cols-3 gap-1.5">
@@ -297,16 +297,16 @@
                 : 'bg-paper-subtle hover:bg-white text-ink border-plate/30 shadow-xs'"
             >
               <div class="flex items-center justify-between w-full mb-0.5">
-                <span class="text-[10px] font-mono font-bold truncate">เครื่องที่ {{ mIdx + 1 }}</span>
-                <span v-if="activeMachineIndex === mIdx" class="text-[9px]">●</span>
+                <span class="text-[11px] font-mono font-bold truncate">เครื่องที่ {{ mIdx + 1 }}</span>
+                <span v-if="activeMachineIndex === mIdx" class="text-[11px]">●</span>
               </div>
-              <span class="text-[9px] font-heading font-medium leading-tight line-clamp-1 opacity-90">
+              <span class="text-[11px] font-heading font-medium leading-tight line-clamp-1 opacity-90">
                 {{ m.shortName || m.name }}
               </span>
             </button>
           </div>
 
-          <p class="text-[10px] text-ink-muted font-body mt-1.5 flex items-center gap-1">
+          <p class="text-[11px] text-ink-muted font-body mt-1.5 flex items-center gap-1">
             <strong class="text-ink font-semibold flex-shrink-0">เครื่องนี้:</strong>
             <span class="truncate">{{ activeMachine.equipment || activeMachine.name }}</span>
           </p>
@@ -331,7 +331,7 @@
     </div>
 
     <!-- Sets Table Header -->
-    <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[9px] sm:text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center justify-between gap-2 select-none">
+    <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[11px] sm:text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center justify-between gap-2 select-none">
       <span>เซ็ต · แนะนำ · เสร็จ</span>
       <span :title="isDumbbell ? 'น้ำหนักดัมเบลต่อข้าง (Per Dumbbell)' : 'น้ำหนักยก'">
         {{ isDumbbell ? 'น.น./ข้าง' : 'น้ำหนัก' }} / ครั้ง (แตะค่าเพื่อพิมพ์)
@@ -351,9 +351,9 @@
           <div class="flex flex-col justify-center min-w-0 flex-1">
             <div class="flex items-center gap-1.5">
               <span
-                class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded tracking-wider uppercase border select-none flex-shrink-0"
+                class="text-[11px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded tracking-wider uppercase border select-none flex-shrink-0"
                 :class="set.type === 'warm'
-                  ? 'bg-sky-bg text-sky border-sky/40'
+                  ? 'bg-sky-bg text-sky-text border-sky/40'
                   : 'bg-surface-card text-ink border-plate/30'"
               >
                 {{ set.type === 'warm' ? 'วอร์ม' : `เซ็ต ${sIdx}` }}
@@ -363,19 +363,19 @@
               </span>
               <span
                 v-if="getPrFlag(sIdx)"
-                class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none flex-shrink-0"
+                class="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none flex-shrink-0"
                 title="ทำสถิติใหม่ (PR) เมื่อเทียบกับสถิติที่บันทึกไว้"
               >🏆 PR</span>
             </div>
             <span
               v-if="hasPrevForSet(sIdx)"
-              class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none truncate"
+              class="text-[11px] sm:text-[11px] font-mono text-ink-muted select-none truncate"
             >
               ครั้งก่อน {{ getPrevWeight(sIdx) }} กก. × {{ getPrevReps(sIdx) || '—' }}
             </span>
             <span
               v-if="getSetNote(set.reps)"
-              class="text-[8px] sm:text-[9px] font-mono text-ink-muted/80 truncate select-none mt-0.5"
+              class="text-[11px] sm:text-[11px] font-mono text-ink-muted truncate select-none mt-0.5"
               :title="getSetNote(set.reps)"
             >
               {{ getSetNote(set.reps) }}
@@ -386,13 +386,13 @@
           <div class="flex items-center justify-center w-14 flex-shrink-0">
             <div
               v-if="getSetAdvice(sIdx)"
-              class="w-full h-7 rounded-md border-2 border-plate shadow-[0.5px_0.5px_0px_#1e2220] select-none text-[9px] sm:text-[10px] font-mono font-bold flex items-center justify-center whitespace-nowrap"
+              class="w-full h-7 rounded-md border-2 border-plate shadow-[0.5px_0.5px_0px_#1e2220] select-none text-[11px] sm:text-[11px] font-mono font-bold flex items-center justify-center whitespace-nowrap"
               :class="getSetAdvice(sIdx).badgeClass"
               :title="getSetAdvice(sIdx).reasonText"
             >
               {{ getSetAdvice(sIdx).delta > 0 ? '+2 kg' : getSetAdvice(sIdx).delta < 0 ? '-2 kg' : 'พอดี' }}
             </div>
-            <span v-else class="text-ink-muted/30 font-mono text-xs select-none">—</span>
+            <span v-else class="text-ink-muted font-mono text-xs select-none">—</span>
           </div>
 
           <!-- Done (56 px) -->
@@ -428,7 +428,7 @@
               title="แตะเพื่อพิมพ์น้ำหนัก"
             >
               <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getWeight(sIdx) !== '' ? getWeight(sIdx) : '—' }}</span>
-              <span class="text-[10px] text-flame font-bold leading-none mt-0.5">กก.</span>
+              <span class="text-[11px] text-flame-text font-bold leading-none mt-0.5">กก.</span>
             </button>
             <button
               type="button"
@@ -452,7 +452,7 @@
               title="แตะเพื่อพิมพ์จำนวนครั้งจริง"
             >
               <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getReps(sIdx) !== '' ? getReps(sIdx) : '—' }}</span>
-              <span class="text-[10px] text-sky font-bold leading-none mt-0.5">ครั้ง</span>
+              <span class="text-[11px] text-sky-text font-bold leading-none mt-0.5">ครั้ง</span>
             </button>
             <button
               type="button"
@@ -465,7 +465,7 @@
 
         <!-- RIR after Done (optional): 3 buttons -->
         <div v-if="isSetDone(sIdx)" class="mt-2 flex items-center gap-1.5 flex-wrap">
-          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none" title="RIR = จำนวนครั้งที่ยังเหลือแรงยกต่อได้ (ไม่บังคับ)">ความเหนื่อย RIR (ไม่บังคับ):</span>
+          <span class="text-[11px] sm:text-[11px] font-mono text-ink-muted select-none" title="RIR = จำนวนครั้งที่ยังเหลือแรงยกต่อได้ (ไม่บังคับ)">ความเหนื่อย RIR (ไม่บังคับ):</span>
           <button
             v-for="opt in RIR_CHOICES"
             :key="opt.value"
@@ -477,7 +477,7 @@
               : 'bg-surface text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
             :title="opt.title"
           >{{ opt.label }}</button>
-          <p class="w-full text-[10px] font-body text-ink-muted leading-snug">เหลือ 2+ = ยังเหลือแรงอีก 2 ครั้งขึ้นไป · เหลือ 1 = อีก 1 ครั้ง · ล้ม = ยกต่อไม่ได้</p>
+          <p class="w-full text-[11px] font-body text-ink-muted leading-snug">เหลือ 2+ = ยังเหลือแรงอีก 2 ครั้งขึ้นไป · เหลือ 1 = อีก 1 ครั้ง · ล้ม = ยกต่อไม่ได้</p>
         </div>
       </div>
     </div>

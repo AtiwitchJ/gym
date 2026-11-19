@@ -2,7 +2,7 @@
   <div class="archive-card p-4 bg-white space-y-3">
     <div class="flex items-center justify-between gap-2">
       <div>
-        <span class="text-[10px] font-mono font-bold tracking-widest text-flame uppercase block">
+        <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase block">
           MUSCLE RECOVERY
         </span>
         <h3 class="text-sm font-bold font-heading text-ink">สถานะการฟื้นตัวของกล้ามเนื้อ</h3>

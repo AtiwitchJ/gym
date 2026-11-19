@@ -7,17 +7,17 @@
       <!-- Digital Stopwatch Readout -->
       <div class="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
         <div class="flex flex-col flex-shrink-0">
-          <span class="text-[8px] sm:text-[9px] font-mono font-bold tracking-widest text-ink-muted uppercase leading-none">
+          <span class="text-[11px] sm:text-[11px] font-mono font-bold tracking-widest text-ink-muted uppercase leading-none">
             REST INTERVAL
           </span>
           <span
             class="font-mono tabular-nums text-2xl sm:text-3xl font-extrabold tracking-wider leading-tight"
-            :class="isRunning ? 'text-flame animate-pulse' : 'text-ink'"
+            :class="isRunning ? 'text-flame-text animate-pulse' : 'text-ink'"
           >
             {{ formatTime(timerRemaining) }}
           </span>
           <!-- Next set (or "all done") -->
-          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted truncate max-w-[12rem] leading-tight">
+          <span class="text-[11px] sm:text-[11px] font-mono text-ink-muted truncate max-w-[12rem] leading-tight">
             {{ nextHint }}
           </span>
         </div>
@@ -28,7 +28,7 @@
             v-for="preset in [60, 90, 120, 180]"
             :key="preset"
             @click="setTimerDuration(preset)"
-            class="min-h-[44px] min-w-[44px] text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full border-2 border-plate transition-all select-none touch-manipulation whitespace-nowrap"
+            class="min-h-[44px] min-w-[44px] text-[11px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full border-2 border-plate transition-all select-none touch-manipulation whitespace-nowrap"
             :class="timerDuration === preset
               ? 'bg-flame text-white shadow-[1.5px_1.5px_0px_#1e2220] translate-x-[-1px] translate-y-[-1px]'
               : 'bg-surface hover:bg-paper-dim text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
@@ -59,8 +59,8 @@
               @click="saveRest"
             >บันทึก</button>
           </div>
-          <span v-if="restError" class="text-[10px] font-mono text-red-700 leading-tight max-w-[12rem]">{{ restError }}</span>
-          <span v-else-if="restOk" class="text-[10px] font-mono text-emerald leading-tight max-w-[12rem]">{{ restOk }}</span>
+          <span v-if="restError" class="text-[11px] font-mono text-red-700 leading-tight max-w-[12rem]">{{ restError }}</span>
+          <span v-else-if="restOk" class="text-[11px] font-mono text-emerald-text leading-tight max-w-[12rem]">{{ restOk }}</span>
         </div>
 
         <!-- Dynamic Steppers (+30s / -15s) -->

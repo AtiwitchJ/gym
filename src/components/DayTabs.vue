@@ -21,7 +21,7 @@
           class="absolute -top-1 right-2 w-2.5 h-2.5 rounded-full bg-emerald border-2 border-plate animate-pulse pointer-events-none"
         ></span>
         <span class="text-[12px] sm:text-xs font-bold leading-tight">{{ tab.label }}</span>
-        <span class="text-[9px] opacity-80 font-body font-normal truncate max-w-full">{{ tabSub(tab) }}</span>
+        <span class="text-[11px] opacity-80 font-body font-normal truncate max-w-full">{{ tabSub(tab) }}</span>
       </button>
     </div>
   </nav>

@@ -5,24 +5,24 @@
   >
     <!-- Left: Tally Badges -->
     <div class="flex items-center gap-1.5 flex-wrap">
-      <span class="text-[10px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-wider mr-1">
+      <span class="text-[11px] sm:text-[11px] font-bold text-ink-muted uppercase tracking-wider mr-1">
         แผนรอบหน้ารวม:
       </span>
       <span
         v-if="increaseCount > 0"
-        class="px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-flame text-white border border-plate shadow-[1px_1px_0px_#1e2220]"
+        class="px-1.5 sm:px-2 py-0.5 rounded text-[11px] sm:text-[11px] font-bold bg-flame text-white border border-plate shadow-[1px_1px_0px_#1e2220]"
       >
         +2 kg ({{ increaseCount }} ท่า)
       </span>
       <span
         v-if="optimalCount > 0"
-        class="px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-emerald text-white border border-plate shadow-[1px_1px_0px_#059669]"
+        class="px-1.5 sm:px-2 py-0.5 rounded text-[11px] sm:text-[11px] font-bold bg-emerald text-white border border-plate shadow-[1px_1px_0px_#059669]"
       >
         0 kg ({{ optimalCount }} ท่า)
       </span>
       <span
         v-if="decreaseCount > 0"
-        class="px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-amber-500 text-white border border-plate shadow-[1px_1px_0px_#1e2220]"
+        class="px-1.5 sm:px-2 py-0.5 rounded text-[11px] sm:text-[11px] font-bold bg-amber-500 text-white border border-plate shadow-[1px_1px_0px_#1e2220]"
       >
         -2 kg ({{ decreaseCount }} ท่า)
       </span>

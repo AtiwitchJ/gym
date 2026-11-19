@@ -7,7 +7,7 @@
     <div class="w-full max-w-md bg-paper border-4 border-plate rounded-t-3xl sm:rounded-3xl shadow-[0_12px_40px_rgba(30,34,32,0.35)] p-4 sm:p-6 max-h-[90vh] overflow-y-auto flex flex-col gap-4">
       <div class="flex items-start justify-between gap-3">
         <div>
-          <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase block">
+          <span class="text-[11px] font-mono font-bold tracking-widest text-emerald-text uppercase block">
             1RM CALCULATOR
           </span>
           <h3 class="text-lg font-extrabold font-heading text-ink leading-tight">ประเมิน 1RM จากเซ็ตย่อย</h3>
@@ -66,7 +66,7 @@
         <div class="text-3xl font-mono font-extrabold text-ink tabular-nums">
           {{ result }}<span v-if="result !== '—'" class="text-base text-ink-muted"> kg</span>
         </div>
-        <p class="text-[10px] font-mono text-ink-muted mt-2">
+        <p class="text-[11px] font-mono text-ink-muted mt-2">
           สูตร: น้ำหนัก × (1 + (ครั้ง + RIR) / 30) — สูตรเดียวกับ PR ของเซ็ต
         </p>
       </div>

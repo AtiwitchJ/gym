@@ -22,7 +22,7 @@
             🏆
           </div>
 
-          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-flame text-white text-[10px] font-mono font-bold uppercase tracking-wider mb-1.5 shadow-[1px_1px_0px_#1e2220]">
+          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-flame text-white text-[11px] font-mono font-bold uppercase tracking-wider mb-1.5 shadow-[1px_1px_0px_#1e2220]">
             <span>⚡ WORKOUT COMPLETE</span>
           </div>
 
@@ -37,7 +37,7 @@
           <h2 class="text-xl sm:text-2xl font-extrabold font-heading text-ink tracking-tight">
             สุดยอดมาก! ฝึกสำเร็จแล้ว
           </h2>
-          <p class="text-xs sm:text-sm font-heading font-bold text-flame mt-0.5">
+          <p class="text-xs sm:text-sm font-heading font-bold text-flame-text mt-0.5">
             {{ summary?.title || 'Workout Session' }}
           </p>
           <p v-if="summary?.subtitle" class="text-[11px] text-ink-muted font-body mt-0.5">
@@ -50,20 +50,20 @@
           <div class="grid grid-cols-3 gap-2 sm:gap-2.5">
             <!-- Total Volume Card -->
             <div class="bg-surface border-2 border-plate rounded-xl p-2.5 sm:p-3 text-center shadow-[2px_2px_0px_#1e2220] flex flex-col justify-center">
-              <span class="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">
+              <span class="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">
                 ปริมาณยก (Volume)
               </span>
-              <div class="flex items-baseline justify-center gap-0.5 text-flame">
+              <div class="flex items-baseline justify-center gap-0.5 text-flame-text">
                 <span class="font-mono tabular-nums text-base sm:text-lg font-extrabold">
                   {{ formattedVolume }}
                 </span>
-                <span class="text-[10px] font-mono font-bold text-ink-muted">กก.</span>
+                <span class="text-[11px] font-mono font-bold text-ink-muted">กก.</span>
               </div>
             </div>
 
             <!-- Workout Duration Card -->
             <div class="bg-surface border-2 border-plate rounded-xl p-2.5 sm:p-3 text-center shadow-[2px_2px_0px_#1e2220] flex flex-col justify-center">
-              <span class="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">
+              <span class="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">
                 เวลาที่ใช้ (Duration)
               </span>
               <div class="font-mono tabular-nums text-base sm:text-lg font-extrabold text-ink">
@@ -73,10 +73,10 @@
 
             <!-- Completed Sets Card -->
             <div class="bg-surface border-2 border-plate rounded-xl p-2.5 sm:p-3 text-center shadow-[2px_2px_0px_#1e2220] flex flex-col justify-center">
-              <span class="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">
+              <span class="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">
                 เซ็ตสำเร็จ (Sets)
               </span>
-              <div class="font-mono tabular-nums text-base sm:text-lg font-extrabold text-emerald">
+              <div class="font-mono tabular-nums text-base sm:text-lg font-extrabold text-emerald-text">
                 {{ setsRatioText }}
               </div>
             </div>
@@ -96,14 +96,14 @@
                 class="flex items-center justify-between text-xs font-mono p-1.5 rounded-lg bg-paper-subtle border border-plate/15"
               >
                 <div class="flex items-center gap-1.5 min-w-0 pr-2">
-                  <span class="w-4 h-4 rounded bg-plate text-white text-[9px] font-bold flex items-center justify-center flex-shrink-0">
+                  <span class="w-4 h-4 rounded bg-plate text-white text-[11px] font-bold flex items-center justify-center flex-shrink-0">
                     {{ exIdx + 1 }}
                   </span>
                   <span class="font-bold text-ink truncate">{{ ex.name }}</span>
                 </div>
 
                 <div class="flex items-center gap-1 flex-shrink-0 text-[11px]">
-                  <span class="text-emerald font-bold">{{ countExerciseCompletedSets(ex) }}</span>
+                  <span class="text-emerald-text font-bold">{{ countExerciseCompletedSets(ex) }}</span>
                   <span class="text-ink-muted">/</span>
                   <span class="text-ink-muted">{{ ex.sets ? ex.sets.length : 0 }} เซ็ต</span>
                 </div>
@@ -125,7 +125,7 @@
           <div class="p-3 bg-emerald-bg/50 border-2 border-emerald rounded-xl flex items-center gap-2.5">
             <span class="text-xl">💪</span>
             <div class="text-[11px] font-body text-ink leading-relaxed">
-              <strong class="font-bold text-emerald">ฟื้นฟูร่างกายและพักผ่อนให้เพียงพอ:</strong>
+              <strong class="font-bold text-emerald-text">ฟื้นฟูร่างกายและพักผ่อนให้เพียงพอ:</strong>
               ดื่มน้ำ ทานโปรตีน และนอนหลับ 7–8 ชม. เพื่อให้กล้ามเนื้อพร้อมสำหรับการฝึกรอบถัดไป!
             </div>
           </div>
