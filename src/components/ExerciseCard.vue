@@ -317,14 +317,11 @@
     </transition>
 
     <!-- Sets Table Header -->
-    <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[9px] sm:text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider grid grid-cols-[1fr_72px_58px_50px_34px] sm:grid-cols-[1fr_84px_70px_56px_38px] gap-1.5 sm:gap-2 items-center select-none">
-      <div>เซ็ต</div>
-      <div class="text-center" :title="isDumbbell ? 'น้ำหนักดัมเบลต่อข้าง (Per Dumbbell)' : 'น้ำหนักยก'">
-        {{ isDumbbell ? 'น.น./ข้าง' : 'น้ำหนัก' }}
-      </div>
-      <div class="text-center">ครั้ง</div>
-      <div class="text-center">แนะนำ</div>
-      <div class="text-center">เสร็จ</div>
+    <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[9px] sm:text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center justify-between gap-2 select-none">
+      <span>เซ็ต · แนะนำ · เสร็จ</span>
+      <span :title="isDumbbell ? 'น้ำหนักดัมเบลต่อข้าง (Per Dumbbell)' : 'น้ำหนักยก'">
+        {{ isDumbbell ? 'น.น./ข้าง' : 'น้ำหนัก' }} / ครั้ง (แตะค่าเพื่อพิมพ์)
+      </span>
     </div>
 
     <!-- Sets List -->
@@ -332,103 +329,120 @@
       <div
         v-for="(set, sIdx) in exercise.sets"
         :key="sIdx"
-        class="px-2.5 sm:px-4 py-2 sm:py-2.5 grid grid-cols-[1fr_72px_58px_50px_34px] sm:grid-cols-[1fr_84px_70px_56px_38px] gap-1.5 sm:gap-2 items-center transition-colors"
+        class="px-2.5 sm:px-4 py-2.5 sm:py-3 transition-colors"
         :class="isSetDone(sIdx) ? 'bg-emerald-bg/50' : 'hover:bg-surface-low/40'"
       >
-        <!-- 1. Set Indicator & Target Reps -->
-        <div class="flex flex-col justify-center min-w-0 pr-1 overflow-hidden">
-          <div class="flex items-center gap-1.5">
+        <!-- Top line: set label, previous record, advice, Done -->
+        <div class="flex items-center gap-2">
+          <div class="flex flex-col justify-center min-w-0 flex-1">
+            <div class="flex items-center gap-1.5">
+              <span
+                class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded tracking-wider uppercase border select-none flex-shrink-0"
+                :class="set.type === 'warm'
+                  ? 'bg-sky-bg text-sky border-sky/40'
+                  : 'bg-surface-card text-ink border-plate/30'"
+              >
+                {{ set.type === 'warm' ? 'W1' : `S${sIdx}` }}
+              </span>
+              <span class="text-xs sm:text-sm font-mono font-bold text-ink select-none truncate">
+                {{ getCleanTargetReps(set.reps) }}
+              </span>
+            </div>
             <span
-              class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded tracking-wider uppercase border select-none flex-shrink-0"
-              :class="set.type === 'warm'
-                ? 'bg-sky-bg text-sky border-sky/40'
-                : 'bg-surface-card text-ink border-plate/30'"
+              v-if="hasPrevForSet(sIdx)"
+              class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none truncate"
             >
-              {{ set.type === 'warm' ? 'W1' : `S${sIdx}` }}
+              ครั้งก่อน {{ getPrevWeight(sIdx) }} กก. × {{ getPrevReps(sIdx) || '—' }}
             </span>
-            <span class="text-xs sm:text-sm font-mono font-bold text-ink select-none truncate">
-              {{ getCleanTargetReps(set.reps) }}
+            <span
+              v-if="getSetNote(set.reps)"
+              class="text-[8px] sm:text-[9px] font-mono text-ink-muted/80 truncate select-none mt-0.5"
+              :title="getSetNote(set.reps)"
+            >
+              {{ getSetNote(set.reps) }}
             </span>
           </div>
-          <span
-            v-if="getSetNote(set.reps)"
-            class="text-[8px] sm:text-[9px] font-mono text-ink-muted/80 truncate select-none mt-0.5"
-            :title="getSetNote(set.reps)"
-          >
-            {{ getSetNote(set.reps) }}
-          </span>
-        </div>
 
-        <!-- 2. Weight Button (Column-Aligned) -->
-        <button
-          type="button"
-          @click="openWeightKeypad(sIdx)"
-          class="w-full h-8 sm:h-9 rounded-lg border-2 border-plate flex items-center justify-center gap-0.5 font-mono text-xs font-bold transition-all select-none touch-manipulation"
-          :class="getWeight(sIdx) !== ''
-            ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
-            : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
-          title="แตะเพื่อระบุน้ำหนักด้วยแป้น PIN"
-        >
-          <template v-if="getWeight(sIdx) !== ''">
-            <span class="tabular-nums font-extrabold text-xs sm:text-sm text-ink">
-              {{ getWeight(sIdx) }}
-            </span>
-            <span class="text-[9px] sm:text-[10px] text-flame font-bold">กก.</span>
-          </template>
-          <template v-else>
-            <span class="text-xs sm:text-sm text-ink-muted/40 font-bold">—</span>
-          </template>
-        </button>
-
-        <!-- 3. Reps Button (Column-Aligned) -->
-        <button
-          type="button"
-          @click="openRepsKeypad(sIdx, set.reps)"
-          class="w-full h-8 sm:h-9 rounded-lg border-2 border-plate flex items-center justify-center gap-0.5 font-mono text-xs font-bold transition-all select-none touch-manipulation"
-          :class="getReps(sIdx) !== ''
-            ? 'bg-white text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'
-            : 'bg-surface-low text-ink-muted/80 border-dashed hover:border-solid hover:bg-white'"
-          title="แตะเพื่อระบุจำนวนครั้งจริงด้วยแป้น PIN"
-        >
-          <template v-if="getReps(sIdx) !== ''">
-            <span class="tabular-nums font-extrabold text-xs sm:text-sm text-ink">
-              {{ getReps(sIdx) }}
-            </span>
-            <span class="text-[9px] sm:text-[10px] text-sky font-bold">ครั้ง</span>
-          </template>
-          <template v-else>
-            <span class="text-xs sm:text-sm text-ink-muted/40 font-bold">—</span>
-          </template>
-        </button>
-
-        <!-- 4. Progressive Overload Advice Badge (Column-Aligned) -->
-        <div class="flex items-center justify-center w-full">
-          <div
-            v-if="getSetAdvice(sIdx)"
-            class="w-full h-7 sm:h-8 rounded-md border-2 border-plate shadow-[0.5px_0.5px_0px_#1e2220] select-none text-[9px] sm:text-[10px] font-mono font-bold flex items-center justify-center whitespace-nowrap"
-            :class="getSetAdvice(sIdx).badgeClass"
-            :title="getSetAdvice(sIdx).reasonText"
-          >
-            {{ getSetAdvice(sIdx).delta > 0 ? '+2 kg' : getSetAdvice(sIdx).delta < 0 ? '-2 kg' : 'พอดี' }}
+          <!-- Progressive Overload Advice Badge -->
+          <div class="flex items-center justify-center w-14 flex-shrink-0">
+            <div
+              v-if="getSetAdvice(sIdx)"
+              class="w-full h-7 rounded-md border-2 border-plate shadow-[0.5px_0.5px_0px_#1e2220] select-none text-[9px] sm:text-[10px] font-mono font-bold flex items-center justify-center whitespace-nowrap"
+              :class="getSetAdvice(sIdx).badgeClass"
+              :title="getSetAdvice(sIdx).reasonText"
+            >
+              {{ getSetAdvice(sIdx).delta > 0 ? '+2 kg' : getSetAdvice(sIdx).delta < 0 ? '-2 kg' : 'พอดี' }}
+            </div>
+            <span v-else class="text-ink-muted/30 font-mono text-xs select-none">—</span>
           </div>
-          <span v-else class="text-ink-muted/30 font-mono text-xs select-none">—</span>
+
+          <!-- Done (56 px) -->
+          <button
+            type="button"
+            @click="onToggle(sIdx)"
+            class="w-14 h-14 flex-shrink-0 rounded-xl flex items-center justify-center font-bold text-base transition-all select-none border-2 border-plate touch-manipulation"
+            :class="isSetDone(sIdx)
+              ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669]'
+              : 'bg-surface hover:bg-paper-subtle text-ink-muted shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
+            title="ทำเซ็ตนี้สำเร็จ"
+          >
+            <svg v-if="isSetDone(sIdx)" class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span v-else class="text-lg font-mono opacity-50 font-bold">✓</span>
+          </button>
         </div>
 
-        <!-- 5. Complete Checkbox Button (Column-Aligned) -->
-        <button
-          type="button"
-          @click="onToggle(sIdx)"
-          class="w-full h-8 sm:h-9 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base transition-all select-none border-2 border-plate"
-          :class="isSetDone(sIdx)
-            ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669]'
-            : 'bg-surface hover:bg-paper-subtle text-ink-muted shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
-          title="ทำเซ็ตนี้สำเร็จ"
-        >
-          <svg v-if="isSetDone(sIdx)" class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-          </svg>
-          <span v-else class="text-[11px] sm:text-xs font-mono opacity-50 font-bold">✓</span>
-        </button>
+        <!-- Bottom line: ± steppers for weight and reps (tap the value to type it) -->
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <div class="flex items-center gap-1 min-w-0">
+            <button
+              type="button"
+              @click="stepWeight(sIdx, -1)"
+              class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              aria-label="ลดน้ำหนัก"
+            >−</button>
+            <button
+              type="button"
+              @click="openWeightKeypad(sIdx)"
+              class="flex-1 min-w-0 h-14 rounded-xl border-2 border-plate bg-white flex flex-col items-center justify-center touch-manipulation"
+              title="แตะเพื่อพิมพ์น้ำหนัก"
+            >
+              <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getWeight(sIdx) !== '' ? getWeight(sIdx) : '—' }}</span>
+              <span class="text-[10px] text-flame font-bold leading-none mt-0.5">กก.</span>
+            </button>
+            <button
+              type="button"
+              @click="stepWeight(sIdx, 1)"
+              class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              aria-label="เพิ่มน้ำหนัก"
+            >+</button>
+          </div>
+
+          <div class="flex items-center gap-1 min-w-0">
+            <button
+              type="button"
+              @click="stepReps(sIdx, -1)"
+              class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              aria-label="ลดจำนวนครั้ง"
+            >−</button>
+            <button
+              type="button"
+              @click="openRepsKeypad(sIdx, set.reps)"
+              class="flex-1 min-w-0 h-14 rounded-xl border-2 border-plate bg-white flex flex-col items-center justify-center touch-manipulation"
+              title="แตะเพื่อพิมพ์จำนวนครั้งจริง"
+            >
+              <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getReps(sIdx) !== '' ? getReps(sIdx) : '—' }}</span>
+              <span class="text-[10px] text-sky font-bold leading-none mt-0.5">ครั้ง</span>
+            </button>
+            <button
+              type="button"
+              @click="stepReps(sIdx, 1)"
+              class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              aria-label="เพิ่มจำนวนครั้ง"
+            >+</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -450,6 +464,7 @@ import { useWeightAdvisor } from '../composables/useWeightAdvisor';
 import { useTimer } from '../composables/useTimer';
 import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
+import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 
 const showHistory = ref(false);
 
@@ -607,6 +622,21 @@ function getPrevReps(sIdx) {
     return exLast.value.reps_1;
   }
   return '';
+}
+
+// Set-row steppers (step 3): ± one tap; an empty value starts from the previous record.
+function hasPrevForSet(sIdx) {
+  return getPrevWeight(sIdx) !== 0 || getPrevReps(sIdx) !== '';
+}
+
+function stepWeight(sIdx, dir) {
+  const next = stepFrom(getWeight(sIdx), getPrevWeight(sIdx), dir, WEIGHT_STEP_KG);
+  updateWeight(currentDay.value, props.exercise.id, sIdx, String(next));
+}
+
+function stepReps(sIdx, dir) {
+  const next = stepFrom(getReps(sIdx), getPrevReps(sIdx), dir, REPS_STEP);
+  updateReps(currentDay.value, props.exercise.id, sIdx, String(next));
 }
 
 function getWeight(sIdx) {
