@@ -179,6 +179,9 @@
     <!-- Barbell Plate Calculator Modal (z-50) -->
     <PlateCalculatorModal />
 
+    <!-- Standalone 1RM calculator (opened from the account page) -->
+    <OneRmCalculatorModal />
+
     <!-- Exercise Library Modal (Browse / Search / Create Custom) -->
     <ExerciseLibraryModal
       :is-open="showExerciseLibrary"
@@ -233,6 +236,7 @@ import TodoView from './components/TodoView.vue';
 import RestDayView from './components/RestDayView.vue';
 import PinKeypad from './components/PinKeypad.vue';
 import PlateCalculatorModal from './components/PlateCalculatorModal.vue';
+import OneRmCalculatorModal from './components/OneRmCalculatorModal.vue';
 import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
 import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
 import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';

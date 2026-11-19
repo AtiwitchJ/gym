@@ -36,6 +36,21 @@
       </div>
     </div>
 
+    <!-- 1RM Calculator (standalone; no session needed) -->
+    <div class="archive-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase block">1RM CALCULATOR</span>
+        <p class="text-xs text-ink-muted font-body">ประเมิน 1RM จากเซ็ตย่อย โดยไม่ต้องบันทึกเซสชัน</p>
+      </div>
+      <button
+        type="button"
+        @click="openOneRm"
+        class="min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl border-2 border-plate bg-emerald hover:bg-emerald/90 text-white font-heading font-bold text-sm shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+      >
+        🧮 คำนวณ 1RM
+      </button>
+    </div>
+
     <!-- All-Time Stats Overview -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
@@ -248,6 +263,9 @@ import { useExerciseStore } from '../composables/useExerciseStore.js';
 import { useWorkoutStore } from '../composables/useWorkoutStore.js';
 import { useExcelExport } from '../composables/useExcelExport.js';
 import { useTimer } from '../composables/useTimer.js';
+import { useOneRmCalculator } from '../composables/useOneRm.js';
+
+const { open: openOneRm } = useOneRmCalculator();
 
 const { routines, resetToDefaults } = useRoutineStore();
 const { sessionHistory, discardSession } = useActiveSessionStore();
