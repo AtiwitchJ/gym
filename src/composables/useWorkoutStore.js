@@ -493,6 +493,16 @@ function updateWeight(day, exId, setIdx, val) {
     lastWeights[exId][`wt_${setIdx}`] = val;
     lastWeights[exId].updatedAt = new Date().toISOString().split('T')[0];
 
+    // If updating set 1 on a multi-set exercise, harmonize sets 2 and 3 in draft state if empty
+    if (setIdx === 1 && isMultiSetExercise(exId)) {
+      if (userState[day][exId].wt_2 === undefined || userState[day][exId].wt_2 === '') {
+        userState[day][exId].wt_2 = val;
+      }
+      if (userState[day][exId].wt_3 === undefined || userState[day][exId].wt_3 === '') {
+        userState[day][exId].wt_3 = val;
+      }
+    }
+
     // Sync across linked exercises on other days (e.g. bonus vs main)
     syncLinkedExerciseRecords(exId, setIdx, val, undefined);
   }
@@ -509,6 +519,16 @@ function updateReps(day, exId, setIdx, val) {
     if (!lastWeights[exId]) lastWeights[exId] = {};
     lastWeights[exId][`reps_${setIdx}`] = val;
     lastWeights[exId].updatedAt = new Date().toISOString().split('T')[0];
+
+    // If updating set 1 on a multi-set exercise, harmonize sets 2 and 3 in draft state if empty
+    if (setIdx === 1 && isMultiSetExercise(exId)) {
+      if (userState[day][exId].reps_2 === undefined || userState[day][exId].reps_2 === '') {
+        userState[day][exId].reps_2 = val;
+      }
+      if (userState[day][exId].reps_3 === undefined || userState[day][exId].reps_3 === '') {
+        userState[day][exId].reps_3 = val;
+      }
+    }
 
     // Sync across linked exercises on other days (e.g. bonus vs main)
     syncLinkedExerciseRecords(exId, setIdx, undefined, val);
@@ -543,18 +563,63 @@ function toggleSetDone(day, exId, setIdx) {
 }
 
 async function resetDayData(day = currentDay.value) {
-  if (userState[day]) {
+  const dayData = workoutData[day];
+  const nextDayState = {};
+
+  if (dayData) {
+    function setupResetExercise(ex) {
+      nextDayState[ex.id] = {};
+      const exRec = getExerciseLastRecord(ex.id) || {};
+      ex.sets.forEach((set, sIdx) => {
+        let pw = exRec[`wt_${sIdx}`];
+        if ((pw === undefined || pw === '') && sIdx >= 1) {
+          pw = exRec.wt_1 || exRec.wt_2 || exRec.wt_3;
+        }
+        if (pw !== undefined && pw !== '' && Number(pw) > 0) {
+          nextDayState[ex.id][`wt_${sIdx}`] = pw;
+        }
+        let pr = exRec[`reps_${sIdx}`];
+        if ((pr === undefined || pr === '') && sIdx >= 1) {
+          pr = exRec.reps_1 || exRec.reps_2 || exRec.reps_3;
+        }
+        if (pr !== undefined && pr !== '' && Number(pr) > 0) {
+          nextDayState[ex.id][`reps_${sIdx}`] = pr;
+        } else {
+          const parsedTarget = parseRepTarget(set.reps);
+          if (parsedTarget && parsedTarget.max) {
+            nextDayState[ex.id][`reps_${sIdx}`] = parsedTarget.max;
+          }
+        }
+      });
+    }
+
+    if (dayData.exercises) dayData.exercises.forEach(setupResetExercise);
+    if (dayData.bonusExercises) dayData.bonusExercises.forEach(setupResetExercise);
+    userState[day] = nextDayState;
+  } else {
     delete userState[day];
-    persistLocal();
-    try {
-      await fetch('/api/reset-day', {
+  }
+
+  persistLocal();
+  try {
+    await fetch('/api/reset-day', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dayKey: day })
+    });
+    if (dayData && Object.keys(nextDayState).length > 0) {
+      await fetch('/api/state', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dayKey: day })
+        body: JSON.stringify({
+          dayKey: day,
+          state: userState[day],
+          weights: lastWeights
+        })
       });
-    } catch (e) {}
-    showToast('ล้างการติ๊กของวันนี้เรียบร้อย');
-  }
+    }
+  } catch (e) {}
+  showToast('ล้างการติ๊กและเตรียมสถิติรอบใหม่เรียบร้อย');
 }
 
 async function finishAndSaveWorkout() {
@@ -669,19 +734,48 @@ async function finishAndSaveWorkout() {
 
   await recordSessionToHistory(session);
 
-  // Auto-reset checkmarks and draft entries for current day so the user is ready for the next round
-  if (userState[currentDay.value]) {
-    const daySt = userState[currentDay.value];
-    for (const exId of Object.keys(daySt)) {
-      if (daySt[exId] && typeof daySt[exId] === 'object') {
-        for (const k of Object.keys(daySt[exId])) {
-          if (k.startsWith('set_') || k.startsWith('wt_') || k.startsWith('reps_')) {
-            delete daySt[exId][k];
-          }
+  // Reset session lifecycle: clear checkmarks and pre-fill next round with latest stats and target reps
+  const nextDayState = {};
+  function setupNextRoundExercise(ex) {
+    nextDayState[ex.id] = {};
+    const exRec = getExerciseLastRecord(ex.id) || {};
+
+    ex.sets.forEach((set, sIdx) => {
+      // 1. Reset checkmarks: do NOT set set_${sIdx} (defaults to false/unchecked)
+
+      // 2. Pre-fill weight from latest stats
+      let pw = exRec[`wt_${sIdx}`];
+      if ((pw === undefined || pw === '') && sIdx >= 1) {
+        pw = exRec.wt_1 || exRec.wt_2 || exRec.wt_3;
+      }
+      if (pw !== undefined && pw !== '' && Number(pw) > 0) {
+        nextDayState[ex.id][`wt_${sIdx}`] = pw;
+      }
+
+      // 3. Pre-fill target reps intelligently
+      let pr = exRec[`reps_${sIdx}`];
+      if ((pr === undefined || pr === '') && sIdx >= 1) {
+        pr = exRec.reps_1 || exRec.reps_2 || exRec.reps_3;
+      }
+      if (pr !== undefined && pr !== '' && Number(pr) > 0) {
+        nextDayState[ex.id][`reps_${sIdx}`] = pr;
+      } else {
+        const parsedTarget = parseRepTarget(set.reps);
+        if (parsedTarget && parsedTarget.max) {
+          nextDayState[ex.id][`reps_${sIdx}`] = parsedTarget.max;
         }
       }
-    }
+    });
   }
+
+  if (dayData.exercises) {
+    dayData.exercises.forEach(setupNextRoundExercise);
+  }
+  if (dayData.bonusExercises) {
+    dayData.bonusExercises.forEach(setupNextRoundExercise);
+  }
+
+  userState[currentDay.value] = nextDayState;
   persistLocal();
 
   // Sync latest weights and reset state to SQLite backend
@@ -801,6 +895,7 @@ export function useWorkoutStore() {
     deleteTodo,
     getCanonicalExerciseId,
     getLinkedExerciseIds,
+    isMultiSetExercise,
     getExerciseLastRecord,
     syncLinkedExerciseRecords,
     showToast,
