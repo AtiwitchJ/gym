@@ -609,6 +609,18 @@ const repo = {
     `).all();
   },
 
+  // Completed sets with weight and reps (volume input). Read-only; feeds /api/volume/weekly.
+  getCompletedSetVolumeRows() {
+    return db.prepare(`
+      SELECT se.exercise_id AS exerciseId, se.exercise_name AS exerciseName, ws.date AS date,
+             ss.done AS done, ss.weight AS weight, ss.actual_reps AS actualReps
+      FROM session_sets ss
+      JOIN session_exercises se ON se.id = ss.session_exercise_id
+      JOIN workout_sessions ws ON ws.id = se.session_id
+      WHERE ss.done = 1
+    `).all();
+  },
+
   deleteSession(sessionId) {
     const result = db.prepare('DELETE FROM workout_sessions WHERE id = ?').run(sessionId);
     return { success: result.changes > 0 };

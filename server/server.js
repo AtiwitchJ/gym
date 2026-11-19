@@ -5,6 +5,7 @@ const fs = require('fs');
 const repo = require('./db');
 const recovery = require('./recovery');
 const { withPr } = require('./exercise-stats');
+const volume = require('./volume');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -141,6 +142,16 @@ app.get('/api/recovery', (req, res) => {
     res.json(recovery.buildRecovery(repo.getCompletedSetRows(), Date.now()));
   } catch (err) {
     console.error('Error computing recovery:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Weekly training volume per muscle and per exercise, last 8 weeks (completed sets only)
+app.get('/api/volume/weekly', (req, res) => {
+  try {
+    res.json(volume.buildWeeklyVolume(repo.getCompletedSetVolumeRows(), Date.now()));
+  } catch (err) {
+    console.error('Error computing weekly volume:', err);
     res.status(500).json({ error: err.message });
   }
 });
