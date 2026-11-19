@@ -70,7 +70,7 @@ const activeTabId = computed(() => {
 // Subtitle: "วันนี้" shows the next program after the last completed session; others keep their text.
 function tabSub(tab) {
   if (tab.id === 'today') {
-    if (isRestWeekday()) return 'วันพัก';
+    // One status: the same program name as the next-session card on the rest view (language item 2).
     return workoutStore.todayProgramKey?.value === 'prog_b' ? 'Program B' : 'Program A';
   }
   return tab.sub;

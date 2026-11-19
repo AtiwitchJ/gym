@@ -49,3 +49,9 @@ export function programLabel(key) {
 export function nextProgramHint(key) {
   return `ต่อไป: ${programLabel(key)} · ต่อจากครั้งล่าสุดที่ทำเสร็จ`;
 }
+
+/** True when a day's state has at least one ticked set (used to keep the program view on a rest weekday). */
+export function hasTickedSets(dayState) {
+  if (!dayState) return false;
+  return Object.values(dayState).some((ex) => ex && Object.keys(ex).some((k) => k.startsWith('set_') && ex[k]));
+}

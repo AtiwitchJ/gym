@@ -238,6 +238,7 @@ import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
 import WorkoutsView from './components/WorkoutsView.vue';
 import ProfileView from './components/ProfileView.vue';
 import { isRestWeekday } from './data/workouts.js';
+import { hasTickedSets } from './composables/useRestPanel.js';
 import { useDockPadding } from './composables/useDockPadding.js';
 
 // The page keeps clear of the fixed bottom dock, whatever its height is (regular tester item 2).
@@ -255,7 +256,8 @@ const {
   finishAndSaveWorkout,
   fetchServerState,
   lastSessionSummary,
-  closeSessionSummary
+  closeSessionSummary,
+  todayProgramKey
 } = useWorkoutStore();
 
 const { isRunning: isTimerRunning } = useTimer();
@@ -334,7 +336,9 @@ onMounted(() => {
 const activeDayKey = computed(() => currentDay.value);
 const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(activeDayKey.value));
 // วันนี้ on a rest weekday (Tue/Thu/Sat/Sun) shows the rest view; the program is still reachable from โปรแกรม.
-const showRestToday = computed(() => currentTab.value === 'today' && isRestWeekday());
+// A rest weekday shows the rest view unless today's program already has ticked sets (then the program is shown).
+const todayHasProgress = computed(() => hasTickedSets(userState[todayProgramKey.value]));
+const showRestToday = computed(() => currentTab.value === 'today' && isRestWeekday() && !todayHasProgress.value);
 const currentDayData = computed(() => workoutData[activeDayKey.value]);
 
 // Progress calculation

@@ -3,10 +3,10 @@
     <!-- Header -->
     <div class="archive-card p-5">
       <span class="text-[10px] font-mono font-bold tracking-widest text-sky uppercase">
-        ACTIVE RECOVERY PROTOCOL
+        วันพัก
       </span>
       <h2 class="text-xl font-bold font-heading text-ink tracking-tight">
-        วันพักฟื้นกล้ามเนื้อ (Rest & Regeneration)
+        วันนี้เป็นวันพัก ฟื้นฟูร่างกาย
       </h2>
       <p class="text-xs text-ink-muted mt-1 font-body">
         กล้ามเนื้อไม่ได้เติบโตตอนยกในยิม แต่เติบโตตอนนอนหลับและซ่อมแซมเส้นใยกล้ามเนื้อ

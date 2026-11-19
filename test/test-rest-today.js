@@ -22,15 +22,16 @@ console.log('✓ Tue, Thu, Sat, Sun are rest; Mon, Wed, Fri are program days.');
 
 console.log('▶ [2] App.vue: rest view under วันนี้, program hidden on rest days...');
 const app = fs.readFileSync(path.join(root, 'src/App.vue'), 'utf8');
-assert.ok(app.includes("const showRestToday = computed(() => currentTab.value === 'today' && isRestWeekday());"), 'showRestToday must use the weekday rule');
+assert.ok(app.includes("const showRestToday = computed(() => currentTab.value === 'today' && isRestWeekday() && !todayHasProgress.value);"), 'showRestToday uses the weekday rule and yields to ticked sets');
+assert.ok(app.includes("const todayHasProgress = computed(() => hasTickedSets(userState[todayProgramKey.value]));"), 'todayHasProgress uses the tested helper');
 assert.ok(app.includes('isWorkoutDay && currentDayData && !showRestToday'), 'program view must be hidden on rest days');
 assert.ok(app.includes("currentTab === 'rest' || showRestToday"), 'RestDayView must show on rest days');
 assert.ok(app.includes("import { isRestWeekday } from './data/workouts.js';"), 'App imports isRestWeekday');
 console.log('✓ App branches verified.');
 
-console.log('▶ [3] DayTabs subtitle says วันพัก on rest days...');
+console.log('▶ [3] DayTabs subtitle names the next program...');
 const tabs = fs.readFileSync(path.join(root, 'src/components/DayTabs.vue'), 'utf8');
-assert.ok(tabs.includes("if (isRestWeekday()) return 'วันพัก';"), 'subtitle must be วันพัก on rest days');
+assert.ok(!tabs.includes("if (isRestWeekday()) return 'วันพัก';"), 'subtitle no longer says วันพัก (one status: the next program)');
 console.log('✓ Subtitle verified.');
 
 console.log('\n====================================================');
