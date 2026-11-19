@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { labelFor } from './setLabels.js';
 
 export function useExcelExport() {
   function exportWorkoutHistory(history) {
@@ -12,19 +13,19 @@ export function useExcelExport() {
       if (session.exercises && session.exercises.length > 0) {
         session.exercises.forEach(ex => {
           if (ex.sets && ex.sets.length > 0) {
-            ex.sets.forEach(set => {
+            ex.sets.forEach((set, idx) => {
               rows.push({
                 'วันที่': session.date,
                 'เวลา': session.time,
                 'โปรแกรมวัน': session.dayTitle,
                 'ชื่อท่าฝึก': ex.name,
                 'ประเภท': ex.category || '-',
-                'เซ็ตที่': set.setIndex,
+                'เซ็ตที่': labelFor(ex.sets, idx) || '-',
                 'ประเภทเซ็ต': set.type,
                 'เป้าหมาย': set.target,
                 'น้ำหนัก (กก.)': set.weight !== undefined && set.weight !== '' ? Number(set.weight) : 0,
                 'จำนวนครั้งจริง': set.actualReps !== undefined && set.actualReps !== '' ? Number(set.actualReps) : '',
-                'สถานะ': set.done ? 'ผ่าน ✓' : 'ข้าม'
+                'สถานะ': set.done ? 'ผ่าน ✓' : 'ยังไม่ได้ติ๊ก'
               });
             });
           }

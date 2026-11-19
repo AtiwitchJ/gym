@@ -137,21 +137,22 @@
             <!-- Sets Chips -->
             <div class="flex flex-wrap gap-1.5">
               <span
-                v-for="set in ex.sets"
-                :key="set.setIndex"
+                v-for="row in labelSets(ex.sets)"
+                :key="row.key"
                 class="text-[10px] font-mono font-bold px-2 py-1 rounded-md border tabular-nums"
-                :class="set.done
+                :class="row.status === 'done'
                   ? 'bg-emerald-bg text-emerald border-emerald'
-                  : 'bg-surface-low text-ink-muted border-plate/20 line-through'"
+                  : 'bg-surface-low text-ink-muted border-plate/20'"
               >
-                {{ set.type === 'วอร์ม' ? 'W' : 'S' }}{{ set.setIndex }}:
-                {{ (set.weight !== undefined && set.weight !== '') ? set.weight : 0 }} กก.
-                <span v-if="set.actualReps !== undefined && set.actualReps !== null && set.actualReps !== ''">
-                  ({{ set.actualReps }} ครั้ง)
+                {{ row.label }}:
+                {{ (row.set.weight !== undefined && row.set.weight !== '') ? row.set.weight : 0 }} กก.
+                <span v-if="row.set.actualReps !== undefined && row.set.actualReps !== null && row.set.actualReps !== ''">
+                  ({{ row.set.actualReps }} ครั้ง)
                 </span>
                 <span v-else>
-                  ({{ set.target }})
+                  ({{ row.set.target }})
                 </span>
+                <span v-if="row.status !== 'done'"> · ยังไม่ได้ติ๊ก</span>
               </span>
             </div>
           </div>
@@ -164,6 +165,7 @@
 <script setup>
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
+import { labelSets } from '../composables/setLabels.js';
 import VolumeChart from './VolumeChart.vue';
 
 const { workoutHistory, deleteSession } = useWorkoutStore();

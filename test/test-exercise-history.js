@@ -55,7 +55,8 @@ console.log('✓ PR formatting verified.');
 console.log('▶ [3] History row text per set...');
 assert.strictEqual(setText(sessions[0].sets[1]), '40 kg × 9 · RIR 2');
 assert.strictEqual(setText(sessions[0].sets[0]), '20 kg × 15');
-assert.strictEqual(setText(sessions[0].sets[2]), 'ข้าม', 'not done shows as skipped, not 0 reps');
+assert.strictEqual(setText(sessions[0].sets[2]), '40 kg × — · ยังไม่ได้ติ๊ก', 'a typed but unticked set says so (never ข้าม)');
+assert.strictEqual(setText({ done: false, weight: null, actualReps: null }), '', 'an empty unticked set shows no text');
 console.log('✓ Set labels verified.');
 
 console.log('▶ [4] Fetch uses the exercise id and shows errors...');

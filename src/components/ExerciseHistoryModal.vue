@@ -54,12 +54,12 @@
             </div>
             <div class="flex flex-wrap gap-1.5">
               <span
-                v-for="set in session.sets"
-                :key="set.setIndex"
+                v-for="row in labelSets(session.sets)"
+                :key="row.key"
                 class="text-[11px] font-mono px-2 py-0.5 rounded-lg border-2 border-plate"
-                :class="set.done ? 'bg-emerald-bg text-ink' : 'bg-paper-subtle text-ink-muted line-through'"
+                :class="row.status === 'done' ? 'bg-emerald-bg text-ink' : 'bg-paper-subtle text-ink-muted'"
               >
-                S{{ set.setIndex }} {{ setLabel(set) }}
+                {{ row.label }} {{ setLabel(row.set) }}
               </span>
             </div>
           </li>
@@ -72,6 +72,7 @@
 <script setup>
 import { computed, watch } from 'vue';
 import { useExerciseHistory, formatPr, hasPr, setText, HISTORY_EMPTY_MESSAGE } from '../composables/useExerciseHistory.js';
+import { labelSets } from '../composables/setLabels.js';
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },

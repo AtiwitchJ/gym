@@ -62,7 +62,9 @@ export function formatPr(pr) {
 
 /** Short text for one set in a history row. */
 export function setText(set) {
-  if (!set.done) return 'ข้าม';
+  // Review fix: never 'ข้าม'. A set that was not ticked says so; a set with no values shows nothing.
+  const hasValues = (set.weight !== null && set.weight !== undefined && set.weight > 0) || (set.actualReps !== null && set.actualReps !== undefined && set.actualReps > 0);
+  if (!set.done) return hasValues ? `${set.weight ?? '—'} kg × ${set.actualReps ?? '—'} · ยังไม่ได้ติ๊ก` : '';
   const weight = set.weight !== null ? `${set.weight} kg` : '—';
   const reps = set.actualReps !== null ? `× ${set.actualReps}` : '';
   const rir = set.rir !== null ? ` · RIR ${rirLabel(set.rir, set.rirPlus)}` : '';
