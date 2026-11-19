@@ -443,6 +443,22 @@
             >+</button>
           </div>
         </div>
+
+        <!-- RIR after Done (optional): 3 buttons -->
+        <div v-if="isSetDone(sIdx)" class="mt-2 flex items-center gap-1.5 flex-wrap">
+          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted select-none">ความเหนื่อย (ไม่บังคับ):</span>
+          <button
+            v-for="opt in RIR_CHOICES"
+            :key="opt.value"
+            type="button"
+            @click="pickRir(sIdx, opt.value)"
+            class="min-h-[40px] px-3 rounded-xl border-2 border-plate text-xs font-heading font-bold transition-all touch-manipulation"
+            :class="getRir(sIdx) === opt.value
+              ? 'bg-flame text-white shadow-[1.5px_1.5px_0px_#1e2220]'
+              : 'bg-surface text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
+            :title="opt.title"
+          >{{ opt.label }}</button>
+        </div>
       </div>
     </div>
 
@@ -465,6 +481,7 @@ import { useTimer } from '../composables/useTimer';
 import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
+import { RIR_CHOICES, normalizeRir, nextRir } from '../composables/useRir.js';
 
 const showHistory = ref(false);
 
@@ -482,6 +499,7 @@ const {
   getExerciseLastRecord,
   updateWeight,
   updateReps,
+  updateRir,
   applyPrevRecord,
   toggleSetDone,
   showExerciseImages
@@ -637,6 +655,15 @@ function stepWeight(sIdx, dir) {
 function stepReps(sIdx, dir) {
   const next = stepFrom(getReps(sIdx), getPrevReps(sIdx), dir, REPS_STEP);
   updateReps(currentDay.value, props.exercise.id, sIdx, String(next));
+}
+
+// RIR after Done (step 5): tap the chosen button again to clear it.
+function getRir(sIdx) {
+  return normalizeRir(exState.value[`rir_${sIdx}`]);
+}
+
+function pickRir(sIdx, value) {
+  updateRir(currentDay.value, props.exercise.id, sIdx, nextRir(getRir(sIdx), value));
 }
 
 function getWeight(sIdx) {

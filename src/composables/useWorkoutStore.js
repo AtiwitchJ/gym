@@ -2,6 +2,7 @@ import { ref, reactive, watch, computed } from 'vue';
 import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay, resolveDayKey, nextProgramKey } from '../data/workouts.js';
 import { defaultTodos } from '../data/defaultTodos.js';
 import { parseRepTarget } from './useWeightAdvisor.js';
+import { normalizeRir } from './useRir.js';
 
 export function isMultiSetExercise(exId) {
   if (!exId) return false;
@@ -540,6 +541,14 @@ function updateWeight(day, exId, setIdx, val) {
   triggerSave(day);
 }
 
+// RIR (0, 1, 2 = "2+") chosen after a set is done. null clears it. Saved with the day state.
+function updateRir(day, exId, setIdx, val) {
+  if (!userState[day]) userState[day] = {};
+  if (!userState[day][exId]) userState[day][exId] = {};
+  userState[day][exId][`rir_${setIdx}`] = normalizeRir(val);
+  triggerSave(day);
+}
+
 function updateReps(day, exId, setIdx, val) {
   if (!userState[day]) userState[day] = {};
   if (!userState[day][exId]) userState[day][exId] = {};
@@ -697,7 +706,8 @@ async function finishAndSaveWorkout() {
         target: set.reps,
         weight: wt,
         actualReps: reps,
-        done: isDone
+        done: isDone,
+        rir: normalizeRir(exState[`rir_${sIdx}`])
       };
     });
 
@@ -921,6 +931,7 @@ export function useWorkoutStore() {
     switchTab,
     updateWeight,
     updateReps,
+    updateRir,
     applyPrevWeight,
     applyPrevRecord,
     toggleSetDone,
