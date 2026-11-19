@@ -90,7 +90,7 @@
           <div>
             <div class="flex items-center justify-between gap-1 mb-1">
               <span class="text-xs font-bold font-heading text-ink">Program A</span>
-              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-flame-bg text-flame font-bold">6 ท่า • อก+หลัง+ท้อง</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-flame-bg text-flame font-bold">6 ท่า • {{ programSetTotal('prog_a') }} เซ็ต • อก+หลัง+ท้อง</span>
             </div>
             <p class="text-[11px] text-ink-muted line-clamp-1 font-body">
               Flat DB, Lat Pulldown, Incline DB, Seated Row, Pec Fly, Leg Raise
@@ -120,7 +120,7 @@
           <div>
             <div class="flex items-center justify-between gap-1 mb-1">
               <span class="text-xs font-bold font-heading text-ink">Program B</span>
-              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-bg text-emerald font-bold">7 ท่า • ขา+แขน+ไหล่</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-bg text-emerald font-bold">7 ท่า • {{ programSetTotal('prog_b') }} เซ็ต • ขา+แขน+ไหล่</span>
             </div>
             <p class="text-[11px] text-ink-muted line-clamp-1 font-body">
               Leg Press, Hip Thrust, Leg Ext, DB Shoulder, Shrug, Triceps, Hammer
@@ -147,55 +147,6 @@
       </div>
     </div>
 
-    <!-- 3-Day A/B Alternating Split Quick Chips (Program A & Program B) -->
-    <div class="archive-card p-3 sm:p-4">
-      <div class="flex items-center justify-between mb-2.5">
-        <div class="flex items-center gap-2">
-          <span class="text-[10px] font-mono font-bold tracking-widest text-emerald uppercase">
-            3-DAY A/B ALTERNATING PROTOCOL
-          </span>
-          <span class="text-plate/30">•</span>
-          <span class="text-[11px] font-mono text-ink-muted">
-            จันทร์, พุธ, ศุกร์
-          </span>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <button
-          type="button"
-          @click="launchProgramA"
-          class="min-h-[44px] min-w-[44px] flex items-center justify-between p-3 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] bg-surface hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation group text-left"
-        >
-          <div>
-            <div class="flex items-center gap-1.5 mb-0.5">
-              <span class="w-2 h-2 rounded-full bg-emerald"></span>
-              <span class="text-xs font-bold font-heading text-ink">Program A</span>
-              <span class="text-[10px] font-mono text-emerald font-bold">6 ท่า</span>
-            </div>
-            <p class="text-[11px] font-body text-ink-muted truncate">อก + หลัง + ท้อง (Chest, Back & Abs)</p>
-          </div>
-          <span class="text-xs font-mono font-bold text-emerald group-hover:translate-x-0.5 transition-transform">⚡ เริ่มฝึก</span>
-        </button>
-
-        <button
-          type="button"
-          @click="launchProgramB"
-          class="min-h-[44px] min-w-[44px] flex items-center justify-between p-3 rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] bg-surface hover:bg-paper-subtle active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation group text-left"
-        >
-          <div>
-            <div class="flex items-center gap-1.5 mb-0.5">
-              <span class="w-2 h-2 rounded-full bg-flame"></span>
-              <span class="text-xs font-bold font-heading text-ink">Program B</span>
-              <span class="text-[10px] font-mono text-flame font-bold">7 ท่า</span>
-            </div>
-            <p class="text-[11px] font-body text-ink-muted truncate">ขา + แขน + ไหล่/บ่า (Legs, Arms & Shoulders)</p>
-          </div>
-          <span class="text-xs font-mono font-bold text-flame group-hover:translate-x-0.5 transition-transform">⚡ เริ่มฝึก</span>
-        </button>
-      </div>
-    </div>
-
     <!-- Routines List Section Header -->
     <div class="flex items-center justify-between pt-1 px-1">
       <div class="flex items-center gap-2">
@@ -203,7 +154,7 @@
           ตารางออกกำลังกายทั้งหมด (Routines)
         </h3>
         <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-paper-subtle border border-plate/30 text-ink-muted">
-          {{ routines.length }}
+          {{ displayRoutines.length }}
         </span>
       </div>
     </div>
@@ -211,7 +162,7 @@
     <!-- Routine Cards Grid / Stack -->
     <div class="space-y-3">
       <div
-        v-for="routine in routines"
+        v-for="routine in displayRoutines"
         :key="routine.id"
         class="archive-card p-4 sm:p-4.5 transition-all hover:border-plate shadow-[3px_3px_0px_#1e2220]"
       >
@@ -317,6 +268,11 @@ import { useRoutineStore } from '../composables/useRoutineStore.js';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
 import { useExerciseStore } from '../composables/useExerciseStore.js';
 import { useWorkoutStore } from '../composables/useWorkoutStore.js';
+import { programSetTotal } from '../data/workouts.js';
+
+// The two program templates are already the 1-click cards above, so they are not listed twice (secondary item 1).
+const PROGRAM_TEMPLATE_IDS = ['atiwitch_prog_a', 'atiwitch_prog_b', 'atiwitch_ab_program_a', 'atiwitch_ab_program_b'];
+const displayRoutines = computed(() => routines.value.filter((r) => !PROGRAM_TEMPLATE_IDS.includes(r.id)));
 
 const emit = defineEmits(['create-routine', 'edit-routine', 'open-runner']);
 

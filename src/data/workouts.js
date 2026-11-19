@@ -1466,3 +1466,12 @@ export function nextProgramKey(sessions) {
 }
 
 
+
+/** Total number of sets in a program day (main and bonus), one source for every count shown. */
+export function programSetTotal(key) {
+  const day = workoutData[key];
+  if (!day) return 0;
+  const main = (day.exercises || []).reduce((acc, ex) => acc + (ex.sets || []).length, 0);
+  const bonus = (day.bonusExercises || []).reduce((acc, ex) => acc + (ex.sets || []).length, 0);
+  return main + bonus;
+}
