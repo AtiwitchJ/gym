@@ -144,8 +144,7 @@
                   ? 'bg-emerald-bg text-emerald border-emerald'
                   : 'bg-surface-low text-ink-muted border-plate/20'"
               >
-                {{ row.label }}:
-                {{ (row.set.weight !== undefined && row.set.weight !== '') ? row.set.weight : 0 }} กก.
+                {{ row.label }}: {{ weightText(row.set) }}
                 <span v-if="row.set.actualReps !== undefined && row.set.actualReps !== null && row.set.actualReps !== ''">
                   ({{ row.set.actualReps }} ครั้ง)
                 </span>
@@ -165,7 +164,7 @@
 <script setup>
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
-import { labelSets } from '../composables/setLabels.js';
+import { labelSets, weightText } from '../composables/setLabels.js';
 import VolumeChart from './VolumeChart.vue';
 
 const { workoutHistory, deleteSession } = useWorkoutStore();

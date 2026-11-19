@@ -46,3 +46,11 @@ export function labelFor(sets, index) {
   const row = labelSets(sets).find((r) => r.key === `${index}`);
   return row ? row.label : '';
 }
+
+/** Weight text for a history row: "70 กก." or, when no weight was entered, "ไม่ได้ใส่น้ำหนัก". */
+export function weightText(set) {
+  const raw = set ? set.weight : undefined;
+  const n = Number(raw);
+  if (raw === undefined || raw === null || raw === '' || !Number.isFinite(n) || n <= 0) return 'ไม่ได้ใส่น้ำหนัก';
+  return `${n} กก.`;
+}
