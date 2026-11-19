@@ -192,6 +192,55 @@
             </button>
           </div>
         </div>
+
+        <!-- Rest sound: on/off and level (restAlerts.js) -->
+        <div class="p-3 bg-surface rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] space-y-2.5">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <span class="text-xs sm:text-sm font-bold font-heading text-ink block">เสียงเตือนเวลาพัก</span>
+              <span class="text-[11px] text-ink-muted font-body">เสียงใกล้ครบและเสียงพักครบ (ปิดเสียงแล้วการสั่นยังทำงาน)</span>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="restSound.enabled ? 'true' : 'false'"
+              @click="toggleRestSound"
+              class="min-h-[44px] min-w-[64px] px-3 rounded-xl border-2 border-plate font-mono font-bold text-xs touch-manipulation"
+              :class="restSound.enabled ? 'bg-emerald text-white' : 'bg-paper text-ink'"
+            >{{ restSound.enabled ? 'เปิด' : 'ปิด' }}</button>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 sm:gap-2" :class="restSound.enabled ? '' : 'opacity-50'">
+            <button
+              v-for="opt in SOUND_LEVEL_OPTIONS"
+              :key="opt.value"
+              type="button"
+              :disabled="!restSound.enabled"
+              :aria-pressed="restSound.level === opt.value ? 'true' : 'false'"
+              @click="setRestSoundLevel(opt.value)"
+              class="min-h-[44px] rounded-xl border-2 border-plate font-heading font-bold text-xs touch-manipulation"
+              :class="restSound.level === opt.value ? 'bg-plate text-white' : 'bg-paper text-ink'"
+            >{{ opt.label }}</button>
+          </div>
+        </div>
+
+        <!-- Rest-done notification: opt-in, asks permission only on this tap -->
+        <div class="p-3 bg-surface rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] space-y-2">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <span class="text-xs sm:text-sm font-bold font-heading text-ink block">แจ้งเตือนเมื่อพักครบ</span>
+              <span class="text-[11px] text-ink-muted font-body">แจ้งเตือนเฉพาะตอนที่ออกจากแท็บนี้ระหว่างพัก</span>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="restNotify ? 'true' : 'false'"
+              @click="toggleRestNotify"
+              class="min-h-[44px] min-w-[64px] px-3 rounded-xl border-2 border-plate font-mono font-bold text-xs touch-manipulation"
+              :class="restNotify ? 'bg-emerald text-white' : 'bg-paper text-ink'"
+            >{{ restNotify ? 'เปิด' : 'ปิด' }}</button>
+          </div>
+          <p v-if="notifyStatus" class="text-[11px] text-ink-muted font-body" role="status">{{ notifyStatus }}</p>
+        </div>
       </div>
     </div>
 
@@ -264,6 +313,15 @@ import { useWorkoutStore } from '../composables/useWorkoutStore.js';
 import { accountTotals } from '../composables/workingVolume.js';
 import { useExcelExport } from '../composables/useExcelExport.js';
 import { useTimer } from '../composables/useTimer.js';
+import {
+  readSoundSettings,
+  saveSoundSettings,
+  readNotifyEnabled,
+  writeNotifyEnabled,
+  enableRestNotifications,
+  SOUND_LEVEL_OPTIONS,
+  NOTIFY_STATUS_TEXT
+} from '../composables/restAlerts.js';
 import { useOneRmCalculator } from '../composables/useOneRm.js';
 
 const { open: openOneRm } = useOneRmCalculator();
@@ -274,6 +332,31 @@ const { exercises } = useExerciseStore();
 const { workoutHistory, showToast } = useWorkoutStore();
 const { exportWorkoutHistory } = useExcelExport();
 const { timerDuration, setTimerDuration } = useTimer();
+
+// Rest sound and rest-done notification (restAlerts.js)
+const restSound = ref(readSoundSettings());
+const restNotify = ref(readNotifyEnabled());
+const notifyStatus = ref('');
+
+function toggleRestSound() {
+  restSound.value = saveSoundSettings({ enabled: !restSound.value.enabled });
+}
+
+function setRestSoundLevel(level) {
+  restSound.value = saveSoundSettings({ level });
+}
+
+async function toggleRestNotify() {
+  if (restNotify.value) {
+    writeNotifyEnabled(false);
+    restNotify.value = false;
+    notifyStatus.value = '';
+    return;
+  }
+  const result = await enableRestNotifications();
+  restNotify.value = result.ok;
+  notifyStatus.value = result.ok ? '' : (NOTIFY_STATUS_TEXT[result.reason] || NOTIFY_STATUS_TEXT.error);
+}
 
 // Preferences
 const weightUnit = ref(localStorage.getItem('atiwitch_weight_unit') || 'kg');

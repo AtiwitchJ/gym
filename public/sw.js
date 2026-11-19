@@ -26,6 +26,19 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Rest-done notification (restAlerts.js): tapping it brings the app back into focus.
+// The SW never asks for permission; the page does, only after the user turns it on.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      const win = list.find((c) => 'focus' in c);
+      if (win) return win.focus();
+      return self.clients.openWindow('./');
+    })
+  );
+});
+
 function isNavigation(request) {
   return request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html');
 }

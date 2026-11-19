@@ -1,4 +1,5 @@
 import { ref, onMounted, onUnmounted } from 'vue';
+import { readSoundSettings, soundGain, notifyRestDone } from './restAlerts.js';
 
 export const REST_MIN_SECONDS = 10;
 export const REST_MAX_SECONDS = 600;
@@ -20,12 +21,17 @@ const isRunning = ref(false);
 let timerEndTime = null;
 let intervalId = null;
 let lastBeepSecond = null;
+// Each countdown gets a run id; the "rest done" notification fires once per run.
+let runId = 0;
+let notifiedRunId = -1;
 
 /**
  * Pre-warning short beep at 3, 2, 1 seconds (660Hz E5)
  */
 function playPreWarningBeep() {
   try {
+    const sound = readSoundSettings();
+    if (!sound.enabled) return;
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
@@ -33,7 +39,7 @@ function playPreWarningBeep() {
     const gain = ctx.createGain();
     osc.type = 'sine';
     osc.frequency.setValueAtTime(660, ctx.currentTime);
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.setValueAtTime(soundGain(0.12, sound), ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
     osc.connect(gain);
     gain.connect(ctx.destination);
@@ -47,6 +53,8 @@ function playPreWarningBeep() {
  */
 function playCompletionChord() {
   try {
+    const sound = readSoundSettings();
+    if (!sound.enabled) return;
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
@@ -55,7 +63,7 @@ function playCompletionChord() {
       const gain = ctx.createGain();
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.setValueAtTime(soundGain(0.18, sound), ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -99,6 +107,11 @@ function checkTimerTick() {
     lastBeepSecond = null;
     playCompletionChord();
     triggerHaptic([250, 120, 250]);
+    if (notifiedRunId !== runId) {
+      notifiedRunId = runId;
+      // Background-only and opt-in; never throws, and the in-app sound/vibration above still plays.
+      notifyRestDone().catch(() => {});
+    }
   }
 }
 
@@ -107,6 +120,7 @@ function startTimer() {
   if (timerRemaining.value <= 0) {
     timerRemaining.value = timerDuration.value;
   }
+  runId += 1;
   isRunning.value = true;
   lastBeepSecond = null;
   timerEndTime = Date.now() + (timerRemaining.value * 1000);
