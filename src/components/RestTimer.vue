@@ -11,10 +11,14 @@
             REST INTERVAL
           </span>
           <span
-            class="font-mono tabular-nums text-lg sm:text-2xl font-bold tracking-wider leading-tight"
+            class="font-mono tabular-nums text-2xl sm:text-3xl font-extrabold tracking-wider leading-tight"
             :class="isRunning ? 'text-flame animate-pulse' : 'text-ink'"
           >
             {{ formatTime(timerRemaining) }}
+          </span>
+          <!-- Next set (or "all done") -->
+          <span class="text-[10px] sm:text-[11px] font-mono text-ink-muted truncate max-w-[12rem] leading-tight">
+            {{ nextHint }}
           </span>
         </div>
 
@@ -37,14 +41,14 @@
         <div class="flex items-center gap-1 flex-shrink-0">
           <button
             @click="adjustRemaining(30)"
-            class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full border-2 border-plate bg-paper-subtle hover:bg-paper-dim text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap"
+            class="min-h-[44px] px-2.5 sm:px-3 text-xs sm:text-sm font-mono font-bold rounded-xl border-2 border-plate bg-paper-subtle hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap touch-manipulation"
             title="เพิ่มเวลาพักอีก 30 วินาที"
           >
             +30s
           </button>
           <button
             @click="adjustRemaining(-15)"
-            class="text-[10px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full border-2 border-plate bg-paper-subtle hover:bg-paper-dim text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all whitespace-nowrap"
+            class="min-h-[44px] px-2.5 sm:px-3 text-xs sm:text-sm font-mono font-bold rounded-xl border-2 border-plate bg-paper-subtle hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap touch-manipulation"
             title="ลดเวลาพัก 15 วินาที"
           >
             -15s
@@ -54,6 +58,16 @@
 
       <!-- Controls -->
       <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <!-- Skip rest; after the last set it is the main action -->
+        <button
+          type="button"
+          @click="skipTimer"
+          class="min-h-[44px] px-3 text-xs sm:text-sm font-heading font-bold rounded-xl border-2 border-plate transition-all touch-manipulation whitespace-nowrap"
+          :class="allDone
+            ? 'bg-emerald text-white shadow-[2px_2px_0px_#1e2220]'
+            : 'bg-surface text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
+          :title="allDone ? 'จบทุกท่าแล้ว ข้ามพัก' : 'ข้ามพักเดี๋ยวนี้'"
+        >ข้ามพัก</button>
         <!-- Play / Pause Button -->
         <button
           @click="toggleTimer"
@@ -91,9 +105,15 @@
 import { computed } from 'vue';
 import { useTimer } from '../composables/useTimer';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
+import { nextUndoneSet, restHint } from '../composables/useRestPanel.js';
 
-const { currentDay } = useWorkoutStore();
+const { currentDay, workoutData, userState } = useWorkoutStore();
 const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(currentDay.value));
+
+// Next undone set in the current day (null when every set is done).
+const next = computed(() => nextUndoneSet(workoutData[currentDay.value], userState[currentDay.value]));
+const nextHint = computed(() => restHint(next.value));
+const allDone = computed(() => next.value === null);
 
 const {
   timerDuration,
@@ -103,6 +123,7 @@ const {
   toggleTimer,
   resetTimer,
   setTimerDuration,
-  adjustRemaining
+  adjustRemaining,
+  skipTimer
 } = useTimer();
 </script>

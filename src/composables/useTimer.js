@@ -131,6 +131,14 @@ function resetTimer() {
   lastBeepSecond = null;
 }
 
+/** Skip the rest now: stop the countdown and set it to 0 (no completion sound). */
+function skipTimer() {
+  pauseTimer();
+  timerRemaining.value = 0;
+  timerEndTime = null;
+  lastBeepSecond = null;
+}
+
 function setTimerDuration(seconds) {
   timerDuration.value = seconds;
   timerRemaining.value = seconds;
@@ -178,6 +186,7 @@ export function useTimer() {
     pauseTimer,
     toggleTimer,
     resetTimer,
+    skipTimer,
     setTimerDuration,
     adjustRemaining,
     triggerHaptic
