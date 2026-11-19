@@ -3,6 +3,7 @@ import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExer
 import { defaultTodos } from '../data/defaultTodos.js';
 import { parseRepTarget } from './useWeightAdvisor.js';
 import { normalizeRir } from './useRir.js';
+import { buildSessionExercises, recordValuesFromSets } from './sessionPayload.js';
 import { clearPrCache } from './usePersonalRecords.js';
 import { buildSessionSummary } from './useSessionSummary.js';
 
@@ -286,17 +287,7 @@ function getExerciseLastRecord(exId) {
       if (!session || !Array.isArray(session.exercises)) continue;
       for (const ex of session.exercises) {
         if (linked.includes(ex.id) || (ex.canonicalId && ex.canonicalId === canonId)) {
-          const sObj = {};
-          if (Array.isArray(ex.sets)) {
-            ex.sets.forEach((s, idx) => {
-              if (s.weight !== undefined && s.weight !== null && s.weight !== '') {
-                sObj[`wt_${idx}`] = s.weight;
-              }
-              if (s.actualReps !== undefined && s.actualReps !== null && s.actualReps !== '') {
-                sObj[`reps_${idx}`] = s.actualReps;
-              }
-            });
-          }
+          const sObj = recordValuesFromSets(ex.sets);
           if (Object.keys(sObj).length > 0) {
             const timePart = session.time ? (session.time.length === 5 ? `${session.time}:00` : session.time) : '12:00:00';
             const dateStr = session.date ? `${session.date}T${timePart}.000Z` : '1970-01-01T00:00:00.000Z';
@@ -688,96 +679,19 @@ async function finishAndSaveWorkout() {
   const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
   const dayState = userState[currentDay.value] || {};
 
-  let totalSetsDone = 0;
-  const sessionExercises = [];
+  const { sessionExercises, totalSetsDone, lastRecords } = buildSessionExercises(dayData, dayState, lastWeights);
 
-  // Standard exercises
-  for (const ex of dayData.exercises) {
-    const exState = dayState[ex.id] || {};
-    const sets = ex.sets.map((set, sIdx) => {
-      const isDone = !!exState[`set_${sIdx}`];
-      if (isDone) totalSetsDone++;
-      const wt = (exState[`wt_${sIdx}`] !== undefined && exState[`wt_${sIdx}`] !== '')
-        ? exState[`wt_${sIdx}`]
-        : (lastWeights[ex.id] && lastWeights[ex.id][`wt_${sIdx}`]) || '';
-
-      const reps = (exState[`reps_${sIdx}`] !== undefined && exState[`reps_${sIdx}`] !== '')
-        ? exState[`reps_${sIdx}`]
-        : (lastWeights[ex.id] && lastWeights[ex.id][`reps_${sIdx}`]) || '';
-
-      if (wt !== '') {
-        if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
-        lastWeights[ex.id][`wt_${sIdx}`] = wt;
-        syncLinkedExerciseRecords(ex.id, sIdx, wt, undefined);
-      }
-      if (reps !== '') {
-        if (!lastWeights[ex.id]) lastWeights[ex.id] = {};
-        lastWeights[ex.id][`reps_${sIdx}`] = reps;
-        syncLinkedExerciseRecords(ex.id, sIdx, undefined, reps);
-      }
-
-      return {
-        setIndex: sIdx + 1,
-        type: set.type === 'warm' ? 'วอร์ม' : 'เล่นจริง',
-        target: set.reps,
-        weight: wt,
-        actualReps: reps,
-        done: isDone,
-        rir: normalizeRir(exState[`rir_${sIdx}`])
-      };
-    });
-
-    sessionExercises.push({
-      id: ex.id,
-      name: ex.name,
-      category: ex.isMain ? 'ท่าหลัก' : 'ท่าเสริม',
-      sets
-    });
-  }
-
-  // Bonus exercises
-  if (dayData.bonusExercises) {
-    for (const bEx of dayData.bonusExercises) {
-      const bState = dayState[bEx.id] || {};
-      const sets = bEx.sets.map((set, sIdx) => {
-        const isDone = !!bState[`set_${sIdx}`];
-        if (isDone) totalSetsDone++;
-        const wt = (bState[`wt_${sIdx}`] !== undefined && bState[`wt_${sIdx}`] !== '')
-          ? bState[`wt_${sIdx}`]
-          : (lastWeights[bEx.id] && lastWeights[bEx.id][`wt_${sIdx}`]) || '';
-
-        const reps = (bState[`reps_${sIdx}`] !== undefined && bState[`reps_${sIdx}`] !== '')
-          ? bState[`reps_${sIdx}`]
-          : (lastWeights[bEx.id] && lastWeights[bEx.id][`reps_${sIdx}`]) || '';
-
-        if (wt !== '') {
-          if (!lastWeights[bEx.id]) lastWeights[bEx.id] = {};
-          lastWeights[bEx.id][`wt_${sIdx}`] = wt;
-          syncLinkedExerciseRecords(bEx.id, sIdx, wt, undefined);
-        }
-        if (reps !== '') {
-          if (!lastWeights[bEx.id]) lastWeights[bEx.id] = {};
-          lastWeights[bEx.id][`reps_${sIdx}`] = reps;
-          syncLinkedExerciseRecords(bEx.id, sIdx, undefined, reps);
-        }
-
-        return {
-          setIndex: sIdx + 1,
-          type: set.type === 'warm' ? 'วอร์ม' : 'ซ้อมเสริม',
-          target: set.reps,
-          weight: wt,
-          actualReps: reps,
-          done: isDone,
-          rir: normalizeRir(bState[`rir_${sIdx}`])
-        };
-      });
-
-      sessionExercises.push({
-        id: bEx.id,
-        name: bEx.name,
-        category: 'ซ้อมเสริม',
-        sets
-      });
+  // Only completed sets write last-record values: no drafts, no unfinished sets.
+  for (const r of lastRecords) {
+    if (r.wt !== '') {
+      if (!lastWeights[r.exId]) lastWeights[r.exId] = {};
+      lastWeights[r.exId][`wt_${r.sIdx}`] = r.wt;
+      syncLinkedExerciseRecords(r.exId, r.sIdx, r.wt, undefined);
+    }
+    if (r.reps !== '') {
+      if (!lastWeights[r.exId]) lastWeights[r.exId] = {};
+      lastWeights[r.exId][`reps_${r.sIdx}`] = r.reps;
+      syncLinkedExerciseRecords(r.exId, r.sIdx, undefined, r.reps);
     }
   }
 

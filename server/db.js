@@ -568,9 +568,11 @@ const repo = {
 
           if (Array.isArray(ex.sets)) {
             for (const set of ex.sets) {
-              const wt = (set.weight !== undefined && set.weight !== '') ? Number(set.weight) : null;
-              const reps = (set.actualReps !== undefined && set.actualReps !== '') ? Number(set.actualReps) : null;
-              const rir = (set.rir !== undefined && set.rir !== '' && set.rir !== null) ? Number(set.rir) : null;
+              const isSetDone = set.done === undefined || set.done === null || Boolean(set.done);
+              // Only a completed set carries weight, reps or RIR. An unfinished set is stored without values.
+              const wt = (isSetDone && set.weight !== undefined && set.weight !== '') ? Number(set.weight) : null;
+              const reps = (isSetDone && set.actualReps !== undefined && set.actualReps !== '') ? Number(set.actualReps) : null;
+              const rir = (isSetDone && set.rir !== undefined && set.rir !== '' && set.rir !== null) ? Number(set.rir) : null;
 
               insertSet.run(
                 exerciseRowId,
@@ -585,12 +587,11 @@ const repo = {
 
               // Persist to last record with bidirectional cross-day propagation
               // Only record when set is completed (done) or if done is undefined (implied completed session)
-              const isSetDone = set.done === undefined || set.done === null || Boolean(set.done);
-              if ((wt !== null || reps !== null) && isSetDone) {
+              if (isSetDone && wt !== null) {
                 const sessionDateStr = session.date && session.time
                   ? `${session.date}T${session.time}:00.000Z`
                   : (session.date || new Date().toISOString());
-                this.saveLastRecord(ex.id, set.setIndex - 1, wt || 0, reps, sessionDateStr, false, rir);
+                this.saveLastRecord(ex.id, set.setIndex - 1, wt, reps, sessionDateStr, false, rir);
               }
             }
           }
