@@ -2,7 +2,10 @@
  * RIR (reps in reserve) buttons shown after a set is done (step 5 of the set-screen plan).
  * Three choices only. Pure functions: no store, no DOM.
  *
- * Mapping (guess, see plan): "ล้ม" = RIR 0, "เหลือ 1" = RIR 1, "เหลือ 2+" = RIR 2 (stored as 2, meaning 2 or more).
+ * Mapping: "ล้ม" = RIR 0, "เหลือ 1" = RIR 1, "เหลือ 2+" = RIR 2 (stored as 2, meaning 2 or more).
+ *
+ * NOT YET CONFIRMED: this mapping is a guess, not checked with gym users.
+ * The user should confirm it (or change the values) before it is relied on.
  */
 
 export const RIR_CHOICES = [

@@ -11,6 +11,9 @@ console.log('====================================================');
 console.log('🧪 QA Test: RIR buttons after Done (step 5)');
 console.log('====================================================\n');
 
+const rirSource = fs.readFileSync(path.join(root, 'src/composables/useRir.js'), 'utf8');
+assert.ok(rirSource.includes('NOT YET CONFIRMED') && rirSource.includes('เหลือ 2+" = RIR 2'), 'the unconfirmed mapping note stays in the file');
+
 console.log('▶ [1] Exactly three choices: เหลือ 2+, เหลือ 1, ล้ม...');
 assert.deepStrictEqual(RIR_CHOICES.map((c) => c.value), [2, 1, 0]);
 assert.deepStrictEqual(RIR_CHOICES.map((c) => c.label), ['เหลือ 2+', 'เหลือ 1', 'ล้ม']);
