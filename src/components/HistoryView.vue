@@ -49,6 +49,11 @@
       </div>
     </div>
 
+    <!-- Weekly Volume Chart (8 weeks, per muscle / per exercise) -->
+    <div class="mb-5">
+      <VolumeChart />
+    </div>
+
     <!-- Empty State -->
     <div
       v-if="workoutHistory.length === 0"
@@ -159,6 +164,7 @@
 <script setup>
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
+import VolumeChart from './VolumeChart.vue';
 
 const { workoutHistory, deleteSession } = useWorkoutStore();
 const { exportWorkoutHistory, downloadSqliteDatabase } = useExcelExport();
