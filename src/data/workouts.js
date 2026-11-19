@@ -1437,4 +1437,10 @@ export function resolveDayKey(key, date = new Date()) {
   return key;
 }
 
+/** Today's program key ('prog_a' | 'prog_b' | 'rest') from the weekday schedule. */
+export function resolveTodayKey(date = new Date()) {
+  const weekday = ['rest', 'mon', 'tue', 'wed', 'thu', 'fri', 'rest'][date.getDay()];
+  return resolveDayKey(weekday, date);
+}
+
 

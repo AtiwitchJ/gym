@@ -58,6 +58,15 @@
       </button>
     </div>
 
+    <!-- Exercise library (moved here from the bottom bar) -->
+    <button
+      type="button"
+      @click="workoutStore.switchTab('exercises')"
+      class="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs sm:text-sm rounded-xl border-2 border-plate shadow-[2px_2px_0px_#1e2220] transition-all touch-manipulation"
+    >
+      <span>🔎 คลังท่าฝึก (ค้นหา / ดูคลิป)</span>
+    </button>
+
     <!-- 3-Day A/B Alternating Split Quick Chips (1-Click Launch) -->
     <div class="archive-card p-3 sm:p-4 bg-gradient-to-br from-paper via-surface to-paper border-2 border-plate shadow-[3px_3px_0px_#1e2220]">
       <div class="flex items-center justify-between mb-2.5">

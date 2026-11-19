@@ -1,5 +1,5 @@
 import { ref, reactive, watch } from 'vue';
-import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay, resolveDayKey } from '../data/workouts.js';
+import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay, resolveDayKey, resolveTodayKey } from '../data/workouts.js';
 import { defaultTodos } from '../data/defaultTodos.js';
 import { parseRepTarget } from './useWeightAdvisor.js';
 
@@ -31,23 +31,25 @@ const storage = {
   }
 };
 
+// Old per-day tab keys: opening the app with one of these saved means "วันนี้" (today) now.
+const LEGACY_TODAY_TAB_KEYS = ['today', 'mon', 'tue', 'wed', 'thu', 'fri', 'prog_a', 'prog_b', 'rest', 'todo'];
+
 // Active Day restoration
 function getInitialDay() {
+  const savedTab = storage.getItem('atiwitch_active_global_tab');
+  if (!savedTab || LEGACY_TODAY_TAB_KEYS.includes(savedTab)) {
+    return resolveTodayKey();
+  }
   const saved = storage.getItem('atiwitch_active_tab') || storage.getItem('jetts_active_tab');
   if (saved && (workoutData[saved] || saved === 'rest' || saved === 'history' || saved === 'todo')) {
     return resolveDayKey(saved);
   }
-  const day = new Date().getDay();
-  if (day === 1) return resolveDayKey('mon');
-  if (day === 2) return resolveDayKey('tue');
-  if (day === 3) return resolveDayKey('wed');
-  if (day === 4) return resolveDayKey('thu');
-  if (day === 5) return resolveDayKey('fri');
-  return 'rest';
+  return resolveTodayKey();
 }
 
 const currentDay = ref(getInitialDay());
-const currentTab = ref(storage.getItem('atiwitch_active_global_tab') || getInitialDay());
+const savedGlobalTab = storage.getItem('atiwitch_active_global_tab');
+const currentTab = ref(!savedGlobalTab || LEGACY_TODAY_TAB_KEYS.includes(savedGlobalTab) ? 'today' : savedGlobalTab);
 const saveStatus = ref('saved'); // 'saved', 'saving', 'error'
 const toastMessage = ref('');
 let toastTimer = null;
@@ -468,9 +470,13 @@ function healCrossDayExerciseRecords() {
 healCrossDayExerciseRecords();
 
 // Actions
+// 'today' = วันนี้ tab (weekday schedule). Mon/Wed/Fri resolve to Program A/B; Tue/Thu to rest.
+function dayKeyFor(key) {
+  return key === 'today' ? resolveTodayKey() : resolveDayKey(key);
+}
+
 function switchDay(dayKey) {
-  // Mon/Wed/Fri tabs resolve to Program A/B for the current week; Tue/Thu resolve to rest
-  currentDay.value = resolveDayKey(dayKey);
+  currentDay.value = dayKeyFor(dayKey);
   currentTab.value = dayKey;
   storage.setItem('atiwitch_active_tab', currentDay.value);
   storage.setItem('atiwitch_active_global_tab', dayKey);
@@ -478,8 +484,8 @@ function switchDay(dayKey) {
 
 function switchTab(tabKey) {
   currentTab.value = tabKey;
-  if (['mon', 'tue', 'wed', 'thu', 'fri', 'prog_a', 'prog_b', 'rest', 'todo', 'history'].includes(tabKey)) {
-    currentDay.value = resolveDayKey(tabKey);
+  if (['today', 'mon', 'tue', 'wed', 'thu', 'fri', 'prog_a', 'prog_b', 'rest', 'todo', 'history'].includes(tabKey)) {
+    currentDay.value = dayKeyFor(tabKey);
     storage.setItem('atiwitch_active_tab', currentDay.value);
   }
   storage.setItem('atiwitch_active_global_tab', tabKey);

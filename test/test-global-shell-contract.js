@@ -55,13 +55,14 @@ assert(profileViewContent.includes('exportJsonBackup'), 'ProfileView provides JS
 assert(profileViewContent.includes('exportExcelHistory') || profileViewContent.includes('exportWorkoutHistory'), 'ProfileView provides Excel export');
 assert(profileViewContent.includes('handleResetData') || profileViewContent.includes('resetToDefaults'), 'ProfileView provides Reset data button');
 
-// 4. DayTabs.vue Contract Checks (4 Global Tabs)
+// 4. DayTabs.vue Contract Checks (4 Global Tabs: วันนี้ · โปรแกรม · ประวัติ · บัญชี)
 assert(dayTabsContent.includes('workouts'), 'DayTabs includes workouts tab');
-assert(dayTabsContent.includes('exercises'), 'DayTabs includes exercises tab');
+assert(dayTabsContent.includes('today') && dayTabsContent.includes('วันนี้'), 'DayTabs includes the วันนี้ tab');
 assert(dayTabsContent.includes('history'), 'DayTabs includes history tab');
 assert(dayTabsContent.includes('profile'), 'DayTabs includes profile tab');
 assert(dayTabsContent.includes('โปรแกรม'), 'DayTabs workouts tab is labeled โปรแกรม');
-assert(dayTabsContent.includes('ท่าฝึก'), 'DayTabs exercises tab is labeled ท่าฝึก');
+assert(!dayTabsContent.includes("id: 'exercises'"), 'DayTabs no longer has a separate ท่าฝึก tab (library is under โปรแกรม)');
+assert(workoutsViewContent.includes("switchTab('exercises')"), 'WorkoutsView opens the exercise library');
 assert(dayTabsContent.includes('ประวัติ'), 'DayTabs history tab is labeled ประวัติ');
 assert(dayTabsContent.includes('บัญชี'), 'DayTabs profile tab is labeled บัญชี');
 assert(dayTabsContent.includes('safe-area-inset-bottom'), 'DayTabs is safe-area inset aware');

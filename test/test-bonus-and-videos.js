@@ -93,6 +93,6 @@ assert(activeRunnerContent.includes('getExerciseVideoInfo'), 'ActiveWorkoutSheet
 assert(activeRunnerContent.includes('youtube-nocookie.com/embed'), 'ActiveWorkoutSheet embeds YouTube iframe');
 
 // Verify DayTabs has direct access to all days
-assert(dayTabsContent.includes('mon') && dayTabsContent.includes('tue') && dayTabsContent.includes('wed') && dayTabsContent.includes('thu'), 'DayTabs provides direct day navigation');
+assert(dayTabsContent.includes("'today'"), 'DayTabs provides direct day navigation via the today tab');
 
 console.log('✓ All Bonus Sets & 3 YouTube Gym Machine Alternatives contract tests passed successfully!');

@@ -164,12 +164,12 @@ const dayTabsContent = fs.readFileSync(path.resolve(__dirname, '../src/component
 const workoutsViewContent = fs.readFileSync(path.resolve(__dirname, '../src/components/WorkoutsView.vue'), 'utf8');
 
 // DayTabs contract
-assert(dayTabsContent.includes('fri') && dayTabsContent.includes('ศุกร์'), 'DayTabs must support Friday (ศุกร์)');
-assert(dayTabsContent.includes('Program A') || dayTabsContent.includes('prog_a'), 'DayTabs must support Program A switching');
-assert(dayTabsContent.includes('Program B') || dayTabsContent.includes('prog_b'), 'DayTabs must support Program B switching');
-assert(dayTabsContent.includes('mon') && dayTabsContent.includes('wed'), 'DayTabs preserves mon and wed');
-assert(dayTabsContent.includes('tue') && dayTabsContent.includes('thu'), 'DayTabs preserves tue and thu for backward compatibility');
-assert(dayTabsContent.includes('workouts') && dayTabsContent.includes('exercises') && dayTabsContent.includes('history') && dayTabsContent.includes('profile'), 'DayTabs preserves 4 global tabs');
+// Step 1 nav cleanup: one "วันนี้" tab resolves the weekday program (Mon/Wed/Fri A/B, Tue/Thu rest);
+// the 4 bottom tabs are วันนี้ · โปรแกรม · ประวัติ · บัญชี; the library is under โปรแกรม.
+assert(dayTabsContent.includes("'today'") && dayTabsContent.includes('วันนี้'), 'DayTabs has the single today tab');
+assert(!dayTabsContent.includes("id: 'mon'") && !dayTabsContent.includes("id: 'tue'"), 'DayTabs no longer lists per-weekday tabs');
+assert(dayTabsContent.includes("'workouts'") && dayTabsContent.includes("'history'") && dayTabsContent.includes("'profile'"), 'DayTabs has workouts, history and profile tabs');
+assert(!dayTabsContent.includes('Program A') || !dayTabsContent.includes('⚡'), 'DayTabs no longer has program pills');
 
 // WorkoutsView contract
 assert(workoutsViewContent.includes('Program A') || workoutsViewContent.includes('atiwitch_prog_a'), 'WorkoutsView includes Program A Quick Chip / 1-Click Launch');
