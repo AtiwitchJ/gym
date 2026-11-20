@@ -101,7 +101,7 @@
         </div>
 
         <!-- Exercise Cards List -->
-        <div class="space-y-3">
+        <div class="space-y-2 sm:space-y-3">
           <ExerciseCard
             v-for="(ex, idx) in currentDayData.exercises"
             :key="ex.id"

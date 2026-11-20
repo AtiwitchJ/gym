@@ -1,6 +1,6 @@
 <template>
   <div
-    class="archive-card mb-4 overflow-hidden"
+    class="archive-card mb-2 sm:mb-4 overflow-hidden"
     :class="isAllCompleted ? 'bg-emerald-bg/30 border-emerald shadow-[3px_3px_0px_#059669]' : ''"
   >
     <!-- Top Flame Accent Line -->
