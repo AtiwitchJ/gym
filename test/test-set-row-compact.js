@@ -20,7 +20,7 @@ console.log('====================================================\n');
 console.log('▶ [1] Steppers and Done share one line...');
 assert.ok(template.includes('<!-- Bottom line: weight and reps steppers side by side, then Done'), 'bottom line is the steppers line');
 assert.ok(template.includes('class="flex items-stretch gap-1.5 mt-1.5"'), 'one flex row for the bottom line');
-const groups = template.match(/class="flex flex-1 items-center gap-1 min-w-0"/g) || [];
+const groups = template.match(/class="flex flex-1 items-center gap-0\.5 sm:gap-1 min-w-0"/g) || [];
 assert.strictEqual(groups.length, 2, 'weight and reps steppers each take half the row');
 console.log('  ✓ weight and reps steppers side by side, Done on the same line\n');
 

@@ -439,7 +439,7 @@
 
         <!-- Bottom line: weight and reps steppers side by side, then Done (tap the value to type it) -->
         <div class="flex items-stretch gap-1.5 mt-1.5">
-          <div class="flex flex-1 items-center gap-1 min-w-0">
+          <div class="flex flex-1 items-center gap-0.5 sm:gap-1 min-w-0">
             <button
               type="button"
               @click="stepWeight(sIdx, -1)"
@@ -452,7 +452,7 @@
               class="flex-1 min-w-0 h-11 sm:h-14 rounded-xl border-2 border-plate bg-white flex items-baseline justify-center gap-1 touch-manipulation"
               title="แตะเพื่อพิมพ์น้ำหนัก"
             >
-              <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getWeight(sIdx) !== '' ? getWeight(sIdx) : '—' }}</span>
+              <span class="tabular-nums font-extrabold text-sm sm:text-base text-ink leading-none">{{ getWeight(sIdx) !== '' ? getWeight(sIdx) : '—' }}</span>
               <span class="text-[11px] text-flame-text font-bold leading-none">กก.</span>
             </button>
             <button
@@ -463,7 +463,7 @@
             >+</button>
           </div>
 
-          <div class="flex flex-1 items-center gap-1 min-w-0">
+          <div class="flex flex-1 items-center gap-0.5 sm:gap-1 min-w-0">
             <button
               type="button"
               @click="stepReps(sIdx, -1)"
@@ -476,7 +476,7 @@
               class="flex-1 min-w-0 h-11 sm:h-14 rounded-xl border-2 border-plate bg-white flex items-baseline justify-center gap-1 touch-manipulation"
               title="แตะเพื่อพิมพ์จำนวนครั้งจริง"
             >
-              <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getReps(sIdx) !== '' ? getReps(sIdx) : '—' }}</span>
+              <span class="tabular-nums font-extrabold text-sm sm:text-base text-ink leading-none">{{ getReps(sIdx) !== '' ? getReps(sIdx) : '—' }}</span>
               <span class="text-[11px] text-sky-text font-bold leading-none">ครั้ง</span>
             </button>
             <button
