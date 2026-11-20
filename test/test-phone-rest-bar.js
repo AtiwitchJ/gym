@@ -13,7 +13,7 @@ console.log('====================================================\n');
 console.log('▶ [1] The bar wraps instead of overflowing sideways...');
 assert.ok(rest.includes('flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5'), 'outer bar wraps');
 assert.ok(!rest.includes('overflow-x-auto scrollbar-none">'), 'presets no longer hide overflow off-screen');
-assert.ok(rest.includes('<div class="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">'), 'the readout block wraps its presets and steppers');
+assert.ok(rest.includes('<div class="flex flex-wrap items-center gap-1 sm:gap-1.5">'), 'the presets wrap inside the expanded panel');
 assert.ok(rest.includes('<div class="flex flex-wrap items-center gap-1 flex-shrink-0">'), 'steppers wrap');
 assert.ok(rest.includes('<div class="flex flex-wrap items-center gap-1.5 sm:gap-2 flex-shrink-0">'), 'controls wrap');
 console.log('✓ Wrapping verified.');
