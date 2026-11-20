@@ -41,17 +41,31 @@
             <h3 class="text-sm sm:text-lg font-bold text-ink font-heading tracking-tight leading-snug">
               {{ exercise.name }}
             </h3>
-            <p class="text-[11px] sm:text-xs text-ink-muted mt-0.5 font-body">
+            <!-- Description: hidden on phones until "รายละเอียด" is tapped (density step 5) -->
+            <p
+              :class="showDetail ? 'block' : 'hidden sm:block'"
+              class="text-[11px] sm:text-xs text-ink-muted mt-0.5 font-body"
+            >
               {{ exercise.altName }}
             </p>
-            <button
-              type="button"
-              class="min-h-[44px] min-w-[44px] mt-1 text-[11px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
-              title="ดูประวัติและ PR ของท่านี้"
-              @click="showHistory = true"
-            >
-              📈 ประวัติ &amp; PR
-            </button>
+            <div class="flex flex-wrap items-center gap-1 mt-1">
+              <button
+                type="button"
+                class="min-h-[44px] min-w-[44px] text-[11px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all"
+                title="ดูประวัติและ PR ของท่านี้"
+                @click="showHistory = true"
+              >
+                📈 ประวัติ &amp; PR
+              </button>
+              <button
+                type="button"
+                class="sm:hidden min-h-[44px] text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-surface text-ink-muted touch-manipulation"
+                :aria-expanded="showDetail ? 'true' : 'false'"
+                @click="showDetail = !showDetail"
+              >
+                {{ showDetail ? 'ซ่อนรายละเอียด' : 'รายละเอียด' }}
+              </button>
+            </div>
             <button
               v-if="isBarbell"
               type="button"
@@ -70,7 +84,7 @@
           <div
             v-if="showExerciseImages && !isPlayingVideo"
             @click="isPlayingVideo = true"
-            class="relative w-24 sm:w-36 aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[2px_2px_0px_#1e2220] group cursor-pointer bg-plate transition-transform active:scale-95"
+            class="relative hidden sm:block w-24 sm:w-36 aspect-video rounded-xl overflow-hidden border-2 border-plate shadow-[2px_2px_0px_#1e2220] group cursor-pointer bg-plate transition-transform active:scale-95"
             title="แตะเพื่อเปิดเล่นคลิปในหน้านี้"
           >
             <img
@@ -102,6 +116,17 @@
             </span>
           </div>
 
+          <!-- Phone: a small chip instead of the thumbnail (density step 5; the thumbnail shows from 640 px) -->
+          <button
+            v-if="showExerciseImages && !isPlayingVideo"
+            type="button"
+            @click="isPlayingVideo = true"
+            class="sm:hidden min-h-[44px] flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-1 rounded-lg border-2 border-plate bg-surface hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all whitespace-nowrap touch-manipulation"
+            title="แตะเพื่อเปิดเล่นคลิปในหน้านี้"
+          >
+            ▶ 🎬 {{ hasMultiMachineVideos ? '3 เครื่อง' : 'คลิป' }}
+          </button>
+
           <!-- 2. Action Button (When Video is playing OR Images disabled) -->
           <button
             v-else
@@ -126,9 +151,10 @@
       </div>
 
       <!-- Muscles & Guidance -->
-      <div class="mt-2 text-[11px] sm:text-xs text-ink-muted flex flex-wrap gap-x-2.5 gap-y-0.5">
-        <span><strong class="text-ink font-semibold">เป้าหมาย:</strong> {{ exercise.mainMuscle }}</span>
-        <span v-if="exercise.subMuscle" class="text-ink-muted">• {{ exercise.subMuscle }}</span>
+      <!-- One line on phones (the second muscle group shows from 640 px) -->
+      <div class="mt-2 min-w-0 text-[11px] sm:text-xs text-ink-muted flex sm:flex-wrap gap-x-2.5 gap-y-0.5">
+        <span class="truncate min-w-0"><strong class="text-ink font-semibold">เป้าหมาย:</strong> {{ exercise.mainMuscle }}</span>
+        <span v-if="exercise.subMuscle" class="hidden sm:inline text-ink-muted">• {{ exercise.subMuscle }}</span>
       </div>
 
       <!-- Progressive Overload Plan & Target Table (Directly in Card) -->
@@ -507,6 +533,8 @@ import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
 const showHistory = ref(false);
+// Phone: the description (altName) is behind the "รายละเอียด" toggle (density step 5)
+const showDetail = ref(false);
 
 const props = defineProps({
   exercise: { type: Object, required: true },
