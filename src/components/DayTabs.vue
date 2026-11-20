@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="w-full bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-4px_20px_rgba(30,34,32,0.12)] px-2 sm:px-4 py-1.5 pb-[max(8px,env(safe-area-inset-bottom))] select-none"
+    class="w-full bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-4px_20px_rgba(30,34,32,0.12)] px-2 sm:px-4 py-1 pb-[max(4px,env(safe-area-inset-bottom))] select-none"
   >
     <!-- Four global tabs: วันนี้ · โปรแกรม · ประวัติ · บัญชี -->
     <div class="max-w-3xl mx-auto grid grid-cols-4 gap-1.5 sm:gap-2">
@@ -10,7 +10,7 @@
         :data-tab-id="tab.id"
         type="button"
         @click="selectTab(tab.id)"
-        class="flex flex-col items-center justify-center min-h-[56px] py-1.5 px-1 rounded-xl transition-all relative font-heading border-2 touch-manipulation"
+        class="flex flex-col items-center justify-center min-h-[44px] sm:min-h-[56px] py-1 sm:py-1.5 px-1 rounded-xl transition-all relative font-heading border-2 touch-manipulation"
         :class="activeTabId === tab.id
           ? 'bg-flame text-white border-plate shadow-[2px_2px_0px_#1e2220] -translate-y-0.5 font-bold'
           : 'bg-surface text-ink border-plate/30 hover:border-plate shadow-[1px_1px_0px_#1e2220]'"
@@ -21,7 +21,8 @@
           class="absolute -top-1 right-2 w-2.5 h-2.5 rounded-full bg-emerald border-2 border-plate animate-pulse pointer-events-none"
         ></span>
         <span class="text-[12px] sm:text-xs font-bold leading-tight">{{ tab.label }}</span>
-        <span class="text-[11px] opacity-80 font-body font-normal truncate max-w-full">{{ tabSub(tab) }}</span>
+        <!-- Sub-label: hidden on phones to keep the dock short (shows from 640 px) -->
+        <span class="hidden sm:block text-[11px] opacity-80 font-body font-normal truncate max-w-full">{{ tabSub(tab) }}</span>
       </button>
     </div>
   </nav>
