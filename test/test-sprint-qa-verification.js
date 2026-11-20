@@ -210,7 +210,7 @@ assert.strictEqual(monStateAfter['reps_1'], 8, 'Working set 1 reps should be pre
 // Target recommendation for next round:
 // Since 60 kg x 8 reps was optimal/high in 6-8 target range, next session recommended weight should be 62 kg (+2 kg)!
 const adviceNextRound = getExerciseOverallAdvice([
-  { type: 'work', weight: lastRecord.wt_1, reps: lastRecord.reps_1, targetReps: '6–8' }
+  { type: 'work', weight: lastRecord.wt_1, reps: lastRecord.reps_1, targetReps: '6–8', rir: 2 }
 ]);
 assert(adviceNextRound && adviceNextRound.workAdvice, 'Advice for next round should be present');
 assert.strictEqual(adviceNextRound.workAdvice.suggestedWeight, 62, 'Next round target weight should be 62 kg (+2 kg overload)');

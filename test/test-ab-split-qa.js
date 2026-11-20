@@ -102,7 +102,8 @@ const a1Overload = calculateWeightAdvice({
   weight: 60,
   reps: 10,
   type: 'work',
-  targetReps: '6–8'
+  targetReps: '6–8',
+  rir: 2
 });
 assert.strictEqual(a1Overload.status, 'increase', 'Lifting more than target range (> 8 reps) recommends increase');
 assert.strictEqual(a1Overload.delta, 2, 'Should recommend +2 kg');
@@ -133,9 +134,9 @@ assert.strictEqual(b1Deload.suggestedWeight, 88, 'Suggested weight should be 88 
 // Case 3.3: Exercise overall advice across complete sets
 const fullExerciseSets = [
   { type: 'warm', weight: 40, reps: 15 },
-  { type: 'work', weight: 70, reps: 8, targetReps: '6–8' },
-  { type: 'work', weight: 70, reps: 8, targetReps: '6–8' },
-  { type: 'work', weight: 70, reps: 8, targetReps: '6–8' }
+  { type: 'work', weight: 70, reps: 8, targetReps: '6–8', rir: 2 },
+  { type: 'work', weight: 70, reps: 8, targetReps: '6–8', rir: 2 },
+  { type: 'work', weight: 70, reps: 8, targetReps: '6–8', rir: 2 }
 ];
 const overallProgAdvice = getExerciseOverallAdvice(fullExerciseSets);
 assert(overallProgAdvice && overallProgAdvice.workAdvice, 'Should produce overall working advice');

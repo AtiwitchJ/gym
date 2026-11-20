@@ -753,7 +753,7 @@ function applyAllPrev() {
   });
 }
 
-const { isWarmupType, parseRepTarget, calculateWeightAdvice, getExerciseOverallAdvice } = useWeightAdvisor();
+const { isWarmupType, parseRepTarget, calculateWeightAdvice, getExerciseOverallAdvice, shouldFillWeight } = useWeightAdvisor();
 
 const workRepTargetLabel = computed(() => {
   const workSet = props.exercise.sets.find(s => !isWarmupType(s.type));
@@ -772,12 +772,13 @@ function getSetAdvice(sIdx) {
   if (!reps || reps === '' || Number(reps) <= 0) return null;
 
   const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
-  return calculateWeightAdvice({ weight: wt, reps, type: set.type, targetReps: set.reps });
+  return calculateWeightAdvice({ weight: wt, reps, type: set.type, targetReps: set.reps, rir: getRir(sIdx) });
 }
 
 function applySetAdvice(sIdx) {
   const advice = getSetAdvice(sIdx);
-  if (advice && advice.suggestedWeight !== undefined) {
+  // Advice only fills an empty weight; a value the user typed is never replaced.
+  if (advice && advice.suggestedWeight !== undefined && shouldFillWeight(getWeight(sIdx))) {
     updateWeight(currentDay.value, props.exercise.id, sIdx, advice.suggestedWeight);
   }
 }
@@ -795,7 +796,8 @@ const exerciseAdvice = computed(() => {
           type: set.type,
           weight: curWeight !== '' ? curWeight : getPrevWeight(sIdx),
           reps: curReps,
-          targetReps: set.reps
+          targetReps: set.reps,
+          rir: getRir(sIdx)
         });
       }
     }
@@ -810,7 +812,7 @@ function applyRecommendedWeightAll() {
   if (!targetWt) return;
   props.exercise.sets.forEach((set, sIdx) => {
     // ข้ามเซ็ตวอร์มโดยเด็ดขาด ห้ามนำน้ำหนักเล่นจริงไปทับเซ็ตวอร์ม
-    if (!isWarmupType(set.type)) {
+    if (!isWarmupType(set.type) && shouldFillWeight(getWeight(sIdx))) {
       updateWeight(currentDay.value, props.exercise.id, sIdx, targetWt);
     }
   });
@@ -820,7 +822,7 @@ function applyRecommendedWarmupWeight() {
   if (!exerciseAdvice.value?.warmAdvice?.suggestedWeight) return;
   const targetWt = exerciseAdvice.value.warmAdvice.suggestedWeight;
   props.exercise.sets.forEach((set, sIdx) => {
-    if (isWarmupType(set.type)) {
+    if (isWarmupType(set.type) && shouldFillWeight(getWeight(sIdx))) {
       updateWeight(currentDay.value, props.exercise.id, sIdx, targetWt);
     }
   });

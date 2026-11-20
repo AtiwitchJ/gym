@@ -12,13 +12,13 @@ assert.strictEqual(isWarmupType('work'), false);
 assert.strictEqual(isWarmupType('touchup'), false);
 console.log('✓ isWarmupType detects warmup variants correctly');
 
-// 1. Test Working Set > 8 reps -> increase weight by +2 kg
-const resMoreThan8 = calculateWeightAdvice({ weight: 60, reps: 10, type: 'work' });
+// 1. Test Working Set > 8 reps with RIR 2+ -> increase weight by +2 kg (approved rule: RIR is required to add weight)
+const resMoreThan8 = calculateWeightAdvice({ weight: 60, reps: 10, type: 'work', rir: 2 });
 assert.strictEqual(resMoreThan8.status, 'increase');
 assert.strictEqual(resMoreThan8.delta, 2);
 assert.strictEqual(resMoreThan8.suggestedWeight, 62);
 assert.strictEqual(resMoreThan8.badgeText, '+2 kg');
-console.log('✓ Reps > 8 correctly recommends +2 kg');
+console.log('✓ Reps > 8 with RIR 2+ correctly recommends +2 kg');
 
 // 2. Test Working Set < 6 reps -> decrease weight by -2 kg
 const resLessThan6 = calculateWeightAdvice({ weight: 60, reps: 5, type: 'work' });
@@ -65,7 +65,7 @@ console.log('✓ Warm-up 12-20 reps correctly identified as optimal');
 // 5. Test Bonus Touch-up Sets (ซ้อมเสริม)
 const setsBonus = [
   { type: 'warm', weight: 15, reps: 22 },    // Warmup > 20 reps -> recommends +2 kg warmup (17 kg)
-  { type: 'touchup', weight: 25, reps: 9 }   // Touchup > 8 reps -> recommends +2 kg touchup (27 kg)
+  { type: 'touchup', weight: 25, reps: 9, rir: 2 }   // Touchup above the top of the range with RIR 2+ -> +2 kg touchup (27 kg)
 ];
 const bonusAdv = getExerciseOverallAdvice(setsBonus);
 assert.strictEqual(bonusAdv.warmAdvice.status, 'increase');
@@ -77,9 +77,9 @@ console.log('✓ Bonus Touch-up (ซ้อมเสริม) calculates BOTH wa
 // 6. Test Overall Advice calculation — next week progressive overload when playing in sweet spot (6-8 reps)
 const setsWithWarmupOptimal = [
   { type: 'warm', weight: 30, reps: 16 }, // Warmup 16 reps (12-19 optimal warmup)
-  { type: 'work', weight: 60, reps: 7 },
-  { type: 'work', weight: 60, reps: 7 },
-  { type: 'work', weight: 60, reps: 8 }
+  { type: 'work', weight: 60, reps: 8, rir: 2 },
+  { type: 'work', weight: 60, reps: 8, rir: 2 },
+  { type: 'work', weight: 60, reps: 8, rir: 2 }
 ];
 const overallAdvOptimal = getExerciseOverallAdvice(setsWithWarmupOptimal);
 assert.strictEqual(overallAdvOptimal.warmAdvice.status, 'optimal');
@@ -88,14 +88,14 @@ assert.strictEqual(overallAdvOptimal.warmAdvice.suggestedWeight, 30);
 assert.strictEqual(overallAdvOptimal.workAdvice.status, 'increase');
 assert.strictEqual(overallAdvOptimal.workAdvice.delta, 2);
 assert.strictEqual(overallAdvOptimal.workAdvice.suggestedWeight, 62);
-console.log('✓ Successfully playing in 6-8 sweet spot correctly recommends +2 kg for next week');
+console.log('✓ Every set at the top of 6-8 (8 reps, RIR 2+) recommends +2 kg for next week');
 
 // 7. Test Leg 01 (Seated Leg Press Machine: W1 65kgx20, S1-S3 84kgx8)
 const setsLeg01 = [
   { type: 'warm', weight: 65, reps: 20 },
-  { type: 'work', weight: 84, reps: 8 },
-  { type: 'work', weight: 84, reps: 8 },
-  { type: 'work', weight: 84, reps: 8 }
+  { type: 'work', weight: 84, reps: 8, rir: 2 },
+  { type: 'work', weight: 84, reps: 8, rir: 2 },
+  { type: 'work', weight: 84, reps: 8, rir: 2 }
 ];
 const leg01Advice = getExerciseOverallAdvice(setsLeg01);
 assert.strictEqual(leg01Advice.warmAdvice.status, 'increase');
@@ -108,15 +108,15 @@ console.log('✓ Leg 01 (played 84kg x 8 reps) correctly recommends 86kg (+2kg) 
 
 const setsEx1 = [
   { type: 'warm', weight: 40, reps: 15 },
-  { type: 'work', weight: 60, reps: 9 },
-  { type: 'work', weight: 60, reps: 9 },
-  { type: 'work', weight: 60, reps: 7 }
+  { type: 'work', weight: 60, reps: 9, rir: 2 },
+  { type: 'work', weight: 60, reps: 9, rir: 2 },
+  { type: 'work', weight: 60, reps: 8, rir: 2 }
 ];
 const overallAdv1 = getExerciseOverallAdvice(setsEx1);
 assert.strictEqual(overallAdv1.status, 'increase');
 assert.strictEqual(overallAdv1.delta, 2);
 assert.strictEqual(overallAdv1.suggestedWeight, 62);
-console.log('✓ Overall advice for high reps aggregates to +2 kg');
+console.log('✓ Overall advice with every set at the top (RIR 2+) aggregates to +2 kg');
 
 const setsEx2 = [
   { type: 'warm', weight: 40, reps: 15 },
@@ -143,7 +143,7 @@ const calfOptimal = calculateWeightAdvice({ weight: 40, reps: 14, type: 'work', 
 assert.strictEqual(calfOptimal.status, 'optimal');
 assert.strictEqual(calfOptimal.delta, 0);
 
-const calfIncrease = calculateWeightAdvice({ weight: 40, reps: 16, type: 'work', targetReps: '12–15 ครั้ง' });
+const calfIncrease = calculateWeightAdvice({ weight: 40, reps: 16, type: 'work', targetReps: '12–15 ครั้ง', rir: 2 });
 assert.strictEqual(calfIncrease.status, 'increase');
 assert.strictEqual(calfIncrease.delta, 2);
 assert.strictEqual(calfIncrease.suggestedWeight, 42);
@@ -157,9 +157,9 @@ console.log('✓ Calf Raise (12–15 reps) set advice correctly handles optimal,
 // Overall Advice with custom target reps
 const setsCalf = [
   { type: 'warm', weight: 25, reps: 20 },
-  { type: 'work', weight: 40, reps: 14, targetReps: '12–15 ครั้ง' },
-  { type: 'work', weight: 40, reps: 13, targetReps: '12–15 ครั้ง' },
-  { type: 'work', weight: 40, reps: 14, targetReps: '12–15 ครั้ง' }
+  { type: 'work', weight: 40, reps: 15, targetReps: '12–15 ครั้ง', rir: 2 },
+  { type: 'work', weight: 40, reps: 15, targetReps: '12–15 ครั้ง', rir: 1 },
+  { type: 'work', weight: 40, reps: 15, targetReps: '12–15 ครั้ง', rir: 2 }
 ];
 const calfOverall = getExerciseOverallAdvice(setsCalf);
 assert.strictEqual(calfOverall.workAdvice.status, 'increase');

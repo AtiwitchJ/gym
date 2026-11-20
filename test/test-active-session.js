@@ -120,7 +120,7 @@ const previousHistory = [
       {
         exerciseId: 'barbell_bench_press',
         sets: [
-          { type: 'working', weight: 70, reps: 10, completed: true } // > 8 reps -> +2 kg
+          { type: 'working', weight: 70, reps: 10, completed: true, rir: 2 } // above the top of the range with RIR 2+ -> +2 kg
         ]
       }
     ]
