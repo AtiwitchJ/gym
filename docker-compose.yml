@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./data:/app/data
+      - C:/Users/theup/gym-data:/app/data
     environment:
       - PORT=8080
       - NODE_ENV=production
