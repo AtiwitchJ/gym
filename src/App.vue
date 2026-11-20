@@ -89,15 +89,16 @@
               ></div>
             </div>
           </div>
-        </div>
 
-        <!-- Next Session Overview Bar -->
-        <NextSessionOverview
-          :day-key="currentDay"
-          :day-data="currentDayData"
-          :user-state="userState"
-          :last-weights="lastWeights"
-        />
+          <!-- Plan for next session, folded into the card (density step 4) -->
+          <NextSessionOverview
+            embedded
+            :day-key="currentDay"
+            :day-data="currentDayData"
+            :user-state="userState"
+            :last-weights="lastWeights"
+          />
+        </div>
 
         <!-- Exercise Cards List -->
         <div class="space-y-3">

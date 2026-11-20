@@ -17,7 +17,7 @@ console.log('🧪 QA Test: Daily card density on phones (density step 3)');
 console.log('====================================================\n');
 
 const cardStart = app.indexOf('<!-- Routine Banner -->');
-const cardEnd = app.indexOf('<!-- Next Session Overview Bar -->');
+const cardEnd = app.indexOf('<!-- Exercise Cards List -->');
 assert.ok(cardStart > 0 && cardEnd > cardStart, 'daily card block found');
 const card = app.slice(cardStart, cardEnd);
 

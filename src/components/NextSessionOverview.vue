@@ -1,7 +1,9 @@
 <template>
   <div
     v-if="dayData && totalCount > 0"
-    class="mb-3 p-2 sm:px-3 sm:py-2.5 rounded-lg border-2 border-plate bg-paper shadow-[2px_2px_0px_#1e2220] flex items-center justify-between gap-2 font-mono text-xs select-none"
+    :class="embedded
+      ? 'mt-2.5 pt-2 border-t-2 border-plate/10 flex items-center justify-between gap-2 font-mono text-xs select-none'
+      : 'mb-3 p-2 sm:px-3 sm:py-2.5 rounded-lg border-2 border-plate bg-paper shadow-[2px_2px_0px_#1e2220] flex items-center justify-between gap-2 font-mono text-xs select-none'"
   >
     <!-- Left: Tally Badges -->
     <div class="flex items-center gap-1.5 flex-wrap">
@@ -39,7 +41,9 @@ const props = defineProps({
   dayKey: { type: String, default: 'mon' },
   dayData: { type: Object, default: () => ({}) },
   userState: { type: Object, default: () => ({}) },
-  lastWeights: { type: Object, default: () => ({}) }
+  lastWeights: { type: Object, default: () => ({}) },
+  // embedded: shown inside the daily card (density step 4) instead of as its own box
+  embedded: { type: Boolean, default: false }
 });
 
 defineEmits(['open-plan']);
