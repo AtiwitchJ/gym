@@ -157,8 +157,22 @@
         <span v-if="exercise.subMuscle" class="hidden sm:inline text-ink-muted">• {{ exercise.subMuscle }}</span>
       </div>
 
+      <!-- Phone: the plan table is collapsed under a one-line summary (density step 6; open from 640 px) -->
+      <button
+        type="button"
+        class="sm:hidden mt-2.5 w-full min-h-[44px] flex items-center justify-between gap-2 px-2.5 rounded-lg border-2 border-plate bg-white text-left font-mono text-[11px] font-bold text-ink touch-manipulation"
+        :aria-expanded="showPlan ? 'true' : 'false'"
+        @click="showPlan = !showPlan"
+      >
+        <span class="truncate">แผนและเป้าหมายรอบหน้า · {{ exercise.sets.length }} เซ็ต</span>
+        <span class="flex-shrink-0 text-ink-muted">{{ showPlan ? 'ซ่อน ▴' : 'ดู ▾' }}</span>
+      </button>
+
       <!-- Progressive Overload Plan & Target Table (Directly in Card) -->
-      <div class="mt-2.5 rounded-lg border-2 border-plate bg-white overflow-hidden shadow-[1.5px_1.5px_0px_#1e2220] font-mono">
+      <div
+        :class="showPlan ? '' : 'hidden sm:block'"
+        class="mt-2.5 rounded-lg border-2 border-plate bg-white overflow-hidden shadow-[1.5px_1.5px_0px_#1e2220] font-mono"
+      >
         <div class="px-2.5 py-1.5 bg-paper-subtle border-b-2 border-plate flex items-center justify-between gap-1 flex-wrap">
           <div class="flex items-center gap-1.5 flex-wrap">
             <span class="text-[11px] font-bold text-ink uppercase tracking-wider">แผนและเป้าหมายรอบหน้า</span>
@@ -535,6 +549,8 @@ import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCa
 const showHistory = ref(false);
 // Phone: the description (altName) is behind the "รายละเอียด" toggle (density step 5)
 const showDetail = ref(false);
+// Phone: the plan table is collapsed until its summary line is tapped (density step 6)
+const showPlan = ref(false);
 
 const props = defineProps({
   exercise: { type: Object, required: true },
