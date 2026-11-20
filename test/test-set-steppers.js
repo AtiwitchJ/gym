@@ -49,7 +49,7 @@ assert.ok(card.includes("from '../composables/useSetStepper.js'"), 'ExerciseCard
 assert.ok(card.includes('@click="stepWeight(sIdx, -1)"') && card.includes('@click="stepWeight(sIdx, 1)"'), 'weight ± buttons');
 assert.ok(card.includes('@click="stepReps(sIdx, -1)"') && card.includes('@click="stepReps(sIdx, 1)"'), 'reps ± buttons');
 assert.ok(card.includes('@click="openWeightKeypad(sIdx)"') && card.includes('@click="openRepsKeypad(sIdx, set.reps)"'), 'tapping the value still opens the keypad');
-assert.ok(card.includes('w-14 h-14 flex-shrink-0 rounded-xl flex items-center justify-center font-bold text-base'), 'Done button is 56 px (w-14 h-14)');
+assert.ok(card.includes('w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl flex items-center justify-center font-bold text-base'), 'Done button is 44 px on phones, 56 px from 640 px (density step 1)');
 assert.ok(!card.includes('grid-cols-[1fr_72px_58px_50px_34px]'), 'old 5-column set row is gone');
 assert.ok(card.includes('ครั้งก่อน {{ getPrevWeight(sIdx) }} กก.'), 'previous record line shows under the set');
 console.log('✓ ExerciseCard wiring verified.');

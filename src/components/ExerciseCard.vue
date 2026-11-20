@@ -343,7 +343,7 @@
       <div
         v-for="(set, sIdx) in exercise.sets"
         :key="sIdx"
-        class="px-2.5 sm:px-4 py-2.5 sm:py-3 transition-colors"
+        class="px-2.5 sm:px-4 py-2 sm:py-3 transition-colors"
         :class="isSetDone(sIdx) ? 'bg-emerald-bg/50' : 'hover:bg-surface-low/40'"
       >
         <!-- Top line: set label, previous record, advice, Done -->
@@ -395,11 +395,62 @@
             <span v-else class="text-ink-muted font-mono text-xs select-none">—</span>
           </div>
 
-          <!-- Done (56 px) -->
+        </div>
+
+        <!-- Bottom line: weight and reps steppers side by side, then Done (tap the value to type it) -->
+        <div class="flex items-stretch gap-1.5 mt-1.5">
+          <div class="flex flex-1 items-center gap-1 min-w-0">
+            <button
+              type="button"
+              @click="stepWeight(sIdx, -1)"
+              class="w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              aria-label="ลดน้ำหนัก"
+            >−</button>
+            <button
+              type="button"
+              @click="openWeightKeypad(sIdx)"
+              class="flex-1 min-w-0 h-11 sm:h-14 rounded-xl border-2 border-plate bg-white flex items-baseline justify-center gap-1 touch-manipulation"
+              title="แตะเพื่อพิมพ์น้ำหนัก"
+            >
+              <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getWeight(sIdx) !== '' ? getWeight(sIdx) : '—' }}</span>
+              <span class="text-[11px] text-flame-text font-bold leading-none">กก.</span>
+            </button>
+            <button
+              type="button"
+              @click="stepWeight(sIdx, 1)"
+              class="w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              aria-label="เพิ่มน้ำหนัก"
+            >+</button>
+          </div>
+
+          <div class="flex flex-1 items-center gap-1 min-w-0">
+            <button
+              type="button"
+              @click="stepReps(sIdx, -1)"
+              class="w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              aria-label="ลดจำนวนครั้ง"
+            >−</button>
+            <button
+              type="button"
+              @click="openRepsKeypad(sIdx, set.reps)"
+              class="flex-1 min-w-0 h-11 sm:h-14 rounded-xl border-2 border-plate bg-white flex items-baseline justify-center gap-1 touch-manipulation"
+              title="แตะเพื่อพิมพ์จำนวนครั้งจริง"
+            >
+              <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getReps(sIdx) !== '' ? getReps(sIdx) : '—' }}</span>
+              <span class="text-[11px] text-sky-text font-bold leading-none">ครั้ง</span>
+            </button>
+            <button
+              type="button"
+              @click="stepReps(sIdx, 1)"
+              class="w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+              aria-label="เพิ่มจำนวนครั้ง"
+            >+</button>
+          </div>
+          <!-- Done (44 px on phones, 56 px from 640 px) -->
           <button
             type="button"
             @click="onToggle(sIdx)"
-            class="w-14 h-14 flex-shrink-0 rounded-xl flex items-center justify-center font-bold text-base transition-all select-none border-2 border-plate touch-manipulation"
+            class="w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0 rounded-xl flex items-center justify-center font-bold text-base transition-all select-none border-2 border-plate touch-manipulation"
             :class="isSetDone(sIdx)
               ? 'bg-emerald text-white shadow-[1.5px_1.5px_0px_#059669]'
               : 'bg-surface hover:bg-paper-subtle text-ink-muted shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
@@ -410,57 +461,6 @@
             </svg>
             <span v-else class="text-lg font-mono opacity-50 font-bold">✓</span>
           </button>
-        </div>
-
-        <!-- Bottom line: ± steppers for weight and reps (tap the value to type it) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-          <div class="flex items-center gap-1 min-w-0">
-            <button
-              type="button"
-              @click="stepWeight(sIdx, -1)"
-              class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
-              aria-label="ลดน้ำหนัก"
-            >−</button>
-            <button
-              type="button"
-              @click="openWeightKeypad(sIdx)"
-              class="flex-1 min-w-0 h-14 rounded-xl border-2 border-plate bg-white flex flex-col items-center justify-center touch-manipulation"
-              title="แตะเพื่อพิมพ์น้ำหนัก"
-            >
-              <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getWeight(sIdx) !== '' ? getWeight(sIdx) : '—' }}</span>
-              <span class="text-[11px] text-flame-text font-bold leading-none mt-0.5">กก.</span>
-            </button>
-            <button
-              type="button"
-              @click="stepWeight(sIdx, 1)"
-              class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
-              aria-label="เพิ่มน้ำหนัก"
-            >+</button>
-          </div>
-
-          <div class="flex items-center gap-1 min-w-0">
-            <button
-              type="button"
-              @click="stepReps(sIdx, -1)"
-              class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
-              aria-label="ลดจำนวนครั้ง"
-            >−</button>
-            <button
-              type="button"
-              @click="openRepsKeypad(sIdx, set.reps)"
-              class="flex-1 min-w-0 h-14 rounded-xl border-2 border-plate bg-white flex flex-col items-center justify-center touch-manipulation"
-              title="แตะเพื่อพิมพ์จำนวนครั้งจริง"
-            >
-              <span class="tabular-nums font-extrabold text-base text-ink leading-none">{{ getReps(sIdx) !== '' ? getReps(sIdx) : '—' }}</span>
-              <span class="text-[11px] text-sky-text font-bold leading-none mt-0.5">ครั้ง</span>
-            </button>
-            <button
-              type="button"
-              @click="stepReps(sIdx, 1)"
-              class="w-14 h-14 flex-shrink-0 rounded-xl border-2 border-plate bg-surface text-xl font-extrabold text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
-              aria-label="เพิ่มจำนวนครั้ง"
-            >+</button>
-          </div>
         </div>
 
         <!-- RIR after Done (optional): 3 buttons -->
