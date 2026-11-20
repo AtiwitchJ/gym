@@ -55,7 +55,7 @@
       <!-- Fallback / Legacy Day View (if currentDay or currentTab is mon/tue/wed/thu) -->
       <div v-else-if="isWorkoutDay && currentDayData && !showRestToday">
         <!-- Routine Banner -->
-        <div class="archive-card p-4 mb-4">
+        <div class="archive-card p-3 sm:p-4 mb-4">
           <div class="flex items-center gap-2 mb-1">
             <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase">
               DAILY PROTOCOL
@@ -65,15 +65,16 @@
               ท่าละ 4 เซ็ต (1 วอร์ม + 3 เล่นจริง)
             </span>
           </div>
-          <h2 class="text-lg font-bold font-heading text-ink tracking-tight">
+          <h2 class="text-base sm:text-lg font-bold font-heading text-ink tracking-tight">
             {{ currentDayData.title }}
           </h2>
-          <p class="text-xs text-ink-muted mt-0.5 font-body">
+          <!-- Phone: the description is hidden to save space (shown from 640 px) -->
+          <p class="hidden sm:block text-xs text-ink-muted mt-0.5 font-body">
             {{ currentDayData.subtitle }}
           </p>
 
           <!-- Progress Bar -->
-          <div class="mt-3.5 pt-3 border-t-2 border-plate/10">
+          <div class="mt-2.5 pt-2 sm:mt-3.5 sm:pt-3 border-t-2 border-plate/10">
             <div class="flex items-center justify-between text-xs font-mono mb-1.5">
               <span class="text-ink-muted font-bold">
                 ความคืบหน้าท่าประจำวัน:
