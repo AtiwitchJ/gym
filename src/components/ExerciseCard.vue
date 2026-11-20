@@ -370,6 +370,16 @@
       เวลาพักหลังเซ็ตของท่านี้: <span class="font-bold text-ink">{{ restLabel }}</span>
     </div>
 
+    <!-- Warm-up plan from the working weight (percent calculator; an estimate, not applied to the sets) -->
+    <div
+      v-if="warmupPlan.length"
+      class="px-2.5 sm:px-4 pb-1 text-[11px] font-mono text-ink-muted select-none"
+      title="คำนวณจาก % ของน้ำหนักเซ็ตแรก — ค่าเริ่มต้น 40%×5, 60%×5, 80%×3 (ยังไม่ได้ทดสอบในแอป)"
+    >
+      วอร์มอัพแนะนำ (ประมาณ):
+      <span class="font-bold text-ink">{{ warmupPlan.map((s) => `${s.weight} กก.×${s.reps}`).join(' · ') }}</span>
+    </div>
+
     <!-- Sets Table Header -->
     <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[11px] sm:text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center justify-between gap-2 select-none">
       <span>เซ็ต · แนะนำ · เสร็จ</span>
@@ -544,6 +554,7 @@ import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetSteppe
 import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';
 import { getCustomRest, formatRestLabel, restRevision } from '../composables/useCustomRest.js';
 import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
+import { buildWarmupSets } from '../composables/warmupCalc.js';
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
 const showHistory = ref(false);
@@ -960,6 +971,14 @@ const isBarbell = isBarbellExercise(props.exercise);
 const restLabel = computed(() => {
   void restRevision.value;
   return formatRestLabel(getCustomRest(props.exercise.id));
+});
+
+// Warm-up plan from the first working set's weight (typed value, else last record). [] when no weight.
+const warmupPlan = computed(() => {
+  const idx = props.exercise.sets.findIndex((s) => !isWarmupType(s.type));
+  if (idx < 0) return [];
+  const wt = getWeight(idx) !== '' ? getWeight(idx) : getPrevWeight(idx);
+  return buildWarmupSets(wt);
 });
 
 function openPlatesForExercise() {
