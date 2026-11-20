@@ -4,7 +4,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { RIR_CHOICES, nextRirSelection, isRirChoiceSelected, rirLabel } from '../src/composables/useRir.js';
 import { useWorkoutStore } from '../src/composables/useWorkoutStore.js';
-import repo from '../server/db.js';
+import os from 'node:os';
+
+// Rule: tests never write to data/gym.db. Use a temp database (set before server/db.js loads).
+if (!process.env.GYM_DB_PATH) {
+  process.env.GYM_DB_PATH = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'gym-rirplus-')), 'gym-test.db');
+}
+const { default: repo } = await import('../server/db.js');
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
