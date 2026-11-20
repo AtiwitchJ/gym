@@ -20,7 +20,7 @@
       <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
         <!-- Auto-save Pill -->
         <span
-          class="text-[11px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 transition-all flex items-center gap-1 select-none"
+          class="text-[11px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 transition-all hidden sm:flex items-center gap-1 select-none"
           :class="saveStatus === 'saving'
             ? 'bg-flame-bg border-flame text-flame-text shadow-[1.5px_1.5px_0px_#ea580c] animate-pulse'
             : 'bg-emerald-bg border-emerald text-emerald-text shadow-[1.5px_1.5px_0px_#059669]'"
@@ -51,8 +51,14 @@
           @click="confirmReset"
           class="min-h-[44px] min-w-[44px] text-[11px] sm:text-[11px] font-mono font-bold px-2 sm:px-2.5 py-1 rounded-full border-2 border-plate bg-surface hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
           title="ล้างการติ๊กของวันนี้ (ไม่ลบประวัติ)"
+          aria-label="ล้างการติ๊กของวันนี้ (ไม่ลบประวัติ)"
         >
-          ล้างการติ๊ก
+          <!-- Phone: icon only (44 px target); from 640 px the words show -->
+          <svg class="w-3.5 h-3.5 sm:hidden fill-none stroke-current stroke-2" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+          <span class="hidden sm:inline">ล้างการติ๊ก</span>
         </button>
       </div>
     </div>

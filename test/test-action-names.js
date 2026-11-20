@@ -31,7 +31,7 @@ console.log('✓ Result wording verified.');
 console.log('▶ [3] Status and reset are named plainly...');
 assert.ok(header.includes("'กำลังบันทึก...' : 'บันทึกในเครื่องแล้ว'"), 'status: กำลังบันทึก / บันทึกในเครื่องแล้ว');
 assert.ok(!header.includes('SAVED') && !header.includes('SYNCING'), 'no SAVED / SYNCING in the header');
-assert.ok(header.includes('          ล้างการติ๊ก\n'), 'the reset button is ล้างการติ๊ก');
+assert.ok(header.includes('<span class="hidden sm:inline">ล้างการติ๊ก</span>'), 'the reset button is ล้างการติ๊ก (words from 640 px; icon on phones)');
 assert.ok(!header.includes('          RESET\n'), 'no RESET button text');
 assert.ok(header.includes('ล้างการติ๊กของวันนี้ (ไม่ลบประวัติ)'), 'reset says it does not delete history');
 console.log('✓ Status and reset verified.');
