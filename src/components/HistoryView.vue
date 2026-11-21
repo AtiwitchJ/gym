@@ -54,6 +54,11 @@
       <VolumeChart />
     </div>
 
+    <!-- Monthly summary: sets done, volume and PR per exercise for the chosen month -->
+    <div class="mb-5">
+      <MonthlySummary />
+    </div>
+
     <!-- Empty State -->
     <div
       v-if="workoutHistory.length === 0"
@@ -166,6 +171,7 @@ import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
 import { labelSets, weightText } from '../composables/setLabels.js';
 import VolumeChart from './VolumeChart.vue';
+import MonthlySummary from './MonthlySummary.vue';
 
 const { workoutHistory, deleteSession } = useWorkoutStore();
 const { exportWorkoutHistory, downloadSqliteDatabase } = useExcelExport();
