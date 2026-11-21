@@ -8,6 +8,7 @@ const { withPr } = require('./exercise-stats');
 const volume = require('./volume');
 const advice = require('./advice');
 const supersets = require('./supersets');
+const monthly = require('./monthly');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -205,6 +206,18 @@ app.delete('/api/supersets/:groupId/exercises/:exerciseId', (req, res) => {
     res.json(repo.removeSupersetMember(req.params.groupId, req.params.exerciseId));
   } catch (err) {
     sendSupersetError(res, err);
+  }
+});
+
+// Monthly summary (read-only): GET /api/summary/monthly?month=YYYY-MM -> rules in server/monthly.js
+app.get('/api/summary/monthly', (req, res) => {
+  try {
+    const month = monthly.validateMonth(req.query.month);
+    res.json(monthly.buildMonthlySummary(repo.getHistory(), month));
+  } catch (err) {
+    const status = err && err.status ? err.status : 500;
+    if (status === 500) console.error('Error computing monthly summary:', err);
+    res.status(status).json({ error: err.message });
   }
 });
 
