@@ -421,10 +421,13 @@
       <div
         v-for="(set, sIdx) in exercise.sets"
         :key="sIdx"
-        class="px-2.5 sm:px-4 py-2 sm:py-3 transition-colors"
+        class="px-2.5 sm:px-4 py-2 sm:py-3 transition-colors touch-pan-y"
         :class="isSetDone(sIdx) ? 'bg-emerald-bg/50' : 'hover:bg-surface-low/40'"
+        @pointerdown="onRowPointerDown($event, sIdx)"
+        @pointerup="onRowPointerUp($event, sIdx)"
+        @pointercancel="onRowPointerCancel"
       >
-        <!-- Top line: set label, previous record, advice, Done -->
+        <!-- Top line: set label, previous record, copy (tap alternative to the swipe), advice, Done -->
         <div class="flex items-center gap-2">
           <div class="flex flex-col justify-center min-w-0 flex-1">
             <div class="flex items-center gap-1.5">
@@ -459,6 +462,16 @@
               {{ getSetNote(set.reps) }}
             </span>
           </div>
+
+          <!-- Copy to the next empty set (same as the swipe). Shown only when there is a target. -->
+          <button
+            v-if="copyTargetFor(sIdx) !== null"
+            type="button"
+            @click="copySetTo(sIdx)"
+            class="min-h-[44px] min-w-[44px] px-2 flex-shrink-0 rounded-xl border-2 border-plate bg-white text-ink font-heading font-bold text-[11px] shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+            :aria-label="`คัดลอกน้ำหนัก ครั้ง และ RIR ไปเซ็ต ${copyTargetFor(sIdx)}`"
+            title="คัดลอกน้ำหนัก ครั้ง และ RIR ไปเซ็ตว่างถัดไป"
+          >คัดลอก</button>
 
           <!-- Progressive Overload Advice Badge -->
           <div class="flex items-center justify-center w-14 flex-shrink-0">
@@ -585,6 +598,7 @@ import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
 import { buildWarmupSets } from '../composables/warmupCalc.js';
 import { useSupersetStore, groupForExercise, groupNumber, partnerNames } from '../composables/useSupersets.js';
 import { shouldRestAfterTick, doneFromState, countFromExercises } from '../composables/supersetRound.js';
+import { setHasValues, findCopyTarget, planCopy, isHorizontalSwipe, copiedMessage } from '../composables/setCopy.js';
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
 const showHistory = ref(false);
@@ -1056,6 +1070,52 @@ async function evaluatePrOnTick(sIdx) {
   if (isPr) {
     showToast(`🏆 PR ใหม่: ${props.exercise.name} ${getWeight(sIdx)} kg × ${getReps(sIdx)} (e1RM ≈ ${e1rm.toFixed(1)} kg)`);
   }
+}
+
+// Copy the set to the next empty set (swipe or the "คัดลอก" button). Never overwrites a set with values.
+function copyTargetFor(sIdx) {
+  if (!setHasValues(exState.value, sIdx)) return null;
+  return findCopyTarget(props.exercise.sets, exState.value, sIdx);
+}
+
+function copySetTo(fromIdx) {
+  const plan = planCopy(props.exercise.sets, exState.value, fromIdx);
+  if (!plan.ok) {
+    showToast(plan.message);
+    return false;
+  }
+  const day = currentDay.value;
+  const exId = props.exercise.id;
+  if (plan.weight !== '') updateWeight(day, exId, plan.targetIdx, plan.weight);
+  if (plan.reps !== '') updateReps(day, exId, plan.targetIdx, plan.reps);
+  if (plan.rir !== null) updateRir(day, exId, plan.targetIdx, plan.rir, plan.rirPlus);
+  showToast(copiedMessage(plan.targetIdx));
+  return true;
+}
+
+// Swipe on a set row (touch or pen only; a drag that starts on a button does nothing).
+// The row uses touch-action pan-y, so a vertical drag still scrolls the page.
+let swipe = null;
+
+function onRowPointerDown(e, sIdx) {
+  if (e.pointerType === 'mouse') return;
+  if (e.target && e.target.closest && e.target.closest('button, input, textarea, a')) return;
+  swipe = { id: e.pointerId, sIdx, x0: e.clientX, y0: e.clientY };
+}
+
+function onRowPointerUp(e, sIdx) {
+  if (!swipe || swipe.id !== e.pointerId || swipe.sIdx !== sIdx) {
+    swipe = null;
+    return;
+  }
+  const dx = e.clientX - swipe.x0;
+  const dy = e.clientY - swipe.y0;
+  swipe = null;
+  if (isHorizontalSwipe(dx, dy)) copySetTo(sIdx);
+}
+
+function onRowPointerCancel() {
+  swipe = null;
 }
 
 function onToggle(sIdx) {
