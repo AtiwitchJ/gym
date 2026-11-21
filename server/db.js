@@ -9,7 +9,12 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 
 // GYM_DB_PATH lets tests use a throwaway database; default is the real data/gym.db.
-const DB_PATH = process.env.GYM_DB_PATH || path.join(DATA_DIR, 'gym.db');
+// GYM_FORBID_REAL_DB=1 (set by scripts/run-tests.js) makes opening the real database an error.
+const REAL_DB_PATH = path.join(DATA_DIR, 'gym.db');
+const DB_PATH = process.env.GYM_DB_PATH || REAL_DB_PATH;
+if (process.env.GYM_FORBID_REAL_DB === '1' && path.resolve(DB_PATH) === path.resolve(REAL_DB_PATH)) {
+  throw new Error('GYM_FORBID_REAL_DB=1: refusing to open data/gym.db from a test step. Set GYM_DB_PATH to a temp file.');
+}
 if (process.env.GYM_DB_PATH) {
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 }
