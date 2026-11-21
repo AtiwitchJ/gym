@@ -57,7 +57,8 @@ console.log('▶ [5] RestTimer wiring: skip button, next-set hint, larger contro
 const rest = fs.readFileSync(path.join(root, 'src/components/RestTimer.vue'), 'utf8');
 assert.ok(rest.includes('@click="onSkip"') && rest.includes('ข้ามพัก') && rest.includes('skipTimer();'), 'skip button present (collapses the compact panel)');
 assert.ok(rest.includes('{{ nextHint }}'), 'next-set hint shown under the timer');
-assert.ok(rest.includes("import { nextUndoneSet, restHint } from '../composables/useRestPanel.js';"), 'RestTimer uses the rest panel helpers');
+assert.ok(rest.includes("import { restHint } from '../composables/useRestPanel.js';"), 'RestTimer uses the rest panel helpers');
+assert.ok(rest.includes("import { nextUndoneWithGroups, doneFromState } from '../composables/supersetRound.js';"), 'RestTimer "ต่อไป" is group-aware (superset round rule)');
 assert.ok(rest.includes('min-h-[44px]'), 'controls are at least 44 px tall');
 assert.ok(rest.includes('text-xl sm:text-3xl font-extrabold'), 'larger timer readout on desktop, compact on phones');
 console.log('✓ RestTimer wiring verified.');

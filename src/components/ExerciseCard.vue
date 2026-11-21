@@ -584,6 +584,7 @@ import { getCustomRest, formatRestLabel, restRevision } from '../composables/use
 import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
 import { buildWarmupSets } from '../composables/warmupCalc.js';
 import { useSupersetStore, groupForExercise, groupNumber, partnerNames } from '../composables/useSupersets.js';
+import { shouldRestAfterTick, doneFromState, countFromExercises } from '../composables/supersetRound.js';
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
 const showHistory = ref(false);
@@ -1061,11 +1062,25 @@ function onToggle(sIdx) {
   const isNowChecked = toggleSetDone(currentDay.value, props.exercise.id, sIdx);
   if (isNowChecked) {
     triggerHaptic([35]);
-    // Custom rest (gap item 5): the rest before the next undone set uses that exercise's saved value
-    // The rest after this exercise's set is the exercise's own saved rest, the same value shown on the card.
-    const saved = getCustomRest(props.exercise.id);
-    if (saved) setTimerDuration(saved);
-    startTimer();
+    // Superset round: rest only after the whole round is done (ungrouped exercises rest after every set, as before).
+    const dayExercises = [
+      ...((workoutData[currentDay.value] || {}).exercises || []),
+      ...((workoutData[currentDay.value] || {}).bonusExercises || [])
+    ];
+    const startRest = shouldRestAfterTick(
+      superset.groups.value,
+      props.exercise.id,
+      sIdx,
+      doneFromState(userState[currentDay.value]),
+      countFromExercises(dayExercises)
+    );
+    if (startRest) {
+      // Custom rest (gap item 5): the rest uses the saved value of the exercise whose set was ticked,
+      // the same value shown on the card.
+      const saved = getCustomRest(props.exercise.id);
+      if (saved) setTimerDuration(saved);
+      startTimer();
+    }
     evaluatePrOnTick(sIdx);
   } else {
     setPrFlag(currentDay.value, props.exercise.id, sIdx, false);

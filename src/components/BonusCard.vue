@@ -438,6 +438,10 @@ import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { usePinKeypad } from '../composables/usePinKeypad';
 import { useWeightAdvisor } from '../composables/useWeightAdvisor';
 import { useTimer } from '../composables/useTimer';
+import { useSupersetStore } from '../composables/useSupersets.js';
+import { shouldRestAfterTick, doneFromState, countFromExercises } from '../composables/supersetRound.js';
+
+const superset = useSupersetStore();
 import { getYoutubeId } from '../utils/youtube';
 
 const props = defineProps({
@@ -449,6 +453,7 @@ const isPlayingVideo = ref(false);
 
 const {
   currentDay,
+  workoutData,
   userState,
   lastWeights,
   updateWeight,
@@ -838,7 +843,17 @@ function onToggle(sIdx) {
   const isNowChecked = toggleSetDone(currentDay.value, props.bonus.id, sIdx);
   if (isNowChecked) {
     triggerHaptic([35]);
-    startTimer();
+    // Superset round: rest only after the whole round is done (ungrouped bonus exercises rest after every set, as before).
+    const day = workoutData[currentDay.value] || {};
+    const dayExercises = [...(day.exercises || []), ...(day.bonusExercises || [])];
+    const startRest = shouldRestAfterTick(
+      superset.groups.value,
+      props.bonus.id,
+      sIdx,
+      doneFromState(userState[currentDay.value]),
+      countFromExercises(dayExercises)
+    );
+    if (startRest) startTimer();
   }
 }
 </script>

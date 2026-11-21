@@ -160,14 +160,22 @@ import { computed } from 'vue';
 import { useTimer } from '../composables/useTimer';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { ref, watch } from 'vue';
-import { nextUndoneSet, restHint } from '../composables/useRestPanel.js';
+import { restHint } from '../composables/useRestPanel.js';
+import { useSupersetStore } from '../composables/useSupersets.js';
+import { nextUndoneWithGroups, doneFromState } from '../composables/supersetRound.js';
 import { getCustomRest, saveCustomRest } from '../composables/useCustomRest.js';
 
 const { currentDay, workoutData, userState } = useWorkoutStore();
 const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(currentDay.value));
 
 // Next undone set in the current day (null when every set is done).
-const next = computed(() => nextUndoneSet(workoutData[currentDay.value], userState[currentDay.value]));
+// Superset-aware: inside a group the next step is the group's round-order step (ungrouped: same as nextUndoneSet).
+const superset = useSupersetStore();
+const next = computed(() => {
+  const day = workoutData[currentDay.value] || {};
+  const dayExercises = [...(day.exercises || []), ...(day.bonusExercises || [])];
+  return nextUndoneWithGroups(dayExercises, doneFromState(userState[currentDay.value]), superset.groups.value);
+});
 const nextHint = computed(() => restHint(next.value));
 const allDone = computed(() => next.value === null);
 
