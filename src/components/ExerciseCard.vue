@@ -1,7 +1,10 @@
 <template>
   <div
     class="archive-card mb-2 sm:mb-4 overflow-hidden"
-    :class="isAllCompleted ? 'bg-emerald-bg/30 border-emerald shadow-[3px_3px_0px_#059669]' : ''"
+    :class="[
+      isAllCompleted ? 'bg-emerald-bg/30 border-emerald shadow-[3px_3px_0px_#059669]' : '',
+      myGroup ? 'border-l-[6px] border-l-gold' : ''
+    ]"
   >
     <!-- Top Flame Accent Line -->
     <div
@@ -32,6 +35,12 @@
                 {{ exercise.isMain ? 'ท่าหลัก' : 'ท่าช่วย' }}
               </span>
               <span
+                v-if="myGroup"
+                class="text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none"
+              >
+                🔗 ซูเปอร์เซ็ต {{ myGroupNo }}
+              </span>
+              <span
                 v-if="isDumbbell"
                 class="text-[11px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-paper-subtle text-ink border border-plate/40 select-none inline-flex items-center gap-1"
               >
@@ -41,6 +50,15 @@
             <h3 class="text-sm sm:text-lg font-bold text-ink font-heading tracking-tight leading-snug">
               {{ exercise.name }}
             </h3>
+            <!-- Superset partners and remove (44 px). Shown only for grouped exercises. -->
+            <div v-if="myGroup" class="mt-1 flex items-center gap-1.5 flex-wrap">
+              <span class="text-[11px] font-mono text-ink-muted min-w-0 truncate">คู่กับ {{ partnerLabel }}</span>
+              <button
+                type="button"
+                class="min-h-[44px] px-2.5 rounded-xl border-2 border-plate bg-white text-ink font-heading font-bold text-[11px] touch-manipulation"
+                @click="unlinkMe"
+              >นำออกจากซูเปอร์เซ็ต</button>
+            </div>
             <!-- Description: hidden on phones until "รายละเอียด" is tapped (density step 5) -->
             <p
               :class="showDetail ? 'block' : 'hidden sm:block'"
@@ -77,6 +95,16 @@
             </button>
           </div>
         </div>
+
+        <!-- Superset link mode: pick this exercise (44 px). Grouped exercises cannot be picked. -->
+        <button
+          v-if="linkMode && !myGroup"
+          type="button"
+          :aria-pressed="isSelected ? 'true' : 'false'"
+          class="min-h-[44px] px-2.5 flex-shrink-0 rounded-xl border-2 border-plate font-heading font-bold text-xs transition-all touch-manipulation"
+          :class="isSelected ? 'bg-gold text-ink shadow-[1.5px_1.5px_0px_#1e2220]' : 'bg-white text-ink'"
+          @click="superset.toggle(exercise.id)"
+        >{{ isSelected ? '✓ เลือกแล้ว' : 'เลือก' }}</button>
 
         <!-- Compact Thumbnail Box or Toggle Button -->
         <div v-if="hasVideo" class="flex-shrink-0">
@@ -555,6 +583,7 @@ import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from
 import { getCustomRest, formatRestLabel, restRevision } from '../composables/useCustomRest.js';
 import { isNewPr, getBaselineE1rm } from '../composables/usePersonalRecords.js';
 import { buildWarmupSets } from '../composables/warmupCalc.js';
+import { useSupersetStore, groupForExercise, groupNumber, partnerNames } from '../composables/useSupersets.js';
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
 const showHistory = ref(false);
@@ -972,6 +1001,25 @@ const restLabel = computed(() => {
   void restRevision.value;
   return formatRestLabel(getCustomRest(props.exercise.id));
 });
+
+// Supersets of this day: badge, partner names, remove, and the link-mode selection (useSupersets.js)
+const superset = useSupersetStore();
+const myGroup = computed(() => groupForExercise(superset.groups.value, props.exercise.id));
+const myGroupNo = computed(() => groupNumber(superset.groups.value, myGroup.value && myGroup.value.groupId));
+const linkMode = computed(() => superset.linkMode.value);
+const isSelected = computed(() => superset.selected.value.includes(props.exercise.id));
+const dayNameById = computed(() => {
+  const day = workoutData[currentDay.value] || {};
+  const all = [...(day.exercises || []), ...(day.bonusExercises || [])];
+  return Object.fromEntries(all.map((e) => [e.id, e.name]));
+});
+const partnerLabel = computed(() =>
+  partnerNames(myGroup.value, props.exercise.id, dayNameById.value).join(' + ')
+);
+async function unlinkMe() {
+  if (!myGroup.value) return;
+  await superset.unlink(currentDay.value, myGroup.value.groupId, props.exercise.id);
+}
 
 // Warm-up plan from the first working set's weight (typed value, else last record). [] when no weight.
 const warmupPlan = computed(() => {

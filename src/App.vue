@@ -100,6 +100,42 @@
           />
         </div>
 
+        <!-- Superset toolbar: link 2+ exercises of this day (44 px controls) -->
+        <div v-if="currentDayData.exercises.length >= 2" class="mb-2 space-y-1.5">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <template v-if="!supersetLinkMode">
+              <button
+                type="button"
+                class="min-h-[44px] px-3 rounded-xl border-2 border-plate bg-surface hover:bg-paper-subtle text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation"
+                @click="startSupersetLink"
+              >🔗 ทำซูเปอร์เซ็ต</button>
+            </template>
+            <template v-else>
+              <span class="text-[11px] font-mono font-bold text-ink-muted">
+                เลือกท่า: {{ supersetSelected.length }} ท่า (อย่างน้อย 2)
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  class="min-h-[44px] px-3 rounded-xl border-2 border-plate bg-surface text-ink font-heading font-bold text-xs touch-manipulation"
+                  @click="cancelSupersetLink"
+                >ยกเลิก</button>
+                <button
+                  type="button"
+                  :disabled="!supersetCanConfirm"
+                  class="min-h-[44px] px-3 rounded-xl border-2 border-plate bg-gold text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] disabled:opacity-50 touch-manipulation"
+                  @click="confirmSupersetLink(activeDayKey)"
+                >เชื่อมเป็นซูเปอร์เซ็ต</button>
+              </div>
+            </template>
+          </div>
+          <p
+            v-if="supersetError"
+            role="alert"
+            class="text-[11px] font-mono text-red-700 bg-red-50 border-2 border-red-600 rounded-lg px-2 py-1"
+          >{{ supersetError }}</p>
+        </div>
+
         <!-- Exercise Cards List -->
         <div class="space-y-2 sm:space-y-3">
           <ExerciseCard
@@ -217,8 +253,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useWorkoutStore } from './composables/useWorkoutStore';
+import { useSupersetStore, canLink } from './composables/useSupersets.js';
 import { useTimer } from './composables/useTimer';
 import { useActiveSessionStore } from './composables/useActiveSessionStore';
 import HeaderBar from './components/HeaderBar.vue';
@@ -337,6 +374,24 @@ onMounted(() => {
 // currentDay is always a resolved key: prog_a | prog_b | rest | todo | history (store resolves mon/wed/fri/tue/thu)
 const activeDayKey = computed(() => currentDay.value);
 const isWorkoutDay = computed(() => ['prog_a', 'prog_b'].includes(activeDayKey.value));
+
+// Supersets of the day (shared state; see useSupersets.js)
+const superset = useSupersetStore();
+const supersetLinkMode = superset.linkMode;
+const supersetSelected = superset.selected;
+const supersetError = superset.error;
+const supersetCanConfirm = computed(() => canLink(superset.selected.value, superset.groups.value));
+function startSupersetLink() { superset.startLinking(); }
+function cancelSupersetLink() { superset.cancelLinking(); }
+function confirmSupersetLink(dayKey) { return superset.confirmLink(dayKey); }
+watch(
+  () => [activeDayKey.value, isWorkoutDay.value],
+  ([dayKey, workDay]) => {
+    if (workDay) superset.load(dayKey);
+    else superset.cancelLinking();
+  },
+  { immediate: true }
+);
 // วันนี้ on a rest weekday (Tue/Thu/Sat/Sun) shows the rest view; the program is still reachable from โปรแกรม.
 // A rest weekday shows the rest view unless today's program already has ticked sets (then the program is shown).
 const todayHasProgress = computed(() => hasTickedSets(userState[todayProgramKey.value]));
