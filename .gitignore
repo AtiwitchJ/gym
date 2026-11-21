@@ -15,3 +15,5 @@ data/*.db-shm
 .env.local
 
 agent-*
+data/*.db.backup*
+*.db.backup*
