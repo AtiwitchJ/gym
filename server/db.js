@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
+const { MIN_MEMBERS } = require('./supersets');
 
 const DATA_DIR = path.resolve(__dirname, '../data');
 if (!fs.existsSync(DATA_DIR)) {
@@ -71,6 +72,21 @@ db.exec(`
     text TEXT NOT NULL,
     done INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  -- Exercise supersets (new). One group per workout day; an exercise belongs to at most one group per day.
+  CREATE TABLE IF NOT EXISTS superset_groups (
+    group_id TEXT PRIMARY KEY,
+    day_key TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS superset_members (
+    group_id TEXT NOT NULL REFERENCES superset_groups(group_id) ON DELETE CASCADE,
+    day_key TEXT NOT NULL,
+    exercise_id TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    PRIMARY KEY (day_key, exercise_id)
   );
 `);
 
@@ -632,6 +648,68 @@ const repo = {
       JOIN workout_sessions ws ON ws.id = se.session_id
       WHERE ss.done = 1
     `).all();
+  },
+
+  // Exercise supersets (per workout day). Read/write only the superset tables.
+  getSupersetGroup(groupId) {
+    const g = db.prepare('SELECT group_id, day_key FROM superset_groups WHERE group_id = ?').get(groupId);
+    if (!g) return null;
+    const members = db.prepare('SELECT exercise_id FROM superset_members WHERE group_id = ? ORDER BY position ASC').all(groupId);
+    return { groupId: g.group_id, dayKey: g.day_key, exerciseIds: members.map((m) => m.exercise_id) };
+  },
+
+  getSupersets(dayKey) {
+    const ids = db.prepare('SELECT group_id FROM superset_groups WHERE day_key = ? ORDER BY created_at ASC, group_id ASC').all(dayKey);
+    return ids.map((r) => this.getSupersetGroup(r.group_id));
+  },
+
+  // Creates a group. Throws status 409 if any exercise is already grouped on that day.
+  createSuperset(dayKey, exerciseIds) {
+    const findMember = db.prepare('SELECT group_id FROM superset_members WHERE day_key = ? AND exercise_id = ?');
+    const insertGroup = db.prepare('INSERT INTO superset_groups (group_id, day_key) VALUES (?, ?)');
+    const insertMember = db.prepare('INSERT INTO superset_members (group_id, day_key, exercise_id, position) VALUES (?, ?, ?, ?)');
+
+    const groupId = `ss_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const transaction = db.transaction(() => {
+      for (const id of exerciseIds) {
+        if (findMember.get(dayKey, id)) {
+          throw Object.assign(new Error(`${id} is already in a superset on ${dayKey}`), { status: 409 });
+        }
+      }
+      insertGroup.run(groupId, dayKey);
+      exerciseIds.forEach((id, i) => insertMember.run(groupId, dayKey, id, i));
+    });
+    transaction();
+    return this.getSupersetGroup(groupId);
+  },
+
+  // Removes one exercise from its group. A group left with fewer than MIN_MEMBERS is dissolved.
+  // Throws status 404 when the exercise is not a member of that group.
+  removeSupersetMember(groupId, exerciseId) {
+    const deleteMember = db.prepare('DELETE FROM superset_members WHERE group_id = ? AND exercise_id = ?');
+    const deleteGroup = db.prepare('DELETE FROM superset_groups WHERE group_id = ?');
+    let dissolved = false;
+    let dayKey = null;
+    let exerciseIds = [];
+
+    const transaction = db.transaction(() => {
+      const before = this.getSupersetGroup(groupId);
+      if (!before || !before.exerciseIds.includes(exerciseId)) {
+        throw Object.assign(new Error('exercise is not in this superset'), { status: 404 });
+      }
+      dayKey = before.dayKey;
+      deleteMember.run(groupId, exerciseId);
+      const remaining = this.getSupersetGroup(groupId);
+      if (remaining.exerciseIds.length < MIN_MEMBERS) {
+        deleteGroup.run(groupId); // members cascade
+        dissolved = true;
+        exerciseIds = [];
+      } else {
+        exerciseIds = remaining.exerciseIds;
+      }
+    });
+    transaction();
+    return { groupId, dayKey, exerciseIds, dissolved };
   },
 
   deleteSession(sessionId) {

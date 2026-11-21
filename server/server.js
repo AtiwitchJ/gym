@@ -7,6 +7,7 @@ const recovery = require('./recovery');
 const { withPr } = require('./exercise-stats');
 const volume = require('./volume');
 const advice = require('./advice');
+const supersets = require('./supersets');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -167,6 +168,43 @@ app.get('/api/volume/weekly', (req, res) => {
   } catch (err) {
     console.error('Error computing weekly volume:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Exercise supersets (per workout day). Rules live in server/db.js and server/supersets.js.
+// GET    /api/supersets?dayKey=mon                       -> { dayKey, groups: [{ groupId, dayKey, exerciseIds }] }
+// POST   /api/supersets  { dayKey, exerciseIds: [..2+] } -> 201 { groupId, dayKey, exerciseIds }
+// DELETE /api/supersets/:groupId/exercises/:exerciseId   -> { groupId, dayKey, exerciseIds, dissolved }
+function sendSupersetError(res, err) {
+  const status = err && err.status ? err.status : 500;
+  if (status === 500) console.error('Superset error:', err);
+  res.status(status).json({ error: err.message });
+}
+
+app.get('/api/supersets', (req, res) => {
+  try {
+    const dayKey = supersets.validateDayKey(req.query.dayKey);
+    res.json({ dayKey, groups: repo.getSupersets(dayKey) });
+  } catch (err) {
+    sendSupersetError(res, err);
+  }
+});
+
+app.post('/api/supersets', (req, res) => {
+  try {
+    const input = supersets.validateCreateInput(req.body);
+    const group = repo.createSuperset(input.dayKey, input.exerciseIds);
+    res.status(201).json(group);
+  } catch (err) {
+    sendSupersetError(res, err);
+  }
+});
+
+app.delete('/api/supersets/:groupId/exercises/:exerciseId', (req, res) => {
+  try {
+    res.json(repo.removeSupersetMember(req.params.groupId, req.params.exerciseId));
+  } catch (err) {
+    sendSupersetError(res, err);
   }
 });
 
