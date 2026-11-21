@@ -26,7 +26,7 @@
     <!-- Main Container -->
     <!-- Main Container -->
     <main
-      class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-hidden"
+      class="max-w-3xl mx-auto px-2.5 sm:px-4 py-3 sm:py-4 overflow-x-clip"
       :style="{ paddingBottom: dockPadding }"
     >
       <!-- 1. Workouts View (Global Tab) -->
