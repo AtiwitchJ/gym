@@ -93,6 +93,13 @@ db.exec(`
     position INTEGER NOT NULL,
     PRIMARY KEY (day_key, exercise_id)
   );
+
+  -- Custom rest seconds per exercise (synced across devices; the browser keeps a localStorage cache).
+  CREATE TABLE IF NOT EXISTS exercise_rest (
+    exercise_id TEXT PRIMARY KEY,
+    seconds INTEGER NOT NULL,
+    updated_at TEXT NOT NULL
+  );
 `);
 
 // Safe migrations for columns
@@ -746,6 +753,26 @@ const repo = {
 
     transaction();
     return { success: true };
+  },
+
+  // Custom rest seconds per exercise (synced across devices).
+  getExerciseRest() {
+    const rows = db.prepare('SELECT exercise_id, seconds FROM exercise_rest').all();
+    const map = {};
+    for (const r of rows) {
+      map[r.exercise_id] = r.seconds;
+    }
+    return map;
+  },
+
+  saveExerciseRest(exerciseId, seconds) {
+    const id = String(exerciseId);
+    const value = Number(seconds);
+    db.prepare(
+      `INSERT INTO exercise_rest (exercise_id, seconds, updated_at) VALUES (?, ?, ?)
+       ON CONFLICT(exercise_id) DO UPDATE SET seconds = excluded.seconds, updated_at = excluded.updated_at`
+    ).run(id, value, new Date().toISOString());
+    return { success: true, exerciseId: id, seconds: value };
   },
 
   // Heal all canonical records from true historical sessions

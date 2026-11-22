@@ -9,6 +9,7 @@ const volume = require('./volume');
 const advice = require('./advice');
 const supersets = require('./supersets');
 const monthly = require('./monthly');
+const exerciseRest = require('./exercise-rest');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -217,6 +218,30 @@ app.get('/api/summary/monthly', (req, res) => {
   } catch (err) {
     const status = err && err.status ? err.status : 500;
     if (status === 500) console.error('Error computing monthly summary:', err);
+    res.status(status).json({ error: err.message });
+  }
+});
+
+// Custom rest seconds per exercise (synced across devices).
+// GET  /api/exercise-rest            -> { "<exerciseId>": 120, ... }
+// PUT  /api/exercise-rest/:exerciseId { seconds: 120 } -> { success, exerciseId, seconds }
+app.get('/api/exercise-rest', (req, res) => {
+  try {
+    res.json(repo.getExerciseRest());
+  } catch (err) {
+    console.error('Error reading exercise rest:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/exercise-rest/:exerciseId', (req, res) => {
+  try {
+    const exerciseId = exerciseRest.validateExerciseId(req.params.exerciseId);
+    const seconds = exerciseRest.validateSeconds(req.body && req.body.seconds);
+    res.json(repo.saveExerciseRest(exerciseId, seconds));
+  } catch (err) {
+    const status = err && err.status ? err.status : 500;
+    if (status === 500) console.error('Error saving exercise rest:', err);
     res.status(status).json({ error: err.message });
   }
 });

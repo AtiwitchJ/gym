@@ -278,6 +278,7 @@ import WorkoutsView from './components/WorkoutsView.vue';
 import ProfileView from './components/ProfileView.vue';
 import { isRestWeekday } from './data/workouts.js';
 import { hasTickedSets } from './composables/useRestPanel.js';
+import { syncRestFromServer } from './composables/useCustomRest.js';
 import { useDockPadding } from './composables/useDockPadding.js';
 
 // The page keeps clear of the fixed bottom dock, whatever its height is (regular tester item 2).
@@ -369,6 +370,8 @@ function onRoutineSaved(routine) {
 
 onMounted(() => {
   fetchServerState();
+  // Custom rest times come from SQLite so they reach every device; offline keeps the localStorage copy.
+  void syncRestFromServer();
 });
 
 // currentDay is always a resolved key: prog_a | prog_b | rest | todo | history (store resolves mon/wed/fri/tue/thu)
