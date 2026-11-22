@@ -439,6 +439,151 @@ app.delete('/api/gym-profiles', (req, res) => {
   }
 });
 
+// Body Weight Tracker & Daily Trend (parity with Strong/Hevy/FitNotes).
+// GET    /api/body-weights            -> 200 [ { date, weight, note, updated_at } ] ORDER BY date DESC
+// GET    /api/body-weights/:date      -> 200 { date, weight, note, updated_at } or 404
+// POST   /api/body-weights            -> 201 (new) or 200 (upsert existing date)
+// DELETE /api/body-weights/:date      -> 200 { success: true, date } or 404
+
+function validateDateString(dateStr) {
+  if (typeof dateStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return false;
+  }
+  const [yearStr, monthStr, dayStr] = dateStr.split('-');
+  const y = parseInt(yearStr, 10);
+  const m = parseInt(monthStr, 10);
+  const d = parseInt(dayStr, 10);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+  const dateObj = new Date(Date.UTC(y, m - 1, d));
+  return (
+    dateObj.getUTCFullYear() === y &&
+    dateObj.getUTCMonth() === m - 1 &&
+    dateObj.getUTCDate() === d
+  );
+}
+
+function validateBodyWeight(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    const err = new Error('Request body must be a JSON object');
+    err.status = 400;
+    throw err;
+  }
+
+  // Date
+  if (typeof body.date !== 'string' || !validateDateString(body.date)) {
+    const err = new Error('date must be a valid calendar date in YYYY-MM-DD format');
+    err.status = 400;
+    throw err;
+  }
+
+  // Weight
+  if (body.weight === undefined || body.weight === null || body.weight === '') {
+    const err = new Error('weight is required');
+    err.status = 400;
+    throw err;
+  }
+  const weight = Number(body.weight);
+  if (!Number.isFinite(weight) || weight < 20 || weight > 300) {
+    const err = new Error('weight must be a finite number between 20 and 300 kg');
+    err.status = 400;
+    throw err;
+  }
+
+  // Note
+  let note = '';
+  if (body.note !== undefined && body.note !== null) {
+    if (typeof body.note !== 'string') {
+      const err = new Error('note must be a string');
+      err.status = 400;
+      throw err;
+    }
+    if (body.note.length > 500) {
+      const err = new Error('note must be at most 500 characters');
+      err.status = 400;
+      throw err;
+    }
+    note = body.note;
+  }
+
+  return {
+    date: body.date,
+    weight,
+    note
+  };
+}
+
+app.get('/api/body-weights', (req, res) => {
+  try {
+    res.json(repo.getBodyWeights());
+  } catch (err) {
+    console.error('Error reading body weights:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/body-weights/:date', (req, res) => {
+  try {
+    const date = req.params.date;
+    if (!validateDateString(date)) {
+      return res.status(400).json({ error: 'date must be a valid calendar date in YYYY-MM-DD format' });
+    }
+    const item = repo.getBodyWeightByDate(date);
+    if (!item) {
+      return res.status(404).json({ error: 'Body weight record not found' });
+    }
+    res.json(item);
+  } catch (err) {
+    console.error('Error fetching body weight:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/body-weights', (req, res) => {
+  try {
+    const input = validateBodyWeight(req.body);
+    const result = repo.saveBodyWeight(input);
+    res.status(result.isUpdate ? 200 : 201).json(result.record);
+  } catch (err) {
+    const status = err && err.status ? err.status : 400;
+    if (status === 500) console.error('Error saving body weight:', err);
+    res.status(status).json({ error: err.message });
+  }
+});
+
+app.delete('/api/body-weights/:date', (req, res) => {
+  try {
+    const date = req.params.date;
+    if (!validateDateString(date)) {
+      return res.status(400).json({ error: 'date must be a valid calendar date in YYYY-MM-DD format' });
+    }
+    const result = repo.deleteBodyWeight(date);
+    if (!result.success) {
+      return res.status(404).json({ error: 'Body weight record not found' });
+    }
+    res.json(result);
+  } catch (err) {
+    console.error('Error deleting body weight:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/body-weights', (req, res) => {
+  try {
+    const date = req.body && req.body.date;
+    if (!validateDateString(date)) {
+      return res.status(400).json({ error: 'date must be a valid calendar date in YYYY-MM-DD format' });
+    }
+    const result = repo.deleteBodyWeight(date);
+    if (!result.success) {
+      return res.status(404).json({ error: 'Body weight record not found' });
+    }
+    res.json(result);
+  } catch (err) {
+    console.error('Error deleting body weight:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Todos
 app.get('/api/todos', (req, res) => {
   try {

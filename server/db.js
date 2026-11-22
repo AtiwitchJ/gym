@@ -109,6 +109,14 @@ db.exec(`
     default_bar_weight REAL DEFAULT 20,
     updated_at TEXT
   );
+
+  -- Body weight tracking (daily logs & trend).
+  CREATE TABLE IF NOT EXISTS body_weights (
+    date TEXT PRIMARY KEY,
+    weight REAL NOT NULL,
+    note TEXT,
+    updated_at TEXT
+  );
 `);
 
 // Safe migrations for columns
@@ -857,6 +865,56 @@ const repo = {
     const numId = Number(id);
     const result = db.prepare('DELETE FROM gym_profiles WHERE id = ?').run(numId);
     return { success: result.changes > 0, id: numId };
+  },
+
+  // Body weight tracking (daily logs & trend)
+  getBodyWeights() {
+    const rows = db.prepare('SELECT date, weight, note, updated_at FROM body_weights ORDER BY date DESC').all();
+    return rows.map(r => this.formatBodyWeight(r));
+  },
+
+  getBodyWeightByDate(date) {
+    const row = db.prepare('SELECT date, weight, note, updated_at FROM body_weights WHERE date = ?').get(String(date));
+    return row ? this.formatBodyWeight(row) : null;
+  },
+
+  formatBodyWeight(r) {
+    return {
+      date: r.date,
+      weight: Number(r.weight),
+      note: r.note || '',
+      updated_at: r.updated_at
+    };
+  },
+
+  saveBodyWeight(data) {
+    const date = String(data.date).trim();
+    const weight = Number(data.weight);
+    const note = data.note !== undefined && data.note !== null ? String(data.note) : '';
+    const updatedAt = data.updated_at || new Date().toISOString();
+
+    const existing = db.prepare('SELECT date FROM body_weights WHERE date = ?').get(date);
+    const isUpdate = Boolean(existing);
+
+    db.prepare(`
+      INSERT INTO body_weights (date, weight, note, updated_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(date) DO UPDATE SET
+        weight = excluded.weight,
+        note = excluded.note,
+        updated_at = excluded.updated_at
+    `).run(date, weight, note, updatedAt);
+
+    return {
+      isUpdate,
+      record: this.getBodyWeightByDate(date)
+    };
+  },
+
+  deleteBodyWeight(date) {
+    const d = String(date).trim();
+    const result = db.prepare('DELETE FROM body_weights WHERE date = ?').run(d);
+    return { success: result.changes > 0, date: d };
   },
 
   // Heal all canonical records from true historical sessions
