@@ -157,6 +157,19 @@ db.exec(`
     general_note TEXT DEFAULT '',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- Exercise substitutions (user favorites & priority)
+  CREATE TABLE IF NOT EXISTS exercise_substitutions (
+    exercise_id TEXT NOT NULL,
+    substitute_id TEXT NOT NULL,
+    priority INTEGER DEFAULT 1,
+    notes TEXT DEFAULT '',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (exercise_id, substitute_id)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_exercise_substitutions_exercise_id 
+    ON exercise_substitutions(exercise_id);
 `);
 
 // Safe migrations for columns
@@ -1313,6 +1326,51 @@ const repo = {
     if (!exerciseId) return false;
     const info = db.prepare('DELETE FROM exercise_setup_notes WHERE exercise_id = ?').run(String(exerciseId).trim());
     return info.changes > 0;
+  },
+
+  // Exercise substitutions (user favorites & priority)
+  getFavoriteSubstitutions(exerciseId) {
+    if (!exerciseId || typeof exerciseId !== 'string') return [];
+    const cleanId = exerciseId.trim();
+    return db.prepare('SELECT exercise_id, substitute_id, priority, notes, created_at FROM exercise_substitutions WHERE exercise_id = ? ORDER BY priority ASC, created_at ASC').all(cleanId);
+  },
+
+  saveFavoriteSubstitution(data) {
+    const exerciseId = String(data.exerciseId || data.exercise_id || '').trim();
+    const substituteId = String(data.substituteId || data.substitute_id || '').trim();
+    if (!exerciseId || !substituteId) {
+      throw new Error('exerciseId and substituteId are required');
+    }
+    const priority = Number.isInteger(Number(data.priority)) && Number(data.priority) > 0 ? Number(data.priority) : 1;
+    const notes = data.notes !== undefined && data.notes !== null ? String(data.notes) : '';
+
+    db.prepare(`
+      INSERT INTO exercise_substitutions (exercise_id, substitute_id, priority, notes)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(exercise_id, substitute_id) DO UPDATE SET
+        priority = excluded.priority,
+        notes = excluded.notes
+    `).run(exerciseId, substituteId, priority, notes);
+
+    return {
+      exerciseId,
+      substituteId,
+      priority,
+      notes
+    };
+  },
+
+  deleteFavoriteSubstitution(exerciseId, substituteId) {
+    if (!exerciseId || !substituteId) return false;
+    const info = db.prepare('DELETE FROM exercise_substitutions WHERE exercise_id = ? AND substitute_id = ?').run(
+      String(exerciseId).trim(),
+      String(substituteId).trim()
+    );
+    return info.changes > 0;
+  },
+
+  getAllFavoriteSubstitutions() {
+    return db.prepare('SELECT exercise_id, substitute_id, priority, notes, created_at FROM exercise_substitutions ORDER BY exercise_id ASC, priority ASC').all();
   }
 };
 

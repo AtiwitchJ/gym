@@ -14,6 +14,7 @@ const calendar = require('./calendar');
 const progression = require('./exercise-progression');
 const backup = require('./backup');
 const exerciseNotes = require('./exercise-notes');
+const exerciseSubstitutes = require('./exercise-substitutes');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -257,6 +258,72 @@ const handlePutExerciseNote = (req, res) => {
 
 app.put('/api/exercises/:id/note', handlePutExerciseNote);
 app.post('/api/exercises/:id/note', handlePutExerciseNote);
+
+// Exercise Substitution & Equipment Alternative Engine
+app.get('/api/exercises/:id/substitutes', (req, res) => {
+  try {
+    const exerciseId = req.params.id ? String(req.params.id).trim() : '';
+    if (!exerciseId) {
+      return res.status(400).json({ error: 'Exercise ID is required' });
+    }
+    const equipment = req.query.equipment ? String(req.query.equipment).trim() : '';
+    const result = exerciseSubstitutes.getSubstitutes(repo, exerciseId, { equipment });
+    res.json(result);
+  } catch (err) {
+    console.error('Error fetching exercise substitutes:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/exercises/:id/substitutes', (req, res) => {
+  try {
+    const exerciseId = req.params.id ? String(req.params.id).trim() : '';
+    if (!exerciseId) {
+      return res.status(400).json({ error: 'Exercise ID is required' });
+    }
+    const validated = exerciseSubstitutes.validateSubstituteInput(req.body);
+    const record = repo.saveFavoriteSubstitution({
+      exerciseId,
+      substituteId: validated.substituteId,
+      priority: validated.priority,
+      notes: validated.notes
+    });
+    res.json({
+      success: true,
+      message: 'บันทึกท่าทดแทนโปรดเรียบร้อยแล้ว',
+      record: {
+        exerciseId: record.exerciseId,
+        substituteId: record.substituteId,
+        priority: record.priority,
+        notes: record.notes
+      }
+    });
+  } catch (err) {
+    if (err.status === 400 || err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    console.error('Error saving favorite substitution:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/exercises/:id/substitutes/:substituteId', (req, res) => {
+  try {
+    const exerciseId = req.params.id ? String(req.params.id).trim() : '';
+    const substituteId = req.params.substituteId ? String(req.params.substituteId).trim() : '';
+    if (!exerciseId || !substituteId) {
+      return res.status(400).json({ error: 'exerciseId and substituteId are required' });
+    }
+    repo.deleteFavoriteSubstitution(exerciseId, substituteId);
+    res.json({
+      success: true,
+      message: 'ลบรายการท่าทดแทนเรียบร้อยแล้ว'
+    });
+  } catch (err) {
+    console.error('Error deleting favorite substitution:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Muscle fatigue & recovery (SPEC §2.3). Derived from completed sets; no new tables.
 app.get('/api/recovery', (req, res) => {

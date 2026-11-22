@@ -77,6 +77,14 @@
               </button>
               <button
                 type="button"
+                class="min-h-[44px] min-w-[44px] text-[11px] sm:text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-white hover:bg-paper-subtle text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none transition-all touch-manipulation"
+                title="สลับเป็นท่าทดแทนตามอุปกรณ์ที่ว่างในยิม"
+                @click="showSubstituteModal = true"
+              >
+                🔄 สลับท่า
+              </button>
+              <button
+                type="button"
                 class="sm:hidden min-h-[44px] text-[11px] font-mono font-bold px-2 py-0.5 rounded-full border-2 border-plate bg-surface text-ink-muted touch-manipulation"
                 :aria-expanded="showDetail ? 'true' : 'false'"
                 @click="showDetail = !showDetail"
@@ -622,6 +630,14 @@
       :exercise-name="exercise.name"
       @close="isNoteModalOpen = false"
     />
+
+    <!-- Exercise Substitution Modal: Equipment Alternative Engine -->
+    <ExerciseSubstitutionModal
+      :is-open="showSubstituteModal"
+      :exercise="exercise"
+      :exercise-index="index"
+      @close="showSubstituteModal = false"
+    />
   </div>
 </template>
 
@@ -634,6 +650,7 @@ import { useTimer } from '../composables/useTimer';
 import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 import ExerciseNoteModal from './ExerciseNoteModal.vue';
+import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
 import { useExerciseNotes } from '../composables/useExerciseNotes.js';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';
@@ -646,6 +663,7 @@ import { setHasValues, findCopyTarget, planCopy, isHorizontalSwipe, copiedMessag
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
 const showHistory = ref(false);
+const showSubstituteModal = ref(false);
 const isNoteModalOpen = ref(false);
 const { hasNote, formatSummaryPill } = useExerciseNotes();
 // Phone: the description (altName) is behind the "รายละเอียด" toggle (density step 5)
