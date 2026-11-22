@@ -137,6 +137,17 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- Backup and import audit logs
+  CREATE TABLE IF NOT EXISTS backup_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    imported_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    source_format TEXT NOT NULL,
+    sessions_count INTEGER DEFAULT 0,
+    sets_count INTEGER DEFAULT 0,
+    skipped_count INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'success'
+  );
 `);
 
 // Safe migrations for columns
@@ -1091,6 +1102,125 @@ const repo = {
       }
     }
     return { success: true, healedCount };
+  },
+
+  // Backup and import operations
+  importBackupData({ sessions = [], bodyWeights = [], dedupe = true, sourceFormat = 'json_gym' }) {
+    const checkExisting = db.prepare('SELECT id FROM workout_sessions WHERE date = ? AND time = ?');
+    const insertSession = db.prepare(`
+      INSERT INTO workout_sessions (id, date, time, day_key, day_title, total_sets_done, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    const insertExercise = db.prepare(`
+      INSERT INTO session_exercises (session_id, exercise_id, exercise_name, category, canonical_id)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    const insertSet = db.prepare(`
+      INSERT INTO session_sets (session_exercise_id, set_index, type, target, weight, actual_reps, done, rir)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    const insertLog = db.prepare(`
+      INSERT INTO backup_logs (source_format, sessions_count, sets_count, skipped_count, status)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    const insertBodyWeight = db.prepare(`
+      INSERT INTO body_weights (date, weight, note, updated_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(date) DO UPDATE SET
+        weight = excluded.weight,
+        note = excluded.note,
+        updated_at = excluded.updated_at
+    `);
+
+    let sessionsImported = 0;
+    let setsImported = 0;
+    let duplicatesSkipped = 0;
+    let bodyWeightsImported = 0;
+
+    const runAtomic = db.transaction(() => {
+      // 1. Process sessions
+      for (const s of sessions) {
+        if (!s.date || typeof s.date !== 'string') {
+          throw new Error('Missing or invalid session date');
+        }
+        const time = s.time ? String(s.time) : '12:00:00';
+
+        if (dedupe) {
+          const exists = checkExisting.get(s.date, time);
+          if (exists) {
+            duplicatesSkipped++;
+            continue;
+          }
+        }
+
+        const sessionId = s.id ? String(s.id) : `session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        const dayKey = s.dayKey ? String(s.dayKey) : 'day1';
+        const dayTitle = s.dayTitle ? String(s.dayTitle) : 'Workout Session';
+        const totalSets = Number(s.totalSetsDone) || 0;
+        const createdAt = s.createdAt || new Date().toISOString();
+
+        insertSession.run(sessionId, s.date, time, dayKey, dayTitle, totalSets, createdAt);
+        sessionsImported++;
+
+        for (const ex of (s.exercises || [])) {
+          const exName = ex.exerciseName || ex.name || 'Exercise';
+          const exId = ex.exerciseId || ex.id || exName.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'ex';
+          const cat = ex.category ? String(ex.category) : 'General';
+          const canon = ex.canonicalId || getCanonicalExerciseId(exId);
+
+          const exResult = insertExercise.run(sessionId, exId, exName, cat, canon);
+          const sessionExerciseId = exResult.lastInsertRowid;
+
+          for (const set of (ex.sets || [])) {
+            const w = Number(set.weight);
+            if (!Number.isFinite(w) || w < 0) {
+              throw new Error(`Invalid set weight: ${set.weight}`);
+            }
+            const reps = Number(set.actualReps !== undefined ? set.actualReps : set.reps);
+            if (!Number.isInteger(reps) || reps < 0) {
+              throw new Error(`Invalid set reps: ${reps}`);
+            }
+
+            const setIdx = Number.isInteger(Number(set.setIndex)) ? Number(set.setIndex) : 0;
+            const setType = set.type ? String(set.type) : 'work';
+            const target = set.target ? String(set.target) : String(reps);
+            const done = set.done ? 1 : 0;
+            const rir = (set.rir !== undefined && set.rir !== null && set.rir !== '') ? Number(set.rir) : null;
+
+            insertSet.run(sessionExerciseId, setIdx, setType, target, w, reps, done, rir);
+            setsImported++;
+          }
+        }
+      }
+
+      // 2. Process body weights
+      for (const bw of bodyWeights) {
+        if (!bw.date || typeof bw.date !== 'string') continue;
+        const w = Number(bw.weight);
+        if (!Number.isFinite(w) || w <= 0) continue;
+        const note = bw.note ? String(bw.note) : '';
+        const now = new Date().toISOString();
+        insertBodyWeight.run(bw.date, w, note, now);
+        bodyWeightsImported++;
+      }
+
+      // 3. Log backup
+      insertLog.run(sourceFormat, sessionsImported, setsImported, duplicatesSkipped, 'success');
+    });
+
+    runAtomic();
+
+    return {
+      success: true,
+      sessionsImported,
+      setsImported,
+      duplicatesSkipped,
+      bodyWeightsImported
+    };
+  },
+
+  getBackupLogs(limit = 10) {
+    return db.prepare('SELECT * FROM backup_logs ORDER BY imported_at DESC LIMIT ?').all(limit);
   }
 };
 

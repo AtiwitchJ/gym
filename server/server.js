@@ -12,6 +12,7 @@ const monthly = require('./monthly');
 const exerciseRest = require('./exercise-rest');
 const calendar = require('./calendar');
 const progression = require('./exercise-progression');
+const backup = require('./backup');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -726,6 +727,63 @@ app.get('/api/export/db', (req, res) => {
     res.download(dbPath, filename);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Universal Workout Data Backup: JSON Export & Universal Import (JSON/CSV)
+app.get('/api/backup/export/json', (req, res) => {
+  try {
+    const data = backup.buildJsonExport(repo);
+    res.json(data);
+  } catch (err) {
+    console.error('Error exporting backup json:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/backup/import', (req, res) => {
+  try {
+    const body = req.body;
+    if (!body || typeof body !== 'object') {
+      return res.status(400).json({ error: 'รูปแบบไฟล์ไม่ถูกต้อง หรือไม่พบข้อมูลเซสชันการฝึกที่รองรับ' });
+    }
+
+    const { format, content, dedupe } = body;
+    if (!format || (format !== 'json' && format !== 'csv')) {
+      return res.status(400).json({ error: 'รูปแบบไฟล์ไม่ถูกต้อง หรือไม่พบข้อมูลเซสชันการฝึกที่รองรับ' });
+    }
+
+    if (content === undefined || content === null || content === '') {
+      return res.status(400).json({ error: 'รูปแบบไฟล์ไม่ถูกต้อง หรือไม่พบข้อมูลเซสชันการฝึกที่รองรับ' });
+    }
+
+    let parsed;
+    try {
+      if (format === 'csv') {
+        parsed = backup.parseCSVContent(content);
+      } else {
+        parsed = backup.parseJSONContent(content);
+      }
+    } catch (parseErr) {
+      return res.status(400).json({ error: 'รูปแบบไฟล์ไม่ถูกต้อง หรือไม่พบข้อมูลเซสชันการฝึกที่รองรับ' });
+    }
+
+    if (!parsed || !Array.isArray(parsed.sessions) || (parsed.sessions.length === 0 && (!Array.isArray(parsed.bodyWeights) || parsed.bodyWeights.length === 0))) {
+      return res.status(400).json({ error: 'รูปแบบไฟล์ไม่ถูกต้อง หรือไม่พบข้อมูลเซสชันการฝึกที่รองรับ' });
+    }
+
+    const shouldDedupe = dedupe !== false; // default true
+    const result = repo.importBackupData({
+      sessions: parsed.sessions,
+      bodyWeights: parsed.bodyWeights || [],
+      dedupe: shouldDedupe,
+      sourceFormat: parsed.sourceFormat || (format === 'csv' ? 'csv_generic' : 'json_gym')
+    });
+
+    res.json(result);
+  } catch (err) {
+    console.error('Error importing backup:', err);
+    res.status(400).json({ error: 'รูปแบบไฟล์ไม่ถูกต้อง หรือไม่พบข้อมูลเซสชันการฝึกที่รองรับ' });
   }
 });
 

@@ -15,12 +15,22 @@
           </p>
         </div>
 
-        <!-- Export Buttons -->
-        <div class="flex items-center gap-2.5 w-full sm:w-auto">
+        <!-- Export & Import Buttons -->
+        <div class="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
+          <!-- Import Backup Button -->
+          <button
+            @click="isBackupModalOpen = true"
+            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-flame hover:bg-flame-glow text-white font-bold text-xs px-3.5 py-2.5 rounded-xl border-2 border-plate shadow-[3px_3px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all min-h-[44px] touch-manipulation"
+            title="นำเข้าข้อมูลจากไฟล์สำรอง (.json, .csv จาก Strong / Hevy)"
+          >
+            <span class="text-sm">📥</span>
+            <span>นำเข้าข้อมูล</span>
+          </button>
+
           <!-- Excel Export Button -->
           <button
             @click="exportWorkoutHistory(workoutHistory)"
-            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-emerald hover:bg-emerald/90 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl border-2 border-plate shadow-[3px_3px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-emerald hover:bg-emerald/90 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl border-2 border-plate shadow-[3px_3px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all min-h-[44px] touch-manipulation"
           >
             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -35,7 +45,7 @@
           <!-- SQLite DB Download Button -->
           <button
             @click="downloadSqliteDatabase"
-            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-surface hover:bg-paper-dim text-ink font-bold text-xs px-3.5 py-2.5 rounded-xl border-2 border-plate shadow-[3px_3px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+            class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-surface hover:bg-paper-dim text-ink font-bold text-xs px-3.5 py-2.5 rounded-xl border-2 border-plate shadow-[3px_3px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all min-h-[44px] touch-manipulation"
             title="ดาวน์โหลดไฟล์ฐานข้อมูล gym.db สำหรับสำรองข้อมูล"
           >
             <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
@@ -165,18 +175,35 @@
       </div>
     </div>
   </div>
+
+  <!-- Data Backup, Import & Restore Modal -->
+  <DataBackupModal
+    :is-open="isBackupModalOpen"
+    @close="isBackupModalOpen = false"
+    @imported="handleImportSuccess"
+  />
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
 import { labelSets, weightText } from '../composables/setLabels.js';
 import VolumeChart from './VolumeChart.vue';
 import MonthlySummary from './MonthlySummary.vue';
 import TrainingCalendarCard from './TrainingCalendarCard.vue';
+import DataBackupModal from './DataBackupModal.vue';
 
-const { workoutHistory, deleteSession } = useWorkoutStore();
+const isBackupModalOpen = ref(false);
+
+const { workoutHistory, deleteSession, fetchServerState } = useWorkoutStore();
 const { exportWorkoutHistory, downloadSqliteDatabase } = useExcelExport();
+
+async function handleImportSuccess() {
+  if (fetchServerState) {
+    await fetchServerState();
+  }
+}
 
 function scrollToSession(sessionId) {
   if (!sessionId) return;
