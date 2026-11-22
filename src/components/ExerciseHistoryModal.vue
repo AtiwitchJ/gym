@@ -40,6 +40,9 @@
           <p v-if="!hasAnyPr" class="text-[11px] text-ink-muted font-body mt-2">ยังไม่มี PR: เซ็ตวอร์มไม่นับเป็น PR และ PR จะอัปเดตหลังบันทึกเซสชัน</p>
         </div>
 
+        <!-- Exercise Progression Chart & Strength Curve -->
+        <ExerciseProgressionChart :exercise-id="props.exerciseId" />
+
         <!-- History rows -->
         <div v-if="sessions.length === 0" class="text-xs text-ink-muted font-body">
           {{ emptyMessage }}
@@ -75,6 +78,7 @@
 import { computed, watch } from 'vue';
 import { useExerciseHistory, formatPr, hasPr, setText, HISTORY_EMPTY_MESSAGE } from '../composables/useExerciseHistory.js';
 import { labelSets } from '../composables/setLabels.js';
+import ExerciseProgressionChart from './ExerciseProgressionChart.vue';
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },

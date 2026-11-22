@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Database = require('better-sqlite3');
 const { MIN_MEMBERS } = require('./supersets');
+const { calculateEstimated1RM } = require('./estimate');
 
 const DATA_DIR = path.resolve(__dirname, '../data');
 if (!fs.existsSync(DATA_DIR)) {
@@ -125,6 +126,17 @@ db.exec(`
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
   INSERT OR IGNORE INTO user_training_goals (id, weekly_target_days) VALUES ('default_user', 4);
+
+  -- Exercise target goals for progression chart & strength curve
+  CREATE TABLE IF NOT EXISTS exercise_goals (
+    exercise_id TEXT PRIMARY KEY,
+    target_weight REAL NOT NULL,
+    target_reps INTEGER DEFAULT 1,
+    target_e1rm REAL,
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // Safe migrations for columns
@@ -955,6 +967,63 @@ const repo = {
       WHERE date LIKE ?
       ORDER BY date ASC, time ASC
     `).all(`${String(prefix)}%`);
+  },
+
+  // Exercise target goals
+  getExerciseGoal(exerciseId) {
+    if (!exerciseId) return null;
+    const canon = getCanonicalExerciseId(exerciseId);
+    const linkedIds = getLinkedExerciseIds(exerciseId);
+    const placeholders = linkedIds.map(() => '?').join(',');
+    const row = db.prepare(`
+      SELECT exercise_id, target_weight, target_reps, target_e1rm, notes
+      FROM exercise_goals
+      WHERE exercise_id = ? OR exercise_id = ? OR exercise_id IN (${placeholders})
+      ORDER BY CASE WHEN exercise_id = ? THEN 1 WHEN exercise_id = ? THEN 2 ELSE 3 END, updated_at DESC
+      LIMIT 1
+    `).get(exerciseId, canon, ...linkedIds, exerciseId, canon);
+
+    if (!row) return null;
+    return {
+      targetWeight: Number(row.target_weight),
+      targetReps: Number(row.target_reps),
+      targetE1rm: row.target_e1rm !== null ? Number(row.target_e1rm) : null,
+      notes: row.notes || ''
+    };
+  },
+
+  setExerciseGoal(exerciseId, data) {
+    const w = Number(data.targetWeight);
+    const r = data.targetReps !== undefined && data.targetReps !== null && data.targetReps !== ''
+      ? parseInt(data.targetReps, 10)
+      : 1;
+    const e1rm = data.targetE1rm !== undefined && data.targetE1rm !== null && data.targetE1rm !== ''
+      ? Number(data.targetE1rm)
+      : (r === 1 ? w : calculateEstimated1RM(w, r, 0));
+    const notes = data.notes !== undefined && data.notes !== null ? String(data.notes) : '';
+    const now = new Date().toISOString();
+
+    db.prepare(`
+      INSERT INTO exercise_goals (exercise_id, target_weight, target_reps, target_e1rm, notes, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(exercise_id) DO UPDATE SET
+        target_weight = excluded.target_weight,
+        target_reps = excluded.target_reps,
+        target_e1rm = excluded.target_e1rm,
+        notes = excluded.notes,
+        updated_at = excluded.updated_at
+    `).run(exerciseId, w, r, e1rm, notes, now, now);
+
+    return {
+      success: true,
+      exerciseId,
+      goal: {
+        targetWeight: w,
+        targetReps: r,
+        targetE1rm: e1rm,
+        notes
+      }
+    };
   },
 
   // Heal all canonical records from true historical sessions

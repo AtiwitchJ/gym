@@ -11,6 +11,7 @@ const supersets = require('./supersets');
 const monthly = require('./monthly');
 const exerciseRest = require('./exercise-rest');
 const calendar = require('./calendar');
+const progression = require('./exercise-progression');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -153,6 +154,75 @@ app.get('/api/exercises/:id/advice', (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Per-Exercise Progression Chart & Strength Curve
+app.get('/api/exercises/:id/progression', (req, res) => {
+  try {
+    const exerciseId = req.params.id;
+    if (!exerciseId) {
+      return res.status(400).json({ error: 'Exercise ID is required' });
+    }
+
+    let limit = 20;
+    if (req.query.limit !== undefined && req.query.limit !== null && req.query.limit !== '') {
+      const parsed = Number(req.query.limit);
+      if (!Number.isInteger(parsed) || parsed < 1 || parsed > 50) {
+        return res.status(400).json({ error: 'limit must be an integer between 1 and 50' });
+      }
+      limit = parsed;
+    }
+
+    const history = repo.getExerciseHistory(exerciseId);
+    const goal = repo.getExerciseGoal(exerciseId);
+    res.json(progression.buildProgression(exerciseId, history, goal, limit));
+  } catch (err) {
+    console.error('Error fetching exercise progression:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const handleSetExerciseGoal = (req, res) => {
+  try {
+    const exerciseId = req.params.id;
+    if (!exerciseId) {
+      return res.status(400).json({ error: 'Exercise ID is required' });
+    }
+
+    const body = req.body || {};
+    const { targetWeight, targetReps, notes } = body;
+
+    if (targetWeight === undefined || targetWeight === null || targetWeight === '') {
+      return res.status(400).json({ error: 'targetWeight is required' });
+    }
+    const tw = Number(targetWeight);
+    if (!Number.isFinite(tw) || tw <= 0 || tw > 1000) {
+      return res.status(400).json({ error: 'targetWeight must be a positive number up to 1000' });
+    }
+
+    let tr = 1;
+    if (targetReps !== undefined) {
+      const parsedReps = Number(targetReps);
+      if (targetReps === null || targetReps === '' || !Number.isInteger(parsedReps) || parsedReps < 1 || parsedReps > 100) {
+        return res.status(400).json({ error: 'targetReps must be an integer between 1 and 100' });
+      }
+      tr = parsedReps;
+    }
+
+    const result = repo.setExerciseGoal(exerciseId, {
+      targetWeight: tw,
+      targetReps: tr,
+      notes: notes || ''
+    });
+
+    res.json(result);
+  } catch (err) {
+    console.error('Error setting exercise goal:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+app.put('/api/exercises/:id/goal', handleSetExerciseGoal);
+app.post('/api/exercises/:id/goal', handleSetExerciseGoal);
 
 // Muscle fatigue & recovery (SPEC §2.3). Derived from completed sets; no new tables.
 app.get('/api/recovery', (req, res) => {
