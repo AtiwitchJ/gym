@@ -10,6 +10,7 @@ const advice = require('./advice');
 const supersets = require('./supersets');
 const monthly = require('./monthly');
 const exerciseRest = require('./exercise-rest');
+const calendar = require('./calendar');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -583,6 +584,46 @@ app.delete('/api/body-weights', (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Training Calendar & Consistency Streak (read-only calendar + weekly goal).
+// GET  /api/calendar/month?year=YYYY&month=M -> month grid & workout days
+// GET  /api/calendar/streak                  -> streak & weekly target progress
+// PUT  /api/calendar/target                  -> set weekly target days (1-7)
+
+app.get('/api/calendar/month', (req, res) => {
+  try {
+    const { year, month } = calendar.validateYearMonth(req.query.year, req.query.month);
+    const prefix = `${year}-${String(month).padStart(2, '0')}-`;
+    res.json(calendar.buildMonthData(repo.getSessionsByMonth(prefix), year, month));
+  } catch (err) {
+    const status = err && err.status ? err.status : 500;
+    if (status === 500) console.error('Error building calendar month:', err);
+    res.status(status).json({ error: err.message });
+  }
+});
+
+app.get('/api/calendar/streak', (req, res) => {
+  try {
+    res.json(calendar.buildStreak(repo.getWorkoutDates(), repo.getWeeklyTarget(), new Date()));
+  } catch (err) {
+    console.error('Error building streak:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const saveWeeklyTarget = (req, res) => {
+  try {
+    const weeklyTarget = calendar.validateWeeklyTarget(req.body);
+    res.json(repo.setWeeklyTarget(weeklyTarget));
+  } catch (err) {
+    const status = err && err.status ? err.status : 500;
+    if (status === 500) console.error('Error saving weekly target:', err);
+    res.status(status).json({ error: err.message });
+  }
+};
+
+app.put('/api/calendar/target', saveWeeklyTarget);
+app.post('/api/calendar/target', saveWeeklyTarget);
 
 // Todos
 app.get('/api/todos', (req, res) => {

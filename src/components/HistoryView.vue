@@ -81,6 +81,7 @@
       <div
         v-for="session in workoutHistory"
         :key="session.id"
+        :id="`session-${session.id}`"
         class="archive-card overflow-hidden"
       >
         <!-- Session Header -->
@@ -172,9 +173,16 @@ import { useExcelExport } from '../composables/useExcelExport';
 import { labelSets, weightText } from '../composables/setLabels.js';
 import VolumeChart from './VolumeChart.vue';
 import MonthlySummary from './MonthlySummary.vue';
+import TrainingCalendarCard from './TrainingCalendarCard.vue';
 
 const { workoutHistory, deleteSession } = useWorkoutStore();
 const { exportWorkoutHistory, downloadSqliteDatabase } = useExcelExport();
+
+function scrollToSession(sessionId) {
+  if (!sessionId) return;
+  const el = document.getElementById(`session-${sessionId}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 
 function confirmDelete(id) {
   if (confirm('คุณต้องการลบรายการประวัติตัวนี้ใช่หรือไม่?')) {

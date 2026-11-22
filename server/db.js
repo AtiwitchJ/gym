@@ -117,6 +117,14 @@ db.exec(`
     note TEXT,
     updated_at TEXT
   );
+
+  -- Weekly training goal for the calendar/streak overview.
+  CREATE TABLE IF NOT EXISTS user_training_goals (
+    id TEXT PRIMARY KEY,
+    weekly_target_days INTEGER DEFAULT 4,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  INSERT OR IGNORE INTO user_training_goals (id, weekly_target_days) VALUES ('default_user', 4);
 `);
 
 // Safe migrations for columns
@@ -915,6 +923,38 @@ const repo = {
     const d = String(date).trim();
     const result = db.prepare('DELETE FROM body_weights WHERE date = ?').run(d);
     return { success: result.changes > 0, date: d };
+  },
+
+  // Training calendar & streak
+  getWeeklyTarget() {
+    const row = db.prepare('SELECT weekly_target_days FROM user_training_goals WHERE id = ?').get('default_user');
+    const value = row ? Number(row.weekly_target_days) : 4;
+    return Number.isInteger(value) && value >= 1 && value <= 7 ? value : 4;
+  },
+
+  setWeeklyTarget(target) {
+    const value = Number(target);
+    db.prepare(`
+      INSERT INTO user_training_goals (id, weekly_target_days, updated_at)
+      VALUES ('default_user', ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        weekly_target_days = excluded.weekly_target_days,
+        updated_at = excluded.updated_at
+    `).run(value, new Date().toISOString());
+    return { success: true, weeklyTarget: this.getWeeklyTarget() };
+  },
+
+  getWorkoutDates() {
+    return db.prepare('SELECT DISTINCT date FROM workout_sessions ORDER BY date ASC').all().map(r => r.date);
+  },
+
+  getSessionsByMonth(prefix) {
+    return db.prepare(`
+      SELECT id, date, day_key, day_title, total_sets_done
+      FROM workout_sessions
+      WHERE date LIKE ?
+      ORDER BY date ASC, time ASC
+    `).all(`${String(prefix)}%`);
   },
 
   // Heal all canonical records from true historical sessions
