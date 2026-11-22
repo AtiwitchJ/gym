@@ -148,6 +148,15 @@ db.exec(`
     skipped_count INTEGER DEFAULT 0,
     status TEXT DEFAULT 'success'
   );
+
+  -- Persistent exercise machine setup and form cues
+  CREATE TABLE IF NOT EXISTS exercise_setup_notes (
+    exercise_id TEXT PRIMARY KEY,
+    pin_setting TEXT DEFAULT '',
+    form_cues TEXT DEFAULT '',
+    general_note TEXT DEFAULT '',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // Safe migrations for columns
@@ -1221,6 +1230,89 @@ const repo = {
 
   getBackupLogs(limit = 10) {
     return db.prepare('SELECT * FROM backup_logs ORDER BY imported_at DESC LIMIT ?').all(limit);
+  },
+
+  // Persistent exercise machine setup and form cues
+  getExerciseSetupNote(exerciseId) {
+    if (!exerciseId || typeof exerciseId !== 'string') {
+      return {
+        exerciseId: String(exerciseId || ''),
+        pinSetting: '',
+        formCues: '',
+        generalNote: '',
+        updatedAt: null
+      };
+    }
+    const cleanId = exerciseId.trim();
+    const row = db.prepare('SELECT exercise_id, pin_setting, form_cues, general_note, updated_at FROM exercise_setup_notes WHERE exercise_id = ?').get(cleanId);
+    if (!row) {
+      return {
+        exerciseId: cleanId,
+        pinSetting: '',
+        formCues: '',
+        generalNote: '',
+        updatedAt: null
+      };
+    }
+    return {
+      exerciseId: row.exercise_id,
+      pinSetting: row.pin_setting !== null && row.pin_setting !== undefined ? String(row.pin_setting) : '',
+      formCues: row.form_cues !== null && row.form_cues !== undefined ? String(row.form_cues) : '',
+      generalNote: row.general_note !== null && row.general_note !== undefined ? String(row.general_note) : '',
+      updatedAt: row.updated_at || null
+    };
+  },
+
+  saveExerciseSetupNote(data) {
+    const exerciseId = String(data.exerciseId || data.exercise_id || '').trim();
+    if (!exerciseId) {
+      throw new Error('exerciseId is required');
+    }
+    const pinSetting = data.pinSetting !== undefined && data.pinSetting !== null
+      ? String(data.pinSetting)
+      : (data.pin_setting !== undefined && data.pin_setting !== null ? String(data.pin_setting) : '');
+    const formCues = data.formCues !== undefined && data.formCues !== null
+      ? String(data.formCues)
+      : (data.form_cues !== undefined && data.form_cues !== null ? String(data.form_cues) : '');
+    const generalNote = data.generalNote !== undefined && data.generalNote !== null
+      ? String(data.generalNote)
+      : (data.general_note !== undefined && data.general_note !== null ? String(data.general_note) : '');
+    const updatedAt = data.updatedAt || data.updated_at || new Date().toISOString();
+
+    db.prepare(`
+      INSERT INTO exercise_setup_notes (exercise_id, pin_setting, form_cues, general_note, updated_at)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(exercise_id) DO UPDATE SET
+        pin_setting = excluded.pin_setting,
+        form_cues = excluded.form_cues,
+        general_note = excluded.general_note,
+        updated_at = excluded.updated_at
+    `).run(exerciseId, pinSetting, formCues, generalNote, updatedAt);
+
+    return {
+      exerciseId,
+      pinSetting,
+      formCues,
+      generalNote,
+      updatedAt
+    };
+  },
+
+  getAllExerciseSetupNotes() {
+    const rows = db.prepare('SELECT exercise_id, pin_setting, form_cues, general_note, updated_at FROM exercise_setup_notes ORDER BY updated_at DESC').all();
+    return rows.map(r => ({
+      exerciseId: r.exercise_id,
+      pinSetting: r.pin_setting || '',
+      formCues: r.form_cues || '',
+      generalNote: r.general_note || '',
+      updatedAt: r.updated_at || null
+    }));
+  },
+
+  deleteExerciseSetupNote(exerciseId) {
+    if (!exerciseId) return false;
+    const info = db.prepare('DELETE FROM exercise_setup_notes WHERE exercise_id = ?').run(String(exerciseId).trim());
+    return info.changes > 0;
   }
 };
 

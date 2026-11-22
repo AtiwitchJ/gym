@@ -13,6 +13,7 @@ const exerciseRest = require('./exercise-rest');
 const calendar = require('./calendar');
 const progression = require('./exercise-progression');
 const backup = require('./backup');
+const exerciseNotes = require('./exercise-notes');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -224,6 +225,38 @@ const handleSetExerciseGoal = (req, res) => {
 
 app.put('/api/exercises/:id/goal', handleSetExerciseGoal);
 app.post('/api/exercises/:id/goal', handleSetExerciseGoal);
+
+// Exercise Machine Setup & Form Cues
+app.get('/api/exercises/:id/note', (req, res) => {
+  try {
+    const exerciseId = exerciseNotes.validateExerciseId(req.params.id);
+    const note = exerciseNotes.getNote(repo, exerciseId);
+    res.json(note);
+  } catch (err) {
+    if (err.status === 400 || err instanceof exerciseNotes.ValidationError) {
+      return res.status(400).json({ error: err.message });
+    }
+    console.error('Error fetching exercise note:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const handlePutExerciseNote = (req, res) => {
+  try {
+    const exerciseId = exerciseNotes.validateExerciseId(req.params.id);
+    const result = exerciseNotes.saveNote(repo, exerciseId, req.body);
+    res.json(result);
+  } catch (err) {
+    if (err.status === 400 || err instanceof exerciseNotes.ValidationError) {
+      return res.status(400).json({ error: err.message });
+    }
+    console.error('Error saving exercise note:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+app.put('/api/exercises/:id/note', handlePutExerciseNote);
+app.post('/api/exercises/:id/note', handlePutExerciseNote);
 
 // Muscle fatigue & recovery (SPEC §2.3). Derived from completed sets; no new tables.
 app.get('/api/recovery', (req, res) => {

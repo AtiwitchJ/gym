@@ -185,6 +185,40 @@
         <span v-if="exercise.subMuscle" class="hidden sm:inline text-ink-muted">• {{ exercise.subMuscle }}</span>
       </div>
 
+      <!-- Exercise Machine Setup & Form Cues Pill (Persistent Note) -->
+      <div class="mt-2.5">
+        <div
+          v-if="hasNote(exercise.id)"
+          class="bg-paper-subtle border border-plate/30 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2 text-xs font-mono text-ink shadow-[1px_1px_0px_#1e2220] hover:bg-paper-dim transition-all cursor-pointer min-h-[44px] touch-manipulation"
+          title="แตะเพื่อดูหรือแก้ไขการตั้งค่าเครื่องและคิวฟอร์ม"
+          @click="isNoteModalOpen = true"
+        >
+          <div class="flex items-center gap-1.5 min-w-0 flex-1">
+            <span class="text-sm select-none">📌</span>
+            <span class="truncate text-[11px] sm:text-xs font-mono font-bold text-ink">
+              {{ formatSummaryPill(exercise.id) }}
+            </span>
+          </div>
+          <button
+            type="button"
+            class="min-h-[44px] min-w-[44px] px-2.5 py-1 rounded-lg border border-plate/30 bg-white hover:bg-surface text-ink font-mono font-bold text-[11px] flex items-center gap-1 flex-shrink-0 shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px] touch-manipulation"
+            title="แก้ไขการตั้งค่าและคิวฟอร์ม"
+            @click.stop="isNoteModalOpen = true"
+          >
+            ✏️ แก้ไขโน้ต
+          </button>
+        </div>
+        <button
+          v-else
+          type="button"
+          class="w-full min-h-[44px] px-3 py-2 rounded-xl border border-dashed border-plate/40 hover:border-plate bg-white/70 hover:bg-white text-ink-muted hover:text-ink font-mono text-xs flex items-center justify-center gap-1.5 transition-all touch-manipulation shadow-[1px_1px_0px_#1e2220] active:translate-x-[0.5px] active:translate-y-[0.5px]"
+          title="บันทึกตำแหน่งเครื่อง พินเบาะ และคิวฟอร์มของท่านี้"
+          @click="isNoteModalOpen = true"
+        >
+          <span>+ บันทึกพินเครื่อง / ฟอร์มการเล่น</span>
+        </button>
+      </div>
+
       <!-- Phone: the plan table is collapsed under a one-line summary (density step 6; open from 640 px) -->
       <button
         type="button"
@@ -580,6 +614,14 @@
       :exercise-name="exercise.name"
       @close="showHistory = false"
     />
+
+    <!-- Exercise Note Modal: Persistent Machine Setup & Form Cues -->
+    <ExerciseNoteModal
+      :is-open="isNoteModalOpen"
+      :exercise-id="exercise.id"
+      :exercise-name="exercise.name"
+      @close="isNoteModalOpen = false"
+    />
   </div>
 </template>
 
@@ -591,6 +633,8 @@ import { useWeightAdvisor } from '../composables/useWeightAdvisor';
 import { useTimer } from '../composables/useTimer';
 import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
+import ExerciseNoteModal from './ExerciseNoteModal.vue';
+import { useExerciseNotes } from '../composables/useExerciseNotes.js';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';
 import { getCustomRest, formatRestLabel, restRevision } from '../composables/useCustomRest.js';
@@ -602,6 +646,8 @@ import { setHasValues, findCopyTarget, planCopy, isHorizontalSwipe, copiedMessag
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 
 const showHistory = ref(false);
+const isNoteModalOpen = ref(false);
+const { hasNote, formatSummaryPill } = useExerciseNotes();
 // Phone: the description (altName) is behind the "รายละเอียด" toggle (density step 5)
 const showDetail = ref(false);
 // Phone: the plan table is collapsed until its summary line is tapped (density step 6)
