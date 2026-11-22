@@ -51,6 +51,21 @@
       </button>
     </div>
 
+    <!-- Barbell Plate Calculator & Inventory (standalone; no session needed) -->
+    <div class="archive-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase block">PLATE CALCULATOR & INVENTORY</span>
+        <p class="text-xs text-ink-muted font-body">คำนวณการใส่แผ่นบาร์เบล และตั้งค่าจำนวนแผ่นเหล็กในยิม</p>
+      </div>
+      <button
+        type="button"
+        @click="openPlateCalculator(60)"
+        class="min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl border-2 border-plate bg-flame hover:bg-flame-glow text-white font-heading font-bold text-sm shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+      >
+        🏋️ คำนวณแผ่น / คลังแผ่น
+      </button>
+    </div>
+
     <!-- All-Time Stats Overview -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
@@ -323,8 +338,10 @@ import {
   NOTIFY_STATUS_TEXT
 } from '../composables/restAlerts.js';
 import { useOneRmCalculator } from '../composables/useOneRm.js';
+import { usePlateCalculator } from '../composables/usePlateCalculator.js';
 
 const { open: openOneRm } = useOneRmCalculator();
+const { openPlateCalculator } = usePlateCalculator();
 
 const { routines, resetToDefaults } = useRoutineStore();
 const { sessionHistory, discardSession } = useActiveSessionStore();

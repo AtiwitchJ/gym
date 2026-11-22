@@ -18,14 +18,115 @@ export const AVAILABLE_PLATES = [
   { weight: 1.25,color: '#16A34A', textColor: '#FFFFFF', name: '1.25', heightClass: 'h-10 sm:h-11', widthClass: 'w-3 sm:w-3' }
 ];
 
+export const PLATE_INVENTORY_STORAGE_KEY = 'gym_plate_inventory_v1';
+
+// Default inventory: standard pairs per plate weight in a well-equipped gym
+export const DEFAULT_PLATE_INVENTORY = {
+  25: 4,
+  20: 4,
+  15: 2,
+  10: 2,
+  5: 2,
+  2.5: 2,
+  1.25: 2
+};
+
 /**
- * Greedily calculate plates required per side
- * @param {number|string} targetTotalWeight 
- * @param {number} barWeight 
+ * Load plate inventory from localStorage with safe fallback to DEFAULT_PLATE_INVENTORY
  */
-export function calculatePlates(targetTotalWeight, barWeight = 20) {
+export function loadPlateInventory() {
+  if (typeof localStorage === 'undefined') {
+    return { ...DEFAULT_PLATE_INVENTORY };
+  }
+  try {
+    const raw = localStorage.getItem(PLATE_INVENTORY_STORAGE_KEY);
+    if (!raw) return { ...DEFAULT_PLATE_INVENTORY };
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return { ...DEFAULT_PLATE_INVENTORY };
+
+    const result = { ...DEFAULT_PLATE_INVENTORY };
+    for (const plate of AVAILABLE_PLATES) {
+      const val = parsed[plate.weight] !== undefined ? parsed[plate.weight] : parsed[String(plate.weight)];
+      if (val !== undefined && val !== null && !isNaN(Number(val))) {
+        result[plate.weight] = Math.max(0, Math.floor(Number(val)));
+      }
+    }
+    return result;
+  } catch (e) {
+    return { ...DEFAULT_PLATE_INVENTORY };
+  }
+}
+
+/**
+ * Persist plate inventory to localStorage
+ */
+export function savePlateInventory(inventory) {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(PLATE_INVENTORY_STORAGE_KEY, JSON.stringify(inventory));
+  } catch (e) {
+    console.error('Failed to save plate inventory to localStorage', e);
+  }
+}
+
+// Reactive singleton state for inventory
+const plateInventory = ref(loadPlateInventory());
+
+/**
+ * Helper to get available pairs for a specific plate weight from an inventory object or map
+ */
+function getAvailablePairs(inv, weight) {
+  if (!inv) return Infinity;
+  let val;
+  if (inv instanceof Map) {
+    val = inv.has(weight) ? inv.get(weight) : inv.get(String(weight));
+  } else if (typeof inv === 'object') {
+    val = inv[weight] !== undefined ? inv[weight] : inv[String(weight)];
+  }
+  if (val === undefined || val === null) {
+    return 0;
+  }
+  const num = Number(val);
+  return isNaN(num) ? 0 : Math.max(0, Math.floor(num));
+}
+
+/**
+ * Set the number of pairs for a specific plate weight
+ */
+export function setPlatePairs(weight, pairs) {
+  const numWeight = parseFloat(weight);
+  const count = Math.max(0, parseInt(pairs, 10) || 0);
+  plateInventory.value = {
+    ...plateInventory.value,
+    [numWeight]: count
+  };
+  savePlateInventory(plateInventory.value);
+  return plateInventory.value;
+}
+
+/**
+ * Reset plate inventory back to default pairs
+ */
+export function resetPlateInventory() {
+  plateInventory.value = { ...DEFAULT_PLATE_INVENTORY };
+  savePlateInventory(plateInventory.value);
+  return plateInventory.value;
+}
+
+/**
+ * Greedily calculate plates required per side respecting plate inventory
+ * @param {number|string} targetTotalWeight
+ * @param {number} barWeight
+ * @param {Object|Map|null} [inventory] Optional inventory map (weight -> pairs). If omitted, uses current reactive inventory/default.
+ */
+export function calculatePlates(targetTotalWeight, barWeight = 20, inventory) {
   const target = Math.max(0, parseFloat(targetTotalWeight) || 0);
   const bar = parseFloat(barWeight) || 0;
+
+  let effectiveInventory = inventory;
+  if (effectiveInventory === undefined || effectiveInventory === null) {
+    effectiveInventory = plateInventory?.value || DEFAULT_PLATE_INVENTORY;
+  }
 
   if (target <= bar) {
     return {
@@ -36,7 +137,12 @@ export function calculatePlates(targetTotalWeight, barWeight = 20) {
       platesPerSide: [],
       plateSummary: [],
       remainder: 0,
-      achievedTotal: bar
+      achievedTotal: bar,
+      shortage: 0,
+      shortagePerSide: 0,
+      shortageTotal: 0,
+      hasShortage: false,
+      notes: ''
     };
   }
 
@@ -44,15 +150,32 @@ export function calculatePlates(targetTotalWeight, barWeight = 20) {
   let currentRemainder = sideTarget;
   const allocatedPlates = [];
 
+  const remainingPairs = new Map();
+  for (const plate of AVAILABLE_PLATES) {
+    remainingPairs.set(plate.weight, getAvailablePairs(effectiveInventory, plate.weight));
+  }
+
+  let ranOutOfPlates = false;
+
   for (const plate of AVAILABLE_PLATES) {
     while (currentRemainder >= plate.weight - 0.001) {
-      allocatedPlates.push(plate);
-      currentRemainder = Math.round((currentRemainder - plate.weight) * 100) / 100;
+      const avail = remainingPairs.get(plate.weight) || 0;
+      if (avail > 0) {
+        allocatedPlates.push(plate);
+        currentRemainder = Math.round((currentRemainder - plate.weight) * 100) / 100;
+        remainingPairs.set(plate.weight, avail - 1);
+      } else {
+        ranOutOfPlates = true;
+        break;
+      }
     }
   }
 
   const achievedSide = Math.round(allocatedPlates.reduce((sum, p) => sum + p.weight, 0) * 100) / 100;
   const achievedTotal = Math.round((bar + achievedSide * 2) * 100) / 100;
+  const shortageTotal = Math.max(0, Math.round((target - achievedTotal) * 100) / 100);
+  const shortagePerSide = Math.max(0, Math.round(currentRemainder * 100) / 100);
+  const hasShortage = shortageTotal > 0 && (ranOutOfPlates || shortageTotal > 0.001);
 
   // Group summary (e.g. 20kg x 2, 5kg x 1)
   const countMap = new Map();
@@ -69,6 +192,13 @@ export function calculatePlates(targetTotalWeight, barWeight = 20) {
     };
   });
 
+  let notes = '';
+  if (hasShortage) {
+    notes = `แผ่นเหล็กในคลังไม่พอ ขาดอีก ${shortageTotal} กก. (ข้างละ ${shortagePerSide} กก.)`;
+  } else if (currentRemainder > 0) {
+    notes = `เศษน้ำหนักข้างละ ${currentRemainder} กก. (รวม ${Math.round(currentRemainder * 2 * 100) / 100} กก.)`;
+  }
+
   return {
     success: true,
     targetWeight: target,
@@ -77,7 +207,13 @@ export function calculatePlates(targetTotalWeight, barWeight = 20) {
     platesPerSide: allocatedPlates,
     plateSummary,
     remainder: Math.round(currentRemainder * 100) / 100,
-    achievedTotal
+    achievedTotal,
+    shortage: shortageTotal,
+    shortagePerSide,
+    shortageTotal,
+    hasShortage,
+    notes,
+    note: notes
   };
 }
 
@@ -88,7 +224,7 @@ const selectedBar = ref(BAR_PRESETS[0]);
 let onApplyCallback = null;
 
 const calculation = computed(() => {
-  return calculatePlates(targetWeight.value, selectedBar.value.weight);
+  return calculatePlates(targetWeight.value, selectedBar.value.weight, plateInventory.value);
 });
 
 /**
@@ -142,6 +278,11 @@ export function usePlateCalculator() {
     selectedBar,
     barPresets: BAR_PRESETS,
     availablePlates: AVAILABLE_PLATES,
+    plateInventory,
+    plateInventoryStorageKey: PLATE_INVENTORY_STORAGE_KEY,
+    defaultPlateInventory: DEFAULT_PLATE_INVENTORY,
+    setPlatePairs,
+    resetPlateInventory,
     calculation,
     openPlateCalculator,
     closePlateCalculator,

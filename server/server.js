@@ -246,6 +246,199 @@ app.put('/api/exercise-rest/:exerciseId', (req, res) => {
   }
 });
 
+// Gym profiles (plate inventory and barbell defaults per gym).
+// GET    /api/gym-profiles            -> [ { id, name, plate_inventory, default_bar_weight, updated_at }, ... ]
+// GET    /api/gym-profiles/:id        -> { id, name, plate_inventory, default_bar_weight, updated_at }
+// POST   /api/gym-profiles            -> 201 (create) or 200 (update if id provided)
+// PUT    /api/gym-profiles/:id        -> 200 (update)
+// DELETE /api/gym-profiles/:id        -> 200 { success: true, id }
+function validateGymProfile(body, { requireName = true } = {}) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    const err = new Error('Request body must be a JSON object');
+    err.status = 400;
+    throw err;
+  }
+
+  // Name
+  let name;
+  if (body.name !== undefined) {
+    if (typeof body.name !== 'string') {
+      const err = new Error('name must be a string');
+      err.status = 400;
+      throw err;
+    }
+    const trimmed = body.name.trim();
+    if (trimmed.length === 0) {
+      const err = new Error('name cannot be empty');
+      err.status = 400;
+      throw err;
+    }
+    if (trimmed.length > 100) {
+      const err = new Error('name must be at most 100 characters');
+      err.status = 400;
+      throw err;
+    }
+    name = trimmed;
+  } else if (requireName) {
+    const err = new Error('name is required');
+    err.status = 400;
+    throw err;
+  }
+
+  // Plate inventory
+  let plateInventory = {};
+  const rawInv = body.plate_inventory !== undefined ? body.plate_inventory : body.plateInventory;
+  if (rawInv !== undefined && rawInv !== null) {
+    if (typeof rawInv === 'string') {
+      try {
+        plateInventory = JSON.parse(rawInv);
+      } catch (e) {
+        const err = new Error('plate_inventory must be valid JSON');
+        err.status = 400;
+        throw err;
+      }
+    } else if (typeof rawInv === 'object' && !Array.isArray(rawInv)) {
+      plateInventory = rawInv;
+    } else {
+      const err = new Error('plate_inventory must be a JSON object or valid JSON string');
+      err.status = 400;
+      throw err;
+    }
+
+    if (typeof plateInventory !== 'object' || plateInventory === null || Array.isArray(plateInventory)) {
+      const err = new Error('plate_inventory must be an object');
+      err.status = 400;
+      throw err;
+    }
+  }
+
+  // Default bar weight
+  let defaultBarWeight = 20;
+  const rawBar = body.default_bar_weight !== undefined ? body.default_bar_weight : body.defaultBarWeight;
+  if (rawBar !== undefined && rawBar !== null) {
+    const num = Number(rawBar);
+    if (!Number.isFinite(num) || num < 0 || num > 500) {
+      const err = new Error('default_bar_weight must be a number between 0 and 500');
+      err.status = 400;
+      throw err;
+    }
+    defaultBarWeight = num;
+  }
+
+  // ID
+  let id;
+  if (body.id !== undefined && body.id !== null) {
+    const numId = Number(body.id);
+    if (!Number.isInteger(numId) || numId <= 0) {
+      const err = new Error('id must be a positive integer');
+      err.status = 400;
+      throw err;
+    }
+    id = numId;
+  }
+
+  return {
+    id,
+    name,
+    plate_inventory: plateInventory,
+    default_bar_weight: defaultBarWeight
+  };
+}
+
+app.get('/api/gym-profiles', (req, res) => {
+  try {
+    res.json(repo.getGymProfiles());
+  } catch (err) {
+    console.error('Error reading gym profiles:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/gym-profiles/:id', (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'id must be a positive integer' });
+    }
+    const profile = repo.getGymProfileById(id);
+    if (!profile) {
+      return res.status(404).json({ error: 'Gym profile not found' });
+    }
+    res.json(profile);
+  } catch (err) {
+    console.error('Error fetching gym profile:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/gym-profiles', (req, res) => {
+  try {
+    const input = validateGymProfile(req.body);
+    const isUpdate = Boolean(input.id && repo.getGymProfileById(input.id));
+    const saved = repo.saveGymProfile(input);
+    res.status(isUpdate ? 200 : 201).json(saved);
+  } catch (err) {
+    const status = err && err.status ? err.status : 400;
+    if (status === 500) console.error('Error saving gym profile:', err);
+    res.status(status).json({ error: err.message });
+  }
+});
+
+app.put('/api/gym-profiles/:id', (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'id must be a positive integer' });
+    }
+    const existing = repo.getGymProfileById(id);
+    if (!existing) {
+      return res.status(404).json({ error: 'Gym profile not found' });
+    }
+    const input = validateGymProfile({ ...req.body, id });
+    const saved = repo.saveGymProfile(input);
+    res.json(saved);
+  } catch (err) {
+    const status = err && err.status ? err.status : 400;
+    if (status === 500) console.error('Error updating gym profile:', err);
+    res.status(status).json({ error: err.message });
+  }
+});
+
+app.delete('/api/gym-profiles/:id', (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'id must be a positive integer' });
+    }
+    const result = repo.deleteGymProfile(id);
+    if (!result.success) {
+      return res.status(404).json({ error: 'Gym profile not found' });
+    }
+    res.json(result);
+  } catch (err) {
+    console.error('Error deleting gym profile:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/gym-profiles', (req, res) => {
+  try {
+    const rawId = req.body && req.body.id;
+    const id = Number(rawId);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ error: 'id must be a positive integer' });
+    }
+    const result = repo.deleteGymProfile(id);
+    if (!result.success) {
+      return res.status(404).json({ error: 'Gym profile not found' });
+    }
+    res.json(result);
+  } catch (err) {
+    console.error('Error deleting gym profile:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Todos
 app.get('/api/todos', (req, res) => {
   try {

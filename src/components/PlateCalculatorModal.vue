@@ -34,7 +34,7 @@
 
           <button
             @click="closePlateCalculator"
-            class="w-8 h-8 rounded-full border-2 border-plate bg-white hover:bg-paper-dim flex items-center justify-center text-ink font-bold shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+            class="min-h-[44px] min-w-[44px] w-9 h-9 rounded-full border-2 border-plate bg-white hover:bg-paper-dim flex items-center justify-center text-ink font-bold shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
             title="ปิดหน้าต่าง"
           >
             ✕
@@ -64,7 +64,7 @@
                 v-for="delta in [-10, -2.5, 2.5, 10]"
                 :key="delta"
                 @click="adjustWeight(delta)"
-                class="px-2.5 py-1.5 rounded-xl border-2 border-plate text-xs font-mono font-bold shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                class="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl border-2 border-plate text-xs font-mono font-bold shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation flex items-center justify-center"
                 :class="delta < 0 ? 'bg-paper-subtle hover:bg-paper-dim text-ink' : 'bg-flame-bg hover:bg-flame hover:text-white text-flame-text'"
               >
                 {{ delta > 0 ? `+${delta}` : delta }}
@@ -82,7 +82,7 @@
                 v-for="bar in barPresets"
                 :key="bar.id"
                 @click="selectBarPreset(bar)"
-                class="px-2 py-1.5 rounded-xl border-2 border-plate text-left text-xs font-mono transition-all flex items-center justify-between"
+                class="min-h-[44px] px-2 py-1.5 rounded-xl border-2 border-plate text-left text-xs font-mono transition-all flex items-center justify-between touch-manipulation"
                 :class="selectedBar.id === bar.id
                   ? 'bg-ink text-white font-bold shadow-[2px_2px_0px_#e11d48]'
                   : 'bg-paper-subtle hover:bg-paper-dim text-ink shadow-[1px_1px_0px_#1e2220]'"
@@ -142,7 +142,7 @@
             </div>
           </div>
 
-          <!-- Plate Breakdown Badges -->
+          <!-- Plate Breakdown Badges & Remainder/Shortage Alerts -->
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-xs font-mono font-bold text-ink">แผ่นที่ต้องใส่:</span>
             <div
@@ -155,11 +155,95 @@
               <span class="bg-black/20 px-1.5 py-0.2 rounded-full text-[11px]">x{{ item.count }}</span>
             </div>
 
+            <!-- Shortage Alert: when plates in inventory are insufficient -->
             <div
-              v-if="calculation.remainder > 0"
+              v-if="calculation.hasShortage || calculation.shortage > 0"
+              class="w-full mt-1 px-3 py-2 rounded-xl bg-red-100 border-2 border-red-500 text-red-950 text-xs font-mono font-bold flex items-center gap-2 shadow-[2px_2px_0px_#1e2220]"
+            >
+              <span class="text-base flex-shrink-0">⚠️</span>
+              <div>
+                <span>แผ่นเหล็กในคลังไม่พอ: ขาดอีก {{ calculation.shortage }} กก. (จัดได้จริงรวม {{ calculation.achievedTotal }} กก.)</span>
+              </div>
+            </div>
+
+            <!-- Remainder Alert: when target has odd fractions not made by plates -->
+            <div
+              v-else-if="calculation.remainder > 0"
               class="px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-500 text-amber-900 text-xs font-mono font-bold flex items-center gap-1"
             >
               <span>⚠️ เศษข้างละ {{ calculation.remainder }} กก. (รวม {{ calculation.remainder * 2 }} กก.)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plate Inventory Settings Section -->
+        <div class="bg-white border-2 border-plate shadow-[3px_3px_0px_#1e2220] rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold text-ink uppercase tracking-wider">
+                คลังแผ่นเหล็กในยิม (Gym Inventory)
+              </span>
+              <span class="text-[11px] font-mono text-ink-muted">
+                (คู่ / Pairs)
+              </span>
+            </div>
+
+            <button
+              type="button"
+              @click="resetPlateInventory"
+              class="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border border-plate/30 hover:border-flame bg-paper-subtle hover:bg-flame-bg text-ink-muted hover:text-flame-text text-xs font-mono font-bold transition-all shadow-[1px_1px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none flex items-center gap-1 touch-manipulation"
+              title="รีเซ็ตจำนวนแผ่นกลับเป็นค่าเริ่มต้น"
+            >
+              <span>↺</span>
+              <span>คืนค่าเริ่มต้น</span>
+            </button>
+          </div>
+
+          <p class="text-[11px] font-body text-ink-muted leading-tight">
+            กำหนดจำนวนคู่ของแผ่นเหล็กที่มีในยิม (1 คู่ = ข้างละ 1 แผ่น) ระบบจะคำนวณไม่เกินจำนวนที่มี
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <div
+              v-for="plate in availablePlates"
+              :key="plate.weight"
+              class="flex items-center justify-between p-2 rounded-xl border border-plate/20 bg-paper-subtle"
+            >
+              <div class="flex items-center gap-2">
+                <span
+                  class="w-3.5 h-6 rounded border border-plate/40 flex-shrink-0"
+                  :style="{ backgroundColor: plate.color }"
+                ></span>
+                <span class="text-xs font-mono font-bold text-ink">
+                  {{ plate.name }}
+                </span>
+              </div>
+
+              <!-- Steppers: -1, count, +1 with strict 44px touch target -->
+              <div class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  @click="setPlatePairs(plate.weight, (plateInventory[plate.weight] || 0) - 1)"
+                  :disabled="(plateInventory[plate.weight] || 0) <= 0"
+                  class="min-h-[44px] min-w-[44px] w-11 h-11 rounded-xl border-2 border-plate bg-white hover:bg-paper-dim disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center font-mono font-bold text-sm text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+                  :aria-label="`ลดแผ่น ${plate.name}`"
+                >
+                  -
+                </button>
+
+                <span class="w-8 text-center font-mono font-extrabold text-sm text-ink tabular-nums">
+                  {{ plateInventory[plate.weight] ?? 0 }}
+                </span>
+
+                <button
+                  type="button"
+                  @click="setPlatePairs(plate.weight, (plateInventory[plate.weight] || 0) + 1)"
+                  class="min-h-[44px] min-w-[44px] w-11 h-11 rounded-xl border-2 border-plate bg-white hover:bg-paper-dim flex items-center justify-center font-mono font-bold text-sm text-ink shadow-[1px_1px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
+                  :aria-label="`เพิ่มแผ่น ${plate.name}`"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -168,14 +252,14 @@
         <div class="flex items-center gap-3 pt-2">
           <button
             @click="closePlateCalculator"
-            class="flex-1 h-12 rounded-xl bg-paper-subtle hover:bg-paper-dim border-2 border-plate text-ink font-heading font-bold text-sm shadow-[2.5px_2.5px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all"
+            class="flex-1 min-h-[44px] h-12 rounded-xl bg-paper-subtle hover:bg-paper-dim border-2 border-plate text-ink font-heading font-bold text-sm shadow-[2.5px_2.5px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all touch-manipulation"
           >
             ยกเลิก (Cancel)
           </button>
 
           <button
             @click="applyWeight"
-            class="flex-2 h-12 rounded-xl bg-flame hover:bg-flame-glow border-2 border-plate text-white font-heading font-extrabold text-base shadow-[3px_3px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all flex items-center justify-center gap-2"
+            class="flex-2 min-h-[44px] h-12 rounded-xl bg-flame hover:bg-flame-glow border-2 border-plate text-white font-heading font-extrabold text-base shadow-[3px_3px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all flex items-center justify-center gap-2 touch-manipulation"
           >
             <span>นำค่าน้ำหนักนี้ไปใช้ ({{ targetWeight }} กก.)</span>
             <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
@@ -196,6 +280,10 @@ const {
   targetWeight,
   selectedBar,
   barPresets,
+  availablePlates,
+  plateInventory,
+  setPlatePairs,
+  resetPlateInventory,
   calculation,
   closePlateCalculator,
   adjustWeight,

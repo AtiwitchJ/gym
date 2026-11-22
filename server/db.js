@@ -100,6 +100,15 @@ db.exec(`
     seconds INTEGER NOT NULL,
     updated_at TEXT NOT NULL
   );
+
+  -- Gym profiles for plate inventory and barbell defaults (synced across devices).
+  CREATE TABLE IF NOT EXISTS gym_profiles (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    plate_inventory TEXT NOT NULL DEFAULT '{}',
+    default_bar_weight REAL DEFAULT 20,
+    updated_at TEXT
+  );
 `);
 
 // Safe migrations for columns
@@ -773,6 +782,81 @@ const repo = {
        ON CONFLICT(exercise_id) DO UPDATE SET seconds = excluded.seconds, updated_at = excluded.updated_at`
     ).run(id, value, new Date().toISOString());
     return { success: true, exerciseId: id, seconds: value };
+  },
+
+  // Gym profiles (plate inventory and barbell defaults per gym)
+  getGymProfiles() {
+    const rows = db.prepare('SELECT id, name, plate_inventory, default_bar_weight, updated_at FROM gym_profiles ORDER BY id ASC').all();
+    return rows.map(r => this.formatGymProfile(r));
+  },
+
+  getGymProfileById(id) {
+    const row = db.prepare('SELECT id, name, plate_inventory, default_bar_weight, updated_at FROM gym_profiles WHERE id = ?').get(Number(id));
+    return row ? this.formatGymProfile(row) : null;
+  },
+
+  formatGymProfile(r) {
+    let inventory = {};
+    try {
+      inventory = typeof r.plate_inventory === 'string' ? JSON.parse(r.plate_inventory) : (r.plate_inventory || {});
+    } catch (e) {
+      inventory = {};
+    }
+    return {
+      id: r.id,
+      name: r.name,
+      plate_inventory: inventory,
+      default_bar_weight: r.default_bar_weight !== null && r.default_bar_weight !== undefined ? Number(r.default_bar_weight) : 20,
+      updated_at: r.updated_at
+    };
+  },
+
+  saveGymProfile(profile) {
+    const name = String(profile.name || '').trim();
+    let inventoryStr = '{}';
+    const rawInv = profile.plate_inventory !== undefined ? profile.plate_inventory : profile.plateInventory;
+    if (rawInv !== undefined && rawInv !== null) {
+      inventoryStr = typeof rawInv === 'string' ? rawInv : JSON.stringify(rawInv);
+    }
+
+    let barWeight = 20;
+    const rawBar = profile.default_bar_weight !== undefined ? profile.default_bar_weight : profile.defaultBarWeight;
+    if (rawBar !== undefined && rawBar !== null) {
+      barWeight = Number(rawBar);
+    }
+
+    const updatedAt = profile.updated_at || profile.updatedAt || new Date().toISOString();
+
+    if (profile.id) {
+      const id = Number(profile.id);
+      const existing = db.prepare('SELECT id FROM gym_profiles WHERE id = ?').get(id);
+      if (existing) {
+        db.prepare(`
+          UPDATE gym_profiles
+          SET name = ?, plate_inventory = ?, default_bar_weight = ?, updated_at = ?
+          WHERE id = ?
+        `).run(name, inventoryStr, barWeight, updatedAt, id);
+        return this.getGymProfileById(id);
+      } else {
+        db.prepare(`
+          INSERT INTO gym_profiles (id, name, plate_inventory, default_bar_weight, updated_at)
+          VALUES (?, ?, ?, ?, ?)
+        `).run(id, name, inventoryStr, barWeight, updatedAt);
+        return this.getGymProfileById(id);
+      }
+    } else {
+      const info = db.prepare(`
+        INSERT INTO gym_profiles (name, plate_inventory, default_bar_weight, updated_at)
+        VALUES (?, ?, ?, ?)
+      `).run(name, inventoryStr, barWeight, updatedAt);
+      return this.getGymProfileById(info.lastInsertRowid);
+    }
+  },
+
+  deleteGymProfile(id) {
+    const numId = Number(id);
+    const result = db.prepare('DELETE FROM gym_profiles WHERE id = ?').run(numId);
+    return { success: result.changes > 0, id: numId };
   },
 
   // Heal all canonical records from true historical sessions
