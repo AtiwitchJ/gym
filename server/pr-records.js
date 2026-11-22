@@ -1,83 +1,220 @@
-// Personal Records Timeline & Set Records (read-only).
-// Derives everything from existing workout history; no new tables.
+// Exercise PR Records Timeline & Set Records engine (SPEC §3).
+// Pure logic: calculates all-time PRs, set records by reps, and milestone timeline.
+// Uses existing tables (workout_sessions, session_exercises, session_sets). No new tables.
+
 const { calculateEstimated1RM } = require('./estimate');
 const { isWarmupSet } = require('./exercise-stats');
 
-const TYPES = {
-  heaviestWeight: 'weight',
-  bestE1rm: 'e1rm',
-  bestSetVolume: 'setVolume',
-  mostReps: 'reps'
-};
+/**
+ * Filter and extract completed working sets from history sessions.
+ */
+function extractWorkingSets(history) {
+  const sessions = Array.isArray(history) ? history : [];
+  // Sort chronologically ascending for timeline progression (oldest -> newest)
+  const sortedSessions = [...sessions].sort((a, b) => {
+    const d = (a.date || '').localeCompare(b.date || '');
+    if (d !== 0) return d;
+    return (a.time || '').localeCompare(b.time || '');
+  });
 
-function collectEntries(repo, exerciseId) {
-  const history = typeof repo.getHistory === 'function' ? repo.getHistory() : [];
-  const entries = [];
-  for (const session of Array.isArray(history) ? history : []) {
-    for (const ex of Array.isArray(session.exercises) ? session.exercises : []) {
-      if (ex.id !== exerciseId && ex.canonicalId !== exerciseId) continue;
-      for (const set of Array.isArray(ex.sets) ? ex.sets : []) {
-        if (!set || !set.done || isWarmupSet(set)) continue;
-        const weight = Number(set.weight);
-        const reps = Number(set.actualReps);
-        if (!Number.isFinite(weight) || weight <= 0 || !Number.isFinite(reps) || reps <= 0) continue;
-        const rir = set.rir === null || set.rir === undefined ? 0 : Number(set.rir);
-        entries.push({
-          date: session.date,
-          sessionId: session.id,
-          weight,
-          reps,
-          e1rm: calculateEstimated1RM(weight, reps, Number.isFinite(rir) ? rir : 0),
-          setVolume: weight * reps
+  return sortedSessions;
+}
+
+/**
+ * Build PR records payload for a given exercise.
+ * Supports both signatures:
+ *   buildPrRecords(repo, exerciseId)
+ *   buildPrRecords(exerciseId, history)
+ */
+function buildPrRecords(arg1, arg2) {
+  let exerciseId = '';
+  let rawHistory = [];
+
+  if (arg1 && typeof arg1 === 'object' && typeof arg1.getExerciseHistory === 'function') {
+    exerciseId = String(arg2 || '').trim();
+    rawHistory = exerciseId ? arg1.getExerciseHistory(exerciseId) : [];
+  } else {
+    exerciseId = String(arg1 || '').trim();
+    rawHistory = Array.isArray(arg2) ? arg2 : [];
+  }
+
+  const chronological = extractWorkingSets(rawHistory);
+
+  let curHeaviest = null;
+  let curBestE1rm = null;
+  let curBestVolume = null;
+  let curMostReps = null;
+
+  const timeline = [];
+  const setRecordMap = new Map();
+
+  for (const session of chronological) {
+    const sId = String(session.sessionId || session.id || '');
+    const sDate = String(session.date || '');
+    const sets = Array.isArray(session.sets) ? session.sets : [];
+
+    let sessMaxWeight = 0;
+    let sessMaxE1rm = 0;
+    let sessMaxVolume = 0;
+    let sessMaxReps = 0;
+
+    for (const set of sets) {
+      if (!set || !set.done || isWarmupSet(set)) continue;
+
+      const weight = Number(set.weight);
+      const reps = Number(set.actualReps !== undefined && set.actualReps !== null
+        ? set.actualReps
+        : (set.actual_reps !== undefined && set.actual_reps !== null ? set.actual_reps : set.reps));
+
+      const hasWeight = Number.isFinite(weight) && weight > 0;
+      const hasReps = Number.isInteger(reps) && reps > 0;
+
+      if (hasWeight) {
+        if (weight > sessMaxWeight) sessMaxWeight = weight;
+      }
+
+      if (hasReps) {
+        if (reps > sessMaxReps) sessMaxReps = reps;
+      }
+
+      if (hasWeight && hasReps) {
+        const rir = (set.rir !== null && set.rir !== undefined && set.rir !== '') ? Number(set.rir) : 0;
+        const e1rm = calculateEstimated1RM(weight, reps, rir);
+        if (e1rm > sessMaxE1rm) sessMaxE1rm = e1rm;
+
+        const vol = Math.round(weight * reps * 10) / 10;
+        if (vol > sessMaxVolume) sessMaxVolume = vol;
+
+        // Track set records (max weight per rep count)
+        if (!setRecordMap.has(reps)) {
+          setRecordMap.set(reps, { reps, weight, date: sDate });
+        } else {
+          const prev = setRecordMap.get(reps);
+          if (weight > prev.weight) {
+            setRecordMap.set(reps, { reps, weight, date: sDate });
+          }
+        }
+      }
+    }
+
+    // Process PR milestones for this session
+    // 1. Heaviest Weight
+    if (sessMaxWeight > 0) {
+      if (curHeaviest === null) {
+        timeline.push({
+          date: sDate,
+          type: 'heaviestWeight',
+          value: sessMaxWeight,
+          previousValue: null,
+          sessionId: sId
         });
+        curHeaviest = { value: sessMaxWeight, date: sDate, sessionId: sId };
+      } else if (sessMaxWeight > curHeaviest.value) {
+        timeline.push({
+          date: sDate,
+          type: 'heaviestWeight',
+          value: sessMaxWeight,
+          previousValue: curHeaviest.value,
+          sessionId: sId
+        });
+        curHeaviest = { value: sessMaxWeight, date: sDate, sessionId: sId };
+      }
+    }
+
+    // 2. Best e1RM
+    if (sessMaxE1rm > 0) {
+      if (curBestE1rm === null) {
+        timeline.push({
+          date: sDate,
+          type: 'bestE1rm',
+          value: sessMaxE1rm,
+          previousValue: null,
+          sessionId: sId
+        });
+        curBestE1rm = { value: sessMaxE1rm, date: sDate, sessionId: sId };
+      } else if (sessMaxE1rm > curBestE1rm.value) {
+        timeline.push({
+          date: sDate,
+          type: 'bestE1rm',
+          value: sessMaxE1rm,
+          previousValue: curBestE1rm.value,
+          sessionId: sId
+        });
+        curBestE1rm = { value: sessMaxE1rm, date: sDate, sessionId: sId };
+      }
+    }
+
+    // 3. Best Set Volume
+    if (sessMaxVolume > 0) {
+      if (curBestVolume === null) {
+        timeline.push({
+          date: sDate,
+          type: 'bestSetVolume',
+          value: sessMaxVolume,
+          previousValue: null,
+          sessionId: sId
+        });
+        curBestVolume = { value: sessMaxVolume, date: sDate, sessionId: sId };
+      } else if (sessMaxVolume > curBestVolume.value) {
+        timeline.push({
+          date: sDate,
+          type: 'bestSetVolume',
+          value: sessMaxVolume,
+          previousValue: curBestVolume.value,
+          sessionId: sId
+        });
+        curBestVolume = { value: sessMaxVolume, date: sDate, sessionId: sId };
+      }
+    }
+
+    // 4. Most Reps
+    if (sessMaxReps > 0) {
+      if (curMostReps === null) {
+        timeline.push({
+          date: sDate,
+          type: 'mostReps',
+          value: sessMaxReps,
+          previousValue: null,
+          sessionId: sId
+        });
+        curMostReps = { value: sessMaxReps, date: sDate, sessionId: sId };
+      } else if (sessMaxReps > curMostReps.value) {
+        timeline.push({
+          date: sDate,
+          type: 'mostReps',
+          value: sessMaxReps,
+          previousValue: curMostReps.value,
+          sessionId: sId
+        });
+        curMostReps = { value: sessMaxReps, date: sDate, sessionId: sId };
       }
     }
   }
-  return entries;
-}
-
-function buildPrRecords(repo, exerciseId) {
-  const id = typeof exerciseId === 'string' ? exerciseId.trim() : String(exerciseId || '');
-  const entries = collectEntries(repo, id);
-  if (!entries.length) return { exerciseId: id, records: {}, setRecords: [], timeline: [] };
 
   const records = {};
-  for (const [type, key] of Object.entries(TYPES)) {
-    let best = null;
-    for (const entry of entries) {
-      if (!best || entry[key] > best.value) {
-        best = { value: entry[key], date: entry.date, sessionId: entry.sessionId };
-      }
-    }
-    records[type] = best;
-  }
+  if (curHeaviest) records.heaviestWeight = curHeaviest;
+  if (curBestE1rm) records.bestE1rm = curBestE1rm;
+  if (curBestVolume) records.bestSetVolume = curBestVolume;
+  if (curMostReps) records.mostReps = curMostReps;
 
-  const byReps = new Map();
-  for (const entry of entries) {
-    const prev = byReps.get(entry.reps);
-    if (!prev || entry.weight > prev.weight) {
-      byReps.set(entry.reps, { reps: entry.reps, weight: entry.weight, date: entry.date });
-    }
-  }
-  const setRecords = [...byReps.values()].sort((a, b) => a.reps - b.reps);
+  const setRecords = Array.from(setRecordMap.values()).sort((a, b) => a.reps - b.reps);
 
-  const ascending = [...entries].sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  const timeline = [];
-  let previousValue = null;
-  for (const entry of ascending) {
-    if (previousValue === null || entry.e1rm > previousValue) {
-      timeline.push({
-        date: entry.date,
-        type: 'bestE1rm',
-        value: entry.e1rm,
-        previousValue,
-        sessionId: entry.sessionId
-      });
-      previousValue = entry.e1rm;
-    }
-  }
+  // Sort timeline newest first (date DESC)
+  timeline.sort((a, b) => {
+    const d = (b.date || '').localeCompare(a.date || '');
+    if (d !== 0) return d;
+    return 0;
+  });
 
-  return { exerciseId: id, records, setRecords, timeline: timeline.reverse() };
+  return {
+    exerciseId,
+    records,
+    setRecords,
+    timeline
+  };
 }
 
-module.exports = { buildPrRecords };
+module.exports = {
+  buildPrRecords,
+  extractWorkingSets
+};
