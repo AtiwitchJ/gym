@@ -11,6 +11,7 @@ const supersets = require('./supersets');
 const monthly = require('./monthly');
 const exerciseRest = require('./exercise-rest');
 const calendar = require('./calendar');
+const prRecords = require('./pr-records');
 const progression = require('./exercise-progression');
 const backup = require('./backup');
 const exerciseNotes = require('./exercise-notes');
@@ -321,6 +322,16 @@ app.delete('/api/exercises/:id/substitutes/:substituteId', (req, res) => {
     });
   } catch (err) {
     console.error('Error deleting favorite substitution:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Personal Records Timeline & Set Records (read-only, derived from existing history).
+app.get('/api/exercises/:id/records', (req, res) => {
+  try {
+    res.json(prRecords.buildPrRecords(repo, req.params.id));
+  } catch (err) {
+    console.error('Error building exercise records:', err);
     res.status(500).json({ error: err.message });
   }
 });

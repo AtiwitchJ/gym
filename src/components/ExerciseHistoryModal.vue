@@ -40,6 +40,15 @@
           <p v-if="!hasAnyPr" class="text-[11px] text-ink-muted font-body mt-2">ยังไม่มี PR: เซ็ตวอร์มไม่นับเป็น PR และ PR จะอัปเดตหลังบันทึกเซสชัน</p>
         </div>
 
+        <!-- Personal Records timeline & set records -->
+        <button
+          type="button"
+          class="min-h-[44px] w-full px-3 rounded-xl border-2 border-plate bg-flame-bg hover:bg-flame text-flame-text hover:text-white font-heading font-bold text-xs shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] touch-manipulation"
+          @click="isRecordsOpen = true"
+        >
+          🏆 ดูสถิติส่วนตัว & Set Records
+        </button>
+
         <!-- Exercise Progression Chart & Strength Curve -->
         <ExerciseProgressionChart :exercise-id="props.exerciseId" />
 
@@ -71,14 +80,24 @@
         </ul>
       </template>
     </div>
+
+    <PRRecordsModal
+      :is-open="isRecordsOpen"
+      :exercise-id="props.exerciseId"
+      :exercise-name="props.exerciseName"
+      @close="isRecordsOpen = false"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useExerciseHistory, formatPr, hasPr, setText, HISTORY_EMPTY_MESSAGE } from '../composables/useExerciseHistory.js';
 import { labelSets } from '../composables/setLabels.js';
 import ExerciseProgressionChart from './ExerciseProgressionChart.vue';
+import PRRecordsModal from './PRRecordsModal.vue';
+
+const isRecordsOpen = ref(false);
 
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
