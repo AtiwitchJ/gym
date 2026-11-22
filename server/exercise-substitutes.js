@@ -13,6 +13,46 @@ class ValidationError extends Error {
   }
 }
 
+// The Docker runner image ships only server/ and dist/ (see server/estimate.js),
+// so a self-contained fallback is required when src/data is not present.
+const FALLBACK_CATALOG = [
+  { id: 'barbell_bench_press', name: 'Barbell Bench Press', muscleGroup: 'chest', equipment: 'barbell' },
+  { id: 'incline_dumbbell_press', name: 'Incline Dumbbell Press', muscleGroup: 'chest', equipment: 'dumbbell' },
+  { id: 'flat_dumbbell_bench_press', name: 'Flat Dumbbell Bench Press', muscleGroup: 'chest', equipment: 'dumbbell' },
+  { id: 'chest_press_machine', name: 'Chest Press Machine', muscleGroup: 'chest', equipment: 'machine' },
+  { id: 'pec_fly_machine', name: 'Pec Fly Machine (Pec Deck)', muscleGroup: 'chest', equipment: 'machine' },
+  { id: 'incline_smith_press', name: 'Incline Smith Machine Press', muscleGroup: 'chest', equipment: 'smith_machine' },
+  { id: 'cable_crossover', name: 'Cable Crossover', muscleGroup: 'chest', equipment: 'cable' },
+  { id: 'push_up', name: 'Push Up', muscleGroup: 'chest', equipment: 'bodyweight' },
+  { id: 'barbell_overhead_press', name: 'Barbell Overhead Press', muscleGroup: 'delts', equipment: 'barbell' },
+  { id: 'dumbbell_shoulder_press', name: 'Dumbbell Shoulder Press', muscleGroup: 'delts', equipment: 'dumbbell' },
+  { id: 'lateral_raise', name: 'Dumbbell Lateral Raise', muscleGroup: 'delts', equipment: 'dumbbell' },
+  { id: 'rear_delt_fly', name: 'Reverse Pec Deck Fly', muscleGroup: 'delts', equipment: 'machine' },
+  { id: 'face_pull', name: 'Cable Face Pull', muscleGroup: 'delts', equipment: 'cable' },
+  { id: 'barbell_back_squat', name: 'Barbell Back Squat', muscleGroup: 'quads', equipment: 'barbell' },
+  { id: 'leg_press', name: 'Leg Press Machine', muscleGroup: 'quads', equipment: 'machine' },
+  { id: 'dumbbell_lunge', name: 'Dumbbell Lunge', muscleGroup: 'quads', equipment: 'dumbbell' },
+  { id: 'leg_extension', name: 'Leg Extension', muscleGroup: 'quads', equipment: 'machine' },
+  { id: 'goblet_squat', name: 'Goblet Squat', muscleGroup: 'quads', equipment: 'dumbbell' },
+  { id: 'barbell_deadlift', name: 'Barbell Deadlift', muscleGroup: 'hamstrings', equipment: 'barbell' },
+  { id: 'romanian_deadlift', name: 'Barbell Romanian Deadlift', muscleGroup: 'hamstrings', equipment: 'barbell' },
+  { id: 'lying_leg_curl', name: 'Lying Leg Curl', muscleGroup: 'hamstrings', equipment: 'machine' },
+  { id: 'seated_leg_curl', name: 'Seated Leg Curl', muscleGroup: 'hamstrings', equipment: 'machine' },
+  { id: 'lat_pulldown', name: 'Lat Pulldown', muscleGroup: 'back', equipment: 'cable' },
+  { id: 'barbell_bent_over_row', name: 'Barbell Bent-Over Row', muscleGroup: 'back', equipment: 'barbell' },
+  { id: 'seated_cable_row', name: 'Seated Cable Row', muscleGroup: 'back', equipment: 'cable' },
+  { id: 'single_arm_dumbbell_row', name: 'Single-Arm Dumbbell Row', muscleGroup: 'back', equipment: 'dumbbell' },
+  { id: 'pull_up', name: 'Pull Up', muscleGroup: 'back', equipment: 'bodyweight' },
+  { id: 'bicep_curl', name: 'Barbell Bicep Curl', muscleGroup: 'arms', equipment: 'barbell' },
+  { id: 'dumbbell_curl', name: 'Dumbbell Bicep Curl', muscleGroup: 'arms', equipment: 'dumbbell' },
+  { id: 'cable_curl', name: 'Cable Bicep Curl', muscleGroup: 'arms', equipment: 'cable' },
+  { id: 'tricep_pushdown', name: 'Tricep Pushdown', muscleGroup: 'arms', equipment: 'cable' },
+  { id: 'overhead_tricep_extension', name: 'Overhead Tricep Extension', muscleGroup: 'arms', equipment: 'dumbbell' },
+  { id: 'close_grip_bench_press', name: 'Close-Grip Bench Press', muscleGroup: 'arms', equipment: 'barbell' },
+  { id: 'crunch', name: 'Cable Crunch', muscleGroup: 'abs', equipment: 'cable' },
+  { id: 'hanging_leg_raise', name: 'Hanging Leg Raise', muscleGroup: 'abs', equipment: 'bodyweight' }
+];
+
 let cachedExercises = null;
 
 function getCatalog() {
@@ -28,9 +68,10 @@ function getCatalog() {
       return cachedExercises;
     }
   } catch (err) {
-    console.error('Error loading default exercises catalog:', err);
+    console.error('Error loading default exercises catalog, using embedded fallback:', err);
   }
-  return [];
+  cachedExercises = FALLBACK_CATALOG;
+  return cachedExercises;
 }
 
 function findExercise(exerciseId) {
