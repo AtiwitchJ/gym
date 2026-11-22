@@ -470,7 +470,7 @@
             @click="copySetTo(sIdx)"
             class="min-h-[44px] min-w-[44px] px-2 flex-shrink-0 rounded-xl border-2 border-plate bg-white text-ink font-heading font-bold text-[11px] shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation"
             :aria-label="`คัดลอกน้ำหนัก ครั้ง และ RIR ไปเซ็ต ${copyTargetFor(sIdx)}`"
-            title="คัดลอกน้ำหนัก ครั้ง และ RIR ไปเซ็ตว่างถัดไป"
+            title="คัดลอกน้ำหนัก ครั้ง และ RIR ไปเซ็ตถัดไปที่ยังไม่ติ๊กเสร็จ"
           >คัดลอก</button>
 
           <!-- Progressive Overload Advice Badge -->
@@ -1072,7 +1072,8 @@ async function evaluatePrOnTick(sIdx) {
   }
 }
 
-// Copy the set to the next empty set (swipe or the "คัดลอก" button). Never overwrites a set with values.
+// Copy the set to the next set that is not ticked done (swipe or the "คัดลอก" button).
+// Auto-filled weight/reps of that target are written over on purpose; a done set is never touched.
 function copyTargetFor(sIdx) {
   if (!setHasValues(exState.value, sIdx)) return null;
   return findCopyTarget(props.exercise.sets, exState.value, sIdx);
