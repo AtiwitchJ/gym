@@ -9,7 +9,7 @@
         </p>
       </div>
       <button
-        v-if="sessions.length"
+        v-if="sessions.length || error"
         type="button"
         :disabled="loading"
         @click="load"
@@ -147,7 +147,7 @@ const statCards = computed(() => {
   if (!s) return [];
   const d = s.delta;
   return [
-    { key: 'sessions', label: 'ครั้ง', value: s.thisWeek.sessions, unit: 'session', deltaText: deltaText(d.sessions, ''), deltaClass: deltaClass(d.sessions) },
+    { key: 'sessions', label: 'ครั้ง', value: s.thisWeek.sessions, unit: 'ครั้ง', deltaText: deltaText(d.sessions, ''), deltaClass: deltaClass(d.sessions) },
     { key: 'minutes', label: 'เวลา', value: s.thisWeek.totalMinutes, unit: 'นาที', deltaText: deltaText(d.totalMinutes, ''), deltaClass: deltaClass(d.totalMinutes) },
     { key: 'distance', label: 'ระยะทาง', value: s.thisWeek.totalDistanceKm, unit: 'กม.', deltaText: deltaText(d.totalDistanceKm, ''), deltaClass: deltaClass(d.totalDistanceKm) },
     { key: 'calories', label: 'แคลอรี', value: s.thisWeek.totalCalories, unit: 'kcal', deltaText: deltaText(d.totalCalories, ''), deltaClass: deltaClass(d.totalCalories) }

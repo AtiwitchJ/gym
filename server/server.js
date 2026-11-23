@@ -489,7 +489,7 @@ app.get('/api/cardio', (req, res) => {
     const sessions = repo.getCardioSessions(200);
     res.json({
       sessions,
-      summary: cardio.buildCardioSummary(sessions, new Date())
+      summary: cardio.buildCardioSummary(repo.getAllCardioSessions(), new Date())
     });
   } catch (err) {
     console.error('Error building cardio summary:', err);
@@ -504,7 +504,8 @@ app.post('/api/cardio', (req, res) => {
     const sessions = repo.getCardioSessions(200);
     res.status(201).json({
       session: created,
-      summary: cardio.buildCardioSummary(sessions, new Date())
+      sessions,
+      summary: cardio.buildCardioSummary(repo.getAllCardioSessions(), new Date())
     });
   } catch (err) {
     if (err.status === 400) return res.status(400).json({ error: err.message });
@@ -518,7 +519,11 @@ app.delete('/api/cardio/:id', (req, res) => {
     const deleted = repo.deleteCardioSession(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'Cardio session not found' });
     const sessions = repo.getCardioSessions(200);
-    res.json({ deleted: true, summary: cardio.buildCardioSummary(sessions, new Date()) });
+    res.json({
+      deleted: true,
+      sessions,
+      summary: cardio.buildCardioSummary(repo.getAllCardioSessions(), new Date())
+    });
   } catch (err) {
     console.error('Error deleting cardio session:', err);
     res.status(500).json({ error: err.message });

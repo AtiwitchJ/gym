@@ -1523,6 +1523,25 @@ const repo = {
     }));
   },
 
+  // Uncapped rows for an accurate all-time roll-up (display lists still use getCardioSessions).
+  getAllCardioSessions() {
+    const rows = db.prepare(`
+      SELECT id, date, type, duration_min, distance_km, calories, note, created_at
+      FROM cardio_sessions
+      ORDER BY date DESC, id DESC
+    `).all();
+    return rows.map((r) => ({
+      id: r.id,
+      date: r.date,
+      type: r.type,
+      durationMin: r.duration_min,
+      distanceKm: r.distance_km === null || r.distance_km === undefined ? null : r.distance_km,
+      calories: r.calories === null || r.calories === undefined ? null : r.calories,
+      note: r.note || '',
+      createdAt: r.created_at || null
+    }));
+  },
+
   addCardioSession(entry) {
     const info = db.prepare(`
       INSERT INTO cardio_sessions (date, type, duration_min, distance_km, calories, note)

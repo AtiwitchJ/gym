@@ -53,7 +53,8 @@ try {
   });
   assert.strictEqual(createdRes.status, 201);
   const created = await createdRes.json();
-  assert.deepStrictEqual(Object.keys(created).sort(), ['session', 'summary']);
+  assert.deepStrictEqual(Object.keys(created).sort(), ['session', 'sessions', 'summary']);
+  assert.ok(Array.isArray(created.sessions), 'POST must return sessions so the UI can refresh without a second GET');
   assert.ok(Number.isInteger(created.session.id) && created.session.id > 0);
   assert.strictEqual(created.session.type, 'run');
   assert.strictEqual(created.session.durationMin, 30);
@@ -101,6 +102,8 @@ try {
   assert.strictEqual(delRes.status, 200);
   const delBody = await delRes.json();
   assert.strictEqual(delBody.deleted, true);
+  assert.deepStrictEqual(Object.keys(delBody).sort(), ['deleted', 'sessions', 'summary']);
+  assert.ok(Array.isArray(delBody.sessions), 'DELETE must return sessions so the UI can refresh');
   assert.strictEqual(delBody.summary.thisWeek.sessions, 0);
   const delAgain = await fetch(`${base}/api/cardio/${created.session.id}`, { method: 'DELETE' });
   assert.strictEqual(delAgain.status, 404);
@@ -131,6 +134,8 @@ try {
   assert.ok(card.includes('CARDIO_TYPE_META'), 'icons/labels rendered from data, not hard-coded');
   assert.ok(!card.includes('focus:outline-none'), 'forbidden a11y class');
   assert.ok(!card.includes('text-ink-muted/80'), 'forbidden dim class');
+  assert.ok(card.includes('v-if="sessions.length || error"'), 'retry button must show on error even when empty');
+  assert.ok(!card.includes("unit: 'session'"), 'session unit must be Thai, not English');
   assert.ok(composable.includes("'/api/cardio'"));
   assert.ok(composable.includes("method: 'POST'"));
   assert.ok(composable.includes("method: 'DELETE'"));
