@@ -414,6 +414,17 @@ app.get('/api/recovery', (req, res) => {
   }
 });
 
+// 2D Anatomical Muscle Recovery Heatmap (slug-keyed payload).
+// The legacy /api/recovery array route above is intentionally unchanged.
+app.get('/api/recovery/heatmap', (req, res) => {
+  try {
+    res.json(recovery.buildRecoveryHeatmap(repo.getCompletedSetRows(), Date.now()));
+  } catch (err) {
+    console.error('Error computing muscle heatmap:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Weekly training volume per muscle and per exercise, last 8 weeks (completed sets only)
 app.get('/api/volume/weekly', (req, res) => {
   try {

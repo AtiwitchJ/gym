@@ -25,7 +25,43 @@
       ยังไม่มีข้อมูลการฝึกเพื่อคำนวณการฟื้นตัว
     </p>
 
-    <ul v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <!-- View switch: anatomical heatmap vs. legacy list (list stays as the accessible fallback) -->
+    <div v-else class="flex items-center gap-1.5 flex-wrap">
+      <button
+        type="button"
+        class="min-h-[44px] px-3 rounded-xl border-2 border-plate text-[11px] font-mono font-bold shadow-[1px_1px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-plate"
+        :class="viewMode === 'heatmap' ? 'bg-sky-bg text-sky-text' : 'bg-paper-subtle text-ink'"
+        @click="viewMode = 'heatmap'"
+      >
+        🔥 หุ่น Heatmap
+      </button>
+      <button
+        type="button"
+        class="min-h-[44px] px-3 rounded-xl border-2 border-plate text-[11px] font-mono font-bold shadow-[1px_1px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-plate"
+        :class="viewMode === 'list' ? 'bg-sky-bg text-sky-text' : 'bg-paper-subtle text-ink'"
+        @click="viewMode = 'list'"
+      >
+        📋 รายการ
+      </button>
+    </div>
+
+    <template v-if="viewMode === 'heatmap'">
+      <div class="flex items-center justify-center gap-1.5">
+        <button
+          v-for="side in ['front', 'back']"
+          :key="side"
+          type="button"
+          class="min-h-[44px] px-3 rounded-xl border-2 border-plate text-[11px] font-mono font-bold shadow-[1px_1px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none focus-visible:ring-2 focus-visible:ring-plate"
+          :class="heatmapView === side ? 'bg-sky-bg text-sky-text' : 'bg-paper-subtle text-ink'"
+          @click="heatmapView = side"
+        >
+          {{ side === 'front' ? 'ด้านหน้า' : 'ด้านหลัง' }}
+        </button>
+      </div>
+      <MuscleHeatmapSvg :recovery-data="items" :view="heatmapView" />
+    </template>
+
+    <ul v-else-if="viewMode === 'list'" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
       <li
         v-for="(item, idx) in items"
         :key="idx"
@@ -56,12 +92,15 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRecovery, getRecoveryMeta } from '../composables/useRecovery.js';
+import MuscleHeatmapSvg from './MuscleHeatmapSvg.vue';
 
 const { items, loading, error, load } = useRecovery();
 
 const meta = getRecoveryMeta;
+const viewMode = ref('heatmap');
+const heatmapView = ref('front');
 
 function formatLastTrained(iso) {
   if (!iso) return 'ยังไม่เคยฝึก';
