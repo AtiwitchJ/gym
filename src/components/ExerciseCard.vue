@@ -501,7 +501,10 @@
               <span class="text-xs font-mono font-bold text-ink select-none truncate">
                 {{ getSetTypeLabel(getSetTypeFor(sIdx)) }}
               </span>
-              <span class="text-xs sm:text-sm font-mono font-bold text-ink select-none truncate">
+              <span
+                class="inline-flex items-center justify-center min-w-[30px] h-[26px] px-1.5 rounded-lg border-2 border-plate bg-paper-subtle text-[11px] font-mono font-bold text-ink select-none flex-shrink-0 shadow-[1px_1px_0px_#1e2220]"
+                :title="`เป้าหมายจำนวนครั้ง: ${getCleanTargetReps(set.reps)}`"
+              >
                 {{ getCleanTargetReps(set.reps) }}
               </span>
               <span
