@@ -121,6 +121,9 @@
             </ul>
           </div>
 
+          <!-- Shareable workout card (Hevy-style social summary card) -->
+          <ShareCard :summary="summary" />
+
           <!-- Motivational Encouragement Banner -->
           <div class="p-3 bg-emerald-bg/50 border-2 border-emerald rounded-xl flex items-center gap-2.5">
             <span class="text-xl">💪</span>
@@ -150,6 +153,7 @@
 <script setup>
 import { computed } from 'vue';
 import { prLabel } from '../composables/useSessionSummary.js';
+import ShareCard from './ShareCard.vue';
 
 const props = defineProps({
   isOpen: {
