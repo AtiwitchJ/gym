@@ -678,7 +678,13 @@ function toggleSetDone(day, exId, setIdx) {
 
   const current = !!userState[day][exId][`set_${setIdx}`];
   userState[day][exId][`set_${setIdx}`] = !current;
-  if (!current) markDayStarted(day);
+  // Timestamp powers the post-workout active-time / average-rest analytics.
+  if (!current) {
+    userState[day][exId][`ts_${setIdx}`] = new Date().toISOString();
+    markDayStarted(day);
+  } else {
+    delete userState[day][exId][`ts_${setIdx}`];
+  }
   triggerSave(day);
   return !current; // returns true if now checked
 }

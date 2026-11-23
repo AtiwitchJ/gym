@@ -34,7 +34,10 @@ export function buildSessionSummary(dayData, dayState) {
       const weight = Number(exState[`wt_${sIdx}`]);
       const reps = Number(exState[`reps_${sIdx}`]);
       if (completed && weight > 0 && reps > 0) summary.totalVolumeKg += weight * reps;
-      return { completed };
+      return {
+        completed,
+        completedAt: completed && exState[`ts_${sIdx}`] ? exState[`ts_${sIdx}`] : null
+      };
     });
     summary.exercises.push({ name: ex.name || ex.id, sets: exerciseSets });
     sets.forEach((_, sIdx) => {

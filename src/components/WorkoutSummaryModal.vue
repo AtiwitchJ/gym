@@ -82,6 +82,28 @@
             </div>
           </div>
 
+          <!-- Session time analytics: time under tension vs time resting -->
+          <div v-if="sessionAnalytics.hasTimestamps" class="grid grid-cols-3 gap-2 sm:gap-2.5">
+            <div class="bg-white border-2 border-plate rounded-xl p-2.5 sm:p-3 text-center shadow-[2px_2px_0px_#1e2220] flex flex-col justify-center">
+              <span class="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">เวลาออกแรง (Active)</span>
+              <div class="font-mono tabular-nums text-sm sm:text-base font-extrabold text-emerald-text">
+                {{ formatDuration(sessionAnalytics.activeSec) }}
+              </div>
+            </div>
+            <div class="bg-white border-2 border-plate rounded-xl p-2.5 sm:p-3 text-center shadow-[2px_2px_0px_#1e2220] flex flex-col justify-center">
+              <span class="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">เวลาพัก (Rest)</span>
+              <div class="font-mono tabular-nums text-sm sm:text-base font-extrabold text-sky-text">
+                {{ formatDuration(sessionAnalytics.restSec) }}
+              </div>
+            </div>
+            <div class="bg-white border-2 border-plate rounded-xl p-2.5 sm:p-3 text-center shadow-[2px_2px_0px_#1e2220] flex flex-col justify-center">
+              <span class="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">พักเฉลี่ย/เซ็ต</span>
+              <div class="font-mono tabular-nums text-sm sm:text-base font-extrabold text-flame-text">
+                {{ formatDuration(sessionAnalytics.avgRestSec) }}
+              </div>
+            </div>
+          </div>
+
           <!-- Exercises Breakdown List -->
           <div v-if="summary?.exercises && summary.exercises.length > 0" class="bg-surface border-2 border-plate rounded-xl p-3 shadow-[2px_2px_0px_#1e2220] space-y-2">
             <div class="flex items-center justify-between text-xs font-mono font-bold text-ink border-b border-plate/15 pb-1.5 px-0.5">
@@ -153,6 +175,7 @@
 <script setup>
 import { computed } from 'vue';
 import { prLabel } from '../composables/useSessionSummary.js';
+import { computeSessionAnalytics, formatDuration } from '../composables/useSessionAnalytics.js';
 import ShareCard from './ShareCard.vue';
 
 const props = defineProps({
@@ -167,6 +190,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+
+// Active time / rest time / average rest per set, derived from set completion timestamps.
+const sessionAnalytics = computed(() => computeSessionAnalytics(props.summary));
 
 // Formatted Total Volume with comma separator
 const formattedVolume = computed(() => {
