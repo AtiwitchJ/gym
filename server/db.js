@@ -170,6 +170,17 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_exercise_substitutions_exercise_id 
     ON exercise_substitutions(exercise_id);
+
+  -- Body measurements tracking
+  CREATE TABLE IF NOT EXISTS body_measurements (
+    date TEXT PRIMARY KEY,
+    waist REAL,
+    chest REAL,
+    arm REAL,
+    thigh REAL,
+    hip REAL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // Safe migrations for columns
@@ -968,6 +979,57 @@ const repo = {
     const d = String(date).trim();
     const result = db.prepare('DELETE FROM body_weights WHERE date = ?').run(d);
     return { success: result.changes > 0, date: d };
+  },
+
+  // Body measurements tracking (waist, chest, arm, thigh, hip)
+  formatBodyMeasurement(r) {
+    if (!r) return null;
+    return {
+      date: r.date,
+      waist: r.waist !== null && r.waist !== undefined ? Number(r.waist) : null,
+      chest: r.chest !== null && r.chest !== undefined ? Number(r.chest) : null,
+      arm: r.arm !== null && r.arm !== undefined ? Number(r.arm) : null,
+      thigh: r.thigh !== null && r.thigh !== undefined ? Number(r.thigh) : null,
+      hip: r.hip !== null && r.hip !== undefined ? Number(r.hip) : null,
+      created_at: r.created_at
+    };
+  },
+
+  getBodyMeasurements() {
+    const rows = db.prepare('SELECT date, waist, chest, arm, thigh, hip, created_at FROM body_measurements ORDER BY date ASC').all();
+    return rows.map(r => this.formatBodyMeasurement(r));
+  },
+
+  getLatestBodyMeasurement() {
+    const row = db.prepare('SELECT date, waist, chest, arm, thigh, hip, created_at FROM body_measurements ORDER BY date DESC LIMIT 1').get();
+    return row ? this.formatBodyMeasurement(row) : null;
+  },
+
+  getBodyMeasurementByDate(date) {
+    const row = db.prepare('SELECT date, waist, chest, arm, thigh, hip, created_at FROM body_measurements WHERE date = ?').get(String(date));
+    return row ? this.formatBodyMeasurement(row) : null;
+  },
+
+  saveBodyMeasurement(entry) {
+    const date = String(entry.date).trim();
+    const waist = entry.waist !== null && entry.waist !== undefined ? Number(entry.waist) : null;
+    const chest = entry.chest !== null && entry.chest !== undefined ? Number(entry.chest) : null;
+    const arm = entry.arm !== null && entry.arm !== undefined ? Number(entry.arm) : null;
+    const thigh = entry.thigh !== null && entry.thigh !== undefined ? Number(entry.thigh) : null;
+    const hip = entry.hip !== null && entry.hip !== undefined ? Number(entry.hip) : null;
+
+    db.prepare(`
+      INSERT INTO body_measurements (date, waist, chest, arm, thigh, hip)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(date) DO UPDATE SET
+        waist = excluded.waist,
+        chest = excluded.chest,
+        arm = excluded.arm,
+        thigh = excluded.thigh,
+        hip = excluded.hip
+    `).run(date, waist, chest, arm, thigh, hip);
+
+    return this.getBodyMeasurementByDate(date);
   },
 
   // Training calendar & streak

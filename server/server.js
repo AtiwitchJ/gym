@@ -17,6 +17,7 @@ const backup = require('./backup');
 const exerciseNotes = require('./exercise-notes');
 const exerciseSubstitutes = require('./exercise-substitutes');
 const setClassification = require('./set-classification');
+const bodyMeasurements = require('./body-measurements');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -775,6 +776,43 @@ app.delete('/api/body-weights', (req, res) => {
   } catch (err) {
     console.error('Error deleting body weight:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Body measurements tracking (waist, chest, arm, thigh, hip).
+// GET  /api/body-measurements        -> { entries: [...] } (ORDER BY date ASC)
+// GET  /api/body-measurements/latest -> { entry, trend }
+// POST /api/body-measurements        -> { entry } (400 on validation failure)
+
+app.get('/api/body-measurements', (req, res) => {
+  try {
+    res.json({ entries: repo.getBodyMeasurements() });
+  } catch (err) {
+    console.error('Error reading body measurements:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/body-measurements/latest', (req, res) => {
+  try {
+    const entries = repo.getBodyMeasurements();
+    const result = bodyMeasurements.computeMeasurementTrend(entries);
+    res.json(result);
+  } catch (err) {
+    console.error('Error reading latest body measurement:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/body-measurements', (req, res) => {
+  try {
+    const input = bodyMeasurements.validateBodyMeasurement(req.body);
+    const entry = repo.saveBodyMeasurement(input);
+    res.status(200).json({ entry });
+  } catch (err) {
+    const status = err && err.status ? err.status : 400;
+    if (status === 500) console.error('Error saving body measurement:', err);
+    res.status(status).json({ error: err.message });
   }
 });
 

@@ -69,6 +69,9 @@
     <!-- Body Weight Tracker & Daily Trend -->
     <BodyWeightCard />
 
+    <!-- Body Measurements Tracker (waist / chest / arm / thigh / hip) -->
+    <BodyMeasurementsCard />
+
     <!-- All-Time Stats Overview -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
@@ -343,6 +346,7 @@ import {
 import { useOneRmCalculator } from '../composables/useOneRm.js';
 import { usePlateCalculator } from '../composables/usePlateCalculator.js';
 import BodyWeightCard from './BodyWeightCard.vue';
+import BodyMeasurementsCard from './BodyMeasurementsCard.vue';
 
 const { open: openOneRm } = useOneRmCalculator();
 const { openPlateCalculator } = usePlateCalculator();
