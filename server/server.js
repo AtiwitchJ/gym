@@ -19,6 +19,7 @@ const exerciseSubstitutes = require('./exercise-substitutes');
 const setClassification = require('./set-classification');
 const bodyMeasurements = require('./body-measurements');
 const deload = require('./deload');
+const achievements = require('./achievements');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -431,6 +432,22 @@ app.get('/api/volume/weekly', (req, res) => {
     res.json(volume.buildWeeklyVolume(repo.getCompletedSetVolumeRows(), Date.now()));
   } catch (err) {
     console.error('Error computing weekly volume:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Workout Achievements & Milestones (derived from existing data; no schema change)
+app.get('/api/achievements', (req, res) => {
+  try {
+    res.json(achievements.buildAchievements({
+      history: repo.getHistory(),
+      workoutDates: repo.getWorkoutDates(),
+      bodyWeights: repo.getBodyWeights(),
+      weeklyTarget: repo.getWeeklyTarget(),
+      now: new Date()
+    }));
+  } catch (err) {
+    console.error('Error building achievements:', err);
     res.status(500).json({ error: err.message });
   }
 });
