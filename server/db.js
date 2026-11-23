@@ -34,7 +34,11 @@ db.exec(`
     day_key TEXT NOT NULL,
     day_title TEXT NOT NULL,
     total_sets_done INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    session_rpe INTEGER DEFAULT NULL,
+    session_load_au REAL DEFAULT NULL,
+    pump_rating TEXT DEFAULT NULL,
+    joint_discomfort TEXT DEFAULT NULL
   );
 
   CREATE TABLE IF NOT EXISTS session_exercises (
@@ -211,6 +215,23 @@ try {
 // RIR "เหลือ 2+" is stored as rir 2 with rir_plus 1, so the "2 or more" meaning is kept (review fix).
 try {
   db.exec("ALTER TABLE session_sets ADD COLUMN rir_plus INTEGER DEFAULT 0;");
+} catch(e) {}
+
+// Post-Workout Fatigue & sRPE debrief columns
+try {
+  db.exec("ALTER TABLE workout_sessions ADD COLUMN session_rpe INTEGER DEFAULT NULL;");
+} catch(e) {}
+
+try {
+  db.exec("ALTER TABLE workout_sessions ADD COLUMN session_load_au REAL DEFAULT NULL;");
+} catch(e) {}
+
+try {
+  db.exec("ALTER TABLE workout_sessions ADD COLUMN pump_rating TEXT DEFAULT NULL;");
+} catch(e) {}
+
+try {
+  db.exec("ALTER TABLE workout_sessions ADD COLUMN joint_discomfort TEXT DEFAULT NULL;");
 } catch(e) {}
 
 // Canonical Exercise Mapping (shared across 4-Day Split, 3-Day A/B Alternating Split, and custom routines)
@@ -602,6 +623,10 @@ const repo = {
         dayKey: s.day_key,
         dayTitle: s.day_title,
         totalSetsDone: s.total_sets_done,
+        sessionRpe: s.session_rpe !== undefined && s.session_rpe !== null ? Number(s.session_rpe) : null,
+        sessionLoadAu: s.session_load_au !== undefined && s.session_load_au !== null ? Number(s.session_load_au) : null,
+        pumpRating: s.pump_rating !== undefined && s.pump_rating !== null ? s.pump_rating : null,
+        jointComfort: s.joint_discomfort !== undefined && s.joint_discomfort !== null ? s.joint_discomfort : null,
         exercises
       };
     });
@@ -651,8 +676,11 @@ const repo = {
   saveSession(session) {
     const deleteExisting = db.prepare('DELETE FROM workout_sessions WHERE id = ?');
     const insertSession = db.prepare(`
-      INSERT INTO workout_sessions (id, date, time, day_key, day_title, total_sets_done)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO workout_sessions (
+        id, date, time, day_key, day_title, total_sets_done,
+        session_rpe, session_load_au, pump_rating, joint_discomfort
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const insertExercise = db.prepare(`
@@ -667,13 +695,36 @@ const repo = {
 
     const transaction = db.transaction(() => {
       deleteExisting.run(session.id);
+
+      const sessionRpe = (session.sessionRpe !== undefined && session.sessionRpe !== null && session.sessionRpe !== '')
+        ? Number(session.sessionRpe)
+        : (session.session_rpe !== undefined && session.session_rpe !== null && session.session_rpe !== '' ? Number(session.session_rpe) : null);
+
+      const sessionLoadAu = (session.sessionLoadAu !== undefined && session.sessionLoadAu !== null && session.sessionLoadAu !== '')
+        ? Number(session.sessionLoadAu)
+        : (session.session_load_au !== undefined && session.session_load_au !== null && session.session_load_au !== '' ? Number(session.session_load_au) : null);
+
+      const pumpRating = session.pumpRating !== undefined && session.pumpRating !== null && session.pumpRating !== ''
+        ? String(session.pumpRating)
+        : (session.pump_rating !== undefined && session.pump_rating !== null && session.pump_rating !== '' ? String(session.pump_rating) : null);
+
+      const jointComfort = session.jointComfort !== undefined && session.jointComfort !== null && session.jointComfort !== ''
+        ? String(session.jointComfort)
+        : (session.joint_discomfort !== undefined && session.joint_discomfort !== null && session.joint_discomfort !== ''
+          ? String(session.joint_discomfort)
+          : (session.joint_comfort !== undefined && session.joint_comfort !== null && session.joint_comfort !== '' ? String(session.joint_comfort) : null));
+
       insertSession.run(
         session.id,
         session.date,
         session.time,
         session.dayKey,
         session.dayTitle,
-        session.totalSetsDone || 0
+        session.totalSetsDone || 0,
+        sessionRpe,
+        sessionLoadAu,
+        pumpRating,
+        jointComfort
       );
 
       if (Array.isArray(session.exercises)) {

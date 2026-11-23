@@ -107,6 +107,59 @@ app.post('/api/reset-day', (req, res) => {
 });
 
 // Workout History
+const VALID_PUMP_RATINGS = new Set(['low', 'good', 'insane']);
+const VALID_JOINT_COMFORTS = new Set(['good', 'mild_ache', 'pain']);
+
+function validateDebrief(session) {
+  if (!session || typeof session !== 'object') return;
+
+  const rpeVal = session.sessionRpe !== undefined ? session.sessionRpe : session.session_rpe;
+  if (rpeVal !== undefined && rpeVal !== null && rpeVal !== '') {
+    const rpe = Number(rpeVal);
+    if (!Number.isFinite(rpe) || rpe < 1 || rpe > 10) {
+      const err = new Error('sessionRpe must be a number between 1 and 10');
+      err.status = 400;
+      throw err;
+    }
+    session.sessionRpe = rpe;
+  }
+
+  const pumpVal = session.pumpRating !== undefined ? session.pumpRating : session.pump_rating;
+  if (pumpVal !== undefined && pumpVal !== null && pumpVal !== '') {
+    if (!VALID_PUMP_RATINGS.has(String(pumpVal))) {
+      const err = new Error("pumpRating must be 'low', 'good', or 'insane'");
+      err.status = 400;
+      throw err;
+    }
+    session.pumpRating = String(pumpVal);
+  }
+
+  const jointVal = session.jointComfort !== undefined
+    ? session.jointComfort
+    : (session.joint_discomfort !== undefined ? session.joint_discomfort : session.joint_comfort);
+  if (jointVal !== undefined && jointVal !== null && jointVal !== '') {
+    if (!VALID_JOINT_COMFORTS.has(String(jointVal))) {
+      const err = new Error("jointComfort must be 'good', 'mild_ache', or 'pain'");
+      err.status = 400;
+      throw err;
+    }
+    session.jointComfort = String(jointVal);
+  }
+
+  const loadVal = session.sessionLoadAu !== undefined ? session.sessionLoadAu : session.session_load_au;
+  if (loadVal !== undefined && loadVal !== null && loadVal !== '') {
+    const load = Number(loadVal);
+    if (Number.isFinite(load)) {
+      session.sessionLoadAu = load;
+    }
+  } else if (session.sessionRpe && session.durationSec) {
+    const dur = Number(session.durationSec);
+    if (Number.isFinite(dur) && dur > 0) {
+      session.sessionLoadAu = Math.round((dur / 60) * session.sessionRpe);
+    }
+  }
+}
+
 app.get('/api/history', (req, res) => {
   try {
     const history = repo.getHistory();
@@ -119,11 +172,13 @@ app.get('/api/history', (req, res) => {
 
 app.post('/api/history', (req, res) => {
   try {
+    validateDebrief(req.body);
     const result = repo.saveSession(req.body);
     res.json(result);
   } catch (err) {
-    console.error('Error saving session:', err);
-    res.status(500).json({ error: err.message });
+    const status = err && err.status ? err.status : 500;
+    if (status === 500) console.error('Error saving session:', err);
+    res.status(status).json({ error: err.message });
   }
 });
 

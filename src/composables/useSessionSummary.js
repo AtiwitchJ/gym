@@ -2,13 +2,30 @@
  * Session summary shown after "Save Session" (step 6b). Pure functions: no store, no DOM.
  */
 
+import {
+  normalizeSrpe,
+  normalizePumpRating,
+  normalizeJointComfort,
+  computeSessionLoadAu,
+  DEFAULT_SESSION_RPE,
+  DEFAULT_PUMP_RATING,
+  DEFAULT_JOINT_COMFORT
+} from './useSessionDebrief.js';
+
 /**
  * @param {object} dayData  workoutData[day] (exercises, bonusExercises, title)
  * @param {object} dayState userState[day] as it was before the reset
- * @returns {{title:string, setsDone:number, setsTotal:number, prs:Array<{exerciseId:string, exerciseName:string, setIndex:number, weight:string, reps:string}>}}
+ * @param {object} [options] optional debrief fields or overrides
+ * @returns {{title:string, setsDone:number, setsTotal:number, prs:Array<{exerciseId:string, exerciseName:string, setIndex:number, weight:string, reps:string}>, sessionRpe:number, sessionLoadAu:number, pumpRating:string, jointComfort:string}}
  */
-export function buildSessionSummary(dayData, dayState) {
+export function buildSessionSummary(dayData, dayState, options = {}) {
   // Same field names as the runner summary, so WorkoutSummaryModal shows both (one summary modal).
+  const durationSec = Number(options?.durationSec || 0);
+  const sessionRpe = options?.sessionRpe !== undefined ? normalizeSrpe(options.sessionRpe) : DEFAULT_SESSION_RPE;
+  const pumpRating = options?.pumpRating !== undefined ? normalizePumpRating(options.pumpRating) : DEFAULT_PUMP_RATING;
+  const jointComfort = options?.jointComfort !== undefined ? normalizeJointComfort(options.jointComfort) : DEFAULT_JOINT_COMFORT;
+  const sessionLoadAu = options?.sessionLoadAu !== undefined ? Number(options.sessionLoadAu) : computeSessionLoadAu(durationSec, sessionRpe);
+
   const summary = {
     title: dayData?.title || '',
     subtitle: 'ท่าที่บันทึกในรอบนี้',
@@ -17,9 +34,13 @@ export function buildSessionSummary(dayData, dayState) {
     completedSetsCount: 0,
     totalSetsCount: 0,
     totalVolumeKg: 0,
-    durationSec: 0,
+    durationSec,
     exercises: [],
-    prs: []
+    prs: [],
+    sessionRpe,
+    sessionLoadAu,
+    pumpRating,
+    jointComfort
   };
   if (!dayData) return summary;
   const groups = [

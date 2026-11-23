@@ -29,7 +29,7 @@
           <button
             type="button"
             @click="emit('close')"
-            class="absolute top-2 right-2 min-h-[44px] min-w-[44px] rounded-full border-2 border-plate bg-white text-ink font-bold flex items-center justify-center"
+            class="absolute top-2 right-2 min-h-[44px] min-w-[44px] rounded-full border-2 border-plate bg-white text-ink font-bold flex items-center justify-center focus-visible:ring-2 focus-visible:ring-plate touch-manipulation"
             title="ปิดหน้าสรุป (ไม่บันทึกซ้ำ)"
             aria-label="ปิด"
           >✕</button>
@@ -143,6 +143,126 @@
             </ul>
           </div>
 
+          <!-- Post-Workout Debrief (sRPE, Muscle Pump & Joint Comfort) -->
+          <div class="bg-paper-subtle border-2 border-plate shadow-[3px_3px_0px_#1e2220] rounded-2xl p-4 sm:p-5 flex flex-col gap-4">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b-2 border-plate/15 pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">📊</span>
+                <div>
+                  <span class="text-[11px] font-mono font-bold tracking-widest text-flame-text uppercase block">
+                    POST-WORKOUT DEBRIEF
+                  </span>
+                  <h3 class="text-sm sm:text-base font-heading font-extrabold text-ink leading-tight">
+                    ประเมินความล้า & ความพร้อมร่างกาย
+                  </h3>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-[11px] font-mono font-bold text-ink-muted uppercase block">SESSION LOAD</span>
+                <span class="font-mono tabular-nums text-sm sm:text-base font-extrabold text-flame-text">
+                  {{ currentSessionLoadAu }} AU
+                </span>
+              </div>
+            </div>
+
+            <!-- Session RPE Stepper (1-10) -->
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-mono font-bold text-ink">
+                  ความหนักโดยรวม (Session RPE: 1–10)
+                </label>
+                <span class="text-[11px] font-mono font-bold text-flame-text">
+                  {{ currentSrpeText }}
+                </span>
+              </div>
+
+              <div class="flex items-center justify-between bg-white border-2 border-plate rounded-xl p-2 shadow-[2px_2px_0px_#1e2220]">
+                <button
+                  type="button"
+                  @click="decrementRpe"
+                  :disabled="currentRpe <= 1"
+                  class="min-h-[48px] min-w-[48px] w-12 h-12 rounded-lg border-2 border-plate bg-paper-subtle hover:bg-paper active:translate-x-[1px] active:translate-y-[1px] text-ink font-mono font-extrabold text-lg flex items-center justify-center disabled:opacity-40 disabled:pointer-events-none touch-manipulation focus-visible:ring-2 focus-visible:ring-plate"
+                  aria-label="ลด RPE"
+                >
+                  −
+                </button>
+
+                <div class="flex flex-col items-center">
+                  <div class="flex items-baseline gap-1">
+                    <span class="font-mono tabular-nums text-2xl sm:text-3xl font-extrabold text-ink">
+                      {{ currentRpe }}
+                    </span>
+                    <span class="font-mono text-xs font-bold text-ink-muted">/ 10</span>
+                  </div>
+                  <span class="text-[11px] font-heading font-bold text-ink-muted">
+                    {{ currentSrpeText }}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  @click="incrementRpe"
+                  :disabled="currentRpe >= 10"
+                  class="min-h-[48px] min-w-[48px] w-12 h-12 rounded-lg border-2 border-plate bg-paper-subtle hover:bg-paper active:translate-x-[1px] active:translate-y-[1px] text-ink font-mono font-extrabold text-lg flex items-center justify-center disabled:opacity-40 disabled:pointer-events-none touch-manipulation focus-visible:ring-2 focus-visible:ring-plate"
+                  aria-label="เพิ่ม RPE"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <!-- Muscle Pump Rating Pills -->
+            <div class="flex flex-col gap-1.5">
+              <span class="text-xs font-mono font-bold text-ink">
+                ระดับการปั๊มของกล้ามเนื้อ (Muscle Pump)
+              </span>
+              <div class="grid grid-cols-3 gap-2">
+                <button
+                  v-for="opt in pumpOptions"
+                  :key="opt.id"
+                  type="button"
+                  @click="setPump(opt.id)"
+                  class="min-h-[44px] min-w-[44px] px-2.5 py-2 rounded-xl border-2 font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-all touch-manipulation focus-visible:ring-2 focus-visible:ring-plate"
+                  :class="currentPump === opt.id
+                    ? 'bg-flame text-white border-plate shadow-[2px_2px_0px_#1e2220]'
+                    : 'bg-white text-ink border-plate/40 hover:border-plate hover:bg-paper-subtle'"
+                >
+                  <span>{{ opt.emoji }}</span>
+                  <span class="truncate">{{ opt.shortLabel }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Joint Comfort Rating Pills -->
+            <div class="flex flex-col gap-1.5">
+              <span class="text-xs font-mono font-bold text-ink">
+                สภาพข้อต่อและเส้นเอ็น (Joint Comfort)
+              </span>
+              <div class="grid grid-cols-3 gap-2">
+                <button
+                  v-for="opt in jointOptions"
+                  :key="opt.id"
+                  type="button"
+                  @click="setJoint(opt.id)"
+                  class="min-h-[44px] min-w-[44px] px-2.5 py-2 rounded-xl border-2 font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-all touch-manipulation focus-visible:ring-2 focus-visible:ring-plate"
+                  :class="currentJoint === opt.id
+                    ? 'bg-emerald text-white border-plate shadow-[2px_2px_0px_#1e2220]'
+                    : 'bg-white text-ink border-plate/40 hover:border-plate hover:bg-paper-subtle'"
+                >
+                  <span>{{ opt.emoji }}</span>
+                  <span class="truncate">{{ opt.shortLabel }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Session Load Calculation Summary -->
+            <div class="bg-white/80 border border-plate/20 rounded-xl p-2.5 flex items-center justify-between text-[11px] font-mono text-ink-muted">
+              <span>สูตรคำนวณ: (เวลา {{ Math.round(currentDurationSec / 60) }} นาที ÷ 60) × sRPE {{ currentRpe }}</span>
+              <span class="font-bold text-ink">{{ currentSessionLoadAu }} AU</span>
+            </div>
+          </div>
+
           <!-- Shareable workout card (Hevy-style social summary card) -->
           <ShareCard :summary="summary" />
 
@@ -159,7 +279,7 @@
           <button
             type="button"
             @click="emit('close')"
-            class="w-full py-3.5 px-4 rounded-xl border-2 border-plate bg-flame hover:bg-flame-glow text-white font-heading font-extrabold text-sm sm:text-base tracking-wide shadow-[3px_3px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all flex items-center justify-center gap-2"
+            class="w-full min-h-[44px] py-3.5 px-4 rounded-xl border-2 border-plate bg-flame hover:bg-flame-glow text-white font-heading font-extrabold text-sm sm:text-base tracking-wide shadow-[3px_3px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none transition-all flex items-center justify-center gap-2 touch-manipulation focus-visible:ring-2 focus-visible:ring-plate"
           >
             <span>ปิดและกลับสู่หน้าหลัก (ไม่บันทึกซ้ำ)</span>
             <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
@@ -173,9 +293,21 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { prLabel } from '../composables/useSessionSummary.js';
 import { computeSessionAnalytics, formatDuration } from '../composables/useSessionAnalytics.js';
+import {
+  normalizeSrpe,
+  normalizePumpRating,
+  normalizeJointComfort,
+  computeSessionLoadAu,
+  getSrpeLabel,
+  PUMP_CONFIG,
+  JOINT_CONFIG,
+  DEFAULT_SESSION_RPE,
+  DEFAULT_PUMP_RATING,
+  DEFAULT_JOINT_COMFORT
+} from '../composables/useSessionDebrief.js';
 import ShareCard from './ShareCard.vue';
 
 const props = defineProps({
@@ -234,5 +366,77 @@ const prRows = computed(() => (props.summary?.prs || []).map((pr) => ({ ...pr, l
 function countExerciseCompletedSets(exercise) {
   if (!exercise || !Array.isArray(exercise.sets)) return 0;
   return exercise.sets.filter(s => s && s.completed).length;
+}
+
+// Debrief options
+const pumpOptions = [
+  { id: 'low', ...PUMP_CONFIG.low },
+  { id: 'good', ...PUMP_CONFIG.good },
+  { id: 'insane', ...PUMP_CONFIG.insane }
+];
+
+const jointOptions = [
+  { id: 'good', ...JOINT_CONFIG.good },
+  { id: 'mild_ache', ...JOINT_CONFIG.mild_ache },
+  { id: 'pain', ...JOINT_CONFIG.pain }
+];
+
+// Debrief Reactive State
+const currentRpe = ref(DEFAULT_SESSION_RPE);
+const currentPump = ref(DEFAULT_PUMP_RATING);
+const currentJoint = ref(DEFAULT_JOINT_COMFORT);
+
+const currentDurationSec = computed(() => Number(props.summary?.durationSec || 0));
+
+const currentSessionLoadAu = computed(() => {
+  return computeSessionLoadAu(currentDurationSec.value, currentRpe.value);
+});
+
+const currentSrpeText = computed(() => getSrpeLabel(currentRpe.value));
+
+function syncDebriefToSession() {
+  if (props.summary) {
+    props.summary.sessionRpe = currentRpe.value;
+    props.summary.sessionLoadAu = currentSessionLoadAu.value;
+    props.summary.pumpRating = currentPump.value;
+    props.summary.jointComfort = currentJoint.value;
+  }
+}
+
+watch(
+  () => [props.summary, props.isOpen],
+  () => {
+    if (props.summary) {
+      currentRpe.value = normalizeSrpe(props.summary.sessionRpe ?? DEFAULT_SESSION_RPE);
+      currentPump.value = normalizePumpRating(props.summary.pumpRating ?? DEFAULT_PUMP_RATING);
+      currentJoint.value = normalizeJointComfort(props.summary.jointComfort ?? DEFAULT_JOINT_COMFORT);
+      syncDebriefToSession();
+    }
+  },
+  { immediate: true }
+);
+
+function incrementRpe() {
+  if (currentRpe.value < 10) {
+    currentRpe.value += 1;
+    syncDebriefToSession();
+  }
+}
+
+function decrementRpe() {
+  if (currentRpe.value > 1) {
+    currentRpe.value -= 1;
+    syncDebriefToSession();
+  }
+}
+
+function setPump(id) {
+  currentPump.value = normalizePumpRating(id);
+  syncDebriefToSession();
+}
+
+function setJoint(id) {
+  currentJoint.value = normalizeJointComfort(id);
+  syncDebriefToSession();
 }
 </script>
