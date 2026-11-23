@@ -21,6 +21,12 @@ export function isWarmupType(type) {
   return t === 'warm' || t === 'warmup' || t === 'วอร์ม';
 }
 
+export function isDropType(type) {
+  if (!type) return false;
+  const t = String(type).toLowerCase().trim();
+  return t === 'drop' || t === 'dropset' || t === 'ดรอป' || t === 'ดรอปเซ็ต' || t === 'd';
+}
+
 export function parseRepTarget(repStr) {
   if (!repStr) return { min: 6, max: 8 };
   // Strip parenthetical notes first, e.g. "(40-50%)" or "(ท้าทาย)" so numbers inside them don't interfere with the target rep range
@@ -101,6 +107,23 @@ export function calculateWeightAdvice({ weight, reps, type = 'work', targetReps 
       badgeClass: 'bg-sky-bg text-sky-text border-sky/40',
       reasonText: `วอร์ม ${numReps} ครั้ง (15–20) — พอดี`,
       shortText: 'วอร์มพอดี',
+      actionLabel: `${numWeight} กก.`
+    };
+  }
+
+  // Drop sets (Drop sets are intended for metabolic stress/fatigue, do not penalize with -2 kg advice)
+  if (isDropType(type)) {
+    return {
+      type: 'drop',
+      status: 'optimal',
+      delta: 0,
+      currentWeight: numWeight,
+      suggestedWeight: numWeight,
+      reps: numReps,
+      badgeText: 'ดรอปเซ็ต',
+      badgeClass: 'bg-purple-100 text-purple-900 border-2 border-purple-600 shadow-[1px_1px_0px_#7c3aed]',
+      reasonText: `ดรอปเซ็ต ${numReps} ครั้ง — ยกต่อทันที ไม่ลดน้ำหนักเซ็ตหลัก`,
+      shortText: 'ดรอปเซ็ต',
       actionLabel: `${numWeight} กก.`
     };
   }
@@ -249,12 +272,16 @@ export function getExerciseOverallAdvice(sets = []) {
     let decreaseCount = 0;
     let lastWorkWeight = 0;
 
-    const workWithTarget = workSets.find(s => s.targetReps) || workSets[0];
+    // Filter out drop sets for overload evaluation so drops don't pull down the recommendation
+    const standardWorkSets = workSets.filter(s => !isDropType(s.type));
+    const evalSets = standardWorkSets.length > 0 ? standardWorkSets : workSets;
+
+    const workWithTarget = evalSets.find(s => s.targetReps) || evalSets[0];
     const target = parseRepTarget(workWithTarget?.targetReps);
     const minTarget = target.min || 6;
     const maxTarget = target.max || 8;
 
-    workSets.forEach(s => {
+    evalSets.forEach(s => {
       const r = Number(s.reps);
       const w = Number(s.weight) || 0;
       if (w > 0) lastWorkWeight = w;
@@ -269,17 +296,17 @@ export function getExerciseOverallAdvice(sets = []) {
     // Rule (approved): +2 kg next session only when EVERY working set reached the top of its target
     // range with RIR 1 or 2+. A majority below the minimum gives -2 kg. Anything else holds the weight
     // (RIR 0 and a missing RIR hold). Skipped or unfinished sets are not in workSets.
-    const allReachedTop = workSets.every((s) => {
+    const allReachedTop = evalSets.every((s) => {
       const sMax = parseRepTarget(s.targetReps).max || maxTarget;
       return setReachedTop(s.reps, sMax, s.rir);
     });
-    const anyFailed = workSets.some((s) => normalizeRir(s.rir) === 0);
-    const anyMissingAtTop = workSets.some((s) => {
+    const anyFailed = evalSets.some((s) => normalizeRir(s.rir) === 0);
+    const anyMissingAtTop = evalSets.some((s) => {
       const sMax = parseRepTarget(s.targetReps).max || maxTarget;
       return normalizeRir(s.rir) === null && Number(s.reps) >= sMax;
     });
 
-    if (decreaseCount >= workSets.length / 2) {
+    if (decreaseCount >= evalSets.length / 2) {
       const suggested = Math.max(0, Math.round((lastWorkWeight - 2) * 10) / 10);
       workAdvice = {
         type: isTouch ? 'touch' : 'work',
@@ -373,6 +400,7 @@ export function historyWeightAdvice(sessions) {
 export function useWeightAdvisor() {
   return {
     isWarmupType,
+    isDropType,
     parseRepTarget,
     calculateWeightAdvice,
     getExerciseOverallAdvice,

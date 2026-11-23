@@ -16,6 +16,7 @@ const progression = require('./exercise-progression');
 const backup = require('./backup');
 const exerciseNotes = require('./exercise-notes');
 const exerciseSubstitutes = require('./exercise-substitutes');
+const setClassification = require('./set-classification');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -332,6 +333,16 @@ app.get('/api/exercises/:id/records', (req, res) => {
     res.json(prRecords.buildPrRecords(repo, req.params.id));
   } catch (err) {
     console.error('Error building exercise records:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Set Type Breakdown Stats (Normal, Warmup, Drop, Failure).
+app.get('/api/exercises/:id/set-type-stats', (req, res) => {
+  try {
+    res.json(setClassification.buildSetTypeStats(repo, req.params.id));
+  } catch (err) {
+    console.error('Error building set type stats:', err);
     res.status(500).json({ error: err.message });
   }
 });

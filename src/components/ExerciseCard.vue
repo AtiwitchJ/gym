@@ -471,15 +471,23 @@
       >
         <!-- Top line: set label, previous record, copy (tap alternative to the swipe), advice, Done -->
         <div class="flex items-center gap-2">
+          <!-- Interactive Set Classification Badge (min 44x44px) -->
+          <button
+            type="button"
+            class="min-h-[44px] min-w-[44px] px-2 py-1 rounded-xl flex items-center justify-center transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-none touch-manipulation select-none flex-shrink-0 focus-visible:ring-2 focus-visible:ring-plate"
+            :class="getSetTypeClass(getSetTypeFor(sIdx))"
+            :title="`ประเภทเซ็ต: ${getSetTypeLabel(getSetTypeFor(sIdx))} (แตะเพื่อเปลี่ยนประเภทเซ็ต)`"
+            @click="openSetTypeModal(sIdx)"
+          >
+            <span class="text-xs sm:text-sm font-mono font-extrabold">
+              {{ getSetTypeBadge(getSetTypeFor(sIdx), sIdx + 1) }}
+            </span>
+          </button>
+
           <div class="flex flex-col justify-center min-w-0 flex-1">
-            <div class="flex items-center gap-1.5">
-              <span
-                class="text-[11px] sm:text-[11px] font-mono font-bold px-1.5 sm:px-2 py-0.5 rounded tracking-wider uppercase border select-none flex-shrink-0"
-                :class="set.type === 'warm'
-                  ? 'bg-sky-bg text-sky-text border-sky/40'
-                  : 'bg-surface-card text-ink border-plate/30'"
-              >
-                {{ set.type === 'warm' ? 'วอร์ม' : `เซ็ต ${sIdx}` }}
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-xs font-mono font-bold text-ink select-none truncate">
+                {{ getSetTypeLabel(getSetTypeFor(sIdx)) }}
               </span>
               <span class="text-xs sm:text-sm font-mono font-bold text-ink select-none truncate">
                 {{ getCleanTargetReps(set.reps) }}
@@ -523,7 +531,7 @@
               :class="getSetAdvice(sIdx).badgeClass"
               :title="getSetAdvice(sIdx).reasonText"
             >
-              {{ getSetAdvice(sIdx).delta > 0 ? '+2 kg' : getSetAdvice(sIdx).delta < 0 ? '-2 kg' : 'พอดี' }}
+              {{ getSetAdvice(sIdx).badgeText || (getSetAdvice(sIdx).delta > 0 ? '+2 kg' : getSetAdvice(sIdx).delta < 0 ? '-2 kg' : 'พอดี') }}
             </div>
             <span v-else class="text-ink-muted font-mono text-xs select-none">—</span>
           </div>
@@ -638,6 +646,16 @@
       :exercise-index="index"
       @close="showSubstituteModal = false"
     />
+
+    <!-- Set Type Selector Modal (Set Classification) -->
+    <SetTypeSelectorModal
+      :is-open="isSetTypeModalOpen"
+      :exercise-name="exercise.name"
+      :set-number="activeSetIndexForType + 1"
+      :current-type="getSetTypeFor(activeSetIndexForType)"
+      @close="isSetTypeModalOpen = false"
+      @select="handleSelectSetType"
+    />
   </div>
 </template>
 
@@ -651,6 +669,8 @@ import { getYoutubeId } from '../utils/youtube';
 import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 import ExerciseNoteModal from './ExerciseNoteModal.vue';
 import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
+import SetTypeSelectorModal from './SetTypeSelectorModal.vue';
+import { useSetTypes, normalizeSetType, getSetTypeBadge, getSetTypeClass, getSetTypeLabel } from '../composables/useSetTypes.js';
 import { useExerciseNotes } from '../composables/useExerciseNotes.js';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';
@@ -666,6 +686,33 @@ const showHistory = ref(false);
 const showSubstituteModal = ref(false);
 const isNoteModalOpen = ref(false);
 const { hasNote, formatSummaryPill } = useExerciseNotes();
+const { setSetType } = useSetTypes();
+const isSetTypeModalOpen = ref(false);
+const activeSetIndexForType = ref(0);
+
+function getSetTypeFor(sIdx) {
+  const custom = exState.value[`type_${sIdx}`];
+  if (custom) return normalizeSetType(custom);
+  const set = props.exercise.sets[sIdx];
+  if (set && (set.type === 'warm' || set.type === 'warmup')) return 'warmup';
+  return 'normal';
+}
+
+function openSetTypeModal(sIdx) {
+  activeSetIndexForType.value = sIdx;
+  isSetTypeModalOpen.value = true;
+}
+
+function handleSelectSetType(type) {
+  const sIdx = activeSetIndexForType.value;
+  setSetType(currentDay.value, props.exercise.id, sIdx, type);
+  isSetTypeModalOpen.value = false;
+  showToast(`เปลี่ยนประเภทเซ็ต ${sIdx + 1} เป็น ${getSetTypeLabel(type)} เรียบร้อย`);
+  if (isSetDone(sIdx)) {
+    evaluatePrOnTick(sIdx);
+  }
+}
+
 // Phone: the description (altName) is behind the "รายละเอียด" toggle (density step 5)
 const showDetail = ref(false);
 // Phone: the plan table is collapsed until its summary line is tapped (density step 6)
@@ -935,7 +982,7 @@ function getSetAdvice(sIdx) {
   if (!reps || reps === '' || Number(reps) <= 0) return null;
 
   const wt = getWeight(sIdx) !== '' ? getWeight(sIdx) : getPrevWeight(sIdx);
-  return calculateWeightAdvice({ weight: wt, reps, type: set.type, targetReps: set.reps, rir: getRir(sIdx) });
+  return calculateWeightAdvice({ weight: wt, reps, type: getSetTypeFor(sIdx), targetReps: set.reps, rir: getRir(sIdx) });
 }
 
 function applySetAdvice(sIdx) {
@@ -956,7 +1003,7 @@ const exerciseAdvice = computed(() => {
       if (curReps !== '' && Number(curReps) > 0) {
         const curWeight = getWeight(sIdx);
         completedSets.push({
-          type: set.type,
+          type: getSetTypeFor(sIdx),
           weight: curWeight !== '' ? curWeight : getPrevWeight(sIdx),
           reps: curReps,
           targetReps: set.reps,
@@ -1126,8 +1173,10 @@ async function evaluatePrOnTick(sIdx) {
   const set = props.exercise.sets[sIdx];
   const baseline = await getBaselineE1rm(props.exercise.id);
   if (!isSetDone(sIdx)) return; // unticked while the check was running
+  const curType = getSetTypeFor(sIdx);
+  const isWarm = curType === 'warmup' || (!!set && set.type === 'warm');
   const { isPr, e1rm } = isNewPr(
-    { weight: getWeight(sIdx), reps: getReps(sIdx), rir: getRir(sIdx), isWarm: !!set && set.type === 'warm' },
+    { weight: getWeight(sIdx), reps: getReps(sIdx), rir: getRir(sIdx), isWarm },
     baseline
   );
   setPrFlag(currentDay.value, props.exercise.id, sIdx, isPr);

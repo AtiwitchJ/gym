@@ -18,7 +18,16 @@ console.log('▶ [1] Set codes are gone from the set screen...');
 assert.ok(!card.includes("'W1'") && !card.includes('`S${sIdx}`'), 'no W1 / S-number labels on the card');
 assert.ok(!card.includes('MAIN LIFT') && !card.includes('ASSISTANCE'), 'no MAIN LIFT / ASSISTANCE tags');
 assert.ok(card.includes("'ท่าหลัก' : 'ท่าช่วย'"), 'main and assistance are Thai');
-assert.ok(card.includes("set.type === 'warm' ? 'วอร์ม' : `เซ็ต ${sIdx}`"), 'set rows show วอร์ม / เซ็ต N');
+assert.ok(card.includes('getSetTypeLabel(getSetTypeFor(sIdx))') && card.includes('getSetTypeBadge(getSetTypeFor(sIdx), sIdx + 1)'), 'set rows use the set-type label/badge helpers');
+assert.ok(card.includes("const setLabel = isWarm ? 'วอร์ม' : `เซ็ต ${sIdx}`"), 'set rows keep Thai วอร์ม / เซ็ต N labels');
+const setTypes = read('src/composables/useSetTypes.js');
+assert.ok(
+  setTypes.includes("name: 'เซ็ตปกติ'") &&
+  setTypes.includes("name: 'เซ็ตวอร์มอัพ'") &&
+  setTypes.includes("name: 'ดรอปเซ็ต'") &&
+  setTypes.includes("name: 'เซ็ตล้มเหลว'"),
+  'all four set types have Thai labels'
+);
 console.log('✓ Card labels verified.');
 
 console.log('▶ [2] The recording sheet header and type toggle are plain Thai...');

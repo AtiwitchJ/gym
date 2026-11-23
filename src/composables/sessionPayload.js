@@ -31,7 +31,7 @@ function buildExercise(ex, exState, lastForEx, { category, workLabel }) {
 
     sets.push({
       setIndex: sIdx + 1,
-      type: set.type === 'warm' ? 'วอร์ม' : workLabel,
+      type: exState[`type_${sIdx}`] || (set.type === 'warm' ? 'warmup' : 'normal'),
       target: set.reps,
       weight: isDone ? weight : '',
       actualReps: isDone ? reps : '',

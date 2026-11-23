@@ -2,13 +2,7 @@
 // Uses the same e1RM formula as the frontend (src/composables/useRpeAdvisor.js).
 
 const { calculateEstimated1RM } = require('./estimate');
-
-// Warm-up detection matches src/composables/useWeightAdvisor.js (isWarmupType).
-// The app stores the set type on every saved set: 'warm' (W1 in the UI), 'warmup', or the Thai label 'วอร์ม'.
-const WARMUP_TYPES = new Set(['warm', 'warmup', 'วอร์ม']);
-function isWarmupSet(set) {
-  return Boolean(set) && WARMUP_TYPES.has(set.type);
-}
+const { isWarmupSet } = require('./set-classification');
 
 // sessions: output of repo.getExerciseHistory() -> [{ sets: [{ type, weight, actualReps, rir, done }] }]
 // Only completed working sets count: skipped sets (done falsy) and warm-up sets are excluded.
