@@ -8,6 +8,7 @@ const { withPr } = require('./exercise-stats');
 const volume = require('./volume');
 const volumeLandmarks = require('./volume-landmarks');
 const trainingZones = require('./training-zones');
+const strengthStandards = require('./strength-standards');
 const advice = require('./advice');
 const supersets = require('./supersets');
 const monthly = require('./monthly');
@@ -458,6 +459,23 @@ app.get('/api/training/zones', (req, res) => {
     res.json(trainingZones.buildTrainingZones(e1rm));
   } catch (err) {
     console.error('Error computing training zones:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Strength Standards & Relative Strength Classifier — derived from body_weights + session_sets.
+// Always 200 OK: an empty state returns hasBodyWeight:false instead of 404.
+app.get('/api/strength-standards', (req, res) => {
+  try {
+    const weights = repo.getBodyWeights();
+    const latest = Array.isArray(weights) && weights.length ? weights[0] : null;
+    res.json(strengthStandards.buildStrengthStandards({
+      bodyWeight: latest ? latest.weight : null,
+      bodyWeightDate: latest ? latest.date : null,
+      rows: repo.getCompletedSetVolumeRows()
+    }));
+  } catch (err) {
+    console.error('Error computing strength standards:', err);
     res.status(500).json({ error: err.message });
   }
 });

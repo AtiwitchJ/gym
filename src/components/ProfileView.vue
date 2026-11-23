@@ -75,6 +75,9 @@
     <!-- Body Measurements Tracker (waist / chest / arm / thigh / hip) -->
     <BodyMeasurementsCard />
 
+    <!-- Strength Standards & Relative Strength Classifier (derived from body weight + set history) -->
+    <StrengthStandardsCard />
+
     <!-- All-Time Stats Overview -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
@@ -355,6 +358,7 @@ import BodyWeightCard from './BodyWeightCard.vue';
 import BodyMeasurementsCard from './BodyMeasurementsCard.vue';
 import AchievementsCard from './AchievementsCard.vue';
 import TrainingZonesCard from './TrainingZonesCard.vue';
+import StrengthStandardsCard from './StrengthStandardsCard.vue';
 
 const { open: openOneRm } = useOneRmCalculator();
 const { openPlateCalculator } = usePlateCalculator();

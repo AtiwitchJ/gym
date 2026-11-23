@@ -1,5 +1,5 @@
 <template>
-  <div class="archive-card p-4 sm:p-5 flex flex-col gap-4 select-none">
+  <div id="body-weight" class="archive-card p-4 sm:p-5 flex flex-col gap-4 select-none">
     <!-- Header -->
     <div class="flex items-center justify-between border-b-2 border-plate/20 pb-3">
       <div class="flex items-center gap-2.5">
