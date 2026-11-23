@@ -23,6 +23,7 @@ const setClassification = require('./set-classification');
 const bodyMeasurements = require('./body-measurements');
 const deload = require('./deload');
 const achievements = require('./achievements');
+const cardio = require('./cardio');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -476,6 +477,49 @@ app.get('/api/strength-standards', (req, res) => {
     }));
   } catch (err) {
     console.error('Error computing strength standards:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Cardio Session Logging & Weekly Summary (Strong / Hevy parity).
+// GET always 200; POST validates and returns 400 on bad input (never 500).
+app.get('/api/cardio', (req, res) => {
+  try {
+    const sessions = repo.getCardioSessions(200);
+    res.json({
+      sessions,
+      summary: cardio.buildCardioSummary(sessions, new Date())
+    });
+  } catch (err) {
+    console.error('Error building cardio summary:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/cardio', (req, res) => {
+  try {
+    const entry = cardio.validateCardioPayload(req.body);
+    const created = repo.addCardioSession(entry);
+    const sessions = repo.getCardioSessions(200);
+    res.status(201).json({
+      session: created,
+      summary: cardio.buildCardioSummary(sessions, new Date())
+    });
+  } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error('Error saving cardio session:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/cardio/:id', (req, res) => {
+  try {
+    const deleted = repo.deleteCardioSession(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Cardio session not found' });
+    const sessions = repo.getCardioSessions(200);
+    res.json({ deleted: true, summary: cardio.buildCardioSummary(sessions, new Date()) });
+  } catch (err) {
+    console.error('Error deleting cardio session:', err);
     res.status(500).json({ error: err.message });
   }
 });

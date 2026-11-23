@@ -185,6 +185,21 @@ db.exec(`
     hip REAL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- Cardio sessions (run / walk / cycle / row / swim / elliptical / hiit / other).
+  -- Additive table: no existing schema is altered; DROP TABLE rolls back cleanly.
+  CREATE TABLE IF NOT EXISTS cardio_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    type TEXT NOT NULL,
+    duration_min INTEGER NOT NULL,
+    distance_km REAL,
+    calories INTEGER,
+    note TEXT DEFAULT '',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_cardio_sessions_date ON cardio_sessions(date);
 `);
 
 // Safe migrations for columns
@@ -1484,6 +1499,42 @@ const repo = {
 
   getAllFavoriteSubstitutions() {
     return db.prepare('SELECT exercise_id, substitute_id, priority, notes, created_at FROM exercise_substitutions ORDER BY exercise_id ASC, priority ASC').all();
+  },
+
+  // Cardio session logging (additive; no change to existing tables)
+  getCardioSessions(limit = 200) {
+    const n = Number(limit);
+    const clean = Number.isFinite(n) ? Math.max(1, Math.min(Math.floor(n), 500)) : 200;
+    const rows = db.prepare(`
+      SELECT id, date, type, duration_min, distance_km, calories, note, created_at
+      FROM cardio_sessions
+      ORDER BY date DESC, id DESC
+      LIMIT ?
+    `).all(clean);
+    return rows.map((r) => ({
+      id: r.id,
+      date: r.date,
+      type: r.type,
+      durationMin: r.duration_min,
+      distanceKm: r.distance_km === null || r.distance_km === undefined ? null : r.distance_km,
+      calories: r.calories === null || r.calories === undefined ? null : r.calories,
+      note: r.note || '',
+      createdAt: r.created_at || null
+    }));
+  },
+
+  addCardioSession(entry) {
+    const info = db.prepare(`
+      INSERT INTO cardio_sessions (date, type, duration_min, distance_km, calories, note)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(entry.date, entry.type, entry.durationMin, entry.distanceKm, entry.calories, entry.note);
+    return { id: Number(info.lastInsertRowid), ...entry };
+  },
+
+  deleteCardioSession(id) {
+    const n = Number(id);
+    if (!Number.isInteger(n) || n <= 0) return false;
+    return db.prepare('DELETE FROM cardio_sessions WHERE id = ?').run(n).changes > 0;
   }
 };
 

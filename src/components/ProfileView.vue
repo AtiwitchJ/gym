@@ -78,6 +78,9 @@
     <!-- Strength Standards & Relative Strength Classifier (derived from body weight + set history) -->
     <StrengthStandardsCard />
 
+    <!-- Cardio Session Logging & Weekly Summary (Strong / Hevy parity) -->
+    <CardioCard />
+
     <!-- All-Time Stats Overview -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
@@ -359,6 +362,7 @@ import BodyMeasurementsCard from './BodyMeasurementsCard.vue';
 import AchievementsCard from './AchievementsCard.vue';
 import TrainingZonesCard from './TrainingZonesCard.vue';
 import StrengthStandardsCard from './StrengthStandardsCard.vue';
+import CardioCard from './CardioCard.vue';
 
 const { open: openOneRm } = useOneRmCalculator();
 const { openPlateCalculator } = usePlateCalculator();
