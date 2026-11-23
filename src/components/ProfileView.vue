@@ -81,6 +81,9 @@
     <!-- Cardio Session Logging & Weekly Summary (Strong / Hevy parity) -->
     <CardioCard />
 
+    <!-- 12-Month Training Consistency Heatmap (derived from saved history) -->
+    <TrainingHeatmapCard />
+
     <!-- All-Time Stats Overview -->
     <div class="archive-card p-4 sm:p-5">
       <div class="flex items-center justify-between mb-3">
@@ -363,6 +366,7 @@ import AchievementsCard from './AchievementsCard.vue';
 import TrainingZonesCard from './TrainingZonesCard.vue';
 import StrengthStandardsCard from './StrengthStandardsCard.vue';
 import CardioCard from './CardioCard.vue';
+import TrainingHeatmapCard from './TrainingHeatmapCard.vue';
 
 const { open: openOneRm } = useOneRmCalculator();
 const { openPlateCalculator } = usePlateCalculator();

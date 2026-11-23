@@ -24,6 +24,7 @@ const bodyMeasurements = require('./body-measurements');
 const deload = require('./deload');
 const achievements = require('./achievements');
 const cardio = require('./cardio');
+const trainingHeatmap = require('./training-heatmap');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -520,6 +521,20 @@ app.delete('/api/cardio/:id', (req, res) => {
     res.json({ deleted: true, summary: cardio.buildCardioSummary(sessions, new Date()) });
   } catch (err) {
     console.error('Error deleting cardio session:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 12-Month Training Consistency Heatmap (Hevy / Strong parity).
+// Read-only derivation from existing history; always 200, even with no workouts.
+app.get('/api/training-heatmap', (req, res) => {
+  try {
+    const parsed = Number.parseInt(req.query.days, 10);
+    const days = Number.isFinite(parsed) && parsed > 0 ? parsed : trainingHeatmap.DEFAULT_DAYS;
+    const history = repo.getHistory();
+    res.json(trainingHeatmap.buildTrainingHeatmap(history, new Date(), days));
+  } catch (err) {
+    console.error('Error building training heatmap:', err);
     res.status(500).json({ error: err.message });
   }
 });
