@@ -120,15 +120,14 @@ function buildStreak(dates, weeklyTarget, now = new Date()) {
   const thisWeekWorkouts = counts.get(currentKey) || 0;
   const isTargetMetThisWeek = thisWeekWorkouts >= target;
 
-  // Current streak: the run must still be alive this week. If this week has not
-  // reached the target yet, the streak is 0 (it can be rebuilt next week).
+  // Current streak: count back from this week, or from last week when this week
+  // has not reached the target yet (e.g. on a Monday the week has just started).
+  let cursor = weekStart(current.year, current.weekNumber);
+  if (!isTargetMetThisWeek) cursor = new Date(cursor.getTime() - 7 * 86400000);
   let currentStreakWeeks = 0;
-  if (isTargetMetThisWeek) {
-    let cursor = weekStart(current.year, current.weekNumber);
-    while ((counts.get(weekKey(isoWeekInfo(cursor))) || 0) >= target) {
-      currentStreakWeeks++;
-      cursor = new Date(cursor.getTime() - 7 * 86400000);
-    }
+  while ((counts.get(weekKey(isoWeekInfo(cursor))) || 0) >= target) {
+    currentStreakWeeks++;
+    cursor = new Date(cursor.getTime() - 7 * 86400000);
   }
 
   // Best streak: scan every week from the earliest workout to the current week.

@@ -323,19 +323,19 @@ try {
     assert.ok(curKey >= nxtKey, `weeklyHistory must be ordered descending: ${curKey} >= ${nxtKey}`);
   }
 
-  // Case 3: Gap reset verification
-  // If target is raised to 5, weeks with only 3 days will NOT meet target, resetting streak to 0
+  // Case 3: Gap reset verification. Use the maximum target (7) so no week in the
+  // shared chain database can meet it; weeks with 3 days must reset the streak.
   const putTarget5 = await fetch(`${base}/target`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ weeklyTarget: 5 })
+    body: JSON.stringify({ weeklyTarget: 7 })
   });
   assert.strictEqual(putTarget5.status, 200);
 
   const streakGapRes = await fetch(`${base}/streak`);
   const streakGapData = await streakGapRes.json();
-  assert.strictEqual(streakGapData.weeklyTarget, 5);
-  assert.strictEqual(streakGapData.currentStreakWeeks, 0, 'When daysTrained (3) < weeklyTarget (5), streak must reset to 0');
+  assert.strictEqual(streakGapData.weeklyTarget, 7);
+  assert.strictEqual(streakGapData.currentStreakWeeks, 0, 'When daysTrained (3) < weeklyTarget (7), streak must reset to 0');
   console.log('  ✓ Streak calculation, same-day deduplication, consecutive count, and gap reset verified.\n');
 
   // ----------------------------------------------------------------
