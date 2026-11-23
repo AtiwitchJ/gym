@@ -450,6 +450,18 @@
       <span class="font-bold text-ink">{{ warmupPlan.map((s) => `${s.weight} กก.×${s.reps}`).join(' · ') }}</span>
     </div>
 
+    <!-- Warm-up insert button -->
+    <div v-if="warmupPlan.length" class="px-2.5 sm:px-4 pb-1">
+      <button
+        type="button"
+        class="min-h-[44px] w-full px-3 border-2 border-sky bg-sky-bg text-sky-text font-mono text-[11px] font-bold rounded-lg shadow-plate-sm active:translate-x-[1px] active:translate-y-[1px]"
+        @click="onInsertWarmupSets"
+        title="แทรกเซ็ตวอร์มที่คำนวณจากน้ำหนักเซ็ตแรกลงในตารางเซ็ตทันที"
+      >
+        + แทรกเซ็ตวอร์ม ({{ warmupPlan.length }} เซ็ต) · {{ warmupPlan.map((s) => `${s.weight}×${s.reps}`).join(' · ') }}
+      </button>
+    </div>
+
     <!-- Sets Table Header -->
     <div class="px-2.5 sm:px-4 py-1.5 bg-paper-subtle border-y-2 border-plate text-[11px] sm:text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider flex items-center justify-between gap-2 select-none">
       <span>เซ็ต · แนะนำ · เสร็จ</span>
@@ -737,6 +749,7 @@ const {
   setPrFlag,
   showToast,
   applyPrevRecord,
+  insertWarmupSets,
   toggleSetDone,
   showExerciseImages
 } = useWorkoutStore();
@@ -1154,6 +1167,11 @@ const warmupPlan = computed(() => {
   const wt = getWeight(idx) !== '' ? getWeight(idx) : getPrevWeight(idx);
   return buildWarmupSets(wt);
 });
+
+// 1-click: write the estimated plan into the set table as real warm-up rows.
+function onInsertWarmupSets() {
+  insertWarmupSets(currentDay.value, props.exercise.id);
+}
 
 function openPlatesForExercise() {
   const firstOpen = props.exercise.sets.findIndex((_, i) => !isSetDone(i));

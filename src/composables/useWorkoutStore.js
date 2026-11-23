@@ -1,7 +1,8 @@
 import { ref, reactive, watch, computed } from 'vue';
 import { workoutData, EXERCISE_CANONICAL_MAP, EXERCISE_DAY_MAP, getCanonicalExerciseId, getLinkedExerciseIds, getExerciseDay, resolveDayKey, nextProgramKey } from '../data/workouts.js';
 import { defaultTodos } from '../data/defaultTodos.js';
-import { parseRepTarget } from './useWeightAdvisor.js';
+import { parseRepTarget, isWarmupType } from './useWeightAdvisor.js';
+import { planWarmupInsert } from './warmupCalc.js';
 import { normalizeRir } from './useRir.js';
 import { readKeypadDraft, clearKeypadDraft, applyKeypadDraft } from './usePinKeypad.js';
 import { buildSessionExercises, recordValuesFromSets } from './sessionPayload.js';
@@ -672,6 +673,73 @@ function applyPrevWeight(day, exId, setIdx, prevWt) {
   showToast(`ใส่น้ำหนัก ${prevWt} กก.`);
 }
 
+// State keys that carry a set index and must move when rows are inserted.
+const INDEXED_STATE_PREFIXES = ['wt_', 'reps_', 'set_', 'rirPlus_', 'rir_', 'pr_', 'ts_', 'type_'];
+
+function shiftIndexedState(state, insertAt, count) {
+  const next = { ...state };
+  for (const key of Object.keys(state)) {
+    for (const prefix of INDEXED_STATE_PREFIXES) {
+      if (!key.startsWith(prefix)) continue;
+      const idx = Number(key.slice(prefix.length));
+      if (!Number.isInteger(idx) || idx < insertAt) continue;
+      delete next[key];
+      next[`${prefix}${idx + count}`] = state[key];
+      break;
+    }
+  }
+  return next;
+}
+
+/**
+ * 1-click warm-up generator. Builds percent-based warm-up rows from the first
+ * working set's weight and writes them into the routine table before that set.
+ * Draft values are reindexed so existing sets keep their weight/reps/RIR/time.
+ * Returns the number of rows inserted (0 when nothing was added).
+ */
+function insertWarmupSets(day, exId, plan) {
+  const dayData = workoutData[day];
+  const exercise = dayData && Array.isArray(dayData.exercises)
+    ? dayData.exercises.find((e) => e && e.id === exId)
+    : null;
+  if (!exercise || !Array.isArray(exercise.sets)) return 0;
+  if (exercise.sets.some((s) => s && s._generatedWarmup)) {
+    showToast('เพิ่มเซ็ตวอร์มไว้แล้ว — ไม่เพิ่มซ้ำ');
+    return 0;
+  }
+
+  const state = (userState[day] && userState[day][exId]) || {};
+  const firstWorkIdx = exercise.sets.findIndex((s) => !isWarmupType(s && s.type));
+  if (firstWorkIdx < 0) return 0;
+  let workWeight = state[`wt_${firstWorkIdx}`];
+  if (workWeight === undefined || workWeight === null || workWeight === '') {
+    const last = getExerciseLastRecord(exId) || {};
+    workWeight = last[`wt_${firstWorkIdx}`];
+  }
+
+  const planned = planWarmupInsert(exercise, workWeight, plan);
+  if (!planned) {
+    showToast('ใส่น้ำหนักเซ็ตแรกก่อนจึงจะคำนวณเซ็ตวอร์มได้');
+    return 0;
+  }
+
+  const { insertAt, rows } = planned;
+  exercise.sets.splice(insertAt, 0, ...rows);
+
+  const nextState = shiftIndexedState(state, insertAt, rows.length);
+  rows.forEach((row, i) => {
+    const idx = insertAt + i;
+    nextState[`wt_${idx}`] = String(row.targetWeight);
+    nextState[`reps_${idx}`] = String(row.targetReps);
+    nextState[`type_${idx}`] = 'warm';
+  });
+  if (!userState[day]) userState[day] = {};
+  userState[day][exId] = nextState;
+  triggerSave(day);
+  showToast(`เพิ่มเซ็ตวอร์ม ${rows.length} เซ็ต: ${rows.map((r) => `${r.targetWeight}×${r.targetReps}`).join(' · ')}`);
+  return rows.length;
+}
+
 function toggleSetDone(day, exId, setIdx) {
   if (!userState[day]) userState[day] = {};
   if (!userState[day][exId]) userState[day][exId] = {};
@@ -955,6 +1023,7 @@ export function useWorkoutStore() {
     closeSessionSummary,
     applyPrevWeight,
     applyPrevRecord,
+    insertWarmupSets,
     toggleSetDone,
     resetDayData,
     finishAndSaveWorkout,

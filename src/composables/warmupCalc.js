@@ -30,3 +30,31 @@ export function buildWarmupSets(workWeight, plan = DEFAULT_WARMUP_PLAN) {
     }))
     .filter((set) => set.weight > 0);
 }
+
+/** True for the warm-up type names already used across the app. */
+export function isWarmSetType(type) {
+  if (!type) return false;
+  const t = String(type).toLowerCase().trim();
+  return t === 'warm' || t === 'warmup' || t === 'วอร์ม' || t === 'w';
+}
+
+/**
+ * Plan a one-click warm-up insert. Rows go immediately before the first working
+ * set (after any warm-up sets already in the routine). Pure: no store or DOM writes.
+ * Returns null when there is no working set or the working weight is unusable.
+ */
+export function planWarmupInsert(exercise, workWeight, plan = DEFAULT_WARMUP_PLAN) {
+  const sets = Array.isArray(exercise && exercise.sets) ? exercise.sets : [];
+  const insertAt = sets.findIndex((s) => !isWarmSetType(s && s.type));
+  if (insertAt < 0) return null;
+  const built = buildWarmupSets(workWeight, plan);
+  if (!built.length) return null;
+  const rows = built.map((s) => ({
+    type: 'warm',
+    targetWeight: s.weight,
+    targetReps: s.reps,
+    percent: s.percent,
+    _generatedWarmup: true
+  }));
+  return { insertAt, rows };
+}

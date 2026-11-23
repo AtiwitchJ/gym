@@ -10,7 +10,8 @@ import {
 
 /**
  * Warm-up percent calculator (front end only). Default plan 40%×5, 60%×5, 80%×3, rounded to 0.5 kg.
- * Pure function; the card shows the plan as an estimate and never writes it into a set.
+ * Pure function; the estimate line stays display-only, while a separate button may
+ * write the plan into the table (see test-warmup-insert.js).
  */
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -58,8 +59,11 @@ assert.ok(card.includes("import { buildWarmupSets } from '../composables/warmupC
 assert.ok(card.includes('วอร์มอัพแนะนำ (ประมาณ):'), 'card labels it as an estimate');
 const planBlock = card.slice(card.indexOf('const warmupPlan = computed'), card.indexOf('const warmupPlan = computed') + 400);
 assert.ok(!/updateWeight|updateReps|applyPrevRecord/.test(planBlock), 'warmupPlan does not write to state');
-const tpl = card.slice(card.indexOf('<!-- Warm-up plan from the working weight'), card.indexOf('<!-- Sets Table Header -->'));
-assert.ok(!/@click/.test(tpl), 'the plan line has no click handler (display only)');
-console.log('  ✓ display only, labelled as an estimate\n');
+const tpl = card.slice(card.indexOf('<!-- Warm-up plan from the working weight'), card.indexOf('<!-- Warm-up insert button -->'));
+assert.ok(!/@click/.test(tpl), 'the estimate line has no click handler (display only)');
+const insertBlock = card.slice(card.indexOf('<!-- Warm-up insert button -->'), card.indexOf('<!-- Sets Table Header -->'));
+assert.ok(insertBlock.includes('@click="onInsertWarmupSets"'), 'the separate insert button has a click handler');
+assert.ok(insertBlock.includes('min-h-[44px]'), 'the insert button keeps a 44 px touch target');
+console.log('  ✓ estimate line display only; separate 44 px insert button writes it\n');
 
 console.log('✅ warm-up calculator checks passed');
