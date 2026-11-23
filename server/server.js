@@ -18,6 +18,7 @@ const exerciseNotes = require('./exercise-notes');
 const exerciseSubstitutes = require('./exercise-substitutes');
 const setClassification = require('./set-classification');
 const bodyMeasurements = require('./body-measurements');
+const deload = require('./deload');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -419,6 +420,16 @@ app.get('/api/volume/weekly', (req, res) => {
     res.json(volume.buildWeeklyVolume(repo.getCompletedSetVolumeRows(), Date.now()));
   } catch (err) {
     console.error('Error computing weekly volume:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Deload Week Detection & Volume/Intensity Tapering Advisor
+app.get('/api/deload', (req, res) => {
+  try {
+    res.json(deload.buildDeload(repo.getHistory(), Date.now()));
+  } catch (err) {
+    console.error('Error computing deload advice:', err);
     res.status(500).json({ error: err.message });
   }
 });

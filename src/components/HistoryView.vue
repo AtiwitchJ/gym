@@ -59,6 +59,11 @@
       </div>
     </div>
 
+    <!-- Deload Week Detection & Volume/Intensity Tapering Advisor -->
+    <div class="mb-5">
+      <DeloadAdvisorCard />
+    </div>
+
     <!-- Weekly Volume Chart (8 weeks, per muscle / per exercise) -->
     <div class="mb-5">
       <VolumeChart />
@@ -189,6 +194,7 @@ import { ref } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
 import { labelSets, weightText } from '../composables/setLabels.js';
+import DeloadAdvisorCard from './DeloadAdvisorCard.vue';
 import VolumeChart from './VolumeChart.vue';
 import MonthlySummary from './MonthlySummary.vue';
 import TrainingCalendarCard from './TrainingCalendarCard.vue';
