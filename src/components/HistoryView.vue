@@ -69,6 +69,11 @@
       <VolumeChart />
     </div>
 
+    <!-- Weekly Muscle Volume Landmarks (MEV / MAV / MRV) -->
+    <div class="mb-5">
+      <VolumeLandmarksCard />
+    </div>
+
     <!-- Monthly summary: sets done, volume and PR per exercise for the chosen month -->
     <div class="mb-5">
       <MonthlySummary />
@@ -196,6 +201,7 @@ import { useExcelExport } from '../composables/useExcelExport';
 import { labelSets, weightText } from '../composables/setLabels.js';
 import DeloadAdvisorCard from './DeloadAdvisorCard.vue';
 import VolumeChart from './VolumeChart.vue';
+import VolumeLandmarksCard from './VolumeLandmarksCard.vue';
 import MonthlySummary from './MonthlySummary.vue';
 import TrainingCalendarCard from './TrainingCalendarCard.vue';
 import DataBackupModal from './DataBackupModal.vue';

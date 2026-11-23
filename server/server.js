@@ -6,6 +6,7 @@ const repo = require('./db');
 const recovery = require('./recovery');
 const { withPr } = require('./exercise-stats');
 const volume = require('./volume');
+const volumeLandmarks = require('./volume-landmarks');
 const advice = require('./advice');
 const supersets = require('./supersets');
 const monthly = require('./monthly');
@@ -432,6 +433,16 @@ app.get('/api/volume/weekly', (req, res) => {
     res.json(volume.buildWeeklyVolume(repo.getCompletedSetVolumeRows(), Date.now()));
   } catch (err) {
     console.error('Error computing weekly volume:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Weekly Muscle Volume Landmarks (MEV / MAV / MRV) — current week only.
+app.get('/api/volume/landmarks', (req, res) => {
+  try {
+    res.json(volumeLandmarks.buildVolumeLandmarks(repo.getCompletedSetVolumeRows(), Date.now()));
+  } catch (err) {
+    console.error('Error computing volume landmarks:', err);
     res.status(500).json({ error: err.message });
   }
 });
