@@ -7,6 +7,7 @@ const recovery = require('./recovery');
 const { withPr } = require('./exercise-stats');
 const volume = require('./volume');
 const volumeLandmarks = require('./volume-landmarks');
+const trainingZones = require('./training-zones');
 const advice = require('./advice');
 const supersets = require('./supersets');
 const monthly = require('./monthly');
@@ -443,6 +444,20 @@ app.get('/api/volume/landmarks', (req, res) => {
     res.json(volumeLandmarks.buildVolumeLandmarks(repo.getCompletedSetVolumeRows(), Date.now()));
   } catch (err) {
     console.error('Error computing volume landmarks:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// %1RM Training Zones — derived from an e1RM value (no DB migration, no session needed).
+app.get('/api/training/zones', (req, res) => {
+  const e1rm = trainingZones.normalizeE1rm(req.query.e1rm);
+  if (e1rm === null) {
+    return res.status(400).json({ error: 'e1rm ต้องเป็นตัวเลขมากกว่า 0 และไม่เกิน 1000 กก.' });
+  }
+  try {
+    res.json(trainingZones.buildTrainingZones(e1rm));
+  } catch (err) {
+    console.error('Error computing training zones:', err);
     res.status(500).json({ error: err.message });
   }
 });

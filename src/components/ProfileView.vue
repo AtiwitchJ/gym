@@ -51,6 +51,9 @@
       </button>
     </div>
 
+    <!-- %1RM Training Zones (standalone; derived from an e1RM value) -->
+    <TrainingZonesCard />
+
     <!-- Barbell Plate Calculator & Inventory (standalone; no session needed) -->
     <div class="archive-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
@@ -351,6 +354,7 @@ import { usePlateCalculator } from '../composables/usePlateCalculator.js';
 import BodyWeightCard from './BodyWeightCard.vue';
 import BodyMeasurementsCard from './BodyMeasurementsCard.vue';
 import AchievementsCard from './AchievementsCard.vue';
+import TrainingZonesCard from './TrainingZonesCard.vue';
 
 const { open: openOneRm } = useOneRmCalculator();
 const { openPlateCalculator } = usePlateCalculator();
