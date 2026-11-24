@@ -565,11 +565,13 @@
             <button
               type="button"
               @click="openWeightKeypad(sIdx)"
-              class="flex-1 min-w-0 h-11 sm:h-14 rounded-xl border-2 border-plate bg-white flex items-baseline justify-center gap-1 touch-manipulation"
+              class="flex-1 min-w-0 h-11 sm:h-14 rounded-xl border-2 border-plate bg-white flex items-center justify-center touch-manipulation"
               title="แตะเพื่อพิมพ์น้ำหนัก"
             >
-              <span class="tabular-nums font-extrabold text-sm sm:text-base text-ink leading-none">{{ getWeight(sIdx) !== '' ? getWeight(sIdx) : '—' }}</span>
-              <span class="text-[11px] text-flame-text font-bold leading-none">กก.</span>
+              <span class="inline-flex items-baseline justify-center gap-1">
+                <span class="tabular-nums font-extrabold text-sm sm:text-base text-ink leading-none">{{ getWeight(sIdx) !== '' ? getWeight(sIdx) : '—' }}</span>
+                <span class="text-[11px] text-flame-text font-bold leading-none">กก.</span>
+              </span>
             </button>
             <button
               type="button"
@@ -589,11 +591,13 @@
             <button
               type="button"
               @click="openRepsKeypad(sIdx, set.reps)"
-              class="flex-1 min-w-0 h-11 sm:h-14 rounded-xl border-2 border-plate bg-white flex items-baseline justify-center gap-1 touch-manipulation"
+              class="flex-1 min-w-0 h-11 sm:h-14 rounded-xl border-2 border-plate bg-white flex items-center justify-center touch-manipulation"
               title="แตะเพื่อพิมพ์จำนวนครั้งจริง"
             >
-              <span class="tabular-nums font-extrabold text-sm sm:text-base text-ink leading-none">{{ getReps(sIdx) !== '' ? getReps(sIdx) : '—' }}</span>
-              <span class="text-[11px] text-sky-text font-bold leading-none">ครั้ง</span>
+              <span class="inline-flex items-baseline justify-center gap-1">
+                <span class="tabular-nums font-extrabold text-sm sm:text-base text-ink leading-none">{{ getReps(sIdx) !== '' ? getReps(sIdx) : '—' }}</span>
+                <span class="text-[11px] text-sky-text font-bold leading-none">ครั้ง</span>
+              </span>
             </button>
             <button
               type="button"
