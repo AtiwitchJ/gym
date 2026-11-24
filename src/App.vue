@@ -198,6 +198,23 @@
 
     <!-- Fixed Bottom Mobile Navigation & Timer Dock -->
     <div ref="dockEl" class="fixed bottom-0 left-0 right-0 z-40 bg-paper/95 backdrop-blur-md border-t-2 border-plate shadow-[0_-6px_25px_rgba(30,34,32,0.12)]">
+      <!-- Active Workout Return Mini-Bar (When workout is active & minimized) -->
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <ActiveWorkoutMiniBar
+          v-if="isWorkoutActive && isRunnerMinimized && activeSession"
+          :session="activeSession"
+          :duration-sec="sessionDurationSec"
+          @restore="isRunnerMinimized = false"
+        />
+      </transition>
+
       <!-- Rest Timer Bar (Workout days or whenever timer is actively running) -->
       <transition
         enter-active-class="transition duration-200 ease-out"
@@ -280,6 +297,7 @@ import OneRmCalculatorModal from './components/OneRmCalculatorModal.vue';
 import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
 import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
 import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
+import ActiveWorkoutMiniBar from './components/ActiveWorkoutMiniBar.vue';
 import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
 import WorkoutComparisonModal from './components/WorkoutComparisonModal.vue';
 import WorkoutsView from './components/WorkoutsView.vue';
@@ -311,7 +329,13 @@ const {
 } = useWorkoutStore();
 
 const { isRunning: isTimerRunning } = useTimer();
-const { isWorkoutActive, startSessionFromRoutine, startEmptySession } = useActiveSessionStore();
+const {
+  isWorkoutActive,
+  activeSession,
+  sessionDurationSec,
+  startSessionFromRoutine,
+  startEmptySession
+} = useActiveSessionStore();
 const { openLatestPair } = useWorkoutComparison();
 
 // Modal Visibility State
@@ -320,7 +344,34 @@ const showRoutineBuilder = ref(false);
 const editingRoutine = ref(null);
 const isSummaryModalOpen = ref(false);
 const lastWorkoutSummary = ref(null);
-const isRunnerMinimized = ref(false);
+
+const STORAGE_KEY_MINIMIZED = 'gym_runner_minimized';
+
+function getInitialMinimized() {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem(STORAGE_KEY_MINIMIZED) === 'true';
+    }
+  } catch (_) {}
+  return false;
+}
+
+const isRunnerMinimized = ref(getInitialMinimized());
+
+watch(isRunnerMinimized, (val) => {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_MINIMIZED, val ? 'true' : 'false');
+    }
+  } catch (_) {}
+});
+
+// When active workout completes or discards, reset minimized flag
+watch(isWorkoutActive, (active) => {
+  if (!active) {
+    isRunnerMinimized.value = false;
+  }
+});
 
 function handleWorkoutFinished(summary) {
   lastWorkoutSummary.value = summary;
