@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { useTimer } from './useTimer.js';
-import { useWeightAdvisor, isWarmupType } from './useWeightAdvisor.js';
+import { useWeightAdvisor, isWarmupType, isDropType } from './useWeightAdvisor.js';
 import { useExerciseStore } from './useExerciseStore.js';
 import { useWorkoutStore } from './useWorkoutStore.js';
 
@@ -226,6 +226,176 @@ function startSessionFromRoutine(routine = {}, options = {}) {
 }
 
 /**
+ * Clone a historical workout session into a fresh active session format.
+ * Resets all set completion states, clears timestamps, and generates a new session id.
+ * Handles legacy, empty, and partial data safely.
+ *
+ * @param {Object} historySession Historical session from SQLite or sessionHistory
+ * @returns {Object} Fresh active session definition ready for execution
+ */
+export function cloneSessionToActive(historySession = {}) {
+  const now = Date.now();
+  const exerciseStore = useExerciseStore();
+  const rawExercises = Array.isArray(historySession?.exercises) ? historySession.exercises : [];
+
+  const clonedExercises = rawExercises.map((item, exIdx) => {
+    const exId = item.exerciseId || item.id || item.canonicalId || item.canonical_id || `ex_${exIdx + 1}`;
+    const exMeta = exerciseStore.getExerciseById(exId);
+
+    const rawSets = Array.isArray(item.sets) ? item.sets : [];
+    const clonedSets = rawSets.map((s) => {
+      const isWarm = isWarmupType(s.type);
+      const isDrop = isDropType(s.type);
+      let setType = 'working';
+      if (isWarm) setType = 'warmup';
+      else if (isDrop) setType = 'dropset';
+      else if (s.type === 'failure' || s.type === 'fail' || s.type === 'ล้มเหลว') setType = 'failure';
+      else if (s.type) {
+        const t = String(s.type).toLowerCase().trim();
+        if (t === 'warm' || t === 'warmup' || t === 'วอร์ม') setType = 'warmup';
+        else if (t === 'drop' || t === 'dropset' || t === 'ดรอป' || t === 'ดรอปเซ็ต' || t === 'd') setType = 'dropset';
+        else if (t === 'failure') setType = 'failure';
+      }
+
+      // Weight resolution
+      // Use available weight when there is no explicit targetWeight: s.targetWeight ?? s.weight ?? 0
+      let targetWeightVal = 0;
+      if (s.targetWeight !== undefined && s.targetWeight !== null && s.targetWeight !== '') {
+        const parsedTW = parseFloat(s.targetWeight);
+        targetWeightVal = isNaN(parsedTW) ? 0 : parsedTW;
+      } else if (s.weight !== undefined && s.weight !== null && s.weight !== '') {
+        const parsedW = parseFloat(s.weight);
+        targetWeightVal = isNaN(parsedW) ? 0 : parsedW;
+      }
+
+      let weightVal = targetWeightVal;
+      if (s.weight !== undefined && s.weight !== null && s.weight !== '') {
+        const parsedW = parseFloat(s.weight);
+        weightVal = isNaN(parsedW) ? targetWeightVal : parsedW;
+      }
+
+      // Target & Reps resolution:
+      // 1. Preserve the historical target (target or targetReps) first as the new session's target
+      let targetVal = undefined;
+      if (s.target !== undefined && s.target !== null && String(s.target).trim() !== '') {
+        targetVal = s.target;
+      } else if (s.targetReps !== undefined && s.targetReps !== null && String(s.targetReps).trim() !== '') {
+        targetVal = s.targetReps;
+      } else if (s.target_reps !== undefined && s.target_reps !== null && String(s.target_reps).trim() !== '') {
+        targetVal = s.target_reps;
+      }
+
+      // 2. Fallback to actualReps only when target is missing/empty
+      if (targetVal === undefined) {
+        if (s.actualReps !== undefined && s.actualReps !== null && String(s.actualReps).trim() !== '') {
+          const parsedR = parseInt(s.actualReps, 10);
+          targetVal = (!isNaN(parsedR) && parsedR > 0) ? parsedR : s.actualReps;
+        } else if (s.actual_reps !== undefined && s.actual_reps !== null && String(s.actual_reps).trim() !== '') {
+          const parsedR = parseInt(s.actual_reps, 10);
+          targetVal = (!isNaN(parsedR) && parsedR > 0) ? parsedR : s.actual_reps;
+        } else if (s.reps !== undefined && s.reps !== null && String(s.reps).trim() !== '') {
+          const parsedR = parseInt(s.reps, 10);
+          targetVal = (!isNaN(parsedR) && parsedR > 0) ? parsedR : s.reps;
+        }
+      }
+
+      // If still missing/empty, default based on set type
+      if (targetVal === undefined) {
+        targetVal = isWarm ? 15 : 8;
+      }
+
+      // Reps value for active runner execution (numeric default for steppers/keypad)
+      let repsVal = isWarm ? 15 : 8;
+      if (typeof targetVal === 'number') {
+        repsVal = targetVal;
+      } else if (typeof targetVal === 'string') {
+        const digits = targetVal.match(/\d+/g);
+        if (digits && digits.length > 0) {
+          repsVal = parseInt(digits[digits.length - 1], 10) || (isWarm ? 15 : 8);
+        }
+      }
+
+      return {
+        type: setType,
+        target: targetVal,
+        targetReps: targetVal,
+        targetWeight: targetWeightVal,
+        weight: weightVal,
+        reps: repsVal,
+        completed: false, // Reset completion
+        completedAt: null, // Reset timestamp
+        rir: null,
+        rirPlus: false
+      };
+    });
+
+    return {
+      exerciseId: exId,
+      name: item.name || item.exerciseName || item.exercise_name || exMeta?.name || exId,
+      muscleGroup: exMeta?.muscleGroup || item.muscleGroup || item.category || 'other',
+      equipment: exMeta?.equipment || item.equipment || 'other',
+      restSec: item.restSec !== undefined ? Number(item.restSec) : (exMeta?.restSec || 90),
+      sets: clonedSets
+    };
+  });
+
+  const title = historySession?.dayTitle || historySession?.title || 'Workout Session';
+  const subtitle = historySession?.date ? `เล่นซ้ำจากรอบวันที่ ${historySession.date}` : 'เล่นซ้ำจากประวัติ';
+
+  return {
+    id: `session_${now}_${Math.random().toString(36).slice(2, 7)}`,
+    routineId: historySession?.dayKey || historySession?.routineId || null,
+    title: String(title).trim(),
+    subtitle: String(subtitle).trim(),
+    startTime: now,
+    startedAt: new Date(now).toISOString(),
+    exercises: clonedExercises
+  };
+}
+
+/**
+ * Start a live workout session by cloning a historical session.
+ * Protects ongoing active session drafts from being silently overwritten.
+ *
+ * @param {Object} historySession Session to replay
+ * @param {Object} options Configuration { force: boolean, confirm: function }
+ * @returns {Object} Result { started: boolean, reason?: string, session?: Object }
+ */
+function startSessionFromHistory(historySession = {}, options = {}) {
+  if (!historySession) {
+    return { started: false, reason: 'invalid_session' };
+  }
+
+  // Guard active session if running and has exercises
+  const hasRunningWorkout = isWorkoutActive.value && activeSession.value && Array.isArray(activeSession.value.exercises);
+  if (hasRunningWorkout && !options.force) {
+    const confirmFn = typeof options.confirm === 'function'
+      ? options.confirm
+      : (typeof window !== 'undefined' && typeof window.confirm === 'function'
+          ? window.confirm
+          : null);
+
+    if (confirmFn) {
+      const allowed = confirmFn('มีรอบการฝึกซ้อมที่กำลังเล่นอยู่ (Active Workout) การเริ่มเล่นซ้ำจะแทนที่รอบปัจจุบัน คุณต้องการดำเนินการต่อหรือไม่?');
+      if (!allowed) {
+        return { started: false, reason: 'cancelled_by_user' };
+      }
+    } else {
+      // Without confirmation capability and force=false, refuse overwrite
+      return { started: false, reason: 'active_workout_in_progress' };
+    }
+  }
+
+  const cloned = cloneSessionToActive(historySession);
+  activeSession.value = cloned;
+  isWorkoutActive.value = true;
+  persistDraft();
+  startDurationTicker();
+
+  return { started: true, session: cloned };
+}
+
+/**
  * Start a blank workout session
  */
 function startEmptySession(options = {}) {
@@ -329,6 +499,7 @@ function addSet(exerciseIndex, setData = null) {
   const lastSet = ex.sets[ex.sets.length - 1];
   const newSet = setData || {
     type: lastSet ? lastSet.type : 'working',
+    target: lastSet ? (lastSet.target ?? lastSet.targetReps ?? 8) : 8,
     targetReps: lastSet ? lastSet.targetReps : 8,
     targetWeight: lastSet ? lastSet.targetWeight : 0,
     weight: lastSet ? lastSet.weight : 0,
@@ -450,7 +621,7 @@ function finishSession() {
         sets: (ex.sets || []).map((s, sIdx) => ({
           setIndex: sIdx + 1,
           type: s.type === 'warmup' ? 'วอร์ม' : 'เล่นจริง',
-          target: s.targetReps || s.reps || 8,
+          target: (s.target !== undefined && s.target !== null && s.target !== '') ? s.target : (s.targetReps || s.reps || 8),
           weight: (s.weight !== undefined && s.weight !== '') ? Number(s.weight) : 0,
           actualReps: (s.reps !== undefined && s.reps !== '') ? Number(s.reps) : (s.targetReps || 0),
           done: Boolean(s.completed)
@@ -511,6 +682,8 @@ export function useActiveSessionStore() {
     sessionHistory,
     startSessionFromRoutine,
     startEmptySession,
+    startSessionFromHistory,
+    cloneSessionToActive,
     addExerciseToActiveSession,
     removeExerciseFromActiveSession,
     addSet,

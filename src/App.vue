@@ -47,7 +47,10 @@
       />
 
       <!-- 3. History View (Global Tab) -->
-      <HistoryView v-else-if="currentTab === 'history'" />
+      <HistoryView
+        v-else-if="currentTab === 'history'"
+        @open-runner="isRunnerMinimized = false"
+      />
 
       <!-- 4. Profile View (Global Tab) -->
       <ProfileView v-else-if="currentTab === 'profile'" />

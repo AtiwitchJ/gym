@@ -137,6 +137,18 @@
 
           <!-- Header Actions -->
           <div class="flex items-center gap-2 flex-shrink-0">
+            <!-- Repeat Session Button -->
+            <button
+              type="button"
+              @click="handleRepeatSession(session)"
+              class="min-h-[44px] px-3 py-1.5 rounded-xl border-2 border-plate bg-flame hover:bg-flame-glow text-white font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-plate"
+              title="เล่นซ้ำเซสชันนี้ในโหมดฝึกจริง (Clone เป็นรอบใหม่)"
+            >
+              <span class="text-xs">🔁</span>
+              <span class="hidden sm:inline">เล่นซ้ำ</span>
+              <span class="sm:hidden">ซ้ำ</span>
+            </button>
+
             <!-- Compare with Prior Session Button -->
             <button
               type="button"
@@ -218,6 +230,7 @@ import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
 import { labelSets, weightText } from '../composables/setLabels.js';
 import { useWorkoutComparison } from '../composables/useWorkoutComparison.js';
+import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
 import DeloadAdvisorCard from './DeloadAdvisorCard.vue';
 import VolumeChart from './VolumeChart.vue';
 import VolumeLandmarksCard from './VolumeLandmarksCard.vue';
@@ -225,11 +238,29 @@ import MonthlySummary from './MonthlySummary.vue';
 import TrainingCalendarCard from './TrainingCalendarCard.vue';
 import DataBackupModal from './DataBackupModal.vue';
 
+const emit = defineEmits(['open-runner']);
 const isBackupModalOpen = ref(false);
 
-const { workoutHistory, deleteSession, fetchServerState } = useWorkoutStore();
+const workoutStore = useWorkoutStore();
+const { workoutHistory, deleteSession, fetchServerState } = workoutStore;
 const { exportWorkoutHistory, downloadSqliteDatabase } = useExcelExport();
 const { openLatestPair } = useWorkoutComparison();
+const { isWorkoutActive, startSessionFromHistory } = useActiveSessionStore();
+
+function handleRepeatSession(session) {
+  if (!session) return;
+  if (isWorkoutActive.value) {
+    const ok = confirm('มีรอบการฝึกซ้อมที่กำลังเล่นอยู่ (Active Workout) การเริ่มเล่นซ้ำจะแทนที่รอบปัจจุบัน คุณต้องการดำเนินการต่อหรือไม่?');
+    if (!ok) return;
+  }
+  const result = startSessionFromHistory(session, { force: true });
+  if (result?.started) {
+    emit('open-runner');
+    if (workoutStore?.switchTab) {
+      workoutStore.switchTab('workouts');
+    }
+  }
+}
 
 function openComparison(sessionId) {
   if (sessionId) {
