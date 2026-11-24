@@ -1183,9 +1183,19 @@ function onInsertWarmupSets() {
 function openPlatesForExercise() {
   const firstOpen = props.exercise.sets.findIndex((_, i) => !isSetDone(i));
   const idx = firstOpen >= 0 ? firstOpen : 0;
-  const start = Number(getWeight(idx)) || Number(getPrevWeight(idx)) || 60;
+  const currentWt = Number(getWeight(idx));
+  const prevWt = Number(getPrevWeight(idx));
+  const hasCurrentWeight = !isNaN(currentWt) && currentWt > 0;
+  const hasPrevWeight = !isNaN(prevWt) && prevWt > 0;
+  const start = hasCurrentWeight ? currentWt : (hasPrevWeight ? prevWt : 60);
+
   openPlateCalculator(start, (val) => {
     updateWeight(currentDay.value, props.exercise.id, idx, String(val));
+  }, {
+    isFromSet: hasCurrentWeight,
+    sourceDescription: hasCurrentWeight
+      ? `ดึงจากเซ็ตที่ ${idx + 1}`
+      : (hasPrevWeight ? `น้ำหนักอ้างอิงจากรอบก่อนหน้า (${prevWt} กก.) — ไม่ใช่ค่าของเซ็ตนี้` : 'ค่าเริ่มต้น 60 กก. — ไม่ใช่ค่าของเซ็ตนี้')
   });
 }
 

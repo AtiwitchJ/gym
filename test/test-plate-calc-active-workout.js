@@ -128,13 +128,27 @@ assert.strictEqual(plateStore.isWeightFromSet.value, false, 'User manual adjustm
 plateStore.setTargetWeight(null); // Clear back to null
 assert.strictEqual(plateStore.targetWeight.value, null, 'setTargetWeight(null) clears weight');
 
-// Explicit fallback weight if explicitly requested
+let appliedValue = null;
+
+// Explicit fallback weight if explicitly requested (e.g. Day View default 60 kg or fallback 20 kg)
+plateStore.openPlateCalculator(60, (val) => { appliedValue = val; }, {
+  isFromSet: false,
+  sourceDescription: 'ค่าเริ่มต้น 60 กก. — ไม่ใช่ค่าของเซ็ตนี้'
+});
+assert.strictEqual(plateStore.targetWeight.value, 60, 'Day View default 60 kg respected');
+assert.strictEqual(plateStore.isWeightFromSet.value, false, 'Explicitly marked NOT from set');
+assert.strictEqual(plateStore.weightSourceInfo.value.origin, 'fallback', 'Origin marked as fallback');
+assert.ok(plateStore.weightSourceInfo.value.description.includes('ไม่ใช่ค่าของเซ็ต'), 'Explanation clearly states it is not from set');
+assert.strictEqual(plateStore.applyWeight(), true, 'Can apply default weight in Day View after review');
+assert.strictEqual(appliedValue, 60, 'Callback received 60 kg');
+
 plateStore.openPlateCalculator(null, null, { fallbackWeight: 45 });
 assert.strictEqual(plateStore.targetWeight.value, 45, 'Fallback weight 45 kg respected when provided');
 assert.strictEqual(plateStore.isWeightFromSet.value, false);
+assert.strictEqual(plateStore.weightSourceInfo.value.origin, 'fallback');
 
 // Open with valid prefill 85 kg from set
-let appliedValue = null;
+appliedValue = null;
 plateStore.openPlateCalculator(85, (val) => {
   appliedValue = val;
 });

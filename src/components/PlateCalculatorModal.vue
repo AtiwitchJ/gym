@@ -58,24 +58,45 @@
           <!-- Weight Origin / Guidance Notice -->
           <div
             v-if="!targetWeight || targetWeight <= 0"
-            class="px-3 py-2 rounded-xl bg-amber-50 border-2 border-amber-300 text-amber-900 text-xs font-mono font-bold flex items-center gap-2 shadow-xs"
+            class="modal-weight-status px-3.5 py-2.5 rounded-2xl bg-amber-50 border-2 border-amber-400 text-amber-950 text-xs font-mono flex flex-col gap-1 shadow-[2px_2px_0px_#1e2220]"
           >
-            <span class="text-base flex-shrink-0">⚠️</span>
-            <span>เซ็ตนี้ยังไม่ได้ระบุน้ำหนัก: กรุณาเลือกหรือระบุน้ำหนักก่อนนำไปใช้</span>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 font-extrabold text-amber-900">
+                <span class="text-base">⚠️</span>
+                <span>เซ็ตนี้ยังไม่มีค่าน้ำหนัก</span>
+              </div>
+              <span class="text-[11px] bg-amber-200 border border-amber-400 text-amber-900 px-2 py-0.5 rounded-full font-bold uppercase">ค่าว่าง (Empty)</span>
+            </div>
+            <p class="text-[11px] text-amber-900 leading-tight pl-5">
+              กรุณาเลือกหรือระบุน้ำหนักก่อนนำไปใช้ ปุ่มนำไปใช้จะถูกปิดการทำงานจนกว่าจะระบุน้ำหนัก
+            </p>
           </div>
+
           <div
             v-else-if="!isWeightFromSet"
-            class="px-2.5 py-1 rounded-lg bg-paper-subtle border border-plate/30 text-ink-muted text-xs font-mono flex items-center justify-between"
+            class="modal-weight-status px-3.5 py-2.5 rounded-2xl bg-amber-50 border-2 border-amber-500 text-amber-950 text-xs font-mono flex flex-col gap-1 shadow-[2px_2px_0px_#1e2220]"
           >
-            <span>⚙️ ระบุน้ำหนักเริ่มต้น: {{ targetWeight }} กก.</span>
-            <span class="text-[11px] text-amber-700 font-bold">(ไม่ได้ดึงค่าจากเซ็ต)</span>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 font-extrabold text-amber-900">
+                <span class="text-base text-amber-600">⚠️</span>
+                <span>ค่าน้ำหนักเริ่มต้น: {{ targetWeight }} กก.</span>
+              </div>
+              <span class="text-[11px] bg-amber-200 border border-amber-400 text-amber-900 px-2 py-0.5 rounded-full font-extrabold uppercase">ไม่ใช่ค่าของเซ็ต</span>
+            </div>
+            <p class="text-[11px] text-amber-900 leading-tight pl-5 font-medium">
+              * คำอธิบาย: ค่าน้ำหนัก {{ targetWeight }} กก. นี้เป็นค่าเริ่มต้นสำหรับการคำนวณแผ่นเหล็กเท่านั้น <strong>ไม่ใช่ค่าน้ำหนักที่บันทึกไว้ในเซ็ตนี้</strong> ({{ weightSourceInfo.description || 'โปรดตรวจสอบหรือปรับค่าก่อนนำไปใช้' }})
+            </p>
           </div>
+
           <div
             v-else
-            class="px-2.5 py-1 rounded-lg bg-gold/15 border border-gold/40 text-ink text-xs font-mono flex items-center justify-between"
+            class="modal-weight-status px-3.5 py-2 rounded-2xl bg-emerald-50 border-2 border-emerald-500 text-emerald-950 text-xs font-mono flex items-center justify-between shadow-[2px_2px_0px_#1e2220]"
           >
-            <span>🏋️ ค่าน้ำหนักจากเซ็ต: {{ targetWeight }} กก.</span>
-            <span class="text-[11px] text-emerald-700 font-bold">✓ ดึงจากเซ็ต</span>
+            <div class="flex items-center gap-1.5 font-bold">
+              <span class="text-base text-emerald-600">✓</span>
+              <span>ค่าน้ำหนักจากเซ็ต: <strong>{{ targetWeight }} กก.</strong></span>
+            </div>
+            <span class="text-[11px] bg-emerald-200 border border-emerald-400 text-emerald-900 px-2 py-0.5 rounded-full font-extrabold">ดึงจากเซ็ต</span>
           </div>
 
           <div class="flex items-center justify-between gap-3">
@@ -321,12 +342,13 @@
           <button
             @click="applyWeight"
             :disabled="!targetWeight || targetWeight <= 0"
-            class="flex-2 min-h-[44px] h-12 rounded-xl border-2 font-heading font-extrabold text-base transition-all flex items-center justify-center gap-2 touch-manipulation"
+            class="btn-apply-plate-weight flex-2 min-h-[44px] h-12 rounded-xl border-2 font-heading font-extrabold text-base transition-all flex items-center justify-center gap-2 touch-manipulation"
             :class="(!targetWeight || targetWeight <= 0)
               ? 'bg-stone-200 border-stone-300 text-stone-400 cursor-not-allowed shadow-none'
               : 'bg-flame hover:bg-flame-glow border-plate text-white shadow-[3px_3px_0px_#1e2220] active:translate-x-[1.5px] active:translate-y-[1.5px] active:shadow-none'"
           >
-            <span v-if="targetWeight && targetWeight > 0">นำค่าน้ำหนักนี้ไปใช้ ({{ targetWeight }} กก.)</span>
+            <span v-if="targetWeight && targetWeight > 0 && isWeightFromSet">นำค่าน้ำหนักเซ็ตนี้ไปใช้ ({{ targetWeight }} กก.)</span>
+            <span v-else-if="targetWeight && targetWeight > 0 && !isWeightFromSet">นำค่าเริ่มต้นนี้ไปใช้กับเซ็ต ({{ targetWeight }} กก.)</span>
             <span v-else>โปรดเลือก/ระบุน้ำหนักก่อน</span>
             <svg v-if="targetWeight && targetWeight > 0" class="w-5 h-5 fill-current" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -345,6 +367,7 @@ const {
   isOpen,
   targetWeight,
   isWeightFromSet,
+  weightSourceInfo,
   selectedBar,
   barPresets,
   availablePlates,

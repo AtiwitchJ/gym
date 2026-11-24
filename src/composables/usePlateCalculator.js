@@ -221,6 +221,12 @@ export function calculatePlates(targetTotalWeight, barWeight = 20, inventory) {
 const isOpen = ref(false);
 const targetWeight = ref(null);
 const isWeightFromSet = ref(false);
+const weightSourceInfo = ref({
+  isFromSet: false,
+  origin: 'empty', // 'set' | 'fallback' | 'empty' | 'manual'
+  label: '',
+  description: ''
+});
 const selectedBar = ref(BAR_PRESETS[0]);
 let onApplyCallback = null;
 
@@ -264,17 +270,48 @@ export function isBarbellExercise(ex) {
 export function usePlateCalculator() {
   function openPlateCalculator(initialWeight = null, onApply = null, options = {}) {
     const parsed = parseFloat(initialWeight);
-    if (!isNaN(parsed) && parsed > 0 && options?.isFromSet !== false) {
+    const hasValidWeight = !isNaN(parsed) && parsed > 0;
+    const isFromSet = hasValidWeight && (options?.isFromSet !== undefined ? Boolean(options.isFromSet) : true);
+
+    if (isFromSet) {
       targetWeight.value = parsed;
       isWeightFromSet.value = true;
+      weightSourceInfo.value = {
+        isFromSet: true,
+        origin: 'set',
+        label: 'ค่าน้ำหนักจากเซ็ต',
+        description: options?.sourceDescription || 'ดึงจากค่าน้ำหนักที่บันทึกไว้ในเซ็ต'
+      };
+    } else if (hasValidWeight) {
+      // Provided a fallback weight with isFromSet = false (e.g. Day View 60 kg, or custom fallback)
+      targetWeight.value = parsed;
+      isWeightFromSet.value = false;
+      weightSourceInfo.value = {
+        isFromSet: false,
+        origin: 'fallback',
+        label: 'ค่าเริ่มต้นสำหรับการคำนวณ',
+        description: options?.sourceDescription || 'ค่าน้ำหนักนี้เป็นค่าเริ่มต้นสำหรับการคำนวณ ไม่ใช่ค่าที่บันทึกไว้ในเซ็ต'
+      };
     } else if (options && options.fallbackWeight && !isNaN(parseFloat(options.fallbackWeight)) && parseFloat(options.fallbackWeight) > 0) {
       targetWeight.value = parseFloat(options.fallbackWeight);
       isWeightFromSet.value = false;
+      weightSourceInfo.value = {
+        isFromSet: false,
+        origin: 'fallback',
+        label: 'ค่าเริ่มต้นสำหรับการคำนวณ',
+        description: options?.sourceDescription || 'ค่าน้ำหนักนี้เป็นค่าเริ่มต้นสำหรับการคำนวณ ไม่ใช่ค่าที่บันทึกไว้ในเซ็ต'
+      };
     } else {
       // Empty / invalid weight: do NOT prefill silently!
       // Must be blank (null) so user explicitly specifies/picks weight before applying.
       targetWeight.value = null;
       isWeightFromSet.value = false;
+      weightSourceInfo.value = {
+        isFromSet: false,
+        origin: 'empty',
+        label: 'ยังไม่มีค่าน้ำหนัก',
+        description: options?.sourceDescription || 'เซ็ตนี้ยังไม่ได้ระบุน้ำหนัก: กรุณาเลือกหรือระบุน้ำหนักก่อนนำไปใช้'
+      };
     }
     onApplyCallback = onApply;
     isOpen.value = true;
@@ -289,11 +326,23 @@ export function usePlateCalculator() {
     if (val === null || val === undefined || val === '') {
       targetWeight.value = null;
       isWeightFromSet.value = false;
+      weightSourceInfo.value = {
+        isFromSet: false,
+        origin: 'empty',
+        label: 'ยังไม่มีค่าน้ำหนัก',
+        description: 'เซ็ตนี้ยังไม่ได้ระบุน้ำหนัก: กรุณาเลือกหรือระบุน้ำหนักก่อนนำไปใช้'
+      };
       return;
     }
     const num = parseFloat(val);
     targetWeight.value = isNaN(num) || num <= 0 ? null : num;
     isWeightFromSet.value = false;
+    weightSourceInfo.value = {
+      isFromSet: false,
+      origin: 'manual',
+      label: 'ระบุค่าน้ำหนักเริ่มต้น',
+      description: 'ค่าน้ำหนักนี้ระบุโดยผู้ใช้ ไม่ใช่ค่าเดิมของเซ็ต'
+    };
   }
 
   function adjustWeight(delta) {
@@ -303,6 +352,12 @@ export function usePlateCalculator() {
     const next = Math.max(0, current + delta);
     targetWeight.value = Math.round(next * 100) / 100;
     isWeightFromSet.value = false;
+    weightSourceInfo.value = {
+      isFromSet: false,
+      origin: 'manual',
+      label: 'ปรับค่าน้ำหนัก',
+      description: 'ค่าน้ำหนักนี้ถูกปรับในโมดอล ไม่ใช่ค่าเดิมของเซ็ต'
+    };
   }
 
   function selectBarPreset(bar) {
@@ -325,6 +380,7 @@ export function usePlateCalculator() {
     isOpen,
     targetWeight,
     isWeightFromSet,
+    weightSourceInfo,
     selectedBar,
     barPresets: BAR_PRESETS,
     availablePlates: AVAILABLE_PLATES,

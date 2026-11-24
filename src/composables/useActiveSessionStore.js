@@ -787,6 +787,52 @@ export function insertWarmupSetsToActiveExercise(exerciseIndex, plan = DEFAULT_W
 }
 
 /**
+ * Safely apply a weight to a specific set in activeSession identified by targetSetId and/or set reference.
+ * Prevents writing to wrong set if exercises or sets were reordered, shifted, or deleted.
+ * If target set was deleted, aborts without modifying any set.
+ */
+export function applyPlateWeightToActiveSet(appliedWeight, targetSetRef, targetSetId = null) {
+  if (!isWorkoutActive.value || !activeSession.value) return { success: false, reason: 'no_active_session' };
+  const numWeight = parseFloat(appliedWeight);
+  if (isNaN(numWeight) || numWeight <= 0) return { success: false, reason: 'invalid_weight' };
+
+  let foundExIdx = -1;
+  let foundSetIdx = -1;
+
+  for (let eI = 0; eI < activeSession.value.exercises.length; eI++) {
+    const ex = activeSession.value.exercises[eI];
+    if (!ex || !Array.isArray(ex.sets)) continue;
+    for (let sI = 0; sI < ex.sets.length; sI++) {
+      const s = ex.sets[sI];
+      if (s === targetSetRef || (targetSetId && s?._setId === targetSetId)) {
+        foundExIdx = eI;
+        foundSetIdx = sI;
+        break;
+      }
+    }
+    if (foundExIdx >= 0) break;
+  }
+
+  if (foundExIdx < 0 || foundSetIdx < 0) {
+    return { success: false, reason: 'target_set_not_found', message: 'ไม่พบเซ็ตเป้าหมาย (อาจถูกลบหรือยกเลิกแล้ว)' };
+  }
+
+  const targetSet = activeSession.value.exercises[foundExIdx].sets[foundSetIdx];
+  targetSet.weight = numWeight;
+  targetSet.targetWeight = numWeight;
+
+  persistDraft();
+
+  return {
+    success: true,
+    exerciseIndex: foundExIdx,
+    setIndex: foundSetIdx,
+    weight: numWeight,
+    set: targetSet
+  };
+}
+
+/**
  * Add a new set to an exercise in the active session
  */
 function addSet(exerciseIndex, setData = null) {
@@ -996,6 +1042,7 @@ export function useActiveSessionStore() {
     insertWarmupSetsToActiveExercise,
     hasWarmupSets,
     getExerciseWorkingWeight,
+    applyPlateWeightToActiveSet,
     addSet,
     removeSet,
     updateSetMetric,
