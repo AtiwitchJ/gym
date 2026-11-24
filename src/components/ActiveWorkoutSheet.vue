@@ -255,6 +255,20 @@
                 <span>{{ hasNote(exercise.exerciseId) ? 'ตั้งค่า/โน้ต' : '+ โน้ตเครื่อง' }}</span>
               </button>
 
+              <!-- Warmup Sets Helper Button -->
+              <button
+                type="button"
+                @click="handleInsertWarmup(exIdx)"
+                :disabled="hasWarmupSets(exercise)"
+                class="btn-add-warmup min-h-[44px] min-w-[44px] px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none disabled:opacity-40 disabled:cursor-not-allowed"
+                :class="hasWarmupSets(exercise) ? 'bg-paper-dim text-ink-muted' : 'bg-gold-bg hover:bg-gold-bg/80 text-ink border-gold/70'"
+                :title="hasWarmupSets(exercise) ? 'มีเซ็ตวอร์มแล้ว — ไม่เพิ่มซ้ำ' : 'เพิ่มเซ็ตวอร์มคำนวณอัตโนมัติ 40% · 60% · 80% (ค่าประมาณให้ปรับเอง)'"
+                :aria-label="`เพิ่มเซ็ตวอร์มสำหรับ ${exercise.name}`"
+              >
+                <span>🔥</span>
+                <span>{{ hasWarmupSets(exercise) ? 'มีวอร์มแล้ว' : '+ วอร์ม' }}</span>
+              </button>
+
               <!-- Add Set Button -->
               <button
                 type="button"
@@ -387,6 +401,24 @@
             </button>
           </div>
 
+          <!-- Warmup Guidance Banner (Visible when exercise has warmup sets) -->
+          <div
+            v-if="hasWarmupSets(exercise)"
+            class="warmup-notice-banner p-2 sm:p-2.5 rounded-xl bg-gold-bg/60 border border-gold/50 flex items-center justify-between gap-2 text-xs font-mono select-none shadow-xs"
+            title="เซ็ตวอร์มคำนวณจากเปอร์เซ็นต์ของเซ็ตจริง เป็นค่าประมาณที่สามารถปรับน้ำหนักและจำนวนครั้งได้ตามความเหมาะสม"
+            :aria-label="`เซ็ตวอร์มสำหรับ ${exercise.name}: 40% · 60% · 80% เป็นค่าประมาณให้ปรับเอง`"
+          >
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="text-sm select-none flex-shrink-0">🔥</span>
+              <span class="text-ink font-bold truncate text-[11px] sm:text-xs">
+                เซ็ตวอร์ม: 40% · 60% · 80% (ค่าประมาณให้ปรับเอง)
+              </span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-white text-ink border border-gold/40 flex-shrink-0 shadow-xs">
+              ค่าประมาณให้ปรับเอง
+            </span>
+          </div>
+
           <!-- Sets Table -->
           <div class="space-y-1.5">
             <!-- Table Header: เซ็ต | ครั้งก่อน | น้ำหนัก | ครั้ง | เสร็จ -->
@@ -420,6 +452,14 @@
                   >
                     {{ getSetTypeShort(set.type) }}
                   </button>
+                  <!-- Warmup estimate hint on set row -->
+                  <span
+                    v-if="isWarmSetType(set.type) || Boolean(set.isWarm)"
+                    class="warmup-estimate-tag text-[11px] font-mono font-bold text-gold px-1.5 py-0.5 rounded bg-gold-bg/70 border border-gold/40 flex-shrink-0"
+                    title="น้ำหนักและจำนวนครั้งสำหรับเซ็ตวอร์มเป็นค่าประมาณ สามารถแตะปรับได้ตามความรู้สึก"
+                  >
+                    ค่าประมาณ
+                  </span>
                   <span class="text-[11px] font-mono font-medium text-ink-muted truncate">{{ getPreviousPerformanceText(exercise.exerciseId, setIdx) }}</span>
                   <!-- Live PR Badge on Qualifying Set -->
                   <span
@@ -551,6 +591,7 @@ import { getYoutubeId } from '../utils/youtube.js';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { getBaselineE1rm, getCachedBaseline, evaluateExercisePrs } from '../composables/usePersonalRecords.js';
 import { useExerciseNotes } from '../composables/useExerciseNotes.js';
+import { isWarmSetType } from '../composables/warmupCalc.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
@@ -569,6 +610,8 @@ const {
   moveExerciseUp,
   moveExerciseDown,
   substituteExercise,
+  insertWarmupSetsToActiveExercise,
+  hasWarmupSets,
   addSet: storeAddSet,
   removeSet: storeRemoveSet,
   updateSetMetric,
@@ -981,6 +1024,17 @@ async function handleActiveSubstituteSwapped({ substitute, customWeight, exercis
       activeVideos.value[idx] = false;
       showToast(`สลับเป็นท่า «${substitute.name}» สำเร็จ`);
     }
+  }
+}
+
+// Warmup Sets Helper
+async function handleInsertWarmup(exIdx) {
+  const res = insertWarmupSetsToActiveExercise(exIdx);
+  if (res && res.success) {
+    showToast(`🔥 ${res.message} (ค่าประมาณให้ปรับเอง)`);
+    await recheckExercisePrs(exIdx);
+  } else if (res) {
+    showToast(res.message || 'ไม่สามารถเพิ่มเซ็ตวอร์มได้');
   }
 }
 

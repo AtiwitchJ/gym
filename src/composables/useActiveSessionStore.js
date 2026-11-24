@@ -4,6 +4,7 @@ import { useWeightAdvisor, isWarmupType, isDropType } from './useWeightAdvisor.j
 import { useExerciseStore } from './useExerciseStore.js';
 import { useWorkoutStore } from './useWorkoutStore.js';
 import { collectSessionPrs } from './usePersonalRecords.js';
+import { buildWarmupSets, DEFAULT_WARMUP_PLAN, isWarmSetType } from './warmupCalc.js';
 
 const STORAGE_KEY_DRAFT = 'active_session_draft';
 const STORAGE_KEY_HISTORY = 'global_session_history';
@@ -93,6 +94,31 @@ function persistDraft() {
 }
 
 /**
+ * Check if an exercise in the active session already has warmup sets
+ */
+export function hasWarmupSets(exercise) {
+  if (!exercise || !Array.isArray(exercise.sets)) return false;
+  return exercise.sets.some(s => isWarmSetType(s?.type) || Boolean(s?.isWarm) || Boolean(s?._generatedWarmup));
+}
+
+/**
+ * Get the reference working weight from an exercise's working sets
+ */
+export function getExerciseWorkingWeight(exercise) {
+  if (!exercise || !Array.isArray(exercise.sets)) return 0;
+  for (const s of exercise.sets) {
+    if (!isWarmSetType(s?.type) && !s?.isWarm) {
+      const rawVal = s.weight !== undefined && s.weight !== null && s.weight !== ''
+        ? s.weight
+        : (s.targetWeight !== undefined && s.targetWeight !== null && s.targetWeight !== '' ? s.targetWeight : null);
+      const num = parseFloat(rawVal);
+      if (Number.isFinite(num) && num > 0) return num;
+    }
+  }
+  return 0;
+}
+
+/**
  * Calculate total working volume for completed sets (excluding warmup sets)
  */
 export function calculateTotalWorkingVolume(exercises = []) {
@@ -101,7 +127,7 @@ export function calculateTotalWorkingVolume(exercises = []) {
   for (const ex of exercises) {
     if (!Array.isArray(ex.sets)) continue;
     for (const set of ex.sets) {
-      if (set && set.completed && !isWarmupType(set.type)) {
+      if (set && set.completed && !isWarmupType(set.type) && !isWarmSetType(set.type) && !set.isWarm) {
         const weight = parseFloat(set.weight) || 0;
         const reps = parseInt(set.reps, 10) || 0;
         total += weight * reps;
@@ -422,11 +448,14 @@ function startEmptySession(options = {}) {
 function addExerciseToActiveSession(exerciseId, customSets = null) {
   if (!isWorkoutActive.value || !activeSession.value) return null;
 
-  const exerciseStore = useExerciseStore();
-  const exMeta = exerciseStore.getExerciseById(exerciseId);
-  const advice = getSuggestedWeightAdvice(exerciseId, sessionHistory.value);
+  const actualExId = typeof exerciseId === 'string' ? exerciseId : (exerciseId?.exerciseId || exerciseId?.id);
+  const actualCustomSets = customSets || (typeof exerciseId === 'object' && Array.isArray(exerciseId?.sets) ? exerciseId.sets : null);
 
-  let sets = customSets;
+  const exerciseStore = useExerciseStore();
+  const exMeta = exerciseStore.getExerciseById(actualExId);
+  const advice = getSuggestedWeightAdvice(actualExId, sessionHistory.value);
+
+  let sets = actualCustomSets;
   if (!Array.isArray(sets) || sets.length === 0) {
     const suggestedWorkWeight = (advice && advice.suggestedWeight !== undefined) ? advice.suggestedWeight : 0;
     sets = [
@@ -463,11 +492,11 @@ function addExerciseToActiveSession(exerciseId, customSets = null) {
   }
 
   const newExercise = {
-    exerciseId,
-    name: exMeta?.name || exerciseId,
-    muscleGroup: exMeta?.muscleGroup || 'other',
-    equipment: exMeta?.equipment || 'other',
-    restSec: 90,
+    exerciseId: actualExId,
+    name: exMeta?.name || (typeof exerciseId === 'object' ? exerciseId?.name : null) || actualExId,
+    muscleGroup: exMeta?.muscleGroup || (typeof exerciseId === 'object' ? exerciseId?.muscleGroup : null) || 'other',
+    equipment: exMeta?.equipment || (typeof exerciseId === 'object' ? exerciseId?.equipment : null) || 'other',
+    restSec: (typeof exerciseId === 'object' && typeof exerciseId?.restSec === 'number') ? exerciseId.restSec : 90,
     sets
   };
 
@@ -687,6 +716,77 @@ export function substituteExercise(exerciseIndex, substituteData, options = {}) 
 }
 
 /**
+ * Insert calculated warmup sets to an exercise in the active workout session.
+ * - Extracts working weight from the first working set (or existing working sets).
+ * - Guards against zero/invalid weight (returns safe error).
+ * - Guards against duplicate insertion (if warmup sets already exist).
+ * - Prepends warmup sets before working sets without mutating or overwriting them.
+ * - Persists draft immediately.
+ */
+export function insertWarmupSetsToActiveExercise(exerciseIndex, plan = DEFAULT_WARMUP_PLAN) {
+  if (!isWorkoutActive.value || !activeSession.value) {
+    return { success: false, reason: 'no_active_session', message: 'ไม่มีรอบฝึกที่กำลังใช้งานอยู่' };
+  }
+  const exercises = activeSession.value.exercises;
+  if (!Array.isArray(exercises) || exerciseIndex < 0 || exerciseIndex >= exercises.length) {
+    return { success: false, reason: 'invalid_index', message: 'ไม่พบข้อมูลท่าฝึก' };
+  }
+  const ex = exercises[exerciseIndex];
+  if (!ex || !Array.isArray(ex.sets)) {
+    return { success: false, reason: 'invalid_exercise', message: 'ไม่พบรายการเซ็ตของท่าฝึก' };
+  }
+
+  // Duplicate protection: check if warmup sets already exist
+  if (hasWarmupSets(ex)) {
+    return { success: false, reason: 'already_exists', message: 'เพิ่มเซ็ตวอร์มไว้แล้ว — ไม่เพิ่มซ้ำ' };
+  }
+
+  // Working weight reference
+  const refWeight = getExerciseWorkingWeight(ex);
+  if (!refWeight || refWeight <= 0) {
+    return { success: false, reason: 'invalid_weight', message: 'กรุณาระบุน้ำหนักเซ็ตจริงก่อนเพิ่มเซ็ตวอร์ม' };
+  }
+
+  // Generate warmup sets using warmupCalc engine
+  const built = buildWarmupSets(refWeight, plan);
+  if (!built || built.length === 0) {
+    return { success: false, reason: 'no_sets_generated', message: 'ไม่สามารถคำนวณเซ็ตวอร์มได้จากน้ำหนักนี้' };
+  }
+
+  // Find insert index (immediately before first working set)
+  let insertAt = ex.sets.findIndex(s => !isWarmSetType(s?.type) && !s?.isWarm);
+  if (insertAt < 0) insertAt = 0;
+
+  // Build active workout set objects
+  const warmupSets = built.map(step => ({
+    type: 'warmup',
+    targetWeight: step.weight,
+    targetReps: step.reps,
+    weight: step.weight,
+    reps: step.reps,
+    percent: step.percent,
+    isWarm: true,
+    _generatedWarmup: true,
+    completed: false,
+    completedAt: null
+  }));
+
+  // Prepend warmup sets at insertAt without touching or overwriting working sets
+  ex.sets.splice(insertAt, 0, ...warmupSets);
+
+  // Persist draft immediately
+  persistDraft();
+
+  return {
+    success: true,
+    count: warmupSets.length,
+    sets: warmupSets,
+    referenceWeight: refWeight,
+    message: `เพิ่มเซ็ตวอร์ม ${warmupSets.length} เซ็ต (${warmupSets.map(s => `${s.weight}×${s.reps}`).join(' · ')}) เรียบร้อย`
+  };
+}
+
+/**
  * Add a new set to an exercise in the active session
  */
 function addSet(exerciseIndex, setData = null) {
@@ -893,6 +993,9 @@ export function useActiveSessionStore() {
     moveExerciseUp,
     moveExerciseDown,
     substituteExercise,
+    insertWarmupSetsToActiveExercise,
+    hasWarmupSets,
+    getExerciseWorkingWeight,
     addSet,
     removeSet,
     updateSetMetric,
