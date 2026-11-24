@@ -38,9 +38,19 @@ function persistCustomExercises(list) {
   }
 }
 
+export const STANDARD_EQUIPMENT_TYPES = [
+  'barbell',
+  'dumbbell',
+  'cable',
+  'machine',
+  'smith_machine',
+  'bodyweight'
+];
+
 // Module-level reactive singleton state
 const customExercises = ref(loadStoredCustomExercises());
 const selectedMuscle = ref('');
+const selectedEquipment = ref('');
 const searchQuery = ref('');
 
 // Combined exercises (default catalog + user custom exercises)
@@ -48,17 +58,33 @@ const exercises = computed(() => {
   return [...defaultExercises, ...customExercises.value];
 });
 
-// Reactive filtered list based on active filters (muscle group + search query)
+// Reactive filtered list based on active filters (muscle group + equipment + search query)
 const filteredExercises = computed(() => {
   const muscleFilter = (selectedMuscle.value || '').toLowerCase().trim();
+  const equipFilter = (selectedEquipment.value || '').toLowerCase().trim();
   const query = (searchQuery.value || '').toLowerCase().trim();
 
   return exercises.value.filter(exercise => {
-    // Muscle group filtering (skip if empty or 'all')
+    // 1. Muscle group filtering (skip if empty or 'all')
     if (muscleFilter && muscleFilter !== 'all') {
       const exMuscle = (exercise.muscleGroup || '').toLowerCase().trim();
       if (exMuscle !== muscleFilter) {
         return false;
+      }
+    }
+
+    // 2. Equipment filtering (skip if empty or 'all')
+    if (equipFilter && equipFilter !== 'all') {
+      const exEquip = (exercise.equipment || '').toLowerCase().trim();
+      if (equipFilter === 'other') {
+        const isStandard = STANDARD_EQUIPMENT_TYPES.includes(exEquip);
+        if (isStandard && exEquip !== 'other') {
+          return false;
+        }
+      } else {
+        if (exEquip !== equipFilter) {
+          return false;
+        }
       }
     }
 
@@ -70,6 +96,15 @@ const filteredExercises = computed(() => {
     return true;
   });
 });
+
+/**
+ * Reset all exercise library filters to initial clean state
+ */
+function resetFilters() {
+  selectedMuscle.value = '';
+  selectedEquipment.value = '';
+  searchQuery.value = '';
+}
 
 /**
  * Create a new custom exercise and persist to localStorage
@@ -111,8 +146,11 @@ export function useExerciseStore() {
     exercises,
     filteredExercises,
     selectedMuscle,
+    selectedEquipment,
     searchQuery,
     createCustomExercise,
-    getExerciseById
+    getExerciseById,
+    resetFilters,
+    STANDARD_EQUIPMENT_TYPES
   };
 }

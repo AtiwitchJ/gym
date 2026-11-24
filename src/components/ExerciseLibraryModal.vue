@@ -67,7 +67,7 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="ค้นหาชื่อท่า, กลุ่มกล้ามเนื้อ, หรืออุปกรณ์..."
-                class="w-full pl-9 pr-8 py-2 bg-white text-ink text-xs sm:text-sm font-body border-2 border-plate rounded-xl shadow-[2px_2px_0px_#1e2220] focus-visible:outline-none focus:border-flame transition-all placeholder:text-ink-muted"
+                class="w-full pl-9 pr-8 py-2 bg-white text-ink text-xs sm:text-sm font-body border-2 border-plate rounded-xl shadow-[2px_2px_0px_#1e2220] focus-visible:ring-2 focus-visible:ring-plate focus:border-flame transition-all placeholder:text-ink-muted"
               />
               <button
                 v-if="searchQuery"
@@ -99,17 +99,98 @@
           </div>
 
           <!-- Muscle Group Filter Chips -->
-          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[11px] font-mono font-bold text-ink-muted px-0.5">
+              <span>💪 กล้ามเนื้อ (Muscle)</span>
+              <button
+                v-if="selectedMuscle && selectedMuscle !== 'all'"
+                type="button"
+                @click="selectedMuscle = ''"
+                class="min-h-[44px] inline-flex items-center text-flame-text hover:underline font-bold text-[11px] touch-manipulation focus-visible:ring-2 focus-visible:ring-plate"
+              >
+                ล้างกล้ามเนื้อ ✕
+              </button>
+            </div>
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+              <button
+                v-for="chip in muscleChips"
+                :key="chip.id"
+                type="button"
+                @click="selectMuscleFilter(chip.id)"
+                class="min-h-[44px] px-3 py-1.5 rounded-full border-2 font-mono text-[11px] font-bold whitespace-nowrap transition-all flex-shrink-0 touch-manipulation focus-visible:ring-2 focus-visible:ring-plate inline-flex items-center justify-center"
+                :class="isMuscleActive(chip.id)
+                  ? 'bg-plate text-white border-plate shadow-[2px_2px_0px_#ea580c] -translate-y-0.5'
+                  : 'bg-surface hover:bg-paper text-ink border-plate/30 hover:border-plate shadow-[1px_1px_0px_#1e2220]'"
+              >
+                {{ chip.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Equipment Filter Chips -->
+          <div class="space-y-1 pt-1 border-t border-plate/10">
+            <div class="flex items-center justify-between text-[11px] font-mono font-bold text-ink-muted px-0.5">
+              <span>🏋️ อุปกรณ์ (Equipment)</span>
+              <button
+                v-if="selectedEquipment && selectedEquipment !== 'all'"
+                type="button"
+                @click="selectedEquipment = ''"
+                class="min-h-[44px] inline-flex items-center text-flame-text hover:underline font-bold text-[11px] touch-manipulation focus-visible:ring-2 focus-visible:ring-plate"
+              >
+                ล้างอุปกรณ์ ✕
+              </button>
+            </div>
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+              <button
+                v-for="chip in equipmentChips"
+                :key="chip.id"
+                type="button"
+                @click="selectEquipmentFilter(chip.id)"
+                class="min-h-[44px] px-3 py-1.5 rounded-full border-2 font-mono text-[11px] font-bold whitespace-nowrap transition-all flex-shrink-0 touch-manipulation focus-visible:ring-2 focus-visible:ring-plate inline-flex items-center justify-center"
+                :class="isEquipmentActive(chip.id)
+                  ? 'bg-plate text-white border-plate shadow-[2px_2px_0px_#ea580c] -translate-y-0.5'
+                  : 'bg-surface hover:bg-paper text-ink border-plate/30 hover:border-plate shadow-[1px_1px_0px_#1e2220]'"
+              >
+                {{ chip.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Active Filter Pill Bar (shown when any filter is active) -->
+          <div
+            v-if="hasActiveFilters"
+            class="flex items-center justify-between gap-2 p-2 bg-paper border-2 border-plate/25 rounded-xl text-[11px] font-mono shadow-[1px_1px_0px_#1e2220]"
+          >
+            <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+              <span class="font-bold text-ink-muted flex-shrink-0">ฟิลเตอร์:</span>
+              <span
+                v-if="selectedMuscle && selectedMuscle !== 'all'"
+                class="px-2 py-0.5 rounded-full bg-surface-card border border-plate/30 text-ink font-bold flex items-center gap-1"
+              >
+                <span>กล้ามเนื้อ: {{ getMuscleLabel(selectedMuscle) }}</span>
+                <button type="button" @click="selectedMuscle = ''" class="hover:text-flame-text" aria-label="ล้างตัวกรองกล้ามเนื้อ">✕</button>
+              </span>
+              <span
+                v-if="selectedEquipment && selectedEquipment !== 'all'"
+                class="px-2 py-0.5 rounded-full bg-surface-card border border-plate/30 text-ink font-bold flex items-center gap-1"
+              >
+                <span>อุปกรณ์: {{ getEquipmentLabel(selectedEquipment) }}</span>
+                <button type="button" @click="selectedEquipment = ''" class="hover:text-flame-text" aria-label="ล้างตัวกรองอุปกรณ์">✕</button>
+              </span>
+              <span
+                v-if="searchQuery"
+                class="px-2 py-0.5 rounded-full bg-surface-card border border-plate/30 text-ink font-bold truncate max-w-[150px] flex items-center gap-1"
+              >
+                <span class="truncate">"{{ searchQuery }}"</span>
+                <button type="button" @click="searchQuery = ''" class="hover:text-flame-text flex-shrink-0" aria-label="ล้างคำค้นหา">✕</button>
+              </span>
+            </div>
             <button
-              v-for="chip in muscleChips"
-              :key="chip.id"
-              @click="selectMuscleFilter(chip.id)"
-              class="px-2.5 py-1 rounded-full border-2 font-mono text-[11px] font-bold whitespace-nowrap transition-all flex-shrink-0"
-              :class="isMuscleActive(chip.id)
-                ? 'bg-plate text-white border-plate shadow-[2px_2px_0px_#ea580c] -translate-y-0.5'
-                : 'bg-surface hover:bg-paper text-ink border-plate/30 hover:border-plate shadow-[1px_1px_0px_#1e2220]'"
+              type="button"
+              @click="resetFilters"
+              class="min-h-[44px] px-2.5 py-1 text-[11px] font-mono font-bold text-flame-text hover:text-flame underline flex-shrink-0 touch-manipulation focus-visible:ring-2 focus-visible:ring-plate inline-flex items-center"
             >
-              {{ chip.label }}
+              ล้างทั้งหมด
             </button>
           </div>
         </div>
@@ -147,7 +228,7 @@
                     v-model="customForm.name"
                     type="text"
                     placeholder="เช่น Incline Hammer Dumbbell Curl"
-                    class="w-full px-2.5 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame"
+                    class="w-full px-2.5 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:ring-2 focus-visible:ring-plate focus:border-flame"
                   />
                 </div>
 
@@ -158,7 +239,7 @@
                   </label>
                   <select
                     v-model="customForm.muscleGroup"
-                    class="w-full px-2 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame"
+                    class="w-full px-2 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:ring-2 focus-visible:ring-plate focus:border-flame"
                   >
                     <option value="chest">อก (Chest)</option>
                     <option value="back">หลัง (Back)</option>
@@ -179,7 +260,7 @@
                   </label>
                   <select
                     v-model="customForm.equipment"
-                    class="w-full px-2 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame"
+                    class="w-full px-2 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:ring-2 focus-visible:ring-plate focus:border-flame"
                   >
                     <option value="barbell">บาร์เบล (Barbell)</option>
                     <option value="dumbbell">ดัมเบล (Dumbbell)</option>
@@ -200,7 +281,7 @@
                     v-model="customForm.notes"
                     type="text"
                     placeholder="เช่น ปรับม้านั่ง 45 องศา, โฟกัสช่วงบีบสุด 1 วินาที"
-                    class="w-full px-2.5 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:outline-none focus:border-flame"
+                    class="w-full px-2.5 py-1.5 text-xs bg-paper border-2 border-plate rounded-lg shadow-[1.5px_1.5px_0px_#1e2220] focus-visible:ring-2 focus-visible:ring-plate focus:border-flame"
                   />
                 </div>
               </div>
@@ -372,7 +453,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useExerciseStore } from '../composables/useExerciseStore.js';
 import { getYoutubeId } from '../utils/youtube.js';
 
@@ -398,6 +479,7 @@ const {
   exercises,
   filteredExercises,
   selectedMuscle,
+  selectedEquipment,
   searchQuery,
   createCustomExercise
 } = useExerciseStore();
@@ -413,6 +495,18 @@ const muscleChips = [
   { id: 'arms', label: 'แขน (Arms)' },
   { id: 'abs', label: 'ท้อง (Abs)' },
   { id: 'cardio', label: 'คาร์ดิโอ (Cardio)' }
+];
+
+// Equipment categories chip filters
+const equipmentChips = [
+  { id: 'all', label: 'ทั้งหมด (All)' },
+  { id: 'barbell', label: 'บาร์เบล (Barbell)' },
+  { id: 'dumbbell', label: 'ดัมเบล (Dumbbell)' },
+  { id: 'cable', label: 'เคเบิล (Cable)' },
+  { id: 'machine', label: 'แมชชีน (Machine)' },
+  { id: 'smith_machine', label: 'สมิท (Smith)' },
+  { id: 'bodyweight', label: 'บอดี้เวท (Bodyweight)' },
+  { id: 'other', label: 'อื่นๆ (Other)' }
 ];
 
 function isMuscleActive(chipId) {
@@ -432,8 +526,34 @@ function selectMuscleFilter(chipId) {
   }
 }
 
+function isEquipmentActive(chipId) {
+  if (chipId === 'all') {
+    return !selectedEquipment.value || selectedEquipment.value === 'all';
+  }
+  return selectedEquipment.value === chipId;
+}
+
+function selectEquipmentFilter(chipId) {
+  if (chipId === 'all') {
+    selectedEquipment.value = '';
+  } else if (selectedEquipment.value === chipId) {
+    selectedEquipment.value = '';
+  } else {
+    selectedEquipment.value = chipId;
+  }
+}
+
+const hasActiveFilters = computed(() => {
+  return !!(
+    (selectedMuscle.value && selectedMuscle.value !== 'all') ||
+    (selectedEquipment.value && selectedEquipment.value !== 'all') ||
+    searchQuery.value
+  );
+});
+
 function resetFilters() {
   selectedMuscle.value = '';
+  selectedEquipment.value = '';
   searchQuery.value = '';
 }
 
@@ -528,6 +648,21 @@ function getMuscleBadgeClass(group) {
     default:
       return 'bg-surface-card text-ink-muted border-plate/30';
   }
+}
+
+// Thai label mappings for equipment
+const equipmentLabels = {
+  barbell: 'บาร์เบล',
+  dumbbell: 'ดัมเบล',
+  cable: 'เคเบิล',
+  machine: 'แมชชีน',
+  smith_machine: 'สมิทแมชชีน',
+  bodyweight: 'บอดี้เวท',
+  other: 'อื่นๆ'
+};
+
+function getEquipmentLabel(eq) {
+  return equipmentLabels[eq] || eq || 'ทั่วไป';
 }
 </script>
 
