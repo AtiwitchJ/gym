@@ -454,7 +454,7 @@
             >
               <!-- Line 1: set number, type, previous record, Done (56 px) -->
               <div class="flex items-center gap-2">
-                <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">
                   <span class="font-mono font-bold text-xs tabular-nums text-ink">{{ setIdx + 1 }}</span>
                   <button
                     type="button"
@@ -465,6 +465,26 @@
                   >
                     {{ getSetTypeShort(set.type) }}
                   </button>
+
+                  <!-- Target Rep Range Pill (ช่วงเป้าหมายครั้ง: e.g. เป้า 6–8 ครั้ง หรือ เป้า 8 ครั้ง) -->
+                  <span
+                    v-if="getSetTargetDisplay(set)"
+                    class="set-target-pill text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded border border-plate/30 bg-surface text-ink select-none flex-shrink-0"
+                    :title="`เป้าหมายจำนวนครั้งสำหรับเซ็ตนี้: ${getSetTargetDisplay(set)}`"
+                  >
+                    🎯 {{ getSetTargetDisplay(set) }}
+                  </span>
+
+                  <!-- Target Achievement Status Badge (สถานะบรรลุเป้า: แสดงเมื่อเซ็ตเล่นเสร็จจริง ไม่นับวอร์ม) -->
+                  <span
+                    v-if="getSetAchievementStatus(set)"
+                    class="set-achievement-badge text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border select-none flex-shrink-0 animate-in fade-in-50 duration-200"
+                    :class="getSetAchievementStatus(set).badgeClass"
+                    :title="getSetAchievementStatus(set).detailText"
+                  >
+                    {{ getSetAchievementStatus(set).badgeText }}
+                  </span>
+
                   <!-- Warmup estimate hint on set row -->
                   <span
                     v-if="isWarmSetType(set.type) || Boolean(set.isWarm)"
@@ -538,12 +558,22 @@
                 </div>
               </div>
 
-              <!-- Line 3: Per-set RIR Recording (Optional, appears when set is completed or has RIR) -->
+              <!-- Line 3: Per-set RIR Recording & Target Achievement Status Info -->
               <div
                 v-if="set.completed || set.rir !== null"
                 class="mt-2.5 pt-2 border-t border-plate/15 flex flex-col gap-1.5"
                 data-testid="set-rir-container"
               >
+                <!-- Informative Target Achievement Details (Only for completed working sets) -->
+                <div
+                  v-if="getSetAchievementStatus(set)"
+                  class="flex items-center gap-1.5 text-[11px] font-mono text-ink-muted flex-wrap"
+                  data-testid="set-achievement-detail"
+                >
+                  <span class="font-bold text-ink">สถานะเป้าหมาย:</span>
+                  <span>{{ getSetAchievementStatus(set).detailText }}</span>
+                </div>
+
                 <div class="flex items-center justify-between gap-2 flex-wrap">
                   <div class="flex items-center gap-1.5">
                     <span class="text-xs font-mono font-bold text-ink">ความเหนื่อย RIR</span>
@@ -688,7 +718,7 @@ const {
 const { showToast } = useWorkoutStore();
 const { openKeypad } = usePinKeypad();
 const { openPlateCalculator } = usePlateCalculator();
-const { getExerciseOverallAdvice } = useWeightAdvisor();
+const { getExerciseOverallAdvice, resolveSetRepTarget, evaluateSetTargetAchievement } = useWeightAdvisor();
 const { getExerciseById } = useExerciseStore();
 
 const isPickerOpen = ref(false);
@@ -1020,6 +1050,21 @@ function handleToggleSet(exIdx, setIdx) {
 function isSetRirChoiceSelected(set, opt) {
   if (!set) return false;
   return isRirChoiceSelected(set.rir, set.rirPlus, opt);
+}
+
+// Rep Target Range & Achievement Status Helpers
+function getSetTargetDisplay(set) {
+  if (!set) return '';
+  if (isWarmSetType(set.type) || Boolean(set.isWarm)) {
+    const info = resolveSetRepTarget(set);
+    return info ? `วอร์ม ${info.label}` : 'วอร์ม 15 ครั้ง';
+  }
+  const info = resolveSetRepTarget(set);
+  return info ? `เป้า ${info.label}` : '';
+}
+
+function getSetAchievementStatus(set) {
+  return evaluateSetTargetAchievement(set);
 }
 
 async function handlePickSetRir(exIdx, setIdx, opt) {

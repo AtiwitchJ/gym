@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import { useTimer } from './useTimer.js';
-import { useWeightAdvisor, isWarmupType, isDropType } from './useWeightAdvisor.js';
+import { useWeightAdvisor, isWarmupType, isDropType, parseRepTarget } from './useWeightAdvisor.js';
 import { useExerciseStore } from './useExerciseStore.js';
 import { useWorkoutStore } from './useWorkoutStore.js';
 import { collectSessionPrs } from './usePersonalRecords.js';
@@ -212,14 +212,27 @@ function startSessionFromRoutine(routine = {}, options = {}) {
         ? set.targetWeight
         : (suggestedWeight !== undefined ? suggestedWeight : 0);
 
-      const defaultReps = set.targetReps !== undefined
-        ? set.targetReps
-        : (isWarm ? 15 : 8);
+      const rawTarget = set.target !== undefined && set.target !== null && String(set.target).trim() !== ''
+        ? set.target
+        : (set.targetReps !== undefined && set.targetReps !== null && String(set.targetReps).trim() !== ''
+          ? set.targetReps
+          : (set.reps !== undefined && set.reps !== null && String(set.reps).trim() !== '' ? set.reps : null));
+
+      let targetVal = rawTarget !== null ? rawTarget : (isWarm ? 15 : 8);
+
+      let defaultReps = isWarm ? 15 : 8;
+      if (typeof targetVal === 'number') {
+        defaultReps = targetVal;
+      } else if (typeof targetVal === 'string') {
+        const parsed = parseRepTarget(targetVal);
+        defaultReps = parsed.max || (isWarm ? 15 : 8);
+      }
 
       return {
         type: set.type || 'working',
+        target: targetVal,
+        targetReps: targetVal,
         targetWeight: defaultWeight,
-        targetReps: defaultReps,
         weight: defaultWeight,
         reps: defaultReps,
         suggestedWeight,
@@ -464,6 +477,7 @@ function addExerciseToActiveSession(exerciseId, customSets = null) {
     sets = [
       {
         type: 'warmup',
+        target: 15,
         targetReps: 15,
         targetWeight: 0,
         weight: 0,
@@ -475,6 +489,7 @@ function addExerciseToActiveSession(exerciseId, customSets = null) {
       },
       {
         type: 'working',
+        target: 8,
         targetReps: 8,
         targetWeight: suggestedWorkWeight,
         weight: suggestedWorkWeight,
@@ -487,6 +502,7 @@ function addExerciseToActiveSession(exerciseId, customSets = null) {
       },
       {
         type: 'working',
+        target: 8,
         targetReps: 8,
         targetWeight: suggestedWorkWeight,
         weight: suggestedWorkWeight,
@@ -501,6 +517,8 @@ function addExerciseToActiveSession(exerciseId, customSets = null) {
   } else {
     sets = sets.map(s => ({
       ...s,
+      target: s.target ?? s.targetReps ?? s.reps ?? (isWarmupType(s?.type) ? 15 : 8),
+      targetReps: s.targetReps ?? s.target ?? s.reps ?? (isWarmupType(s?.type) ? 15 : 8),
       rir: s.rir !== undefined ? normalizeRir(s.rir) : null,
       rirPlus: s.rirPlus !== undefined ? Boolean(s.rirPlus) : false
     }));
@@ -858,12 +876,14 @@ function addSet(exerciseIndex, setData = null) {
   const lastSet = ex.sets[ex.sets.length - 1];
   const newSet = setData ? {
     ...setData,
+    target: setData.target ?? setData.targetReps ?? (lastSet?.target ?? lastSet?.targetReps ?? 8),
+    targetReps: setData.targetReps ?? setData.target ?? (lastSet?.targetReps ?? lastSet?.target ?? 8),
     rir: setData.rir !== undefined ? normalizeRir(setData.rir) : null,
     rirPlus: Boolean(setData.rirPlus)
   } : {
     type: lastSet ? lastSet.type : 'working',
     target: lastSet ? (lastSet.target ?? lastSet.targetReps ?? 8) : 8,
-    targetReps: lastSet ? lastSet.targetReps : 8,
+    targetReps: lastSet ? (lastSet.targetReps ?? lastSet.target ?? 8) : 8,
     targetWeight: lastSet ? lastSet.targetWeight : 0,
     weight: lastSet ? lastSet.weight : 0,
     reps: lastSet ? lastSet.reps : 8,
