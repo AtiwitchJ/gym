@@ -183,6 +183,14 @@
                 <span v-if="exercise.restSec" class="text-[11px] font-mono px-1.5 py-0.5 rounded-full bg-paper-subtle text-ink-muted flex-shrink-0">
                   พัก {{ exercise.restSec }}s
                 </span>
+                <!-- Exercise Header PR Badge if any set has a PR -->
+                <span
+                  v-if="exerciseHasPr(exercise)"
+                  class="live-ex-pr-badge text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none flex-shrink-0 animate-in zoom-in-75 duration-200"
+                  title="มีเซ็ตที่ทำสถิติใหม่ (PR) ในรอบนี้"
+                >
+                  🏆 PR
+                </span>
               </div>
 
               <!-- Delete Exercise Button (Placed on top right corner for safety and symmetry) -->
@@ -376,6 +384,12 @@
                     {{ getSetTypeShort(set.type) }}
                   </button>
                   <span class="text-[11px] font-mono font-medium text-ink-muted truncate">{{ getPreviousPerformanceText(exercise.exerciseId, setIdx) }}</span>
+                  <!-- Live PR Badge on Qualifying Set -->
+                  <span
+                    v-if="set.isPr"
+                    class="live-pr-badge text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none flex-shrink-0 animate-in zoom-in-75 duration-200"
+                    title="ทำสถิติใหม่ (PR) เมื่อเทียบกับสถิติที่บันทึกไว้"
+                  >🏆 PR</span>
                 </div>
                 <button
                   type="button"
@@ -481,7 +495,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
 import { useExerciseStore } from '../composables/useExerciseStore.js';
 import { useWorkoutStore } from '../composables/useWorkoutStore.js';
@@ -489,6 +503,7 @@ import { usePinKeypad } from '../composables/usePinKeypad.js';
 import { useWeightAdvisor } from '../composables/useWeightAdvisor.js';
 import { getYoutubeId } from '../utils/youtube.js';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
+import { getBaselineE1rm, getCachedBaseline, evaluateExercisePrs } from '../composables/usePersonalRecords.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
@@ -506,13 +521,14 @@ const {
   moveExerciseUp,
   moveExerciseDown,
   substituteExercise,
-  addSet,
-  removeSet,
+  addSet: storeAddSet,
+  removeSet: storeRemoveSet,
   updateSetMetric,
   toggleSetComplete,
   finishSession,
   discardSession,
-  calculateTotalWorkingVolume
+  calculateTotalWorkingVolume,
+  persistDraft
 } = useActiveSessionStore();
 
 const { showToast } = useWorkoutStore();
@@ -665,6 +681,52 @@ function getPrevWeightOnly(exerciseId, setIdx) {
   return '';
 }
 
+// Live PR tracking in Active Workout
+function exerciseHasPr(exercise) {
+  if (!exercise || !Array.isArray(exercise.sets)) return false;
+  return exercise.sets.some(s => Boolean(s.completed && s.isPr));
+}
+
+async function loadBaselineForExercise(exerciseId) {
+  if (!exerciseId) return undefined;
+  return await getBaselineE1rm(exerciseId);
+}
+
+async function recheckExercisePrs(exIdx, targetSetIdx = null) {
+  const ex = activeSession.value?.exercises?.[exIdx];
+  if (!ex) return;
+
+  const wasPr = (targetSetIdx !== null && ex.sets?.[targetSetIdx]) ? Boolean(ex.sets[targetSetIdx].isPr) : false;
+
+  await loadBaselineForExercise(ex.exerciseId);
+  const baseline = getCachedBaseline(ex.exerciseId);
+  evaluateExercisePrs(ex, baseline);
+  persistDraft();
+
+  if (targetSetIdx !== null && ex.sets?.[targetSetIdx]) {
+    const targetSet = ex.sets[targetSetIdx];
+    const isNowCompleted = Boolean(targetSet.completed);
+    const isNowPr = Boolean(targetSet.isPr);
+    if (isNowCompleted && isNowPr && !wasPr) {
+      const w = targetSet.weight ?? targetSet.targetWeight ?? 0;
+      const r = targetSet.reps ?? targetSet.targetReps ?? 0;
+      const e1rm = targetSet.e1rm || 0;
+      showToast(`🏆 PR ใหม่: ${ex.name} ${w} kg × ${r} (e1RM ≈ ${e1rm.toFixed(1)} kg)`);
+    }
+  }
+}
+
+// Add Set & Remove Set wrappers that recheck PRs
+function addSet(exIdx) {
+  storeAddSet(exIdx);
+  recheckExercisePrs(exIdx);
+}
+
+function removeSet(exIdx, setIdx) {
+  storeRemoveSet(exIdx, setIdx);
+  recheckExercisePrs(exIdx);
+}
+
 // Cycle Set Type: warmup -> working -> dropset -> failure -> warmup
 function cycleSetType(exIdx, setIdx) {
   const rawType = activeSession.value?.exercises?.[exIdx]?.sets?.[setIdx]?.type || 'working';
@@ -672,6 +734,7 @@ function cycleSetType(exIdx, setIdx) {
   const order = ['warmup', 'working', 'dropset', 'failure'];
   const nextIdx = (order.indexOf(current) + 1) % order.length;
   updateSetMetric(exIdx, setIdx, 'type', order[nextIdx]);
+  recheckExercisePrs(exIdx, setIdx);
 }
 
 function getSetTypeShort(type) {
@@ -732,6 +795,7 @@ function openWeightKeypad(exercise, exIdx, set, setIdx) {
     onConfirm: (val) => {
       const num = parseFloat(val);
       updateSetMetric(exIdx, setIdx, 'weight', isNaN(num) ? 0 : num);
+      recheckExercisePrs(exIdx, setIdx);
     }
   });
 }
@@ -740,11 +804,13 @@ function openWeightKeypad(exercise, exIdx, set, setIdx) {
 function stepSheetWeight(exIdx, setIdx, dir, set) {
   const next = stepFrom(set.weight ?? set.targetWeight ?? '', '', dir, WEIGHT_STEP_KG);
   updateSetMetric(exIdx, setIdx, 'weight', next);
+  recheckExercisePrs(exIdx, setIdx);
 }
 
 function stepSheetReps(exIdx, setIdx, dir, set) {
   const next = stepFrom(set.reps ?? set.targetReps ?? '', '', dir, REPS_STEP);
   updateSetMetric(exIdx, setIdx, 'reps', next);
+  recheckExercisePrs(exIdx, setIdx);
 }
 
 function openRepsKeypad(exercise, exIdx, set, setIdx) {
@@ -763,6 +829,7 @@ function openRepsKeypad(exercise, exIdx, set, setIdx) {
     onConfirm: (val) => {
       const num = parseInt(val, 10);
       updateSetMetric(exIdx, setIdx, 'reps', isNaN(num) ? 0 : num);
+      recheckExercisePrs(exIdx, setIdx);
     }
   });
 }
@@ -770,13 +837,18 @@ function openRepsKeypad(exercise, exIdx, set, setIdx) {
 // Checkmark Completion Toggle
 function handleToggleSet(exIdx, setIdx) {
   toggleSetComplete(exIdx, setIdx);
+  recheckExercisePrs(exIdx, setIdx);
 }
 
 // Add Exercise From Picker
-function handleExerciseSelected(exercise) {
+async function handleExerciseSelected(exercise) {
   if (!exercise || !exercise.id) return;
-  addExerciseToActiveSession(exercise.id);
+  const newEx = addExerciseToActiveSession(exercise.id);
   isPickerOpen.value = false;
+  if (newEx && activeSession.value?.exercises) {
+    const idx = activeSession.value.exercises.length - 1;
+    await recheckExercisePrs(idx);
+  }
 }
 
 // Remove Exercise
@@ -826,12 +898,14 @@ function openSubstituteModal(exIdx) {
   isSubstituteModalOpen.value = true;
 }
 
-function handleActiveSubstituteSwapped({ substitute, customWeight, exerciseIndex }) {
+async function handleActiveSubstituteSwapped({ substitute, customWeight, exerciseIndex }) {
   const idx = typeof exerciseIndex === 'number' ? exerciseIndex : activeSubstituteIndex.value;
   const res = substituteExercise(idx, substitute, { customWeight });
   if (res && res.success) {
     isSubstituteModalOpen.value = false;
+    await recheckExercisePrs(idx);
     if (res.mode === 'split') {
+      await recheckExercisePrs(idx + 1);
       activeVideos.value[idx + 1] = false;
       showToast(`สลับเซ็ตที่เหลือเป็น «${substitute.name}» สำเร็จ (คงเซ็ตที่ทำเสร็จแล้วในท่าเดิม)`);
     } else {
@@ -840,6 +914,15 @@ function handleActiveSubstituteSwapped({ substitute, customWeight, exerciseIndex
     }
   }
 }
+
+// Component mount: evaluate PRs for active session exercises
+onMounted(async () => {
+  if (activeSession.value && Array.isArray(activeSession.value.exercises)) {
+    for (let i = 0; i < activeSession.value.exercises.length; i++) {
+      await recheckExercisePrs(i);
+    }
+  }
+});
 
 // Discard Session with Confirmation
 function handleDiscard() {

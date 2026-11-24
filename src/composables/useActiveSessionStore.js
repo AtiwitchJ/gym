@@ -3,6 +3,7 @@ import { useTimer } from './useTimer.js';
 import { useWeightAdvisor, isWarmupType, isDropType } from './useWeightAdvisor.js';
 import { useExerciseStore } from './useExerciseStore.js';
 import { useWorkoutStore } from './useWorkoutStore.js';
+import { collectSessionPrs } from './usePersonalRecords.js';
 
 const STORAGE_KEY_DRAFT = 'active_session_draft';
 const STORAGE_KEY_HISTORY = 'global_session_history';
@@ -783,6 +784,7 @@ function finishSession() {
   const finishedIso = new Date(now).toISOString();
   const completedCount = countCompletedSets(activeSession.value.exercises);
   const totalCount = countTotalSets(activeSession.value.exercises);
+  const sessionPrs = collectSessionPrs(activeSession.value);
 
   const summary = {
     ...activeSession.value,
@@ -793,7 +795,8 @@ function finishSession() {
     totalVolumeKg: calculateTotalWorkingVolume(activeSession.value.exercises),
     totalSetsCompleted: completedCount,
     completedSetsCount: completedCount,
-    totalSetsCount: totalCount
+    totalSetsCount: totalCount,
+    prs: sessionPrs
   };
 
   sessionHistory.value.unshift(summary);
@@ -896,6 +899,7 @@ export function useActiveSessionStore() {
     toggleSetComplete,
     finishSession,
     discardSession,
-    calculateTotalWorkingVolume
+    calculateTotalWorkingVolume,
+    persistDraft
   };
 }

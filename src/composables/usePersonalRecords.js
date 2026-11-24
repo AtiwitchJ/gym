@@ -53,3 +53,104 @@ export async function getBaselineE1rm(exerciseId, fetchImpl = globalThis.fetch) 
 export function clearPrCache() {
   baselineCache.clear();
 }
+
+/** Get the currently cached baseline for an exercise */
+export function getCachedBaseline(exerciseId) {
+  return baselineCache.get(String(exerciseId));
+}
+
+/** Set or override the cached baseline for an exercise (useful for tests and pre-warming) */
+export function setCachedBaseline(exerciseId, value) {
+  baselineCache.set(String(exerciseId), value);
+}
+
+/**
+ * Evaluates PR status for each set of an exercise, taking into account baseline reliability
+ * and intra-session progression (each subsequent PR must beat preceding sets in this session).
+ *
+ * @param {Object} exercise Exercise object with sets array
+ * @param {number|null|undefined} baseline Stored best e1RM from history
+ * @returns {Array<{ setIndex: number, isPr: boolean, e1rm: number }>}
+ */
+export function evaluateExercisePrs(exercise, baseline) {
+  if (!exercise || !Array.isArray(exercise.sets)) return [];
+
+  const results = [];
+  const hasValidBaseline = typeof baseline === 'number' && Number.isFinite(baseline) && baseline > 0;
+  let currentBestE1rm = hasValidBaseline ? baseline : 0;
+
+  for (let sIdx = 0; sIdx < exercise.sets.length; sIdx++) {
+    const s = exercise.sets[sIdx];
+    if (!s) {
+      results.push({ setIndex: sIdx, isPr: false, e1rm: 0 });
+      continue;
+    }
+
+    // Uncompleted sets never count as PR
+    if (!s.completed) {
+      s.isPr = false;
+      results.push({ setIndex: sIdx, isPr: false, e1rm: 0 });
+      continue;
+    }
+
+    // Warmup sets never give a PR
+    const isWarm = s.type === 'warmup' || s.type === 'warm' || Boolean(s.isWarm);
+    if (isWarm) {
+      s.isPr = false;
+      results.push({ setIndex: sIdx, isPr: false, e1rm: 0 });
+      continue;
+    }
+
+    // Incomplete, zero, or negative data never gives a PR
+    const weight = Number(s.weight !== undefined && s.weight !== null ? s.weight : s.targetWeight);
+    const reps = Number(s.reps !== undefined && s.reps !== null ? s.reps : s.targetReps);
+    if (!Number.isFinite(weight) || !Number.isFinite(reps) || weight <= 0 || reps <= 0) {
+      s.isPr = false;
+      results.push({ setIndex: sIdx, isPr: false, e1rm: 0 });
+      continue;
+    }
+
+    const rir = Number.isFinite(Number(s.rir)) && s.rir !== null ? Number(s.rir) : 0;
+    const e1rm = calculateEstimated1RM(weight, reps, rir);
+    s.e1rm = e1rm;
+
+    // Must beat baseline and prior sets within the current session
+    if (hasValidBaseline && e1rm > currentBestE1rm) {
+      s.isPr = true;
+      currentBestE1rm = e1rm;
+      results.push({ setIndex: sIdx, isPr: true, e1rm });
+    } else {
+      s.isPr = false;
+      results.push({ setIndex: sIdx, isPr: false, e1rm });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Collect all PR achievements from an active session for the finish summary.
+ *
+ * @param {Object} session Active session object with exercises array
+ * @returns {Array<{ exerciseId: string, exerciseName: string, setIndex: number, weight: string, reps: string, e1rm?: number }>}
+ */
+export function collectSessionPrs(session) {
+  if (!session || !Array.isArray(session.exercises)) return [];
+  const prs = [];
+  for (const ex of session.exercises) {
+    if (!ex || !Array.isArray(ex.sets)) continue;
+    ex.sets.forEach((set, sIdx) => {
+      if (set && set.completed && set.isPr) {
+        prs.push({
+          exerciseId: ex.exerciseId || ex.id || 'ex',
+          exerciseName: ex.name || ex.exerciseId || 'แบบฝึก',
+          setIndex: sIdx,
+          weight: set.weight !== undefined && set.weight !== null ? String(set.weight) : (set.targetWeight !== undefined ? String(set.targetWeight) : ''),
+          reps: set.reps !== undefined && set.reps !== null ? String(set.reps) : (set.targetReps !== undefined ? String(set.targetReps) : ''),
+          e1rm: set.e1rm || 0
+        });
+      }
+    });
+  }
+  return prs;
+}
