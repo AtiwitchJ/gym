@@ -135,17 +135,33 @@
             </h4>
           </div>
 
-          <!-- Delete Session Button -->
-          <button
-            @click="confirmDelete(session.id)"
-            class="p-2 text-ink-muted hover:text-flame-text hover:bg-flame-bg rounded-lg transition-colors border border-transparent hover:border-flame/30"
-            title="ลบประวัตินี้"
-          >
-            <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
-          </button>
+          <!-- Header Actions -->
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <!-- Compare with Prior Session Button -->
+            <button
+              type="button"
+              @click="openComparison(session.id)"
+              class="min-h-[44px] px-3 py-1.5 rounded-xl border-2 border-plate bg-white hover:bg-paper text-ink font-heading font-bold text-xs shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all touch-manipulation flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-plate"
+              title="เปรียบเทียบเซสชันนี้กับรอบก่อนหน้า"
+            >
+              <span>⚡</span>
+              <span class="hidden sm:inline">เทียบกับรอบก่อน</span>
+              <span class="sm:hidden">เทียบ</span>
+            </button>
+
+            <!-- Delete Session Button -->
+            <button
+              @click="confirmDelete(session.id)"
+              class="min-h-[44px] min-w-[44px] p-2 text-ink-muted hover:text-flame-text hover:bg-flame-bg rounded-xl transition-colors border-2 border-transparent hover:border-flame/30 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-plate touch-manipulation"
+              title="ลบประวัตินี้"
+              aria-label="ลบประวัตินี้"
+            >
+              <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Session Exercises Summary -->
@@ -192,6 +208,8 @@
     @close="isBackupModalOpen = false"
     @imported="handleImportSuccess"
   />
+
+  <!-- WorkoutComparisonModal is mounted globally in App.vue -->
 </template>
 
 <script setup>
@@ -199,6 +217,7 @@ import { ref } from 'vue';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
 import { labelSets, weightText } from '../composables/setLabels.js';
+import { useWorkoutComparison } from '../composables/useWorkoutComparison.js';
 import DeloadAdvisorCard from './DeloadAdvisorCard.vue';
 import VolumeChart from './VolumeChart.vue';
 import VolumeLandmarksCard from './VolumeLandmarksCard.vue';
@@ -210,6 +229,13 @@ const isBackupModalOpen = ref(false);
 
 const { workoutHistory, deleteSession, fetchServerState } = useWorkoutStore();
 const { exportWorkoutHistory, downloadSqliteDatabase } = useExcelExport();
+const { openLatestPair } = useWorkoutComparison();
+
+function openComparison(sessionId) {
+  if (sessionId) {
+    openLatestPair(sessionId);
+  }
+}
 
 async function handleImportSuccess() {
   if (fetchServerState) {

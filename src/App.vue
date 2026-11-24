@@ -248,7 +248,11 @@
       :is-open="isSummaryModalOpen || !!lastSessionSummary"
       :summary="lastSessionSummary || lastWorkoutSummary"
       @close="onSummaryClose"
+      @compare="onSummaryCompare"
     />
+
+    <!-- Workout Session Comparison Modal -->
+    <WorkoutComparisonModal />
   </div>
 </template>
 
@@ -274,12 +278,14 @@ import ExerciseLibraryModal from './components/ExerciseLibraryModal.vue';
 import RoutineBuilderModal from './components/RoutineBuilderModal.vue';
 import ActiveWorkoutSheet from './components/ActiveWorkoutSheet.vue';
 import WorkoutSummaryModal from './components/WorkoutSummaryModal.vue';
+import WorkoutComparisonModal from './components/WorkoutComparisonModal.vue';
 import WorkoutsView from './components/WorkoutsView.vue';
 import ProfileView from './components/ProfileView.vue';
 import { isRestWeekday } from './data/workouts.js';
 import { hasTickedSets } from './composables/useRestPanel.js';
 import { syncRestFromServer } from './composables/useCustomRest.js';
 import { useDockPadding } from './composables/useDockPadding.js';
+import { useWorkoutComparison } from './composables/useWorkoutComparison.js';
 
 // The page keeps clear of the fixed bottom dock, whatever its height is (regular tester item 2).
 const dockEl = ref(null);
@@ -297,11 +303,13 @@ const {
   fetchServerState,
   lastSessionSummary,
   closeSessionSummary,
+  workoutHistory,
   todayProgramKey
 } = useWorkoutStore();
 
 const { isRunning: isTimerRunning } = useTimer();
 const { isWorkoutActive, startSessionFromRoutine, startEmptySession } = useActiveSessionStore();
+const { openLatestPair } = useWorkoutComparison();
 
 // Modal Visibility State
 const showExerciseLibrary = ref(false);
@@ -322,6 +330,13 @@ function handleWorkoutFinished(summary) {
 function onSummaryClose() {
   if (lastSessionSummary.value) closeSessionSummary();
   isSummaryModalOpen.value = false;
+}
+
+function onSummaryCompare(summary) {
+  const sid = summary?.sessionId || summary?.id || (workoutHistory.value && workoutHistory.value[0]?.id);
+  if (sid) {
+    openLatestPair(sid);
+  }
 }
 
 function startTodayLiveWorkout() {

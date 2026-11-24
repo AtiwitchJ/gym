@@ -25,6 +25,7 @@ const deload = require('./deload');
 const achievements = require('./achievements');
 const cardio = require('./cardio');
 const trainingHeatmap = require('./training-heatmap');
+const workoutComparison = require('./workout-comparison');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -195,6 +196,47 @@ app.delete('/api/history/:id', (req, res) => {
     res.json(result);
   } catch (err) {
     console.error('Error deleting session:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Workout Session Comparison & Historical Overload Comparator (docs/COMPETITOR-RE-NEXT-FEATURE-20261130.md)
+app.get('/api/workout-comparison/latest-pair', (req, res) => {
+  try {
+    const { sessionId } = req.query;
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Missing required query parameter: sessionId' });
+    }
+    const history = repo.getHistory();
+    const { baseSession, targetSession } = workoutComparison.findLatestPair(history, sessionId);
+    if (!baseSession) {
+      return res.status(404).json({ error: `Session not found: ${sessionId}` });
+    }
+    res.json(workoutComparison.compareWorkoutSessions(baseSession, targetSession));
+  } catch (err) {
+    console.error('Error fetching latest pair comparison:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/workout-comparison', (req, res) => {
+  try {
+    const { baseId, targetId } = req.query;
+    if (!baseId || !targetId) {
+      return res.status(400).json({ error: 'Missing required query parameters: baseId and targetId' });
+    }
+    const history = repo.getHistory();
+    const baseSession = history.find((s) => s && s.id === baseId);
+    if (!baseSession) {
+      return res.status(404).json({ error: `Base session not found: ${baseId}` });
+    }
+    const targetSession = history.find((s) => s && s.id === targetId);
+    if (!targetSession) {
+      return res.status(404).json({ error: `Target session not found: ${targetId}` });
+    }
+    res.json(workoutComparison.compareWorkoutSessions(baseSession, targetSession));
+  } catch (err) {
+    console.error('Error comparing workout sessions:', err);
     res.status(500).json({ error: err.message });
   }
 });

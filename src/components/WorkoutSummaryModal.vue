@@ -275,6 +275,17 @@
             </div>
           </div>
 
+          <!-- Compare Workout with Prior Session Button -->
+          <button
+            type="button"
+            @click="emit('compare', summary)"
+            class="w-full min-h-[44px] py-3 px-4 rounded-xl border-2 border-plate bg-white hover:bg-paper text-ink font-heading font-extrabold text-xs sm:text-sm tracking-wide shadow-[2px_2px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center justify-center gap-2 touch-manipulation focus-visible:ring-2 focus-visible:ring-plate"
+            title="ดูผลเปรียบเทียบกับรอบก่อนหน้า"
+          >
+            <span>📊</span>
+            <span>ดูผลเทียบกับรอบก่อนหน้า</span>
+          </button>
+
           <!-- Action Button: close (no save) -->
           <button
             type="button"
@@ -321,7 +332,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'compare']); // defineEmits(['close'])
 
 // Active time / rest time / average rest per set, derived from set completion timestamps.
 const sessionAnalytics = computed(() => computeSessionAnalytics(props.summary));

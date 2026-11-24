@@ -638,6 +638,7 @@ const repo = {
         dayKey: s.day_key,
         dayTitle: s.day_title,
         totalSetsDone: s.total_sets_done,
+        durationSec: s.duration_sec !== undefined && s.duration_sec !== null ? Number(s.duration_sec) : null,
         sessionRpe: s.session_rpe !== undefined && s.session_rpe !== null ? Number(s.session_rpe) : null,
         sessionLoadAu: s.session_load_au !== undefined && s.session_load_au !== null ? Number(s.session_load_au) : null,
         pumpRating: s.pump_rating !== undefined && s.pump_rating !== null ? s.pump_rating : null,
