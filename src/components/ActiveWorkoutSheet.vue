@@ -135,15 +135,16 @@
           class="archive-card p-3 sm:p-4 bg-surface border-2 border-plate rounded-2xl shadow-[2.5px_2.5px_0px_#1e2220] space-y-2.5"
         >
           <!-- Exercise Header -->
-          <div class="flex items-start justify-between gap-2 pb-2 border-b-2 border-plate/15">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-1.5 flex-wrap mb-1">
-                <span class="w-5 h-5 rounded-md bg-plate text-white text-[11px] font-mono font-bold flex items-center justify-center">
+          <div class="pb-2 border-b-2 border-plate/15 space-y-1.5">
+            <!-- Top Row: Sequence Badge, Reorder Controls, Badges, and Delete Button -->
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+                <span class="w-5 h-5 rounded-md bg-plate text-white text-[11px] font-mono font-bold flex items-center justify-center flex-shrink-0">
                   #{{ exIdx + 1 }}
                 </span>
 
                 <!-- Reorder Exercise Controls (Move Up / Down) -->
-                <div class="inline-flex items-center rounded-lg border-2 border-plate/30 bg-white shadow-xs overflow-hidden">
+                <div class="inline-flex items-center rounded-lg border-2 border-plate/30 bg-white shadow-xs overflow-hidden flex-shrink-0">
                   <button
                     type="button"
                     @click="handleMoveExerciseUp(exIdx)"
@@ -171,57 +172,77 @@
                 </div>
 
                 <span
-                  class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border"
+                  class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border flex-shrink-0"
                   :class="getMuscleBadgeClass(exercise.muscleGroup)"
                 >
                   {{ getMuscleLabel(exercise.muscleGroup) }}
                 </span>
-                <span class="text-[11px] font-mono px-2 py-0.5 rounded-full capitalize bg-surface-card border border-plate/20 text-ink-muted">
+                <span class="text-[11px] font-mono px-2 py-0.5 rounded-full capitalize bg-surface-card border border-plate/20 text-ink-muted flex-shrink-0">
                   {{ exercise.equipment || 'อุปกรณ์' }}
                 </span>
-                <span v-if="exercise.restSec" class="text-[11px] font-mono px-1.5 py-0.5 rounded-full bg-paper-subtle text-ink-muted">
+                <span v-if="exercise.restSec" class="text-[11px] font-mono px-1.5 py-0.5 rounded-full bg-paper-subtle text-ink-muted flex-shrink-0">
                   พัก {{ exercise.restSec }}s
                 </span>
               </div>
 
-              <h3 class="text-sm sm:text-base font-bold font-heading text-ink leading-tight">
+              <!-- Delete Exercise Button (Placed on top right corner for safety and symmetry) -->
+              <button
+                type="button"
+                @click="handleRemoveExercise(exIdx, exercise.name)"
+                class="min-h-[44px] min-w-[44px] w-8 h-8 rounded-lg border-2 border-rose-300 hover:border-rose-600 bg-rose-50 text-rose-600 flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex-shrink-0"
+                title="ลบท่านี้ออกจากรอบฝึก"
+                :aria-label="`ลบท่าที่ ${exIdx + 1}`"
+              >
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Middle Row: Exercise Title with Full Width -->
+            <div class="pt-0.5">
+              <h3 class="text-sm sm:text-base font-bold font-heading text-ink leading-snug">
                 {{ exercise.name }}
               </h3>
             </div>
 
-            <!-- Exercise Action Buttons: Video Demo, Add Set & Remove Exercise -->
-            <div class="flex items-center gap-1.5 flex-shrink-0">
+            <!-- Bottom Row: Action Toolbar (Video, Substitute, Add Set) -->
+            <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
               <!-- Video Demo Button -->
               <button
                 v-if="getExerciseVideoInfo(exercise.exerciseId, exIdx).videoId || getExerciseVideoInfo(exercise.exerciseId, exIdx).machineOptions.length > 0"
                 type="button"
                 @click="toggleExerciseVideo(exIdx)"
-                class="min-h-[44px] min-w-[44px] px-2 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none"
+                class="min-h-[44px] min-w-[44px] px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none"
                 :class="activeVideos[exIdx] ? 'bg-flame text-white' : 'bg-paper hover:bg-paper-dim text-ink'"
                 :title="activeVideos[exIdx] ? 'ปิดคลิป' : 'ดูคลิปสาธิต YouTube'"
               >
                 <span>{{ activeVideos[exIdx] ? '✕ ปิด' : (getExerciseVideoInfo(exercise.exerciseId, exIdx).hasMultiMachine ? '🎬 3 เครื่อง' : '🎬 คลิป') }}</span>
               </button>
 
+              <!-- Substitute Exercise Button -->
+              <button
+                type="button"
+                @click="openSubstituteModal(exIdx)"
+                :disabled="isAllSetsDone(exercise)"
+                class="min-h-[44px] min-w-[44px] px-3 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none disabled:opacity-25 disabled:cursor-not-allowed"
+                :class="isAllSetsDone(exercise) ? 'bg-paper-dim text-ink-muted' : 'bg-paper hover:bg-paper-dim text-ink'"
+                :title="isAllSetsDone(exercise) ? 'ทำครบทุกเซ็ตแล้ว ไม่สามารถสลับท่าได้' : `สลับท่าทดแทนสำหรับ ${exercise.name}`"
+                :aria-label="`สลับท่าทดแทนสำหรับท่าที่ ${exIdx + 1}`"
+              >
+                <span class="text-xs">🔄</span>
+                <span>สลับท่า</span>
+              </button>
+
+              <!-- Add Set Button -->
               <button
                 type="button"
                 @click="addSet(exIdx)"
-                class="min-h-[44px] min-w-[44px] px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate bg-paper hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
+                class="min-h-[44px] min-w-[44px] px-3 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate bg-paper hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1"
                 title="เพิ่มเซ็ตใหม่สำหรับท่านี้"
               >
                 <span class="text-flame-text font-bold">+</span>
                 <span>เพิ่มเซ็ต</span>
-              </button>
-
-              <button
-                type="button"
-                @click="handleRemoveExercise(exIdx, exercise.name)"
-                class="min-h-[44px] min-w-[44px] w-7 h-7 rounded-lg border-2 border-rose-300 hover:border-rose-600 bg-rose-50 text-rose-600 flex items-center justify-center shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
-                title="ลบท่านี้ออกจากรอบฝึก"
-              >
-                <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
               </button>
             </div>
           </div>
@@ -445,6 +466,17 @@
       @close="isPickerOpen = false"
       @select="handleExerciseSelected"
     />
+
+    <!-- Embedded Exercise Substitution Modal -->
+    <ExerciseSubstitutionModal
+      :is-open="isSubstituteModalOpen"
+      :exercise="activeSubstituteExercise"
+      :exercise-index="activeSubstituteIndex"
+      :active-sets="activeSubstituteExercise?.sets || []"
+      mode="active_session"
+      @close="isSubstituteModalOpen = false"
+      @confirm-active="handleActiveSubstituteSwapped"
+    />
   </div>
 </template>
 
@@ -452,12 +484,14 @@
 import { ref, computed } from 'vue';
 import { useActiveSessionStore } from '../composables/useActiveSessionStore.js';
 import { useExerciseStore } from '../composables/useExerciseStore.js';
+import { useWorkoutStore } from '../composables/useWorkoutStore.js';
 import { usePinKeypad } from '../composables/usePinKeypad.js';
 import { useWeightAdvisor } from '../composables/useWeightAdvisor.js';
 import { getYoutubeId } from '../utils/youtube.js';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
+import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
 
 const emit = defineEmits(['finish', 'discard', 'minimize']);
 
@@ -471,6 +505,7 @@ const {
   moveExercise,
   moveExerciseUp,
   moveExerciseDown,
+  substituteExercise,
   addSet,
   removeSet,
   updateSetMetric,
@@ -480,11 +515,15 @@ const {
   calculateTotalWorkingVolume
 } = useActiveSessionStore();
 
+const { showToast } = useWorkoutStore();
 const { openKeypad } = usePinKeypad();
 const { getExerciseOverallAdvice } = useWeightAdvisor();
 const { getExerciseById } = useExerciseStore();
 
 const isPickerOpen = ref(false);
+const isSubstituteModalOpen = ref(false);
+const activeSubstituteExercise = ref(null);
+const activeSubstituteIndex = ref(-1);
 const activeVideos = ref({});
 const activeMachineIndices = ref({});
 
@@ -773,6 +812,33 @@ function swapLocalExerciseUiState(idxA, idxB) {
   const machA = activeMachineIndices.value[idxA];
   activeMachineIndices.value[idxA] = activeMachineIndices.value[idxB];
   activeMachineIndices.value[idxB] = machA;
+}
+
+// Exercise Substitution in Active Workout
+function isAllSetsDone(ex) {
+  if (!ex || !Array.isArray(ex.sets) || ex.sets.length === 0) return false;
+  return ex.sets.every(s => Boolean(s.completed));
+}
+
+function openSubstituteModal(exIdx) {
+  activeSubstituteIndex.value = exIdx;
+  activeSubstituteExercise.value = activeSession.value?.exercises?.[exIdx] || null;
+  isSubstituteModalOpen.value = true;
+}
+
+function handleActiveSubstituteSwapped({ substitute, customWeight, exerciseIndex }) {
+  const idx = typeof exerciseIndex === 'number' ? exerciseIndex : activeSubstituteIndex.value;
+  const res = substituteExercise(idx, substitute, { customWeight });
+  if (res && res.success) {
+    isSubstituteModalOpen.value = false;
+    if (res.mode === 'split') {
+      activeVideos.value[idx + 1] = false;
+      showToast(`สลับเซ็ตที่เหลือเป็น «${substitute.name}» สำเร็จ (คงเซ็ตที่ทำเสร็จแล้วในท่าเดิม)`);
+    } else {
+      activeVideos.value[idx] = false;
+      showToast(`สลับเป็นท่า «${substitute.name}» สำเร็จ`);
+    }
+  }
 }
 
 // Discard Session with Confirmation

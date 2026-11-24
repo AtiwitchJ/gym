@@ -88,9 +88,9 @@ export function formatWeightAdvice(sourceWeight, weightRatio = 1.0, targetEquipm
 export function inferExerciseMeta(exercise) {
   if (!exercise) return { muscleGroup: 'chest', equipment: 'barbell' };
 
-  const id = String(exercise.id || '');
+  const id = String(exercise.exerciseId || exercise.id || '');
   const name = String(exercise.name || '').toLowerCase();
-  const muscleText = String(exercise.mainMuscle || '').toLowerCase();
+  const muscleText = String(exercise.mainMuscle || exercise.muscleGroup || '').toLowerCase();
 
   // Check defaultExercises catalog first
   const match = defaultExercises.find(e => e.id === id || e.name.toLowerCase() === name);
@@ -138,7 +138,7 @@ export function inferExerciseMeta(exercise) {
 export function getLocalFallbackSubstitutes(exercise, equipmentFilter = 'all') {
   if (!exercise) return [];
   const meta = inferExerciseMeta(exercise);
-  const sourceId = String(exercise.id || '');
+  const sourceId = String(exercise.exerciseId || exercise.id || '');
 
   let candidates = defaultExercises.filter(e => {
     if (e.id === sourceId) return false;
@@ -193,7 +193,7 @@ export function useExerciseSubstitutes(fetchImpl = globalThis.fetch) {
       return [];
     }
 
-    const exId = typeof exercise === 'object' ? exercise.id : exercise;
+    const exId = typeof exercise === 'object' ? (exercise.exerciseId || exercise.id) : exercise;
     const canonId = getCanonicalExerciseId(exId) || exId;
     const lookupId = exId || canonId;
 

@@ -537,6 +537,155 @@ export function moveExerciseDown(index) {
 }
 
 /**
+ * Substitute an exercise in the active workout session.
+ *
+ * CRITICAL BUSINESS & DATA INTEGRITY RULES:
+ * 1. Completed sets MUST NEVER have their exerciseId altered, preserving accurate historical records.
+ * 2. If the original exercise has completed sets AND uncompleted sets:
+ *    - The completed sets remain with the original exercise at the current index.
+ *    - The uncompleted sets are moved into a new exercise card for the substitute and inserted at index + 1.
+ * 3. If ALL sets of the original exercise are completed:
+ *    - Substitution is refused to prevent history corruption.
+ * 4. Automatic weight conversion without user confirmation is strictly avoided:
+ *    - Uses user-specified customWeight if provided in options/substituteData.
+ *    - Otherwise retains current set weight as-is.
+ * 5. Updates draft immediately via persistDraft().
+ *
+ * @param {number} exerciseIndex Index of the exercise in activeSession.exercises
+ * @param {Object} substituteData Substitute exercise definition (id, name, equipment, etc.)
+ * @param {Object} options Configuration { customWeight?: number }
+ * @returns {Object} { success: boolean, mode: 'replaced'|'split', reason?: string, exercise?: Object, newExercise?: Object }
+ */
+export function substituteExercise(exerciseIndex, substituteData, options = {}) {
+  if (!isWorkoutActive.value || !activeSession.value) {
+    return { success: false, reason: 'no_active_workout' };
+  }
+  const exercises = activeSession.value.exercises;
+  if (!Array.isArray(exercises)) {
+    return { success: false, reason: 'no_exercises' };
+  }
+
+  const idx = Number(exerciseIndex);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= exercises.length) {
+    return { success: false, reason: 'invalid_index' };
+  }
+
+  const originalExercise = exercises[idx];
+  if (!originalExercise || !substituteData) {
+    return { success: false, reason: 'missing_data' };
+  }
+
+  const subId = substituteData.id || substituteData.exerciseId;
+  if (!subId) {
+    return { success: false, reason: 'missing_substitute_id' };
+  }
+  if (subId === originalExercise.exerciseId) {
+    return { success: false, reason: 'same_exercise' };
+  }
+
+  const exerciseStore = useExerciseStore();
+  const exMeta = exerciseStore.getExerciseById(subId);
+
+  const completedSets = (originalExercise.sets || []).filter(s => Boolean(s.completed));
+  const uncompletedSets = (originalExercise.sets || []).filter(s => !s.completed);
+
+  // Guard: If all sets are completed, prevent replacement to protect history
+  if (uncompletedSets.length === 0 && completedSets.length > 0) {
+    return {
+      success: false,
+      reason: 'all_sets_completed',
+      message: 'ท่านี้ทำครบทุกเซ็ตแล้ว ไม่สามารถสลับท่าได้'
+    };
+  }
+
+  // Determine weight: explicit user weight if given, otherwise keep existing set weight without unverified calculation
+  const getWeightForSet = (s) => {
+    if (options.customWeight !== undefined && options.customWeight !== null && options.customWeight !== '') {
+      return Number(options.customWeight);
+    }
+    if (substituteData.targetWeight !== undefined && substituteData.targetWeight !== null && substituteData.targetWeight !== '') {
+      return Number(substituteData.targetWeight);
+    }
+    return (s && s.weight !== undefined && s.weight !== '') ? Number(s.weight) : 0;
+  };
+
+  // If SOME sets are completed, split the exercise
+  if (completedSets.length > 0) {
+    // 1. Keep original exercise with completed sets ONLY
+    originalExercise.sets = completedSets;
+
+    // 2. Build new exercise with remaining uncompleted sets
+    const newSets = uncompletedSets.map((s) => {
+      const targetWt = getWeightForSet(s);
+      return {
+        type: s.type || 'working',
+        targetReps: s.targetReps || s.reps || 8,
+        targetWeight: targetWt,
+        weight: targetWt,
+        reps: s.reps || 8,
+        suggestedWeight: (options.customWeight !== undefined && options.customWeight !== null && options.customWeight !== '')
+          ? Number(options.customWeight)
+          : (s.suggestedWeight || targetWt),
+        completed: false,
+        completedAt: null,
+        rir: s.rir !== undefined ? s.rir : null,
+        rirPlus: Boolean(s.rirPlus)
+      };
+    });
+
+    const newExercise = {
+      exerciseId: subId,
+      name: substituteData.name || exMeta?.name || subId,
+      muscleGroup: substituteData.muscleGroup || exMeta?.muscleGroup || originalExercise.muscleGroup || 'other',
+      equipment: substituteData.equipment || exMeta?.equipment || 'other',
+      restSec: typeof substituteData.restSec === 'number' && substituteData.restSec > 0
+        ? substituteData.restSec
+        : (originalExercise.restSec || 90),
+      canonicalId: exMeta?.canonicalId || undefined,
+      sets: newSets
+    };
+
+    // Insert new exercise right after original exercise
+    exercises.splice(idx + 1, 0, newExercise);
+
+    persistDraft();
+    return {
+      success: true,
+      mode: 'split',
+      originalExercise,
+      newExercise,
+      splitIndex: idx + 1
+    };
+  }
+
+  // If NO sets are completed, replace in-place
+  originalExercise.exerciseId = subId;
+  originalExercise.name = substituteData.name || exMeta?.name || subId;
+  originalExercise.muscleGroup = substituteData.muscleGroup || exMeta?.muscleGroup || originalExercise.muscleGroup;
+  originalExercise.equipment = substituteData.equipment || exMeta?.equipment || originalExercise.equipment;
+  if (typeof substituteData.restSec === 'number' && substituteData.restSec > 0) {
+    originalExercise.restSec = substituteData.restSec;
+  }
+  originalExercise.canonicalId = exMeta?.canonicalId || undefined;
+
+  for (const s of (originalExercise.sets || [])) {
+    const targetWt = getWeightForSet(s);
+    s.weight = targetWt;
+    s.targetWeight = targetWt;
+    if (options.customWeight !== undefined && options.customWeight !== null && options.customWeight !== '') {
+      s.suggestedWeight = Number(options.customWeight);
+    }
+  }
+
+  persistDraft();
+  return {
+    success: true,
+    mode: 'replaced',
+    exercise: originalExercise
+  };
+}
+
+/**
  * Add a new set to an exercise in the active session
  */
 function addSet(exerciseIndex, setData = null) {
@@ -740,6 +889,7 @@ export function useActiveSessionStore() {
     moveExercise,
     moveExerciseUp,
     moveExerciseDown,
+    substituteExercise,
     addSet,
     removeSet,
     updateSetMetric,
