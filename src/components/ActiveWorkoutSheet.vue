@@ -538,6 +538,39 @@
                 </div>
               </div>
 
+              <!-- Line 3: Per-set RIR Recording (Optional, appears when set is completed or has RIR) -->
+              <div
+                v-if="set.completed || set.rir !== null"
+                class="mt-2.5 pt-2 border-t border-plate/15 flex flex-col gap-1.5"
+                data-testid="set-rir-container"
+              >
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-mono font-bold text-ink">ความเหนื่อย RIR</span>
+                    <span class="text-[11px] font-mono text-ink-muted">(ไม่บังคับ)</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button
+                      v-for="opt in RIR_CHOICES"
+                      :key="opt.value"
+                      type="button"
+                      @click="handlePickSetRir(exIdx, setIdx, opt)"
+                      :aria-label="`เซ็ตที่ ${setIdx + 1} RIR ${opt.label}`"
+                      :title="opt.title"
+                      class="btn-set-rir min-h-[44px] min-w-[44px] px-3 rounded-xl border-2 border-plate text-xs font-heading font-bold transition-all touch-manipulation flex items-center justify-center select-none"
+                      :class="isSetRirChoiceSelected(set, opt)
+                        ? 'bg-flame text-white shadow-[1.5px_1.5px_0px_#1e2220] border-plate ring-2 ring-flame/30'
+                        : 'bg-surface hover:bg-paper-subtle text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none'"
+                    >
+                      {{ opt.label }}
+                    </button>
+                  </div>
+                </div>
+                <p class="text-[11px] font-body text-ink-muted leading-tight">
+                  เหลือ 2+ = ยกต่อได้ 2 ครั้งขึ้นไป · เหลือ 1 = อีก 1 ครั้ง · ล้ม = ยกต่อไม่ได้
+                </p>
+              </div>
+
               <!-- Remove set (only when there is more than one set) -->
               <div v-if="exercise.sets.length > 1" class="flex justify-end mt-1">
                 <button
@@ -618,6 +651,7 @@ import { getBaselineE1rm, getCachedBaseline, evaluateExercisePrs } from '../comp
 import { useExerciseNotes } from '../composables/useExerciseNotes.js';
 import { isWarmSetType } from '../composables/warmupCalc.js';
 import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
+import { RIR_CHOICES, normalizeRir, nextRirSelection, isRirChoiceSelected } from '../composables/useRir.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
@@ -643,6 +677,7 @@ const {
   addSet: storeAddSet,
   removeSet: storeRemoveSet,
   updateSetMetric,
+  updateSetRir,
   toggleSetComplete,
   finishSession,
   discardSession,
@@ -979,6 +1014,21 @@ function openRepsKeypad(exercise, exIdx, set, setIdx) {
 function handleToggleSet(exIdx, setIdx) {
   toggleSetComplete(exIdx, setIdx);
   recheckExercisePrs(exIdx, setIdx);
+}
+
+// RIR (Reps in Reserve) Set Feedback
+function isSetRirChoiceSelected(set, opt) {
+  if (!set) return false;
+  return isRirChoiceSelected(set.rir, set.rirPlus, opt);
+}
+
+async function handlePickSetRir(exIdx, setIdx, opt) {
+  const ex = activeSession.value?.exercises?.[exIdx];
+  const set = ex?.sets?.[setIdx];
+  if (!set) return;
+  const next = nextRirSelection(set.rir, set.rirPlus, opt);
+  updateSetRir(exIdx, setIdx, next.rir, next.rirPlus);
+  await recheckExercisePrs(exIdx, setIdx);
 }
 
 // Add Exercise From Picker

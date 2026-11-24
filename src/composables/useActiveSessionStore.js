@@ -5,6 +5,7 @@ import { useExerciseStore } from './useExerciseStore.js';
 import { useWorkoutStore } from './useWorkoutStore.js';
 import { collectSessionPrs } from './usePersonalRecords.js';
 import { buildWarmupSets, DEFAULT_WARMUP_PLAN, isWarmSetType } from './warmupCalc.js';
+import { normalizeRir } from './useRir.js';
 
 const STORAGE_KEY_DRAFT = 'active_session_draft';
 const STORAGE_KEY_HISTORY = 'global_session_history';
@@ -223,7 +224,9 @@ function startSessionFromRoutine(routine = {}, options = {}) {
         reps: defaultReps,
         suggestedWeight,
         completed: false,
-        completedAt: null
+        completedAt: null,
+        rir: set.rir !== undefined ? normalizeRir(set.rir) : null,
+        rirPlus: Boolean(set.rirPlus)
       };
     });
 
@@ -466,7 +469,9 @@ function addExerciseToActiveSession(exerciseId, customSets = null) {
         weight: 0,
         reps: 15,
         completed: false,
-        completedAt: null
+        completedAt: null,
+        rir: null,
+        rirPlus: false
       },
       {
         type: 'working',
@@ -476,7 +481,9 @@ function addExerciseToActiveSession(exerciseId, customSets = null) {
         reps: 8,
         suggestedWeight: advice?.suggestedWeight,
         completed: false,
-        completedAt: null
+        completedAt: null,
+        rir: null,
+        rirPlus: false
       },
       {
         type: 'working',
@@ -486,9 +493,17 @@ function addExerciseToActiveSession(exerciseId, customSets = null) {
         reps: 8,
         suggestedWeight: advice?.suggestedWeight,
         completed: false,
-        completedAt: null
+        completedAt: null,
+        rir: null,
+        rirPlus: false
       }
     ];
+  } else {
+    sets = sets.map(s => ({
+      ...s,
+      rir: s.rir !== undefined ? normalizeRir(s.rir) : null,
+      rirPlus: s.rirPlus !== undefined ? Boolean(s.rirPlus) : false
+    }));
   }
 
   const newExercise = {
@@ -841,7 +856,11 @@ function addSet(exerciseIndex, setData = null) {
   if (!ex) return null;
 
   const lastSet = ex.sets[ex.sets.length - 1];
-  const newSet = setData || {
+  const newSet = setData ? {
+    ...setData,
+    rir: setData.rir !== undefined ? normalizeRir(setData.rir) : null,
+    rirPlus: Boolean(setData.rirPlus)
+  } : {
     type: lastSet ? lastSet.type : 'working',
     target: lastSet ? (lastSet.target ?? lastSet.targetReps ?? 8) : 8,
     targetReps: lastSet ? lastSet.targetReps : 8,
@@ -849,7 +868,9 @@ function addSet(exerciseIndex, setData = null) {
     weight: lastSet ? lastSet.weight : 0,
     reps: lastSet ? lastSet.reps : 8,
     completed: false,
-    completedAt: null
+    completedAt: null,
+    rir: null,
+    rirPlus: false
   };
 
   ex.sets.push(newSet);
@@ -882,6 +903,28 @@ function updateSetMetric(exerciseIndex, setIndex, field, value) {
   if (!ex || !ex.sets || !ex.sets[setIndex]) return false;
 
   ex.sets[setIndex][field] = value;
+  persistDraft();
+  return true;
+}
+
+/**
+ * Update RIR (Reps In Reserve) for a specific set in the active workout session.
+ * @param {number} exerciseIndex Index of the exercise in activeSession.exercises
+ * @param {number} setIndex Index of the set within the exercise
+ * @param {number|null} rir RIR value (0, 1, 2, or null)
+ * @param {boolean} rirPlus Whether RIR is "2+" (more than 2)
+ * @returns {boolean} True if successfully updated, false otherwise
+ */
+export function updateSetRir(exerciseIndex, setIndex, rir, rirPlus = false) {
+  if (!isWorkoutActive.value || !activeSession.value) return false;
+  const ex = activeSession.value.exercises?.[exerciseIndex];
+  if (!ex || !Array.isArray(ex.sets) || !ex.sets[setIndex]) return false;
+
+  const targetSet = ex.sets[setIndex];
+  const normalized = normalizeRir(rir);
+  targetSet.rir = normalized;
+  targetSet.rirPlus = normalized === 2 ? Boolean(rirPlus) : false;
+
   persistDraft();
   return true;
 }
@@ -997,6 +1040,10 @@ function finishSession() {
         if (s.done && (s.weight > 0 || s.actualReps > 0)) {
           lastWeights[ex.id][`wt_${s.setIndex - 1}`] = s.weight;
           lastWeights[ex.id][`reps_${s.setIndex - 1}`] = s.actualReps;
+          if (s.rir !== null && s.rir !== undefined) {
+            lastWeights[ex.id][`rir_${s.setIndex - 1}`] = s.rir;
+            lastWeights[ex.id][`rirPlus_${s.setIndex - 1}`] = s.rirPlus ? 1 : 0;
+          }
         }
       }
     }
@@ -1046,6 +1093,7 @@ export function useActiveSessionStore() {
     addSet,
     removeSet,
     updateSetMetric,
+    updateSetRir,
     toggleSetComplete,
     finishSession,
     discardSession,
