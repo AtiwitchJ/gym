@@ -141,6 +141,35 @@
                 <span class="w-5 h-5 rounded-md bg-plate text-white text-[11px] font-mono font-bold flex items-center justify-center">
                   #{{ exIdx + 1 }}
                 </span>
+
+                <!-- Reorder Exercise Controls (Move Up / Down) -->
+                <div class="inline-flex items-center rounded-lg border-2 border-plate/30 bg-white shadow-xs overflow-hidden">
+                  <button
+                    type="button"
+                    @click="handleMoveExerciseUp(exIdx)"
+                    :disabled="exIdx === 0"
+                    class="min-h-[44px] min-w-[44px] px-1.5 flex items-center justify-center text-xs font-bold text-ink hover:bg-paper-dim disabled:opacity-20 disabled:cursor-not-allowed border-r-2 border-plate/20 touch-manipulation focus-visible:ring-2 focus-visible:ring-plate transition-colors"
+                    :title="`เลื่อนท่าที่ ${exIdx + 1} (${exercise.name}) ขึ้น`"
+                    :aria-label="`เลื่อนท่าที่ ${exIdx + 1} ขึ้น`"
+                  >
+                    <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-[2.5]" viewBox="0 0 24 24">
+                      <polyline points="18 15 12 9 6 15" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    @click="handleMoveExerciseDown(exIdx)"
+                    :disabled="exIdx === activeSession.exercises.length - 1"
+                    class="min-h-[44px] min-w-[44px] px-1.5 flex items-center justify-center text-xs font-bold text-ink hover:bg-paper-dim disabled:opacity-20 disabled:cursor-not-allowed touch-manipulation focus-visible:ring-2 focus-visible:ring-plate transition-colors"
+                    :title="`เลื่อนท่าที่ ${exIdx + 1} (${exercise.name}) ลง`"
+                    :aria-label="`เลื่อนท่าที่ ${exIdx + 1} ลง`"
+                  >
+                    <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-[2.5]" viewBox="0 0 24 24">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                </div>
+
                 <span
                   class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full uppercase border"
                   :class="getMuscleBadgeClass(exercise.muscleGroup)"
@@ -439,6 +468,9 @@ const {
   sessionHistory,
   addExerciseToActiveSession,
   removeExerciseFromActiveSession,
+  moveExercise,
+  moveExerciseUp,
+  moveExerciseDown,
   addSet,
   removeSet,
   updateSetMetric,
@@ -713,6 +745,34 @@ function handleRemoveExercise(exIdx, name) {
   if (confirm(`คุณต้องการลบท่า "${name}" ออกจากรอบนี้หรือไม่?`)) {
     removeExerciseFromActiveSession(exIdx);
   }
+}
+
+// Move Exercise Up / Down
+function handleMoveExerciseUp(exIdx) {
+  if (exIdx <= 0) return;
+  const ok = moveExerciseUp(exIdx);
+  if (ok) {
+    swapLocalExerciseUiState(exIdx, exIdx - 1);
+  }
+}
+
+function handleMoveExerciseDown(exIdx) {
+  const exercises = activeSession.value?.exercises;
+  if (!Array.isArray(exercises) || exIdx >= exercises.length - 1) return;
+  const ok = moveExerciseDown(exIdx);
+  if (ok) {
+    swapLocalExerciseUiState(exIdx, exIdx + 1);
+  }
+}
+
+function swapLocalExerciseUiState(idxA, idxB) {
+  const vidA = activeVideos.value[idxA];
+  activeVideos.value[idxA] = activeVideos.value[idxB];
+  activeVideos.value[idxB] = vidA;
+
+  const machA = activeMachineIndices.value[idxA];
+  activeMachineIndices.value[idxA] = activeMachineIndices.value[idxB];
+  activeMachineIndices.value[idxB] = machA;
 }
 
 // Discard Session with Confirmation

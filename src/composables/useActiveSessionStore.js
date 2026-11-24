@@ -489,6 +489,54 @@ function removeExerciseFromActiveSession(index) {
 }
 
 /**
+ * Move an exercise to a new position in the active session.
+ * Preserves all exercise properties, set data, completion status, and RIR.
+ * Persists the updated draft to storage immediately.
+ *
+ * @param {number} fromIndex Current index of the exercise
+ * @param {number} toIndex Target index for the exercise
+ * @returns {boolean} True if successfully moved, false otherwise
+ */
+export function moveExercise(fromIndex, toIndex) {
+  if (!isWorkoutActive.value || !activeSession.value) return false;
+  const exercises = activeSession.value.exercises;
+  if (!Array.isArray(exercises) || exercises.length <= 1) return false;
+
+  const from = Number(fromIndex);
+  const to = Number(toIndex);
+
+  // Boundary protection: strictly validate integer indices within bounds
+  if (!Number.isInteger(from) || !Number.isInteger(to)) return false;
+  if (from < 0 || from >= exercises.length) return false;
+  if (to < 0 || to >= exercises.length) return false;
+  if (from === to) return false;
+
+  const [movedEx] = exercises.splice(from, 1);
+  exercises.splice(to, 0, movedEx);
+
+  persistDraft();
+  return true;
+}
+
+/**
+ * Move an exercise up by 1 position (towards the start)
+ * @param {number} index Current index of the exercise
+ * @returns {boolean}
+ */
+export function moveExerciseUp(index) {
+  return moveExercise(index, index - 1);
+}
+
+/**
+ * Move an exercise down by 1 position (towards the end)
+ * @param {number} index Current index of the exercise
+ * @returns {boolean}
+ */
+export function moveExerciseDown(index) {
+  return moveExercise(index, index + 1);
+}
+
+/**
  * Add a new set to an exercise in the active session
  */
 function addSet(exerciseIndex, setData = null) {
@@ -617,14 +665,17 @@ function finishSession() {
       return {
         id: exId,
         name: ex.name || 'แบบฝึก',
-        category: ex.targetMuscle || 'เวทเทรนนิ่ง',
+        category: ex.category || ex.muscleGroup || ex.targetMuscle || 'เวทเทรนนิ่ง',
+        canonicalId: ex.canonicalId || undefined,
         sets: (ex.sets || []).map((s, sIdx) => ({
           setIndex: sIdx + 1,
           type: s.type === 'warmup' ? 'วอร์ม' : 'เล่นจริง',
           target: (s.target !== undefined && s.target !== null && s.target !== '') ? s.target : (s.targetReps || s.reps || 8),
           weight: (s.weight !== undefined && s.weight !== '') ? Number(s.weight) : 0,
           actualReps: (s.reps !== undefined && s.reps !== '') ? Number(s.reps) : (s.targetReps || 0),
-          done: Boolean(s.completed)
+          done: Boolean(s.completed),
+          rir: (s.rir !== undefined && s.rir !== null && s.rir !== '') ? Number(s.rir) : null,
+          rirPlus: Boolean(s.rirPlus)
         }))
       };
     });
@@ -686,6 +737,9 @@ export function useActiveSessionStore() {
     cloneSessionToActive,
     addExerciseToActiveSession,
     removeExerciseFromActiveSession,
+    moveExercise,
+    moveExerciseUp,
+    moveExerciseDown,
     addSet,
     removeSet,
     updateSetMetric,
