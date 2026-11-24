@@ -219,12 +219,32 @@ export function calculatePlates(targetTotalWeight, barWeight = 20, inventory) {
 
 // Reactive singleton state for the modal
 const isOpen = ref(false);
-const targetWeight = ref(60);
+const targetWeight = ref(null);
+const isWeightFromSet = ref(false);
 const selectedBar = ref(BAR_PRESETS[0]);
 let onApplyCallback = null;
 
 const calculation = computed(() => {
-  return calculatePlates(targetWeight.value, selectedBar.value.weight, plateInventory.value);
+  const tw = targetWeight.value;
+  if (tw === null || tw === undefined || isNaN(parseFloat(tw)) || parseFloat(tw) <= 0) {
+    return {
+      success: false,
+      isEmpty: true,
+      targetWeight: 0,
+      barWeight: selectedBar.value?.weight || 20,
+      perSideWeight: 0,
+      platesPerSide: [],
+      plateSummary: [],
+      remainder: 0,
+      achievedTotal: 0,
+      shortage: 0,
+      shortagePerSide: 0,
+      shortageTotal: 0,
+      hasShortage: false,
+      notes: 'ยังไม่ได้เลือกน้ำหนัก'
+    };
+  }
+  return calculatePlates(tw, selectedBar.value.weight, plateInventory.value);
 });
 
 /**
@@ -232,16 +252,30 @@ const calculation = computed(() => {
  * The exercise name decides: a dumbbell name is never barbell even if the alternate mentions Smith.
  */
 export function isBarbellExercise(ex) {
+  if (!ex) return false;
   const name = String(ex?.name || '');
   const alt = String(ex?.altName || '');
-  if (/dumbbell|ดัมเบล/i.test(name)) return false;
+  const equip = String(ex?.equipment || '');
+  if (/dumbbell|ดัมเบล/i.test(name) || /dumbbell|ดัมเบล/i.test(equip)) return false;
+  if (/barbell|บาร์เบล/i.test(equip)) return true;
   return /barbell|บาร์เบล|smith|trap bar/i.test(`${name} ${alt}`);
 }
 
 export function usePlateCalculator() {
-  function openPlateCalculator(initialWeight = 60, onApply = null) {
+  function openPlateCalculator(initialWeight = null, onApply = null, options = {}) {
     const parsed = parseFloat(initialWeight);
-    targetWeight.value = !isNaN(parsed) && parsed > 0 ? parsed : 60;
+    if (!isNaN(parsed) && parsed > 0 && options?.isFromSet !== false) {
+      targetWeight.value = parsed;
+      isWeightFromSet.value = true;
+    } else if (options && options.fallbackWeight && !isNaN(parseFloat(options.fallbackWeight)) && parseFloat(options.fallbackWeight) > 0) {
+      targetWeight.value = parseFloat(options.fallbackWeight);
+      isWeightFromSet.value = false;
+    } else {
+      // Empty / invalid weight: do NOT prefill silently!
+      // Must be blank (null) so user explicitly specifies/picks weight before applying.
+      targetWeight.value = null;
+      isWeightFromSet.value = false;
+    }
     onApplyCallback = onApply;
     isOpen.value = true;
   }
@@ -252,13 +286,23 @@ export function usePlateCalculator() {
   }
 
   function setTargetWeight(val) {
+    if (val === null || val === undefined || val === '') {
+      targetWeight.value = null;
+      isWeightFromSet.value = false;
+      return;
+    }
     const num = parseFloat(val);
-    targetWeight.value = isNaN(num) ? 0 : Math.max(0, num);
+    targetWeight.value = isNaN(num) || num <= 0 ? null : num;
+    isWeightFromSet.value = false;
   }
 
   function adjustWeight(delta) {
-    const next = Math.max(0, (parseFloat(targetWeight.value) || 0) + delta);
+    const current = (targetWeight.value !== null && !isNaN(parseFloat(targetWeight.value)) && parseFloat(targetWeight.value) > 0)
+      ? parseFloat(targetWeight.value)
+      : (selectedBar.value?.weight || 20); // If empty, start baseline from bar weight
+    const next = Math.max(0, current + delta);
     targetWeight.value = Math.round(next * 100) / 100;
+    isWeightFromSet.value = false;
   }
 
   function selectBarPreset(bar) {
@@ -266,15 +310,21 @@ export function usePlateCalculator() {
   }
 
   function applyWeight() {
+    const num = parseFloat(targetWeight.value);
+    if (isNaN(num) || num <= 0) {
+      return false; // Prevent applying empty or invalid weight
+    }
     if (onApplyCallback) {
-      onApplyCallback(targetWeight.value);
+      onApplyCallback(num);
     }
     closePlateCalculator();
+    return true;
   }
 
   return {
     isOpen,
     targetWeight,
+    isWeightFromSet,
     selectedBar,
     barPresets: BAR_PRESETS,
     availablePlates: AVAILABLE_PLATES,

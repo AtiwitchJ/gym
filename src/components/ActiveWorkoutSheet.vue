@@ -269,6 +269,19 @@
                 <span>{{ hasWarmupSets(exercise) ? 'มีวอร์มแล้ว' : '+ วอร์ม' }}</span>
               </button>
 
+              <!-- Barbell Plate Calculator Button for Exercise -->
+              <button
+                v-if="isBarbellExercise(exercise)"
+                type="button"
+                @click="openPlatesForExercise(exercise, exIdx)"
+                class="btn-exercise-plate-calc min-h-[44px] min-w-[44px] px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none bg-gold hover:bg-gold-glow text-ink"
+                :title="`คำนวณแผ่นน้ำหนักบาร์เบลสำหรับ ${exercise.name}`"
+                :aria-label="`คำนวณแผ่นน้ำหนักบาร์เบลสำหรับ ${exercise.name}`"
+              >
+                <span>🏋️</span>
+                <span>คำนวณแผ่น</span>
+              </button>
+
               <!-- Add Set Button -->
               <button
                 type="button"
@@ -467,6 +480,18 @@
                     class="live-pr-badge text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none flex-shrink-0 animate-in zoom-in-75 duration-200"
                     title="ทำสถิติใหม่ (PR) เมื่อเทียบกับสถิติที่บันทึกไว้"
                   >🏆 PR</span>
+                  <!-- Plate Calculator Button for Set (Barbell only) -->
+                  <button
+                    v-if="isBarbellExercise(exercise)"
+                    type="button"
+                    @click="openPlatesForSet(exercise, exIdx, set, setIdx)"
+                    class="btn-set-plate-calc min-h-[44px] min-w-[44px] px-2 py-0.5 rounded-lg border border-plate/30 bg-gold/15 hover:bg-gold/30 text-ink text-[11px] font-mono font-bold flex items-center gap-1 shadow-xs active:translate-x-[0.5px] active:translate-y-[0.5px] transition-all flex-shrink-0 touch-manipulation"
+                    :title="`คำนวณแผ่นบาร์เบลสำหรับเซ็ตที่ ${setIdx + 1} (${formatWeight(set.weight ?? set.targetWeight)} กก.)`"
+                    :aria-label="`คำนวณแผ่นบาร์เบลเซ็ตที่ ${setIdx + 1}`"
+                  >
+                    <span class="text-xs">🏋️</span>
+                    <span>แผ่น</span>
+                  </button>
                 </div>
                 <button
                   type="button"
@@ -592,6 +617,7 @@ import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetSteppe
 import { getBaselineE1rm, getCachedBaseline, evaluateExercisePrs } from '../composables/usePersonalRecords.js';
 import { useExerciseNotes } from '../composables/useExerciseNotes.js';
 import { isWarmSetType } from '../composables/warmupCalc.js';
+import { usePlateCalculator, isBarbellExercise } from '../composables/usePlateCalculator.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
@@ -612,6 +638,8 @@ const {
   substituteExercise,
   insertWarmupSetsToActiveExercise,
   hasWarmupSets,
+  getExerciseWorkingWeight,
+  applyPlateWeightToActiveSet,
   addSet: storeAddSet,
   removeSet: storeRemoveSet,
   updateSetMetric,
@@ -624,6 +652,7 @@ const {
 
 const { showToast } = useWorkoutStore();
 const { openKeypad } = usePinKeypad();
+const { openPlateCalculator } = usePlateCalculator();
 const { getExerciseOverallAdvice } = useWeightAdvisor();
 const { getExerciseById } = useExerciseStore();
 
@@ -1035,6 +1064,56 @@ async function handleInsertWarmup(exIdx) {
     await recheckExercisePrs(exIdx);
   } else if (res) {
     showToast(res.message || 'ไม่สามารถเพิ่มเซ็ตวอร์มได้');
+  }
+}
+
+// Barbell Plate Calculator Integration
+function openPlatesForSet(exercise, exIdx, set, setIdx) {
+  if (!exercise || !set) return;
+  const rawWeight = set.weight !== undefined && set.weight !== null && set.weight !== ''
+    ? Number(set.weight)
+    : (set.targetWeight !== undefined && set.targetWeight !== null && set.targetWeight !== '' ? Number(set.targetWeight) : null);
+
+  // If set weight is empty or invalid, do not prefill with arbitrary or silent defaults.
+  // Must be null so modal requires user to explicitly select or specify weight.
+  const hasValidSetWeight = Boolean(rawWeight && !isNaN(rawWeight) && rawWeight > 0);
+  const startWeight = hasValidSetWeight ? rawWeight : null;
+
+  // Ensure unique persistent identity for the target set to guard against reorder/deletion
+  if (!set._setId) {
+    set._setId = `set_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+  const targetSetId = set._setId;
+  const targetSetRef = set;
+
+  openPlateCalculator(startWeight, (newWeight) => {
+    handlePlateWeightApplied(newWeight, targetSetRef, targetSetId);
+  }, {
+    isFromSet: hasValidSetWeight,
+    setIndex: setIdx
+  });
+}
+
+function openPlatesForExercise(exercise, exIdx) {
+  if (!exercise || !Array.isArray(exercise.sets) || exercise.sets.length === 0) return;
+  // Pick first uncompleted set, or set 0
+  const uncompletedIdx = exercise.sets.findIndex(s => !s.completed);
+  const targetSetIdx = uncompletedIdx >= 0 ? uncompletedIdx : 0;
+  const targetSet = exercise.sets[targetSetIdx];
+  openPlatesForSet(exercise, exIdx, targetSet, targetSetIdx);
+}
+
+async function handlePlateWeightApplied(appliedWeight, targetSetRef, targetSetId) {
+  if (!isWorkoutActive.value || !activeSession.value) return;
+  const numWeight = parseFloat(appliedWeight);
+  if (isNaN(numWeight) || numWeight <= 0) return;
+
+  const res = applyPlateWeightToActiveSet(numWeight, targetSetRef, targetSetId);
+  if (res && res.success) {
+    await recheckExercisePrs(res.exerciseIndex, res.setIndex);
+    showToast(`🏋️ อัปเดตน้ำหนักเซ็ตที่ ${res.setIndex + 1} เป็น ${numWeight} กก. เรียบร้อย`);
+  } else {
+    showToast('⚠️ ไม่พบเซ็ตเป้าหมาย (อาจถูกลบหรือยกเลิกแล้ว) — ไม่มีการแก้ไขข้อมูล');
   }
 }
 
