@@ -1,10 +1,15 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-plate/60 backdrop-blur-sm select-none"
+    class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-plate/60 backdrop-blur-sm select-none"
     @click.self="$emit('close')"
   >
-    <div class="w-full max-w-lg bg-paper border-4 border-plate rounded-t-3xl sm:rounded-3xl shadow-[0_12px_40px_rgba(30,34,32,0.35)] p-4 sm:p-6 max-h-[90vh] overflow-y-auto flex flex-col gap-4">
+    <div
+      class="w-full max-w-lg bg-paper border-4 border-plate rounded-t-3xl sm:rounded-3xl shadow-[0_12px_40px_rgba(30,34,32,0.35)] p-4 sm:p-6 max-h-[90vh] overflow-y-auto flex flex-col gap-4 font-body text-ink"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="exerciseName ? (`ประวัติท่า ${exerciseName}`) : 'ประวัติท่าฝึก'"
+    >
       <div class="flex items-start justify-between gap-3">
         <div>
           <span class="text-[11px] font-mono font-bold tracking-widest text-emerald-text uppercase block">
@@ -14,8 +19,9 @@
         </div>
         <button
           type="button"
-          class="w-9 h-9 rounded-full border-2 border-plate bg-white flex items-center justify-center text-ink font-bold shadow-[2px_2px_0px_#1e2220]"
+          class="min-h-[44px] min-w-[44px] w-10 h-10 rounded-full border-2 border-plate bg-white flex items-center justify-center text-ink font-bold shadow-[2px_2px_0px_#1e2220] hover:bg-paper-subtle active:translate-x-[0.5px] active:translate-y-[0.5px] touch-manipulation flex-shrink-0"
           title="ปิด"
+          aria-label="ปิดหน้าต่างประวัติ"
           @click="$emit('close')"
         >✕</button>
       </div>
@@ -91,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onUnmounted } from 'vue';
 import { useExerciseHistory, formatPr, hasPr, setText, HISTORY_EMPTY_MESSAGE } from '../composables/useExerciseHistory.js';
 import { labelSets } from '../composables/setLabels.js';
 import ExerciseProgressionChart from './ExerciseProgressionChart.vue';
@@ -102,10 +108,11 @@ const isRecordsOpen = ref(false);
 const props = defineProps({
   isOpen: { type: Boolean, default: false },
   exerciseId: { type: String, default: '' },
-  exerciseName: { type: String, default: '' }
+  exerciseName: { type: String, default: '' },
+  category: { type: String, default: '' }
 });
 
-defineEmits(['close']);
+const emit = defineEmits(['close']);
 
 const { sessions, pr, loading, error, load, retry } = useExerciseHistory();
 
@@ -118,6 +125,32 @@ function formatDate(iso) {
   if (!iso) return '';
   return new Date(`${iso}T00:00:00`).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
 }
+
+function onKeydown(e) {
+  if (e.key === 'Escape') {
+    if (isRecordsOpen.value) {
+      isRecordsOpen.value = false;
+    } else {
+      emit('close');
+    }
+  }
+}
+
+watch(
+  () => props.isOpen,
+  (open) => {
+    if (open) {
+      window.addEventListener('keydown', onKeydown);
+    } else {
+      window.removeEventListener('keydown', onKeydown);
+    }
+  },
+  { immediate: true }
+);
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown);
+});
 
 watch(
   () => [props.isOpen, props.exerciseId],

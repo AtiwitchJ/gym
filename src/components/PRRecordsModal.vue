@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-plate/60 backdrop-blur-sm select-none"
+    class="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-plate/60 backdrop-blur-sm select-none"
     @click.self="$emit('close')"
   >
     <div
@@ -207,7 +207,7 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
+import { watch, onUnmounted } from 'vue';
 import { usePrRecords, RECORD_TYPE_CONFIG } from '../composables/usePrRecords.js';
 
 const props = defineProps({
@@ -216,7 +216,7 @@ const props = defineProps({
   exerciseName: { type: String, default: '' }
 });
 
-defineEmits(['close']);
+const emit = defineEmits(['close']);
 
 const {
   data,
@@ -227,6 +227,29 @@ const {
   formatRecordValue,
   formatThaiDate
 } = usePrRecords();
+
+function onKeydown(e) {
+  if (e.key === 'Escape') {
+    e.stopPropagation();
+    emit('close');
+  }
+}
+
+watch(
+  () => props.isOpen,
+  (open) => {
+    if (open) {
+      window.addEventListener('keydown', onKeydown);
+    } else {
+      window.removeEventListener('keydown', onKeydown);
+    }
+  },
+  { immediate: true }
+);
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown);
+});
 
 watch(
   () => [props.isOpen, props.exerciseId],

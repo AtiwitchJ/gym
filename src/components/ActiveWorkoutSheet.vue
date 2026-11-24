@@ -184,13 +184,16 @@
                   พัก {{ exercise.restSec }}s
                 </span>
                 <!-- Exercise Header PR Badge if any set has a PR -->
-                <span
+                <button
                   v-if="exerciseHasPr(exercise)"
-                  class="live-ex-pr-badge text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none flex-shrink-0 animate-in zoom-in-75 duration-200"
-                  title="มีเซ็ตที่ทำสถิติใหม่ (PR) ในรอบนี้"
+                  type="button"
+                  @click="openHistoryModal(exercise, exIdx)"
+                  class="live-ex-pr-badge min-h-[44px] min-w-[44px] text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-gold text-ink border-2 border-plate select-none flex-shrink-0 animate-in zoom-in-75 duration-200 cursor-pointer shadow-xs active:translate-x-[0.5px] active:translate-y-[0.5px] flex items-center justify-center gap-1 touch-manipulation"
+                  :title="`มีเซ็ตที่ทำสถิติใหม่ (PR) ในรอบนี้ แตะเพื่อดูประวัติและ PR ของ ${exercise.name}`"
+                  :aria-label="`มีเซ็ตที่ทำสถิติใหม่ แตะเพื่อดูประวัติและ PR ของ ${exercise.name}`"
                 >
                   🏆 PR
-                </span>
+                </button>
               </div>
 
               <!-- Delete Exercise Button (Placed on top right corner for safety and symmetry) -->
@@ -226,6 +229,18 @@
                 :title="activeVideos[exIdx] ? 'ปิดคลิป' : 'ดูคลิปสาธิต YouTube'"
               >
                 <span>{{ activeVideos[exIdx] ? '✕ ปิด' : (getExerciseVideoInfo(exercise.exerciseId, exIdx).hasMultiMachine ? '🎬 3 เครื่อง' : '🎬 คลิป') }}</span>
+              </button>
+
+              <!-- Exercise History & PR Records Modal Trigger -->
+              <button
+                type="button"
+                @click="openHistoryModal(exercise, exIdx)"
+                class="btn-exercise-history min-h-[44px] min-w-[44px] px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate bg-paper hover:bg-paper-dim text-ink shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none touch-manipulation"
+                :title="`ดูประวัติและ PR สถิติย้อนหลังของ ${exercise.name}`"
+                :aria-label="`ดูประวัติและ PR ของ ${exercise.name}`"
+              >
+                <span>📜</span>
+                <span>ประวัติ &amp; PR</span>
               </button>
 
               <!-- Substitute Exercise Button -->
@@ -665,6 +680,15 @@
       @close="isNoteModalOpen = false"
       @saved="handleNoteSaved"
     />
+
+    <!-- Embedded Exercise History & PR Records Modal -->
+    <ExerciseHistoryModal
+      :is-open="isHistoryModalOpen"
+      :exercise-id="activeHistoryExercise?.exerciseId || activeHistoryExercise?.id || ''"
+      :exercise-name="activeHistoryExercise?.name || ''"
+      :category="activeHistoryExercise?.muscleGroup || ''"
+      @close="isHistoryModalOpen = false"
+    />
   </div>
 </template>
 
@@ -686,6 +710,7 @@ import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
 import ExerciseNoteModal from './ExerciseNoteModal.vue';
+import ExerciseHistoryModal from './ExerciseHistoryModal.vue';
 
 const emit = defineEmits(['finish', 'discard', 'minimize']);
 
@@ -733,6 +758,17 @@ const { hasNote, formatSummaryPill } = useExerciseNotes();
 const isNoteModalOpen = ref(false);
 const activeNoteExercise = ref(null);
 const activeNoteIndex = ref(-1);
+
+// Exercise History & PR Records Modal State
+const isHistoryModalOpen = ref(false);
+const activeHistoryExercise = ref(null);
+const activeHistoryIndex = ref(-1);
+
+function openHistoryModal(exercise, exIdx = -1) {
+  activeHistoryExercise.value = exercise;
+  activeHistoryIndex.value = exIdx;
+  isHistoryModalOpen.value = true;
+}
 
 function openNoteModal(exercise, exIdx) {
   activeNoteExercise.value = exercise;

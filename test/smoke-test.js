@@ -1,5 +1,7 @@
 import assert from 'node:assert';
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,11 +28,19 @@ async function waitForServer(retries = 30, delayMs = 200) {
 
 async function runSmokeTests() {
   const serverPath = path.resolve(__dirname, '../server/server.js');
+  const tempDb = path.join(os.tmpdir(), `gym-smoke-test-${Date.now()}.db`);
+  const realDb = path.resolve(__dirname, '../data/gym.db');
+  if (fs.existsSync(realDb)) {
+    fs.copyFileSync(realDb, tempDb);
+  }
+
   const serverProc = spawn('node', [serverPath], {
     env: {
       ...process.env,
       PORT: String(SMOKE_PORT),
-      NODE_ENV: 'test'
+      NODE_ENV: 'test',
+      GYM_DB_PATH: tempDb,
+      GYM_FORBID_REAL_DB: '1'
     },
     stdio: 'pipe'
   });
@@ -100,6 +110,13 @@ async function runSmokeTests() {
     console.log('🎉 All Smoke Tests Passed! Service is healthy and ready for deployment.');
   } finally {
     serverProc.kill('SIGTERM');
+    try {
+      if (fs.existsSync(tempDb)) fs.unlinkSync(tempDb);
+      const wal = `${tempDb}-wal`;
+      if (fs.existsSync(wal)) fs.unlinkSync(wal);
+      const shm = `${tempDb}-shm`;
+      if (fs.existsSync(shm)) fs.unlinkSync(shm);
+    } catch (_) {}
   }
 }
 
