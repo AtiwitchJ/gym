@@ -79,6 +79,24 @@
       <MonthlySummary />
     </div>
 
+    <div v-if="workoutHistory.length" class="archive-card p-4 mb-4 space-y-3">
+      <label for="history-search" class="block text-sm font-bold">ค้นหาประวัติ</label>
+      <input id="history-search" v-model="historyQuery" type="search" placeholder="ชื่อท่าหรือโปรแกรม" class="w-full min-h-[44px] px-3 rounded-xl border-2 border-plate text-ink bg-white" />
+      <div class="flex flex-wrap gap-2">
+        <label class="sr-only" for="history-routine">โปรแกรม</label>
+        <select id="history-routine" v-model="historyRoutine" class="min-h-[44px] rounded-xl border-2 border-plate px-3 bg-white text-ink">
+          <option value="">ทุกโปรแกรม</option>
+          <option v-for="title in historyRoutines" :key="title" :value="title">{{ title }}</option>
+        </select>
+        <label class="sr-only" for="history-days">ช่วงเวลา</label>
+        <select id="history-days" v-model.number="historyDays" class="min-h-[44px] rounded-xl border-2 border-plate px-3 bg-white text-ink">
+          <option :value="0">ทุกช่วงเวลา</option><option :value="7">7 วันล่าสุด</option><option :value="30">30 วันล่าสุด</option>
+        </select>
+        <button type="button" @click="clearHistoryFilters" class="min-h-[44px] px-3 rounded-xl border-2 border-plate font-bold">ล้างตัวกรอง</button>
+      </div>
+      <p role="status" class="text-sm text-ink">แสดง {{ filteredHistory.length }} จาก {{ workoutHistory.length }} รอบ</p>
+    </div>
+
     <!-- Empty State -->
     <div
       v-if="workoutHistory.length === 0"
@@ -97,9 +115,10 @@
     </div>
 
     <!-- History Session Cards -->
+    <div v-else-if="filteredHistory.length === 0" class="archive-card p-5 text-center text-ink">ไม่พบประวัติที่ตรงกับตัวกรอง <button type="button" @click="clearHistoryFilters" class="min-h-[44px] px-3 underline font-bold">ล้างตัวกรอง</button></div>
     <div v-else class="space-y-4">
       <div
-        v-for="session in workoutHistory"
+        v-for="session in filteredHistory"
         :key="session.id"
         :id="`session-${session.id}`"
         class="archive-card overflow-hidden"
@@ -225,7 +244,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { filterHistory } from '../composables/historyFilter.js';
 import { useWorkoutStore } from '../composables/useWorkoutStore';
 import { useExcelExport } from '../composables/useExcelExport';
 import { labelSets, weightText } from '../composables/setLabels.js';
@@ -243,6 +263,12 @@ const isBackupModalOpen = ref(false);
 
 const workoutStore = useWorkoutStore();
 const { workoutHistory, deleteSession, fetchServerState } = workoutStore;
+const historyQuery = ref('');
+const historyRoutine = ref('');
+const historyDays = ref(0);
+const historyRoutines = computed(() => [...new Set(workoutHistory.value.map(s => s.dayTitle).filter(Boolean))].sort());
+const filteredHistory = computed(() => filterHistory(workoutHistory.value, { query: historyQuery.value, routine: historyRoutine.value, days: historyDays.value }));
+function clearHistoryFilters() { historyQuery.value = ''; historyRoutine.value = ''; historyDays.value = 0; }
 const { exportWorkoutHistory, downloadSqliteDatabase } = useExcelExport();
 const { openLatestPair } = useWorkoutComparison();
 const { isWorkoutActive, startSessionFromHistory } = useActiveSessionStore();
