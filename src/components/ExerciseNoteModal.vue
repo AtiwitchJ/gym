@@ -239,7 +239,7 @@ async function handleSave() {
       errorMessage.value = result.error || 'บันทึกไม่สำเร็จ';
       return;
     }
-    emit('saved', result.note);
+    emit('saved', { ...(result.note || {}), offline: Boolean(result.offline) });
     emit('close');
   } catch (err) {
     errorMessage.value = err.message || 'บันทึกไม่สำเร็จ';
@@ -260,7 +260,7 @@ async function handleClear() {
     pinSetting.value = '';
     formCues.value = '';
     generalNote.value = '';
-    emit('saved', result.note);
+    emit('saved', { ...(result.note || {}), offline: Boolean(result.offline) });
     emit('close');
   } catch (err) {
     errorMessage.value = err.message || 'ล้างโน้ตไม่สำเร็จ';

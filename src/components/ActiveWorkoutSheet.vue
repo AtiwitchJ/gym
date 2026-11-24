@@ -242,6 +242,19 @@
                 <span>สลับท่า</span>
               </button>
 
+              <!-- Exercise Setup & Form Note Button -->
+              <button
+                type="button"
+                @click="openNoteModal(exercise, exIdx)"
+                class="min-h-[44px] min-w-[44px] px-2.5 py-1 text-[11px] font-heading font-bold rounded-lg border-2 border-plate shadow-[1.5px_1.5px_0px_#1e2220] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1 select-none"
+                :class="hasNote(exercise.exerciseId) ? 'bg-emerald-bg text-emerald-text border-emerald hover:bg-emerald-bg/80' : 'bg-paper hover:bg-paper-dim text-ink'"
+                :title="hasNote(exercise.exerciseId) ? 'ดู/แก้ไขการตั้งค่าเครื่องและคิวฟอร์ม' : 'บันทึกการตั้งค่าเครื่องและคิวฟอร์มสำหรับท่านี้'"
+                :aria-label="`การตั้งค่าและโน้ตสำหรับท่า ${exercise.name}`"
+              >
+                <span>{{ hasNote(exercise.exerciseId) ? '⚙️' : '📝' }}</span>
+                <span>{{ hasNote(exercise.exerciseId) ? 'ตั้งค่า/โน้ต' : '+ โน้ตเครื่อง' }}</span>
+              </button>
+
               <!-- Add Set Button -->
               <button
                 type="button"
@@ -348,6 +361,30 @@
             >
               {{ getOverloadAdvice(exercise.exerciseId).badgeText }}
             </span>
+          </div>
+
+          <!-- Exercise Machine Setup & Form Cues Pill Banner (Visible when note has content) -->
+          <div
+            v-if="hasNote(exercise.exerciseId)"
+            @click="openNoteModal(exercise, exIdx)"
+            class="exercise-note-pill p-2 sm:p-2.5 rounded-xl bg-paper-subtle border border-plate/30 hover:border-plate/60 flex items-center justify-between gap-2 text-xs font-mono cursor-pointer transition-all min-h-[44px] touch-manipulation shadow-xs"
+            title="แตะเพื่อดูหรือแก้ไขการตั้งค่าเครื่องและคิวฟอร์ม"
+            :aria-label="`การตั้งค่าเครื่องและคิวฟอร์ม: ${formatSummaryPill(exercise.exerciseId)}`"
+          >
+            <div class="flex items-center gap-1.5 min-w-0 flex-1">
+              <span class="text-sm select-none flex-shrink-0">📌</span>
+              <span class="text-ink font-bold truncate text-[11px] sm:text-xs">
+                {{ formatSummaryPill(exercise.exerciseId) }}
+              </span>
+            </div>
+            <button
+              type="button"
+              @click.stop="openNoteModal(exercise, exIdx)"
+              class="min-h-[44px] min-w-[44px] px-2.5 py-1 rounded-lg border border-plate/30 bg-white hover:bg-paper text-ink font-mono font-bold text-[11px] flex items-center gap-1 flex-shrink-0 shadow-xs active:translate-x-[0.5px] active:translate-y-[0.5px] touch-manipulation"
+              title="แก้ไขการตั้งค่าและคิวฟอร์ม"
+            >
+              ✏️ แก้ไข
+            </button>
           </div>
 
           <!-- Sets Table -->
@@ -491,6 +528,15 @@
       @close="isSubstituteModalOpen = false"
       @confirm-active="handleActiveSubstituteSwapped"
     />
+
+    <!-- Embedded Exercise Note Modal: Machine Setup & Form Cues -->
+    <ExerciseNoteModal
+      :is-open="isNoteModalOpen"
+      :exercise-id="activeNoteExercise?.exerciseId"
+      :exercise-name="activeNoteExercise?.name"
+      @close="isNoteModalOpen = false"
+      @saved="handleNoteSaved"
+    />
   </div>
 </template>
 
@@ -504,9 +550,11 @@ import { useWeightAdvisor } from '../composables/useWeightAdvisor.js';
 import { getYoutubeId } from '../utils/youtube.js';
 import { stepFrom, WEIGHT_STEP_KG, REPS_STEP } from '../composables/useSetStepper.js';
 import { getBaselineE1rm, getCachedBaseline, evaluateExercisePrs } from '../composables/usePersonalRecords.js';
+import { useExerciseNotes } from '../composables/useExerciseNotes.js';
 import RestTimer from './RestTimer.vue';
 import ExerciseLibraryModal from './ExerciseLibraryModal.vue';
 import ExerciseSubstitutionModal from './ExerciseSubstitutionModal.vue';
+import ExerciseNoteModal from './ExerciseNoteModal.vue';
 
 const emit = defineEmits(['finish', 'discard', 'minimize']);
 
@@ -542,6 +590,27 @@ const activeSubstituteExercise = ref(null);
 const activeSubstituteIndex = ref(-1);
 const activeVideos = ref({});
 const activeMachineIndices = ref({});
+
+// Exercise Machine Setup & Form Cues Modal State
+const { hasNote, formatSummaryPill } = useExerciseNotes();
+const isNoteModalOpen = ref(false);
+const activeNoteExercise = ref(null);
+const activeNoteIndex = ref(-1);
+
+function openNoteModal(exercise, exIdx) {
+  activeNoteExercise.value = exercise;
+  activeNoteIndex.value = exIdx;
+  isNoteModalOpen.value = true;
+}
+
+function handleNoteSaved(payload) {
+  const isOffline = payload && payload.offline;
+  if (isOffline) {
+    showToast(`บันทึกโน้ต «${activeNoteExercise.value?.name || 'ท่าฝึก'}» ในเครื่องเรียบร้อย (ออฟไลน์)`);
+  } else {
+    showToast(`บันทึกการตั้งค่าเครื่อง «${activeNoteExercise.value?.name || 'ท่าฝึก'}» เรียบร้อย`);
+  }
+}
 
 function getExerciseVideoInfo(exerciseId, exIdx = null) {
   const meta = getExerciseById(exerciseId);

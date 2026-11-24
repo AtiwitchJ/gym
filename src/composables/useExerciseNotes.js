@@ -83,6 +83,7 @@ export function getNote(exerciseId, storage = defaultStorage()) {
  */
 export function hasNote(exerciseId) {
   if (!exerciseId) return false;
+  void notesRevision.value;
   const note = getNote(exerciseId);
   return Boolean(
     (note.pinSetting && note.pinSetting.trim()) ||
@@ -96,6 +97,7 @@ export function hasNote(exerciseId) {
  */
 export function formatSummaryPill(exerciseId) {
   if (!exerciseId) return '';
+  void notesRevision.value;
   const note = getNote(exerciseId);
   const parts = [note.pinSetting, note.formCues, note.generalNote]
     .map(s => String(s || '').trim())
@@ -123,13 +125,49 @@ export async function fetchNote(exerciseId, fetchImpl = globalThis.fetch) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    const noteObj = {
-      exerciseId: data.exerciseId || idStr,
-      pinSetting: typeof data.pinSetting === 'string' ? data.pinSetting : '',
-      formCues: typeof data.formCues === 'string' ? data.formCues : '',
-      generalNote: typeof data.generalNote === 'string' ? data.generalNote : '',
-      updatedAt: data.updatedAt || null
-    };
+    const existingLocal = readAllNotesFromStorage()[idStr] || notesMap.value[idStr];
+    const serverHasContent = Boolean(
+      (data.pinSetting && data.pinSetting.trim()) ||
+      (data.formCues && data.formCues.trim()) ||
+      (data.generalNote && data.generalNote.trim())
+    );
+    const localHasContent = Boolean(
+      existingLocal && (
+        (existingLocal.pinSetting && existingLocal.pinSetting.trim()) ||
+        (existingLocal.formCues && existingLocal.formCues.trim()) ||
+        (existingLocal.generalNote && existingLocal.generalNote.trim())
+      )
+    );
+
+    let noteObj;
+    // Conflict resolution: protect local offline notes from being overwritten by stale/empty server responses
+    if (localHasContent && existingLocal.updatedAt && data.updatedAt) {
+      const localTime = new Date(existingLocal.updatedAt).getTime();
+      const serverTime = new Date(data.updatedAt).getTime();
+      if (localTime > serverTime) {
+        // Local offline note is newer than server; preserve local note and do not overwrite!
+        noteObj = existingLocal;
+      } else {
+        noteObj = {
+          exerciseId: data.exerciseId || idStr,
+          pinSetting: typeof data.pinSetting === 'string' ? data.pinSetting : '',
+          formCues: typeof data.formCues === 'string' ? data.formCues : '',
+          generalNote: typeof data.generalNote === 'string' ? data.generalNote : '',
+          updatedAt: data.updatedAt || null
+        };
+      }
+    } else if (localHasContent && !serverHasContent) {
+      // Local has offline note while server is empty; preserve local note!
+      noteObj = existingLocal;
+    } else {
+      noteObj = {
+        exerciseId: data.exerciseId || idStr,
+        pinSetting: typeof data.pinSetting === 'string' ? data.pinSetting : '',
+        formCues: typeof data.formCues === 'string' ? data.formCues : '',
+        generalNote: typeof data.generalNote === 'string' ? data.generalNote : '',
+        updatedAt: data.updatedAt || null
+      };
+    }
 
     notesMap.value[idStr] = noteObj;
     const currentStorage = readAllNotesFromStorage();
@@ -219,7 +257,7 @@ export async function saveNote(exerciseId, { pinSetting = '', formCues = '', gen
     fetchedIds.add(idStr);
     notesRevision.value++;
 
-    return { ok: true, note: confirmedNote };
+    return { ok: true, note: confirmedNote, offline: false };
   } catch (err) {
     // Offline resilience: return optimistic note with offline flag
     return {
